@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { 
   Plus, 
   Edit, 
@@ -8,7 +9,8 @@ import {
   Mail,
   Eye,
   Clock,
-  FileText
+  FileText,
+  ArrowLeft
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -137,6 +139,14 @@ const AdminDashboard = () => {
       {/* Header */}
       <header className="border-b bg-card">
         <div className="container mx-auto px-4 py-6">
+          <div className="flex items-center gap-4 mb-4">
+            <Link to="/">
+              <Button variant="ghost" size="sm">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Voltar ao Menu
+              </Button>
+            </Link>
+          </div>
           <h1 className="text-3xl font-bold text-foreground">Painel Administrativo</h1>
           <p className="text-muted-foreground mt-2">Gerencie projetos e interações do site</p>
         </div>

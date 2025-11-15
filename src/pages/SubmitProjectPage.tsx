@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Send, CheckCircle2 } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Send, CheckCircle2, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -121,8 +122,21 @@ const SubmitProjectPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background py-12 px-4">
-      <div className="container mx-auto max-w-2xl">
+    <div className="min-h-screen bg-background">
+      {/* Back to DevMenu */}
+      <div className="border-b bg-card">
+        <div className="container mx-auto px-4 py-3">
+          <Link to="/">
+            <Button variant="ghost" size="sm">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Voltar ao Menu
+            </Button>
+          </Link>
+        </div>
+      </div>
+
+      <div className="py-12 px-4">
+        <div className="container mx-auto max-w-2xl">
         <Card className="shadow-lg animate-fade-in">
           <CardHeader className="text-center space-y-2">
             <CardTitle className="text-3xl font-bold text-foreground">
@@ -314,6 +328,7 @@ const SubmitProjectPage = () => {
             </form>
           </CardContent>
         </Card>
+        </div>
       </div>
 
       {/* Modal de Sucesso */}
