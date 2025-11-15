@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { 
   Download, 
   Heart, 
@@ -10,7 +11,8 @@ import {
   TrendingUp,
   Award,
   Newspaper,
-  MessageCircle
+  MessageCircle,
+  ArrowLeft
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -79,6 +81,18 @@ const ProjectFullView = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Back to DevMenu */}
+      <div className="border-b bg-card">
+        <div className="container mx-auto px-4 py-3">
+          <Link to="/">
+            <Button variant="ghost" size="sm">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Voltar ao Menu
+            </Button>
+          </Link>
+        </div>
+      </div>
+
       {/* Hero Section */}
       <div className="relative h-[60vh] w-full overflow-hidden">
         <img 
