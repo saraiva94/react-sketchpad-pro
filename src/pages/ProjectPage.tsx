@@ -10,11 +10,8 @@ import {
   MapPin, 
   DollarSign, 
   ExternalLink,
-  User,
   Calendar,
-  Sparkles,
-  LogOut,
-  Settings
+  Sparkles
 } from "lucide-react";
 
 interface Project {
@@ -30,9 +27,6 @@ interface Project {
   budget: string | null;
   location: string | null;
   created_at: string;
-  profiles?: {
-    full_name: string | null;
-  };
 }
 
 const ProjectPage = () => {
@@ -56,17 +50,7 @@ const ProjectPage = () => {
       .maybeSingle();
 
     if (!error && data) {
-      // Fetch profile separately
-      const { data: profileData } = await supabase
-        .from("profiles")
-        .select("full_name")
-        .eq("user_id", data.user_id)
-        .maybeSingle();
-      
-      setProject({
-        ...data,
-        profiles: profileData || undefined,
-      } as Project);
+      setProject(data as Project);
     }
     setLoading(false);
   };
@@ -88,14 +72,14 @@ const ProjectPage = () => {
       <div className="min-h-screen bg-background">
         <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-50">
           <div className="container mx-auto px-4 h-16 flex items-center">
-            <Link to="/" className="text-xl font-bold text-foreground">
+            <Link to="/" className="text-2xl font-handwritten font-bold text-primary">
               Porto de Ideias
             </Link>
           </div>
         </header>
         <main className="container mx-auto px-4 py-16 text-center">
           <Sparkles className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold mb-2">Projeto não encontrado</h1>
+          <h1 className="text-2xl font-handwritten font-bold mb-2">Projeto não encontrado</h1>
           <p className="text-muted-foreground mb-6">
             Este projeto pode não existir ou não estar aprovado ainda.
           </p>
@@ -115,41 +99,24 @@ const ProjectPage = () => {
       {/* Header */}
       <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link to="/" className="text-xl font-bold text-foreground">
+          <Link to="/" className="text-2xl font-handwritten font-bold text-primary">
             Porto de Ideias
           </Link>
           
           <nav className="flex items-center gap-4">
+            {isAdmin && (
+              <Link to="/admin">
+                <Button variant="ghost" size="sm">Admin</Button>
+              </Link>
+            )}
             {user ? (
-              <>
-                <Link to="/dashboard">
-                  <Button variant="ghost" size="sm">
-                    <User className="w-4 h-4 mr-2" />
-                    Meus Projetos
-                  </Button>
-                </Link>
-                {isAdmin && (
-                  <Link to="/admin">
-                    <Button variant="ghost" size="sm">
-                      <Settings className="w-4 h-4 mr-2" />
-                      Admin
-                    </Button>
-                  </Link>
-                )}
-                <Button variant="outline" size="sm" onClick={handleSignOut}>
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Sair
-                </Button>
-              </>
+              <Button variant="outline" size="sm" onClick={handleSignOut}>
+                Sair
+              </Button>
             ) : (
-              <>
-                <Link to="/auth">
-                  <Button variant="ghost" size="sm">Entrar</Button>
-                </Link>
-                <Link to="/auth">
-                  <Button size="sm">Cadastrar</Button>
-                </Link>
-              </>
+              <Link to="/auth">
+                <Button variant="ghost" size="sm">Login Admin</Button>
+              </Link>
             )}
           </nav>
         </div>
@@ -164,8 +131,10 @@ const ProjectPage = () => {
             className="w-full h-full object-cover"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-accent/10">
-            <Sparkles className="w-24 h-24 text-muted-foreground/20" />
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/5">
+            <span className="text-6xl font-handwritten text-primary/30">
+              {project.title.charAt(0)}
+            </span>
           </div>
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
@@ -181,12 +150,12 @@ const ProjectPage = () => {
                 <div className="flex flex-wrap items-center gap-3 mb-4">
                   <Badge>{project.project_type}</Badge>
                   {project.has_incentive_law && (
-                    <Badge className="bg-accent/10 text-accent border-accent/20">
+                    <Badge className="bg-primary/10 text-primary border-primary/20">
                       Lei de Incentivo
                     </Badge>
                   )}
                 </div>
-                <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+                <h1 className="text-3xl md:text-4xl font-handwritten font-bold text-foreground mb-4">
                   {project.title}
                 </h1>
                 <p className="text-lg text-muted-foreground">
@@ -228,7 +197,7 @@ const ProjectPage = () => {
               {/* Description */}
               {project.description && (
                 <div className="mb-8">
-                  <h2 className="text-xl font-semibold mb-4">Sobre o Projeto</h2>
+                  <h2 className="text-xl font-handwritten font-semibold mb-4">Sobre o Projeto</h2>
                   <div className="prose prose-neutral max-w-none">
                     <p className="text-muted-foreground whitespace-pre-wrap">
                       {project.description}
@@ -239,8 +208,8 @@ const ProjectPage = () => {
 
               {/* Incentive Law */}
               {project.has_incentive_law && project.incentive_law_details && (
-                <div className="mb-8 p-4 bg-accent/5 border border-accent/20 rounded-lg">
-                  <h3 className="font-semibold mb-2 text-accent">Lei de Incentivo</h3>
+                <div className="mb-8 p-4 bg-primary/5 border border-primary/20 rounded-lg">
+                  <h3 className="font-semibold mb-2 text-primary">Lei de Incentivo</h3>
                   <p className="text-sm text-muted-foreground">
                     {project.incentive_law_details}
                   </p>
@@ -255,26 +224,11 @@ const ProjectPage = () => {
                     href={project.media_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-accent hover:underline"
+                    className="inline-flex items-center gap-2 text-primary hover:underline"
                   >
                     Acessar material
                     <ExternalLink className="w-4 h-4" />
                   </a>
-                </div>
-              )}
-
-              {/* Creator */}
-              {project.profiles?.full_name && (
-                <div className="pt-6 border-t">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center">
-                      <User className="w-5 h-5 text-muted-foreground" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">Criado por</p>
-                      <p className="font-medium">{project.profiles.full_name}</p>
-                    </div>
-                  </div>
                 </div>
               )}
 

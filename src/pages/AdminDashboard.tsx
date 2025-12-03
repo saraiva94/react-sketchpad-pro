@@ -19,7 +19,6 @@ import {
   Edit,
   Trash2,
   LogOut,
-  User,
   ExternalLink
 } from "lucide-react";
 
@@ -214,17 +213,11 @@ const AdminDashboard = () => {
       {/* Header */}
       <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link to="/" className="text-xl font-bold text-foreground">
+          <Link to="/" className="text-2xl font-handwritten font-bold text-primary">
             Porto de Ideias
           </Link>
           
           <nav className="flex items-center gap-4">
-            <Link to="/dashboard">
-              <Button variant="ghost" size="sm">
-                <User className="w-4 h-4 mr-2" />
-                Meus Projetos
-              </Button>
-            </Link>
             <Button variant="outline" size="sm" onClick={handleSignOut}>
               <LogOut className="w-4 h-4 mr-2" />
               Sair
@@ -236,7 +229,7 @@ const AdminDashboard = () => {
       <main className="container mx-auto px-4 py-8">
         {/* Page Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground">Painel Administrativo</h1>
+          <h1 className="text-3xl font-handwritten font-bold text-foreground">Painel Administrativo</h1>
           <p className="text-muted-foreground mt-1">
             Gerencie os projetos submetidos à plataforma.
           </p>
