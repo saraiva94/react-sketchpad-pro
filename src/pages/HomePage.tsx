@@ -64,9 +64,9 @@ const HomePage = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-50">
+      <header className="border-b border-border bg-blue-50/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link to="/" className="text-2xl font-handwritten font-bold text-primary">
+          <Link to="/" className="text-3xl font-handwritten font-bold text-primary animate-pulse hover:animate-none transition-all">
             Porto de Ideias
           </Link>
           
@@ -77,10 +77,6 @@ const HomePage = () => {
             <Link to="/projetos" className="text-sm text-foreground hover:text-primary transition-colors">Projetos</Link>
             <a href="#contato" className="text-sm text-foreground hover:text-primary transition-colors">Contato</a>
           </nav>
-
-          <Link to="/submit">
-            <Button size="sm">Entrar na Plataforma</Button>
-          </Link>
         </div>
       </header>
 
@@ -375,30 +371,6 @@ const HomePage = () => {
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-16 lg:py-24 bg-primary text-primary-foreground">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-4">
-            Pronto para Transformar o Investimento Cultural?
-          </h2>
-          <p className="text-lg text-primary-foreground/90 mb-8 max-w-2xl mx-auto">
-            Faça parte dessa comunidade e conecte seu projeto com investidores que acreditam no poder da cultura.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/submit">
-              <Button size="lg" variant="secondary" className="w-full sm:w-auto">
-                Cadastre seu Projeto Agora
-              </Button>
-            </Link>
-            <Link to="/projetos">
-              <Button size="lg" variant="outline" className="w-full sm:w-auto border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10">
-                Descubra Projetos para Apoiar
-              </Button>
-            </Link>
           </div>
         </div>
       </section>
