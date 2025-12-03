@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
 import { 
   ArrowLeft, 
   MapPin, 
@@ -31,7 +30,6 @@ interface Project {
 
 const ProjectPage = () => {
   const { id } = useParams();
-  const { user, isAdmin, signOut } = useAuth();
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -53,10 +51,6 @@ const ProjectPage = () => {
       setProject(data as Project);
     }
     setLoading(false);
-  };
-
-  const handleSignOut = async () => {
-    await signOut();
   };
 
   if (loading) {
@@ -104,20 +98,9 @@ const ProjectPage = () => {
           </Link>
           
           <nav className="flex items-center gap-4">
-            {isAdmin && (
-              <Link to="/admin">
-                <Button variant="ghost" size="sm">Admin</Button>
-              </Link>
-            )}
-            {user ? (
-              <Button variant="outline" size="sm" onClick={handleSignOut}>
-                Sair
-              </Button>
-            ) : (
-              <Link to="/auth">
-                <Button variant="ghost" size="sm">Login Admin</Button>
-              </Link>
-            )}
+            <Link to="/submit">
+              <Button variant="ghost" size="sm">Cadastrar Projeto</Button>
+            </Link>
           </nav>
         </div>
       </header>
