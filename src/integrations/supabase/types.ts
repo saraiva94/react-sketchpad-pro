@@ -47,60 +47,134 @@ export type Database = {
         }
         Relationships: []
       }
+      project_members: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          funcao: string | null
+          id: string
+          nome: string
+          project_id: string
+          telefone: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          funcao?: string | null
+          id?: string
+          nome: string
+          project_id: string
+          telefone?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          funcao?: string | null
+          id?: string
+          nome?: string
+          project_id?: string
+          telefone?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_members_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       projects: {
         Row: {
           admin_notes: string | null
           budget: string | null
+          categorias_tags: string[] | null
           created_at: string
           description: string | null
+          diferenciais: string | null
+          featured_on_homepage: boolean | null
           has_incentive_law: boolean | null
           id: string
           image_url: string | null
+          impacto_cultural: string | null
+          impacto_social: string | null
           incentive_law_details: string | null
+          link_pagamento: string | null
+          link_video: string | null
           location: string | null
           media_url: string | null
           project_type: string
+          publico_alvo: string | null
+          responsavel_email: string | null
+          responsavel_nome: string | null
+          responsavel_telefone: string | null
           status: Database["public"]["Enums"]["project_status"]
           synopsis: string
           title: string
           updated_at: string
           user_id: string
+          valor_sugerido: number | null
         }
         Insert: {
           admin_notes?: string | null
           budget?: string | null
+          categorias_tags?: string[] | null
           created_at?: string
           description?: string | null
+          diferenciais?: string | null
+          featured_on_homepage?: boolean | null
           has_incentive_law?: boolean | null
           id?: string
           image_url?: string | null
+          impacto_cultural?: string | null
+          impacto_social?: string | null
           incentive_law_details?: string | null
+          link_pagamento?: string | null
+          link_video?: string | null
           location?: string | null
           media_url?: string | null
           project_type: string
+          publico_alvo?: string | null
+          responsavel_email?: string | null
+          responsavel_nome?: string | null
+          responsavel_telefone?: string | null
           status?: Database["public"]["Enums"]["project_status"]
           synopsis: string
           title: string
           updated_at?: string
           user_id?: string
+          valor_sugerido?: number | null
         }
         Update: {
           admin_notes?: string | null
           budget?: string | null
+          categorias_tags?: string[] | null
           created_at?: string
           description?: string | null
+          diferenciais?: string | null
+          featured_on_homepage?: boolean | null
           has_incentive_law?: boolean | null
           id?: string
           image_url?: string | null
+          impacto_cultural?: string | null
+          impacto_social?: string | null
           incentive_law_details?: string | null
+          link_pagamento?: string | null
+          link_video?: string | null
           location?: string | null
           media_url?: string | null
           project_type?: string
+          publico_alvo?: string | null
+          responsavel_email?: string | null
+          responsavel_nome?: string | null
+          responsavel_telefone?: string | null
           status?: Database["public"]["Enums"]["project_status"]
           synopsis?: string
           title?: string
           updated_at?: string
           user_id?: string
+          valor_sugerido?: number | null
         }
         Relationships: []
       }

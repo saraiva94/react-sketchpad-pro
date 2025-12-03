@@ -1,19 +1,13 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { Send, CheckCircle2, ArrowLeft, Plus, X, Upload } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Send, ArrowLeft, Plus, X, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
 interface TeamMember {
@@ -23,8 +17,10 @@ interface TeamMember {
   telefone: string;
 }
 
-const SubmitProjectPage = () => {
+const AdminAddProjectPage = () => {
+  const navigate = useNavigate();
   const { toast } = useToast();
+  const { user, isAdmin, loading } = useAuth();
   
   // Responsável
   const [responsavelNome, setResponsavelNome] = useState("");
@@ -35,11 +31,11 @@ const SubmitProjectPage = () => {
   const [titulo, setTitulo] = useState("");
   const [categoriasTags, setCategoriasTags] = useState("");
   const [descricao, setDescricao] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
+  const [location, setLocation] = useState("");
   
   // Mídia
   const [linkVideo, setLinkVideo] = useState("");
-  const [videoFile, setVideoFile] = useState<File | null>(null);
-  const [documentFiles, setDocumentFiles] = useState<File[]>([]);
   
   // Integrantes
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
@@ -54,39 +50,21 @@ const SubmitProjectPage = () => {
   const [publicoAlvo, setPublicoAlvo] = useState("");
   const [diferenciais, setDiferenciais] = useState("");
   
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
 
+  // Redirect if not admin
+  if (!loading && (!user || !isAdmin)) {
+    navigate("/auth");
+    return null;
+  }
+
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-
-    if (!responsavelNome.trim()) newErrors.responsavelNome = "Nome é obrigatório";
-    if (!responsavelEmail.trim()) {
-      newErrors.responsavelEmail = "Email é obrigatório";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(responsavelEmail)) {
-      newErrors.responsavelEmail = "Email inválido";
-    }
-    if (!responsavelTelefone.trim()) newErrors.responsavelTelefone = "Telefone é obrigatório";
     if (!titulo.trim()) newErrors.titulo = "Título é obrigatório";
     if (!descricao.trim()) newErrors.descricao = "Descrição é obrigatória";
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
-
-  const uploadFile = async (file: File, path: string) => {
-    const { data, error } = await supabase.storage
-      .from("project-media")
-      .upload(path, file);
-    
-    if (error) throw error;
-    
-    const { data: urlData } = supabase.storage
-      .from("project-media")
-      .getPublicUrl(path);
-    
-    return urlData.publicUrl;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -97,19 +75,9 @@ const SubmitProjectPage = () => {
     setSubmitting(true);
 
     try {
-      let mediaUrl = linkVideo;
-      
-      // Upload video if provided
-      if (videoFile) {
-        const timestamp = Date.now();
-        const path = `videos/${timestamp}_${videoFile.name}`;
-        mediaUrl = await uploadFile(videoFile, path);
-      }
-
-      // Parse tags
       const tags = categoriasTags.split(",").map(t => t.trim()).filter(t => t);
 
-      // Insert project
+      // Insert project directly as approved (admin adding)
       const { data: project, error: projectError } = await supabase
         .from("projects")
         .insert({
@@ -117,19 +85,20 @@ const SubmitProjectPage = () => {
           synopsis: descricao.substring(0, 300),
           description: descricao,
           project_type: tags[0] || "Cultura",
-          responsavel_nome: responsavelNome,
-          responsavel_email: responsavelEmail,
-          responsavel_telefone: responsavelTelefone,
-          categorias_tags: tags,
-          link_video: linkVideo,
-          media_url: mediaUrl,
+          responsavel_nome: responsavelNome || null,
+          responsavel_email: responsavelEmail || null,
+          responsavel_telefone: responsavelTelefone || null,
+          categorias_tags: tags.length > 0 ? tags : null,
+          link_video: linkVideo || null,
+          image_url: imageUrl || null,
+          location: location || null,
           valor_sugerido: valorSugerido ? parseFloat(valorSugerido) : null,
           link_pagamento: linkPagamento || null,
           impacto_cultural: impactoCultural || null,
           impacto_social: impactoSocial || null,
           publico_alvo: publicoAlvo || null,
           diferenciais: diferenciais || null,
-          status: "pending",
+          status: "approved", // Admin adds directly as approved
         })
         .select()
         .single();
@@ -149,38 +118,22 @@ const SubmitProjectPage = () => {
         await supabase.from("project_members").insert(membersData);
       }
 
-      setShowSuccessModal(true);
-      clearForm();
-    } catch (error) {
-      console.error("Error submitting project:", error);
       toast({
-        title: "Erro ao enviar projeto",
-        description: "Ocorreu um erro ao enviar seu projeto. Tente novamente.",
+        title: "Projeto adicionado!",
+        description: "O projeto foi adicionado com sucesso ao portfólio.",
+      });
+      
+      navigate("/admin");
+    } catch (error) {
+      console.error("Error adding project:", error);
+      toast({
+        title: "Erro ao adicionar projeto",
+        description: "Ocorreu um erro ao adicionar o projeto. Tente novamente.",
         variant: "destructive",
       });
     } finally {
       setSubmitting(false);
     }
-  };
-
-  const clearForm = () => {
-    setResponsavelNome("");
-    setResponsavelEmail("");
-    setResponsavelTelefone("");
-    setTitulo("");
-    setCategoriasTags("");
-    setDescricao("");
-    setLinkVideo("");
-    setVideoFile(null);
-    setDocumentFiles([]);
-    setTeamMembers([]);
-    setValorSugerido("");
-    setLinkPagamento("");
-    setImpactoCultural("");
-    setImpactoSocial("");
-    setPublicoAlvo("");
-    setDiferenciais("");
-    setErrors({});
   };
 
   const addTeamMember = () => {
@@ -197,6 +150,14 @@ const SubmitProjectPage = () => {
     setTeamMembers(teamMembers.filter((_, i) => i !== index));
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -210,18 +171,18 @@ const SubmitProjectPage = () => {
 
       <div className="py-8 px-4">
         <div className="container mx-auto max-w-3xl">
-          <Link to="/" className="inline-flex items-center text-muted-foreground hover:text-foreground mb-6">
+          <Link to="/admin" className="inline-flex items-center text-muted-foreground hover:text-foreground mb-6">
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Voltar ao Menu
+            Voltar ao Painel
           </Link>
 
           <Card className="shadow-lg">
             <CardHeader className="text-center space-y-2">
               <CardTitle className="text-3xl font-bold text-foreground">
-                Cadastrar Projeto Cultural
+                Adicionar Projeto (Admin)
               </CardTitle>
               <CardDescription className="text-muted-foreground">
-                Preencha o formulário abaixo para submeter seu projeto para análise
+                Adicione um projeto diretamente ao portfólio
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -234,47 +195,35 @@ const SubmitProjectPage = () => {
                   
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="responsavelNome">Nome Completo *</Label>
+                      <Label htmlFor="responsavelNome">Nome</Label>
                       <Input
                         id="responsavelNome"
                         value={responsavelNome}
                         onChange={(e) => setResponsavelNome(e.target.value)}
                         placeholder="Nome do responsável"
-                        className={errors.responsavelNome ? "border-destructive" : ""}
                       />
-                      {errors.responsavelNome && (
-                        <p className="text-sm text-destructive mt-1">{errors.responsavelNome}</p>
-                      )}
                     </div>
 
                     <div>
-                      <Label htmlFor="responsavelTelefone">Telefone *</Label>
+                      <Label htmlFor="responsavelTelefone">Telefone</Label>
                       <Input
                         id="responsavelTelefone"
                         value={responsavelTelefone}
                         onChange={(e) => setResponsavelTelefone(e.target.value)}
                         placeholder="(00) 00000-0000"
-                        className={errors.responsavelTelefone ? "border-destructive" : ""}
                       />
-                      {errors.responsavelTelefone && (
-                        <p className="text-sm text-destructive mt-1">{errors.responsavelTelefone}</p>
-                      )}
                     </div>
                   </div>
 
                   <div>
-                    <Label htmlFor="responsavelEmail">Email *</Label>
+                    <Label htmlFor="responsavelEmail">Email</Label>
                     <Input
                       id="responsavelEmail"
                       type="email"
                       value={responsavelEmail}
                       onChange={(e) => setResponsavelEmail(e.target.value)}
                       placeholder="email@exemplo.com"
-                      className={errors.responsavelEmail ? "border-destructive" : ""}
                     />
-                    {errors.responsavelEmail && (
-                      <p className="text-sm text-destructive mt-1">{errors.responsavelEmail}</p>
-                    )}
                   </div>
                 </div>
 
@@ -290,7 +239,7 @@ const SubmitProjectPage = () => {
                       id="titulo"
                       value={titulo}
                       onChange={(e) => setTitulo(e.target.value)}
-                      placeholder="Nome do seu projeto"
+                      placeholder="Nome do projeto"
                       className={errors.titulo ? "border-destructive" : ""}
                     />
                     {errors.titulo && (
@@ -298,17 +247,36 @@ const SubmitProjectPage = () => {
                     )}
                   </div>
 
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="categoriasTags">Categorias/Tags</Label>
+                      <Input
+                        id="categoriasTags"
+                        value={categoriasTags}
+                        onChange={(e) => setCategoriasTags(e.target.value)}
+                        placeholder="Cinema, Teatro, Música"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="location">Localização</Label>
+                      <Input
+                        id="location"
+                        value={location}
+                        onChange={(e) => setLocation(e.target.value)}
+                        placeholder="São Paulo, SP"
+                      />
+                    </div>
+                  </div>
+
                   <div>
-                    <Label htmlFor="categoriasTags">Categorias/Tags</Label>
+                    <Label htmlFor="imageUrl">URL da Imagem</Label>
                     <Input
-                      id="categoriasTags"
-                      value={categoriasTags}
-                      onChange={(e) => setCategoriasTags(e.target.value)}
-                      placeholder="Cinema, Teatro, Música (separados por vírgula)"
+                      id="imageUrl"
+                      value={imageUrl}
+                      onChange={(e) => setImageUrl(e.target.value)}
+                      placeholder="https://..."
                     />
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Separe as categorias por vírgula
-                    </p>
                   </div>
 
                   <div>
@@ -317,7 +285,7 @@ const SubmitProjectPage = () => {
                       id="descricao"
                       value={descricao}
                       onChange={(e) => setDescricao(e.target.value)}
-                      placeholder="Descreva seu projeto em detalhes..."
+                      placeholder="Descreva o projeto em detalhes..."
                       rows={6}
                       className={errors.descricao ? "border-destructive" : ""}
                     />
@@ -334,7 +302,7 @@ const SubmitProjectPage = () => {
                   </h3>
                   
                   <div>
-                    <Label htmlFor="linkVideo">Link de Vídeo (YouTube, Vimeo)</Label>
+                    <Label htmlFor="linkVideo">Link de Vídeo</Label>
                     <Input
                       id="linkVideo"
                       type="url"
@@ -342,47 +310,6 @@ const SubmitProjectPage = () => {
                       onChange={(e) => setLinkVideo(e.target.value)}
                       placeholder="https://youtube.com/..."
                     />
-                  </div>
-
-                  <div>
-                    <Label>Upload de Vídeo (MP4, WAV)</Label>
-                    <div className="border-2 border-dashed rounded-lg p-4 text-center">
-                      <input
-                        type="file"
-                        accept=".mp4,.wav,.mov,.avi"
-                        onChange={(e) => setVideoFile(e.target.files?.[0] || null)}
-                        className="hidden"
-                        id="videoUpload"
-                      />
-                      <label htmlFor="videoUpload" className="cursor-pointer">
-                        <Upload className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
-                        <p className="text-sm text-muted-foreground">
-                          {videoFile ? videoFile.name : "Clique para fazer upload de vídeo"}
-                        </p>
-                      </label>
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label>Documentos (PDF)</Label>
-                    <div className="border-2 border-dashed rounded-lg p-4 text-center">
-                      <input
-                        type="file"
-                        accept=".pdf"
-                        multiple
-                        onChange={(e) => setDocumentFiles(Array.from(e.target.files || []))}
-                        className="hidden"
-                        id="documentUpload"
-                      />
-                      <label htmlFor="documentUpload" className="cursor-pointer">
-                        <Upload className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
-                        <p className="text-sm text-muted-foreground">
-                          {documentFiles.length > 0 
-                            ? `${documentFiles.length} arquivo(s) selecionado(s)` 
-                            : "Clique para fazer upload de documentos"}
-                        </p>
-                      </label>
-                    </div>
                   </div>
                 </div>
 
@@ -417,7 +344,7 @@ const SubmitProjectPage = () => {
                           <Input
                             value={member.nome}
                             onChange={(e) => updateTeamMember(index, "nome", e.target.value)}
-                            placeholder="Nome do integrante"
+                            placeholder="Nome"
                           />
                         </div>
                         <div>
@@ -425,7 +352,7 @@ const SubmitProjectPage = () => {
                           <Input
                             value={member.funcao}
                             onChange={(e) => updateTeamMember(index, "funcao", e.target.value)}
-                            placeholder="Diretor, Produtor, etc."
+                            placeholder="Função"
                           />
                         </div>
                         <div>
@@ -448,12 +375,6 @@ const SubmitProjectPage = () => {
                       </div>
                     </Card>
                   ))}
-
-                  {teamMembers.length === 0 && (
-                    <p className="text-sm text-muted-foreground text-center py-4">
-                      Nenhum integrante adicionado. Clique em "Adicionar" para incluir membros da equipe.
-                    </p>
-                  )}
                 </div>
 
                 {/* Financiamento */}
@@ -464,7 +385,7 @@ const SubmitProjectPage = () => {
                   
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="valorSugerido">Valor Sugerido de Apoio (R$)</Label>
+                      <Label htmlFor="valorSugerido">Valor Sugerido (R$)</Label>
                       <Input
                         id="valorSugerido"
                         type="number"
@@ -475,7 +396,7 @@ const SubmitProjectPage = () => {
                     </div>
 
                     <div>
-                      <Label htmlFor="linkPagamento">Link de Pagamento/Doação</Label>
+                      <Label htmlFor="linkPagamento">Link de Pagamento</Label>
                       <Input
                         id="linkPagamento"
                         type="url"
@@ -500,7 +421,7 @@ const SubmitProjectPage = () => {
                         id="impactoCultural"
                         value={impactoCultural}
                         onChange={(e) => setImpactoCultural(e.target.value)}
-                        placeholder="Descreva o impacto cultural esperado..."
+                        placeholder="Impacto cultural esperado..."
                         rows={3}
                       />
                     </div>
@@ -511,7 +432,7 @@ const SubmitProjectPage = () => {
                         id="impactoSocial"
                         value={impactoSocial}
                         onChange={(e) => setImpactoSocial(e.target.value)}
-                        placeholder="Descreva o impacto social esperado..."
+                        placeholder="Impacto social esperado..."
                         rows={3}
                       />
                     </div>
@@ -523,35 +444,38 @@ const SubmitProjectPage = () => {
                       id="publicoAlvo"
                       value={publicoAlvo}
                       onChange={(e) => setPublicoAlvo(e.target.value)}
-                      placeholder="Descreva o público-alvo do projeto..."
+                      placeholder="Público-alvo do projeto..."
                       rows={2}
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor="diferenciais">Diferenciais do Projeto</Label>
+                    <Label htmlFor="diferenciais">Diferenciais</Label>
                     <Textarea
                       id="diferenciais"
                       value={diferenciais}
                       onChange={(e) => setDiferenciais(e.target.value)}
-                      placeholder="O que torna seu projeto único?"
+                      placeholder="O que torna este projeto único?"
                       rows={3}
                     />
                   </div>
                 </div>
 
                 {/* Submit */}
-                <div className="flex justify-end pt-4">
-                  <Button type="submit" size="lg" className="min-w-[200px]" disabled={submitting}>
+                <div className="flex justify-end gap-4 pt-4">
+                  <Button type="button" variant="outline" onClick={() => navigate("/admin")}>
+                    Cancelar
+                  </Button>
+                  <Button type="submit" size="lg" disabled={submitting}>
                     {submitting ? (
                       <>
                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                        Enviando...
+                        Salvando...
                       </>
                     ) : (
                       <>
                         <Send className="w-4 h-4 mr-2" />
-                        Enviar Projeto
+                        Adicionar Projeto
                       </>
                     )}
                   </Button>
@@ -561,29 +485,8 @@ const SubmitProjectPage = () => {
           </Card>
         </div>
       </div>
-
-      {/* Success Modal */}
-      <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader className="text-center">
-            <div className="mx-auto mb-4 w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
-              <CheckCircle2 className="w-10 h-10 text-primary" />
-            </div>
-            <DialogTitle className="text-2xl">Projeto Enviado com Sucesso!</DialogTitle>
-            <DialogDescription className="text-base pt-2">
-              Sua solicitação foi recebida e será analisada em breve. Entraremos em contato
-              através do email informado.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex justify-center pt-4">
-            <Button onClick={() => setShowSuccessModal(false)} size="lg">
-              Fechar
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
 
-export default SubmitProjectPage;
+export default AdminAddProjectPage;
