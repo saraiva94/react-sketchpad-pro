@@ -1,53 +1,45 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 
+const ADMIN_USERNAME = "Admin2025";
+const ADMIN_PASSWORD = "administradorpi2025";
+
 const AuthPage = () => {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { user, isAdmin, signIn } = useAuth();
 
-  useEffect(() => {
-    if (user && isAdmin) {
-      navigate("/admin");
-    }
-  }, [user, isAdmin, navigate]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    try {
-      const { error } = await signIn(email, password);
-      if (error) {
-        toast({
-          title: "Erro ao entrar",
-          description: error.message === "Invalid login credentials" 
-            ? "Email ou senha incorretos" 
-            : error.message,
-          variant: "destructive",
-        });
-      } else {
+    setTimeout(() => {
+      if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+        localStorage.setItem("isAdminLoggedIn", "true");
         toast({
           title: "Bem-vindo!",
           description: "Login realizado com sucesso.",
         });
         navigate("/admin");
+      } else {
+        toast({
+          title: "Dados incorretos",
+          description: "Usuário ou senha incorretos. Tente novamente.",
+          variant: "destructive",
+        });
       }
-    } finally {
       setIsLoading(false);
-    }
+    }, 500);
   };
 
   return (
@@ -81,13 +73,13 @@ const AuthPage = () => {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="username">Usuário</Label>
                 <Input
-                  id="email"
-                  type="email"
-                  placeholder="admin@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  id="username"
+                  type="text"
+                  placeholder="Digite o usuário"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                   required
                 />
               </div>
@@ -102,7 +94,6 @@ const AuthPage = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    minLength={6}
                   />
                   <Button
                     type="button"

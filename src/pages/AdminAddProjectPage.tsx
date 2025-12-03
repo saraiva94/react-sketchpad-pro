@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Send, ArrowLeft, Plus, X, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
 interface TeamMember {
@@ -20,7 +19,6 @@ interface TeamMember {
 const AdminAddProjectPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user, isAdmin, loading } = useAuth();
   
   // Responsável
   const [responsavelNome, setResponsavelNome] = useState("");
@@ -53,11 +51,12 @@ const AdminAddProjectPage = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
 
-  // Redirect if not admin
-  if (!loading && (!user || !isAdmin)) {
-    navigate("/auth");
-    return null;
-  }
+  useEffect(() => {
+    const isLoggedIn = localStorage.getItem("isAdminLoggedIn");
+    if (!isLoggedIn) {
+      navigate("/auth");
+    }
+  }, [navigate]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -149,14 +148,6 @@ const AdminAddProjectPage = () => {
   const removeTeamMember = (index: number) => {
     setTeamMembers(teamMembers.filter((_, i) => i !== index));
   };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-background">

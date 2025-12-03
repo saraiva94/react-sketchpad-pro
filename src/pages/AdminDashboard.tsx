@@ -9,7 +9,6 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { 
   CheckCircle, 
@@ -60,7 +59,6 @@ interface Project {
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user, isAdmin, loading, signOut } = useAuth();
 
   const [projects, setProjects] = useState<Project[]>([]);
   const [loadingProjects, setLoadingProjects] = useState(true);
@@ -77,16 +75,13 @@ const AdminDashboard = () => {
   const [editAdminNotes, setEditAdminNotes] = useState("");
 
   useEffect(() => {
-    if (!loading && (!user || !isAdmin)) {
+    const isLoggedIn = localStorage.getItem("isAdminLoggedIn");
+    if (!isLoggedIn) {
       navigate("/auth");
-    }
-  }, [user, isAdmin, loading, navigate]);
-
-  useEffect(() => {
-    if (user && isAdmin) {
+    } else {
       fetchProjects();
     }
-  }, [user, isAdmin]);
+  }, [navigate]);
 
   const fetchProjects = async () => {
     const { data, error } = await supabase
@@ -208,8 +203,8 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleSignOut = async () => {
-    await signOut();
+  const handleSignOut = () => {
+    localStorage.removeItem("isAdminLoggedIn");
     navigate("/");
   };
 
@@ -232,13 +227,6 @@ const AdminDashboard = () => {
     projeto: p.title,
   })).filter(c => c.nome || c.email || c.telefone);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-background">
