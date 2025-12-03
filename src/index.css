@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Caveat:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -15,7 +15,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
 
-    --primary: 217 91% 60%;
+    --primary: 210 60% 45%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 210 40% 96%;
@@ -24,7 +24,7 @@
     --muted: 210 40% 96%;
     --muted-foreground: 215 16% 47%;
 
-    --accent: 217 91% 60%;
+    --accent: 200 80% 55%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
@@ -32,27 +32,35 @@
 
     --border: 214 32% 91%;
     --input: 214 32% 91%;
-    --ring: 217 91% 60%;
+    --ring: 210 60% 45%;
 
     --radius: 0.75rem;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary: 210 60% 45%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 210 40% 96%;
     --sidebar-accent-foreground: 222 47% 11%;
     --sidebar-border: 214 32% 91%;
-    --sidebar-ring: 217 91% 60%;
+    --sidebar-ring: 210 60% 45%;
 
-    /* Custom tokens */
-    --blue-light: 217 91% 95%;
-    --blue-medium: 217 91% 60%;
-    --blue-dark: 217 91% 45%;
-    --shadow-soft: 217 91% 60% / 0.1;
+    /* Custom elegant tokens */
+    --blue-light: 210 60% 95%;
+    --blue-medium: 210 60% 45%;
+    --blue-dark: 210 60% 35%;
+    --blue-mist: 200 30% 97%;
+    --gold-accent: 38 75% 55%;
+    --shadow-soft: 210 60% 45% / 0.08;
+    --shadow-elegant: 210 60% 25% / 0.12;
+
+    /* Gradient colors */
+    --gradient-start: 210 60% 98%;
+    --gradient-end: 200 50% 93%;
 
     /* Font families */
     --font-handwritten: 'Caveat', cursive;
+    --font-serif: 'Cormorant Garamond', serif;
     --font-sans: 'Inter', sans-serif;
   }
 
@@ -66,7 +74,7 @@
     --popover: 222 47% 15%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 217 91% 60%;
+    --primary: 210 60% 55%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 217 33% 17%;
@@ -75,7 +83,7 @@
     --muted: 217 33% 17%;
     --muted-foreground: 215 20% 65%;
 
-    --accent: 217 91% 60%;
+    --accent: 200 80% 55%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 62% 50%;
@@ -83,21 +91,27 @@
 
     --border: 217 33% 17%;
     --input: 217 33% 17%;
-    --ring: 217 91% 60%;
+    --ring: 210 60% 55%;
 
     --sidebar-background: 222 47% 11%;
     --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary: 210 60% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 217 33% 17%;
     --sidebar-accent-foreground: 210 40% 98%;
     --sidebar-border: 217 33% 17%;
-    --sidebar-ring: 217 91% 60%;
+    --sidebar-ring: 210 60% 55%;
 
     --blue-light: 217 50% 20%;
-    --blue-medium: 217 91% 60%;
-    --blue-dark: 217 91% 70%;
+    --blue-medium: 210 60% 55%;
+    --blue-dark: 210 60% 70%;
+    --blue-mist: 220 40% 15%;
+    --gold-accent: 38 75% 55%;
     --shadow-soft: 0 0% 0% / 0.3;
+    --shadow-elegant: 0 0% 0% / 0.4;
+
+    --gradient-start: 222 47% 13%;
+    --gradient-end: 220 45% 16%;
   }
 }
 
@@ -107,11 +121,115 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans;
+    @apply bg-background text-foreground font-sans antialiased;
     font-family: var(--font-sans);
   }
 
   .font-handwritten {
     font-family: var(--font-handwritten);
+  }
+
+  .font-serif {
+    font-family: var(--font-serif);
+  }
+}
+
+@layer components {
+  /* Elegant glass card effect */
+  .glass-card {
+    @apply bg-white/70 backdrop-blur-md border border-white/50 shadow-lg;
+  }
+
+  /* Elegant hover effect for cards */
+  .card-hover {
+    @apply transition-all duration-500 ease-out;
+  }
+
+  .card-hover:hover {
+    @apply shadow-xl -translate-y-1;
+    box-shadow: 0 25px 50px -12px hsl(var(--shadow-elegant));
+  }
+
+  /* Elegant underline animation */
+  .elegant-link {
+    @apply relative inline-block;
+  }
+
+  .elegant-link::after {
+    content: '';
+    @apply absolute bottom-0 left-0 w-full h-0.5 bg-primary origin-left scale-x-0 transition-transform duration-300 ease-out;
+  }
+
+  .elegant-link:hover::after {
+    @apply scale-x-100;
+  }
+
+  /* Subtle glow effect */
+  .glow-subtle {
+    box-shadow: 0 0 40px hsl(var(--primary) / 0.15);
+  }
+
+  /* Elegant gradient text */
+  .gradient-text {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
+  }
+
+  /* Decorative line */
+  .decorative-line {
+    @apply relative;
+  }
+
+  .decorative-line::before {
+    content: '';
+    @apply absolute -bottom-3 left-1/2 -translate-x-1/2 w-16 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent rounded-full;
+  }
+
+  /* Floating animation */
+  .float-gentle {
+    animation: float-gentle 6s ease-in-out infinite;
+  }
+
+  @keyframes float-gentle {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+  /* Fade in up animation */
+  .animate-fade-in-up {
+    animation: fade-in-up 0.8s ease-out forwards;
+    opacity: 0;
+  }
+
+  @keyframes fade-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Staggered animation delays */
+  .delay-100 { animation-delay: 100ms; }
+  .delay-200 { animation-delay: 200ms; }
+  .delay-300 { animation-delay: 300ms; }
+  .delay-400 { animation-delay: 400ms; }
+  .delay-500 { animation-delay: 500ms; }
+
+  /* Pulse glow for logo */
+  .pulse-glow {
+    animation: pulse-glow 3s ease-in-out infinite;
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% { 
+      text-shadow: 0 0 20px hsl(var(--primary) / 0.3);
+    }
+    50% { 
+      text-shadow: 0 0 40px hsl(var(--primary) / 0.5), 0 0 60px hsl(var(--primary) / 0.2);
+    }
   }
 }
