@@ -24,6 +24,7 @@ import {
   MapPinned,
   Anchor
 } from "lucide-react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 interface Project {
   id: string;
@@ -78,6 +79,7 @@ const HomePage = () => {
             <a href="#plataforma" className="text-base font-medium text-foreground hover:text-primary transition-colors elegant-link">Plataforma</a>
             <Link to="/projetos" className="text-base font-medium text-foreground hover:text-primary transition-colors elegant-link">Projetos</Link>
             <a href="#contato" className="text-base font-medium text-foreground hover:text-primary transition-colors elegant-link">Contato</a>
+            <ThemeToggle />
           </nav>
         </div>
       </header>
