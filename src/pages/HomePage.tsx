@@ -65,17 +65,17 @@ const HomePage = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b border-border bg-blue-50/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link to="/" className="text-3xl font-handwritten font-bold text-primary animate-pulse hover:animate-none transition-all">
+        <div className="container mx-auto px-4 h-20 flex items-center justify-between">
+          <Link to="/" className="text-4xl font-handwritten font-bold text-primary animate-pulse hover:animate-none transition-all">
             Porto de Ideias
           </Link>
           
-          <nav className="hidden md:flex items-center gap-6">
-            <a href="#inicio" className="text-sm text-foreground hover:text-primary transition-colors">Início</a>
-            <a href="#sobre" className="text-sm text-foreground hover:text-primary transition-colors">Sobre</a>
-            <a href="#plataforma" className="text-sm text-foreground hover:text-primary transition-colors">Plataforma</a>
-            <Link to="/projetos" className="text-sm text-foreground hover:text-primary transition-colors">Projetos</Link>
-            <a href="#contato" className="text-sm text-foreground hover:text-primary transition-colors">Contato</a>
+          <nav className="hidden md:flex items-center gap-8">
+            <a href="#inicio" className="text-base font-semibold text-foreground hover:text-primary transition-colors">Início</a>
+            <a href="#sobre" className="text-base font-semibold text-foreground hover:text-primary transition-colors">Sobre</a>
+            <a href="#plataforma" className="text-base font-semibold text-foreground hover:text-primary transition-colors">Plataforma</a>
+            <Link to="/projetos" className="text-base font-semibold text-foreground hover:text-primary transition-colors">Projetos</Link>
+            <a href="#contato" className="text-base font-semibold text-foreground hover:text-primary transition-colors">Contato</a>
           </nav>
         </div>
       </header>
@@ -89,7 +89,7 @@ const HomePage = () => {
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
         <div className="container mx-auto px-4 relative">
           <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6 leading-tight">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-handwritten font-bold text-foreground mb-6 leading-tight">
               Onde a Cultura Encontra o{" "}
               <span className="text-primary">Investimento</span>
             </h1>
@@ -114,7 +114,7 @@ const HomePage = () => {
       </section>
 
       {/* Featured Projects Section */}
-      <section className="py-16 lg:py-24 bg-background">
+      <section className="py-16 lg:py-24 bg-gradient-to-br from-blue-50 via-blue-100/50 to-blue-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
@@ -259,7 +259,7 @@ const HomePage = () => {
       </section>
 
       {/* Platform Section - For Cultural Producers */}
-      <section id="plataforma" className="py-16 lg:py-24 bg-background">
+      <section id="plataforma" className="py-16 lg:py-24 bg-gradient-to-br from-blue-50 via-blue-100/50 to-blue-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Um Ecossistema de Conexões</h2>
