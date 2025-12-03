@@ -1,354 +1,566 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { 
-  Plus, 
-  Edit, 
-  Trash2, 
   CheckCircle, 
   XCircle, 
-  Mail,
-  Eye,
-  Clock,
-  FileText,
-  ArrowLeft
+  Clock, 
+  Eye, 
+  Edit,
+  Trash2,
+  LogOut,
+  User,
+  ExternalLink
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
+interface Profile {
+  full_name: string | null;
+  email: string | null;
+}
+
+interface Project {
+  id: string;
+  title: string;
+  synopsis: string;
+  description: string | null;
+  project_type: string;
+  status: string;
+  media_url: string | null;
+  has_incentive_law: boolean;
+  incentive_law_details: string | null;
+  image_url: string | null;
+  budget: string | null;
+  location: string | null;
+  admin_notes: string | null;
+  created_at: string;
+  user_id: string;
+  profile?: Profile;
+}
 
 const AdminDashboard = () => {
-  // Dados mockados
-  const [projects] = useState([
-    { 
-      id: 1, 
-      title: "Projeto Documentário Ipsum", 
-      status: "Em andamento", 
-      date: "15/03/2024",
-      category: "Cinema",
-      budget: "R$ 150.000"
-    },
-    { 
-      id: 2, 
-      title: "Festival Cultural Lorem", 
-      status: "Aprovado", 
-      date: "10/03/2024",
-      category: "Evento",
-      budget: "R$ 80.000"
-    },
-    { 
-      id: 3, 
-      title: "Exposição Artística Dolor", 
-      status: "Pendente", 
-      date: "05/03/2024",
-      category: "Artes Visuais",
-      budget: "R$ 45.000"
-    },
-  ]);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const { user, isAdmin, loading, signOut } = useAuth();
 
-  const [requests] = useState([
-    {
-      id: 1,
-      projectName: "Projeto Teatro Sit Amet",
-      requester: "João Silva",
-      email: "joao@email.com",
-      date: "18/03/2024",
-      status: "Aguardando"
-    },
-    {
-      id: 2,
-      projectName: "Mostra de Cinema Consectetur",
-      requester: "Maria Santos",
-      email: "maria@email.com",
-      date: "17/03/2024",
-      status: "Aguardando"
-    },
-  ]);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loadingProjects, setLoadingProjects] = useState(true);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [showDetails, setShowDetails] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [activeTab, setActiveTab] = useState("pending");
 
-  const [messages] = useState([
-    {
-      id: 1,
-      name: "Pedro Costa",
-      email: "pedro@email.com",
-      phone: "(11) 98765-4321",
-      message: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Gostaria de saber mais sobre como funciona o processo de aprovação de projetos.",
-      date: "19/03/2024",
-      read: false
-    },
-    {
-      id: 2,
-      name: "Ana Lima",
-      email: "ana@email.com",
-      phone: "(21) 91234-5678",
-      message: "Tenho interesse em apoiar projetos culturais. Como posso me cadastrar na plataforma?",
-      date: "18/03/2024",
-      read: false
-    },
-    {
-      id: 3,
-      name: "Carlos Oliveira",
-      email: "carlos@email.com",
-      phone: "(31) 99876-5432",
-      message: "Meu projeto foi aprovado, mas preciso fazer algumas alterações. É possível?",
-      date: "17/03/2024",
-      read: true
-    },
-  ]);
+  // Edit form state
+  const [editImageUrl, setEditImageUrl] = useState("");
+  const [editBudget, setEditBudget] = useState("");
+  const [editLocation, setEditLocation] = useState("");
+  const [editAdminNotes, setEditAdminNotes] = useState("");
 
-  const handleCreateProject = () => {
-    console.log("Navegando para página de criação de projeto...");
-    // Navegar para /create-project
-    window.location.href = "/create-project";
+  useEffect(() => {
+    if (!loading && (!user || !isAdmin)) {
+      navigate("/");
+    }
+  }, [user, isAdmin, loading, navigate]);
+
+  useEffect(() => {
+    if (user && isAdmin) {
+      fetchProjects();
+    }
+  }, [user, isAdmin]);
+
+  const fetchProjects = async () => {
+    const { data, error } = await supabase
+      .from("projects")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (!error && data) {
+      // Fetch profiles for each project
+      const projectsWithProfiles = await Promise.all(
+        data.map(async (project) => {
+          const { data: profileData } = await supabase
+            .from("profiles")
+            .select("full_name, email")
+            .eq("user_id", project.user_id)
+            .maybeSingle();
+          
+          return {
+            ...project,
+            profile: profileData || undefined,
+          } as Project;
+        })
+      );
+      setProjects(projectsWithProfiles);
+    }
+    setLoadingProjects(false);
   };
 
-  const handleEdit = (id: number) => {
-    console.log("Editar projeto ID:", id);
-  };
+  const updateProjectStatus = async (projectId: string, status: "approved" | "rejected") => {
+    const { error } = await supabase
+      .from("projects")
+      .update({ status })
+      .eq("id", projectId);
 
-  const handleDelete = (id: number) => {
-    console.log("Excluir projeto ID:", id);
-  };
-
-  const handleApprove = (id: number) => {
-    console.log("Aprovar solicitação ID:", id);
-  };
-
-  const handleReject = (id: number) => {
-    console.log("Rejeitar solicitação ID:", id);
-  };
-
-  const handleMarkAsRead = (id: number) => {
-    console.log("Marcar mensagem como lida ID:", id);
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "Em andamento":
-        return "bg-blue-500/10 text-blue-600 border-blue-500/20";
-      case "Aprovado":
-        return "bg-green-500/10 text-green-600 border-green-500/20";
-      case "Pendente":
-        return "bg-yellow-500/10 text-yellow-600 border-yellow-500/20";
-      default:
-        return "bg-muted text-muted-foreground";
+    if (error) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível atualizar o status do projeto.",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: status === "approved" ? "Projeto aprovado!" : "Projeto rejeitado",
+        description: status === "approved" 
+          ? "O projeto está agora visível na página inicial." 
+          : "O projeto foi marcado como não aprovado.",
+      });
+      fetchProjects();
+      setShowDetails(false);
     }
   };
+
+  const openEditDialog = (project: Project) => {
+    setSelectedProject(project);
+    setEditImageUrl(project.image_url || "");
+    setEditBudget(project.budget || "");
+    setEditLocation(project.location || "");
+    setEditAdminNotes(project.admin_notes || "");
+    setShowEditDialog(true);
+  };
+
+  const saveProjectEdit = async () => {
+    if (!selectedProject) return;
+
+    const { error } = await supabase
+      .from("projects")
+      .update({
+        image_url: editImageUrl || null,
+        budget: editBudget || null,
+        location: editLocation || null,
+        admin_notes: editAdminNotes || null,
+      })
+      .eq("id", selectedProject.id);
+
+    if (error) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível salvar as alterações.",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Salvo!",
+        description: "As alterações foram salvas com sucesso.",
+      });
+      fetchProjects();
+      setShowEditDialog(false);
+    }
+  };
+
+  const deleteProject = async (projectId: string) => {
+    if (!confirm("Tem certeza que deseja excluir este projeto?")) return;
+
+    const { error } = await supabase
+      .from("projects")
+      .delete()
+      .eq("id", projectId);
+
+    if (error) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível excluir o projeto.",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Excluído",
+        description: "O projeto foi excluído com sucesso.",
+      });
+      fetchProjects();
+    }
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/");
+  };
+
+  const filteredProjects = projects.filter((p) => {
+    if (activeTab === "pending") return p.status === "pending";
+    if (activeTab === "approved") return p.status === "approved";
+    if (activeTab === "rejected") return p.status === "rejected";
+    return true;
+  });
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center gap-4 mb-4">
-            <Link to="/">
+      <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-50">
+        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+          <Link to="/" className="text-xl font-bold text-foreground">
+            Porto de Ideias
+          </Link>
+          
+          <nav className="flex items-center gap-4">
+            <Link to="/dashboard">
               <Button variant="ghost" size="sm">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Voltar ao Menu
+                <User className="w-4 h-4 mr-2" />
+                Meus Projetos
               </Button>
             </Link>
-          </div>
-          <h1 className="text-3xl font-bold text-foreground">Painel Administrativo</h1>
-          <p className="text-muted-foreground mt-2">Gerencie projetos e interações do site</p>
+            <Button variant="outline" size="sm" onClick={handleSignOut}>
+              <LogOut className="w-4 h-4 mr-2" />
+              Sair
+            </Button>
+          </nav>
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8 space-y-8">
-        {/* Create Project Button */}
-        <Card className="border-2 border-accent/20 bg-accent/5 shadow-lg">
-          <CardContent className="p-8 text-center">
-            <Button 
-              size="lg" 
-              className="text-lg px-8 py-6 h-auto"
-              onClick={handleCreateProject}
-            >
-              <Plus className="w-6 h-6 mr-2" />
-              Adicionar Novo Projeto
-            </Button>
-          </CardContent>
-        </Card>
+      <main className="container mx-auto px-4 py-8">
+        {/* Page Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-foreground">Painel Administrativo</h1>
+          <p className="text-muted-foreground mt-1">
+            Gerencie os projetos submetidos à plataforma.
+          </p>
+        </div>
 
-        {/* Projects Section */}
-        <Card className="shadow-lg">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="w-5 h-5" />
-              Projetos Cadastrados
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {projects.map((project) => (
-                <Card key={project.id} className="border">
-                  <CardContent className="p-6">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                      <div className="flex-1">
-                        <div className="flex items-start gap-3 mb-3">
-                          <Avatar className="w-12 h-12">
-                            <AvatarImage src={`https://api.dicebear.com/7.x/shapes/svg?seed=${project.id}`} />
-                            <AvatarFallback>P{project.id}</AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <h3 className="font-semibold text-lg">{project.title}</h3>
-                            <div className="flex flex-wrap items-center gap-2 mt-2">
-                              <Badge className={getStatusColor(project.status)}>
-                                {project.status}
-                              </Badge>
-                              <Badge variant="outline">{project.category}</Badge>
-                              <span className="text-sm text-muted-foreground">{project.budget}</span>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground ml-15">
-                          <Clock className="w-4 h-4" />
-                          <span>{project.date}</span>
-                        </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => handleEdit(project.id)}
-                        >
-                          <Edit className="w-4 h-4 mr-1" />
-                          Editar
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          className="text-destructive hover:text-destructive"
-                          onClick={() => handleDelete(project.id)}
-                        >
-                          <Trash2 className="w-4 h-4 mr-1" />
-                          Excluir
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        {/* Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <Card>
+            <CardContent className="p-4 text-center">
+              <div className="text-2xl font-bold text-foreground">
+                {projects.filter((p) => p.status === "pending").length}
+              </div>
+              <p className="text-sm text-muted-foreground">Pendentes</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 text-center">
+              <div className="text-2xl font-bold text-green-600">
+                {projects.filter((p) => p.status === "approved").length}
+              </div>
+              <p className="text-sm text-muted-foreground">Aprovados</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 text-center">
+              <div className="text-2xl font-bold text-red-600">
+                {projects.filter((p) => p.status === "rejected").length}
+              </div>
+              <p className="text-sm text-muted-foreground">Rejeitados</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 text-center">
+              <div className="text-2xl font-bold text-foreground">
+                {projects.length}
+              </div>
+              <p className="text-sm text-muted-foreground">Total</p>
+            </CardContent>
+          </Card>
+        </div>
 
-        {/* Requests Section */}
-        <Card className="shadow-lg">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Eye className="w-5 h-5" />
-              Solicitações de Projetos
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {requests.map((request) => (
-                <Card key={request.id} className="border">
-                  <CardContent className="p-6">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                      <div className="flex-1">
-                        <div className="flex items-start gap-3 mb-3">
-                          <Avatar>
-                            <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${request.requester}`} />
-                            <AvatarFallback>{request.requester[0]}</AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <h3 className="font-semibold">{request.projectName}</h3>
-                            <p className="text-sm text-muted-foreground mt-1">
-                              Por: {request.requester} • {request.email}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground ml-11">
-                          <Clock className="w-4 h-4" />
-                          <span>{request.date}</span>
-                          <Badge variant="outline" className="ml-2">{request.status}</Badge>
-                        </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button 
-                          size="sm"
-                          className="bg-green-600 hover:bg-green-700"
-                          onClick={() => handleApprove(request.id)}
-                        >
-                          <CheckCircle className="w-4 h-4 mr-1" />
-                          Aprovar
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          className="text-destructive hover:text-destructive"
-                          onClick={() => handleReject(request.id)}
-                        >
-                          <XCircle className="w-4 h-4 mr-1" />
-                          Rejeitar
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        {/* Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="mb-6">
+            <TabsTrigger value="pending" className="gap-2">
+              <Clock className="w-4 h-4" />
+              Pendentes
+            </TabsTrigger>
+            <TabsTrigger value="approved" className="gap-2">
+              <CheckCircle className="w-4 h-4" />
+              Aprovados
+            </TabsTrigger>
+            <TabsTrigger value="rejected" className="gap-2">
+              <XCircle className="w-4 h-4" />
+              Rejeitados
+            </TabsTrigger>
+            <TabsTrigger value="all">Todos</TabsTrigger>
+          </TabsList>
 
-        {/* Messages Section */}
-        <Card className="shadow-lg">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Mail className="w-5 h-5" />
-              Mensagens do Fale Conosco
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {messages.map((msg) => (
-                <Card key={msg.id} className={`border ${msg.read ? 'opacity-60' : ''}`}>
-                  <CardContent className="p-6">
-                    <div className="flex flex-col gap-4">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex items-start gap-3">
-                          <Avatar>
-                            <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${msg.name}`} />
-                            <AvatarFallback>{msg.name[0]}</AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <h3 className="font-semibold">{msg.name}</h3>
-                            <div className="flex flex-col gap-1 mt-1 text-sm text-muted-foreground">
-                              <span>{msg.email}</span>
-                              <span>{msg.phone}</span>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm text-muted-foreground whitespace-nowrap">{msg.date}</span>
-                          {!msg.read && (
-                            <Badge variant="default" className="bg-accent">
-                              Nova
+          <TabsContent value={activeTab}>
+            {loadingProjects ? (
+              <div className="space-y-4">
+                {[1, 2, 3].map((i) => (
+                  <Card key={i} className="animate-pulse">
+                    <CardContent className="p-6">
+                      <div className="h-6 bg-muted rounded w-1/4 mb-2" />
+                      <div className="h-4 bg-muted rounded w-3/4" />
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : filteredProjects.length > 0 ? (
+              <div className="space-y-4">
+                {filteredProjects.map((project) => (
+                  <Card key={project.id} className="hover:shadow-md transition-shadow">
+                    <CardContent className="p-6">
+                      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <h3 className="text-lg font-semibold text-foreground">
+                              {project.title}
+                            </h3>
+                            <Badge variant={
+                              project.status === "approved" ? "default" :
+                              project.status === "rejected" ? "destructive" : "secondary"
+                            }>
+                              {project.status === "approved" ? "Aprovado" :
+                               project.status === "rejected" ? "Rejeitado" : "Pendente"}
                             </Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+                            {project.synopsis}
+                          </p>
+                          <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
+                            <Badge variant="outline">{project.project_type}</Badge>
+                            <span>
+                              Por: {project.profile?.full_name || project.profile?.email || "Usuário"}
+                            </span>
+                            <span>
+                              {new Date(project.created_at).toLocaleDateString("pt-BR")}
+                            </span>
+                            {project.has_incentive_law && (
+                              <Badge className="bg-accent/10 text-accent border-accent/20">
+                                Lei de Incentivo
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedProject(project);
+                              setShowDetails(true);
+                            }}
+                          >
+                            <Eye className="w-4 h-4 mr-1" />
+                            Ver
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => openEditDialog(project)}
+                          >
+                            <Edit className="w-4 h-4 mr-1" />
+                            Editar
+                          </Button>
+                          {project.status === "pending" && (
+                            <>
+                              <Button
+                                size="sm"
+                                onClick={() => updateProjectStatus(project.id, "approved")}
+                                className="bg-green-600 hover:bg-green-700"
+                              >
+                                <CheckCircle className="w-4 h-4 mr-1" />
+                                Aprovar
+                              </Button>
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => updateProjectStatus(project.id, "rejected")}
+                              >
+                                <XCircle className="w-4 h-4 mr-1" />
+                                Rejeitar
+                              </Button>
+                            </>
                           )}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => deleteProject(project.id)}
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
                         </div>
                       </div>
-                      <div className="pl-11">
-                        <p className="text-muted-foreground leading-relaxed">{msg.message}</p>
-                        {!msg.read && (
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="mt-4"
-                            onClick={() => handleMarkAsRead(msg.id)}
-                          >
-                            <CheckCircle className="w-4 h-4 mr-1" />
-                            Marcar como lida
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <Card className="text-center py-16">
+                <CardContent>
+                  <p className="text-muted-foreground">
+                    Nenhum projeto {activeTab === "pending" ? "pendente" : 
+                                   activeTab === "approved" ? "aprovado" : 
+                                   activeTab === "rejected" ? "rejeitado" : ""} encontrado.
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+        </Tabs>
+      </main>
+
+      {/* Details Dialog */}
+      <Dialog open={showDetails} onOpenChange={setShowDetails}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          {selectedProject && (
+            <>
+              <DialogHeader>
+                <DialogTitle>{selectedProject.title}</DialogTitle>
+                <DialogDescription>
+                  {selectedProject.project_type} • Enviado em {new Date(selectedProject.created_at).toLocaleDateString("pt-BR")}
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-4 py-4">
+                <div>
+                  <h4 className="font-semibold mb-1">Sinopse</h4>
+                  <p className="text-sm text-muted-foreground">{selectedProject.synopsis}</p>
+                </div>
+
+                {selectedProject.description && (
+                  <div>
+                    <h4 className="font-semibold mb-1">Descrição Completa</h4>
+                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                      {selectedProject.description}
+                    </p>
+                  </div>
+                )}
+
+                {selectedProject.media_url && (
+                  <div>
+                    <h4 className="font-semibold mb-1">Material de Apoio</h4>
+                    <a 
+                      href={selectedProject.media_url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-sm text-accent hover:underline flex items-center gap-1"
+                    >
+                      {selectedProject.media_url}
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  </div>
+                )}
+
+                {selectedProject.has_incentive_law && (
+                  <div>
+                    <h4 className="font-semibold mb-1">Lei de Incentivo</h4>
+                    <p className="text-sm text-muted-foreground">
+                      {selectedProject.incentive_law_details || "Sim, possui lei de incentivo aprovada."}
+                    </p>
+                  </div>
+                )}
+
+                <div className="pt-4 border-t">
+                  <h4 className="font-semibold mb-1">Enviado por</h4>
+                  <p className="text-sm text-muted-foreground">
+                    {selectedProject.profile?.full_name || "Nome não informado"} 
+                    {selectedProject.profile?.email && ` (${selectedProject.profile.email})`}
+                  </p>
+                </div>
+              </div>
+
+              {selectedProject.status === "pending" && (
+                <DialogFooter className="gap-2">
+                  <Button
+                    variant="destructive"
+                    onClick={() => updateProjectStatus(selectedProject.id, "rejected")}
+                  >
+                    <XCircle className="w-4 h-4 mr-2" />
+                    Rejeitar
+                  </Button>
+                  <Button
+                    onClick={() => updateProjectStatus(selectedProject.id, "approved")}
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                    Aprovar
+                  </Button>
+                </DialogFooter>
+              )}
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Editar Projeto</DialogTitle>
+            <DialogDescription>
+              Adicione informações extras ao projeto para exibição na plataforma.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="editImageUrl">URL da Imagem de Capa</Label>
+              <Input
+                id="editImageUrl"
+                placeholder="https://..."
+                value={editImageUrl}
+                onChange={(e) => setEditImageUrl(e.target.value)}
+              />
             </div>
-          </CardContent>
-        </Card>
-      </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="editBudget">Orçamento / Valor</Label>
+              <Input
+                id="editBudget"
+                placeholder="R$ 100.000,00"
+                value={editBudget}
+                onChange={(e) => setEditBudget(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="editLocation">Localização</Label>
+              <Input
+                id="editLocation"
+                placeholder="São Paulo, SP"
+                value={editLocation}
+                onChange={(e) => setEditLocation(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="editAdminNotes">Notas do Admin (internas)</Label>
+              <Textarea
+                id="editAdminNotes"
+                placeholder="Observações internas..."
+                value={editAdminNotes}
+                onChange={(e) => setEditAdminNotes(e.target.value)}
+                rows={3}
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEditDialog(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={saveProjectEdit}>
+              Salvar Alterações
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
