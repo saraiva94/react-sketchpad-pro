@@ -144,61 +144,92 @@ const HomePage = () => {
           ) : featuredProjects.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {featuredProjects.map((project, index) => (
-                <Card 
+                <Link 
                   key={project.id} 
-                  className="group h-full overflow-hidden bg-card/80 backdrop-blur-sm border-border/50 card-hover"
-                  style={{ animationDelay: `${index * 100}ms` }}
+                  to={`/project/${project.id}`}
+                  className="block group"
                 >
-                  <div className="relative h-56 overflow-hidden">
-                    {project.image_url ? (
-                      <img
-                        src={project.image_url}
-                        alt={project.title}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 via-accent/5 to-primary/10">
-                        <Sparkles className="w-12 h-12 text-muted-foreground/30" />
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  </div>
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between mb-3">
-                      <Badge variant="outline" className="text-xs font-medium bg-primary/5 border-primary/20 text-primary">
-                        {project.categorias_tags?.[0] || project.project_type}
-                      </Badge>
-                      {project.location && (
-                        <span className="text-xs text-muted-foreground flex items-center gap-1">
-                          <MapPinned className="w-3 h-3" />
-                          {project.location}
-                        </span>
-                      )}
-                    </div>
-                    <h3 className="text-xl font-serif font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
-                      {project.title}
-                    </h3>
-                    <p className="text-sm text-muted-foreground line-clamp-3 mb-4 leading-relaxed">
-                      {project.synopsis}
-                    </p>
-                    <div className="flex items-center justify-between pt-4 border-t border-border/50">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-                          <Users className="w-4 h-4 text-primary" />
+                  <Card 
+                    className="h-full overflow-hidden bg-card/80 backdrop-blur-sm border-border/50 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-2 hover:border-primary/30 animate-fade-in-up"
+                    style={{ animationDelay: `${index * 100}ms` }}
+                  >
+                    {/* Image Container with Overlay Effects */}
+                    <div className="relative h-56 overflow-hidden">
+                      {project.image_url ? (
+                        <img
+                          src={project.image_url}
+                          alt={project.title}
+                          className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 via-accent/10 to-primary/20">
+                          <Sparkles className="w-16 h-16 text-primary/30 group-hover:scale-110 transition-transform duration-500" />
                         </div>
-                        <span className="text-xs text-muted-foreground font-medium">
-                          {project.responsavel_nome || "Produtor Cultural"}
-                        </span>
+                      )}
+                      
+                      {/* Gradient Overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-500" />
+                      
+                      {/* Floating Badge */}
+                      <div className="absolute top-4 left-4">
+                        <Badge className="bg-white/90 text-primary border-0 shadow-lg backdrop-blur-sm font-medium px-3 py-1 group-hover:bg-primary group-hover:text-white transition-all duration-300">
+                          {project.categorias_tags?.[0] || project.project_type}
+                        </Badge>
                       </div>
-                      <Link to={`/project/${project.id}`}>
-                        <Button variant="ghost" size="sm" className="text-primary hover:text-primary hover:bg-primary/10 font-medium">
-                          Ver mais
-                          <ArrowRight className="w-4 h-4 ml-1" />
-                        </Button>
-                      </Link>
+                      
+                      {/* Location Badge */}
+                      {project.location && (
+                        <div className="absolute top-4 right-4">
+                          <span className="flex items-center gap-1.5 bg-black/50 backdrop-blur-sm text-white text-xs px-3 py-1.5 rounded-full">
+                            <MapPinned className="w-3 h-3" />
+                            {project.location}
+                          </span>
+                        </div>
+                      )}
+                      
+                      {/* Bottom Gradient Title Preview */}
+                      <div className="absolute bottom-0 left-0 right-0 p-4">
+                        <h3 className="text-xl font-serif font-bold text-white drop-shadow-lg line-clamp-1 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                          {project.title}
+                        </h3>
+                      </div>
+                      
+                      {/* Hover Indicator */}
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
+                        <div className="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center shadow-xl transform scale-0 group-hover:scale-100 transition-transform duration-500 delay-100">
+                          <ArrowRight className="w-6 h-6 text-primary" />
+                        </div>
+                      </div>
                     </div>
-                  </CardContent>
-                </Card>
+                    
+                    {/* Card Content */}
+                    <CardContent className="p-6">
+                      <p className="text-sm text-muted-foreground line-clamp-2 mb-4 leading-relaxed group-hover:text-foreground transition-colors duration-300">
+                        {project.synopsis}
+                      </p>
+                      
+                      {/* Footer */}
+                      <div className="flex items-center justify-between pt-4 border-t border-border/50">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-md group-hover:shadow-lg group-hover:scale-110 transition-all duration-300">
+                            <Users className="w-5 h-5 text-white" />
+                          </div>
+                          <div>
+                            <span className="text-sm font-medium text-foreground block">
+                              {project.responsavel_nome || "Produtor Cultural"}
+                            </span>
+                            <span className="text-xs text-muted-foreground">Responsável</span>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center gap-1 text-primary font-medium text-sm opacity-0 group-hover:opacity-100 transform translate-x-4 group-hover:translate-x-0 transition-all duration-300">
+                          Ver projeto
+                          <ArrowRight className="w-4 h-4" />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
               ))}
             </div>
           ) : (
