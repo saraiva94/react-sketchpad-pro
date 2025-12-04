@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/c
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
+import { AnimatedStats, defaultStats } from "@/components/AnimatedStats";
 import { 
   Users, 
   Target, 
@@ -23,7 +24,10 @@ import {
   Mail,
   Phone,
   MapPinned,
-  Anchor
+  Anchor,
+  Briefcase,
+  Award,
+  TrendingUp
 } from "lucide-react";
 
 interface Project {
@@ -110,6 +114,37 @@ const HomePage = () => {
           </div>
         </div>
       </section>
+
+      {/* Animated Stats Section */}
+      <AnimatedStats stats={[
+        {
+          label: "Projetos Cadastrados",
+          value: 150,
+          suffix: "+",
+          icon: <Briefcase className="w-8 h-8 text-white" />,
+          color: "bg-gradient-to-br from-primary to-blue-600"
+        },
+        {
+          label: "Criadores Culturais",
+          value: 85,
+          suffix: "+",
+          icon: <Users className="w-8 h-8 text-white" />,
+          color: "bg-gradient-to-br from-emerald-500 to-emerald-600"
+        },
+        {
+          label: "Projetos Aprovados",
+          value: 42,
+          icon: <Award className="w-8 h-8 text-white" />,
+          color: "bg-gradient-to-br from-violet-500 to-violet-600"
+        },
+        {
+          label: "Taxa de Sucesso",
+          value: 95,
+          suffix: "%",
+          icon: <TrendingUp className="w-8 h-8 text-white" />,
+          color: "bg-gradient-to-br from-amber-500 to-orange-500"
+        }
+      ]} />
 
       {/* Featured Projects Section */}
       <section className="py-20 lg:py-28 relative overflow-hidden">
