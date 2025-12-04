@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { Anchor } from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Anchor, Menu, X } from "lucide-react";
 
 interface NavbarProps {
   showNav?: boolean;
@@ -10,6 +12,20 @@ interface NavbarProps {
 }
 
 export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProps) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const navLinks = [
+    { to: "/", label: "Início", isLink: true, id: "home" },
+    { to: "/#sobre", label: "Sobre", isLink: false },
+    { to: "/#plataforma", label: "Plataforma", isLink: false },
+    { to: "/projetos", label: "Projetos", isLink: true, id: "projetos" },
+    { to: "/#contato", label: "Contato", isLink: false },
+  ];
+
+  const handleNavClick = () => {
+    setIsOpen(false);
+  };
+
   return (
     <header className="border-b border-border/50 bg-card/80 backdrop-blur-md sticky top-0 z-50 shadow-soft">
       <div className="container mx-auto px-4 h-20 flex items-center justify-between">
@@ -22,46 +38,35 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
           </span>
         </Link>
         
+        {/* Desktop Navigation */}
         {showNav && (
           <nav className="hidden md:flex items-center gap-8">
-            <Link 
-              to="/" 
-              className={`text-base font-medium transition-colors elegant-link ${
-                currentPage === "home" ? "text-primary" : "text-foreground hover:text-primary"
-              }`}
-            >
-              Início
-            </Link>
-            <a 
-              href="/#sobre" 
-              className="text-base font-medium text-foreground hover:text-primary transition-colors elegant-link"
-            >
-              Sobre
-            </a>
-            <a 
-              href="/#plataforma" 
-              className="text-base font-medium text-foreground hover:text-primary transition-colors elegant-link"
-            >
-              Plataforma
-            </a>
-            <Link 
-              to="/projetos" 
-              className={`text-base font-medium transition-colors elegant-link ${
-                currentPage === "projetos" ? "text-primary" : "text-foreground hover:text-primary"
-              }`}
-            >
-              Projetos
-            </Link>
-            <a 
-              href="/#contato" 
-              className="text-base font-medium text-foreground hover:text-primary transition-colors elegant-link"
-            >
-              Contato
-            </a>
+            {navLinks.map((link) => (
+              link.isLink ? (
+                <Link 
+                  key={link.to}
+                  to={link.to} 
+                  className={`text-base font-medium transition-colors elegant-link ${
+                    currentPage === link.id ? "text-primary" : "text-foreground hover:text-primary"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              ) : (
+                <a 
+                  key={link.to}
+                  href={link.to} 
+                  className="text-base font-medium text-foreground hover:text-primary transition-colors elegant-link"
+                >
+                  {link.label}
+                </a>
+              )
+            ))}
             <ThemeToggle />
           </nav>
         )}
 
+        {/* Right Content (for pages without nav) */}
         {!showNav && (
           <div className="flex items-center gap-4">
             <ThemeToggle />
@@ -69,9 +74,53 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
           </div>
         )}
 
+        {/* Mobile Menu */}
         {showNav && (
-          <div className="md:hidden">
+          <div className="md:hidden flex items-center gap-2">
             <ThemeToggle />
+            <Sheet open={isOpen} onOpenChange={setIsOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="w-10 h-10">
+                  <Menu className="h-6 w-6" />
+                  <span className="sr-only">Abrir menu</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[280px] bg-card border-border">
+                <nav className="flex flex-col gap-6 mt-8">
+                  {navLinks.map((link) => (
+                    link.isLink ? (
+                      <Link 
+                        key={link.to}
+                        to={link.to}
+                        onClick={handleNavClick}
+                        className={`text-lg font-medium transition-colors ${
+                          currentPage === link.id ? "text-primary" : "text-foreground hover:text-primary"
+                        }`}
+                      >
+                        {link.label}
+                      </Link>
+                    ) : (
+                      <a 
+                        key={link.to}
+                        href={link.to}
+                        onClick={handleNavClick}
+                        className="text-lg font-medium text-foreground hover:text-primary transition-colors"
+                      >
+                        {link.label}
+                      </a>
+                    )
+                  ))}
+                  
+                  <div className="pt-4 border-t border-border">
+                    <Link to="/submit" onClick={handleNavClick}>
+                      <Button className="w-full">
+                        Cadastrar Projeto
+                      </Button>
+                    </Link>
+                  </div>
+                </nav>
+              </SheetContent>
+            </Sheet>
           </div>
         )}
       </div>
