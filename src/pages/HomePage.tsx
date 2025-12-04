@@ -64,6 +64,28 @@ const HomePage = () => {
     fetchFeaturedProjects();
     fetchStats();
     fetchStatsVisibility();
+
+    // Subscribe to settings changes for real-time sync
+    const channel = supabase
+      .channel('settings-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'settings',
+          filter: 'key=eq.stats_visible'
+        },
+        (payload) => {
+          const newValue = (payload.new as { value: { enabled: boolean } }).value;
+          setStatsVisible(newValue.enabled);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const fetchStatsVisibility = async () => {
