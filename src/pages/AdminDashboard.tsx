@@ -314,7 +314,7 @@ const AdminDashboard = () => {
         responsavel_email: null,
         responsavel_telefone: null
       })
-      .not("responsavel_nome", "is", null);
+      .or("responsavel_nome.not.is.null,responsavel_email.not.is.null,responsavel_telefone.not.is.null");
 
     if (error) {
       toast({
