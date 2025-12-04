@@ -16,36 +16,62 @@ interface AnimatedStatsProps {
 
 function useCountUp(end: number, duration: number = 2000, startCounting: boolean = false) {
   const [count, setCount] = useState(0);
+  const [isShuffling, setIsShuffling] = useState(false);
   
   useEffect(() => {
     if (!startCounting) return;
     
-    let startTime: number | null = null;
-    let animationFrame: number;
+    // Phase 1: Random number shuffling (slot machine effect)
+    setIsShuffling(true);
+    const shuffleDuration = 800; // 800ms of random numbers
+    const shuffleInterval = 50; // Change number every 50ms
     
-    const animate = (timestamp: number) => {
-      if (!startTime) startTime = timestamp;
-      const progress = Math.min((timestamp - startTime) / duration, 1);
-      
-      // Easing function for smooth animation
-      const easeOutQuart = 1 - Math.pow(1 - progress, 4);
-      setCount(Math.floor(easeOutQuart * end));
-      
-      if (progress < 1) {
-        animationFrame = requestAnimationFrame(animate);
-      }
+    let shuffleTimer: NodeJS.Timeout;
+    const maxShuffleValue = Math.max(end * 2, 999); // Random numbers up to 2x the target or 999
+    
+    const shuffle = () => {
+      setCount(Math.floor(Math.random() * maxShuffleValue));
     };
     
-    animationFrame = requestAnimationFrame(animate);
+    shuffleTimer = setInterval(shuffle, shuffleInterval);
     
-    return () => cancelAnimationFrame(animationFrame);
+    // Phase 2: After shuffle, animate to final value
+    const transitionTimeout = setTimeout(() => {
+      clearInterval(shuffleTimer);
+      setIsShuffling(false);
+      
+      let startTime: number | null = null;
+      let animationFrame: number;
+      
+      const animate = (timestamp: number) => {
+        if (!startTime) startTime = timestamp;
+        const progress = Math.min((timestamp - startTime) / duration, 1);
+        
+        // Easing function for smooth animation
+        const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+        setCount(Math.floor(easeOutQuart * end));
+        
+        if (progress < 1) {
+          animationFrame = requestAnimationFrame(animate);
+        }
+      };
+      
+      animationFrame = requestAnimationFrame(animate);
+      
+      return () => cancelAnimationFrame(animationFrame);
+    }, shuffleDuration);
+    
+    return () => {
+      clearInterval(shuffleTimer);
+      clearTimeout(transitionTimeout);
+    };
   }, [end, duration, startCounting]);
   
-  return count;
+  return { count, isShuffling };
 }
 
 function StatCard({ stat, index, isVisible }: { stat: StatItem; index: number; isVisible: boolean }) {
-  const count = useCountUp(stat.value, 2000, isVisible);
+  const { count, isShuffling } = useCountUp(stat.value, 1500, isVisible);
   
   return (
     <div 
@@ -63,7 +89,7 @@ function StatCard({ stat, index, isVisible }: { stat: StatItem; index: number; i
         </div>
         
         {/* Number */}
-        <div className="text-4xl md:text-5xl font-bold text-foreground mb-2 tabular-nums">
+        <div className={`text-4xl md:text-5xl font-bold text-foreground mb-2 tabular-nums transition-all duration-300 ${isShuffling ? 'text-primary/70 blur-[1px]' : ''}`}>
           {stat.prefix}
           {count}
           {stat.suffix}
