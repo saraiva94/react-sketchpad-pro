@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
+import { Switch } from "@/components/ui/switch";
 import { 
   CheckCircle, 
   XCircle, 
@@ -24,7 +25,8 @@ import {
   Users,
   Star,
   StarOff,
-  Home
+  Home,
+  BarChart3
 } from "lucide-react";
 
 interface Project {
@@ -68,6 +70,8 @@ const AdminDashboard = () => {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [activeTab, setActiveTab] = useState("pending");
   const [activeSection, setActiveSection] = useState<"projects" | "contacts" | "featured">("projects");
+  const [statsVisible, setStatsVisible] = useState(true);
+  const [loadingSettings, setLoadingSettings] = useState(true);
 
   // Edit form state
   const [editImageUrl, setEditImageUrl] = useState("");
@@ -81,8 +85,47 @@ const AdminDashboard = () => {
       navigate("/auth");
     } else {
       fetchProjects();
+      fetchStatsVisibility();
     }
   }, [navigate]);
+
+  const fetchStatsVisibility = async () => {
+    const { data } = await supabase
+      .from("settings")
+      .select("value")
+      .eq("key", "stats_visible")
+      .single();
+    
+    if (data) {
+      setStatsVisible((data.value as { enabled: boolean }).enabled);
+    }
+    setLoadingSettings(false);
+  };
+
+  const toggleStatsVisibility = async () => {
+    const newValue = !statsVisible;
+    
+    const { error } = await supabase
+      .from("settings")
+      .update({ value: { enabled: newValue } })
+      .eq("key", "stats_visible");
+
+    if (error) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível atualizar a configuração.",
+        variant: "destructive",
+      });
+    } else {
+      setStatsVisible(newValue);
+      toast({
+        title: newValue ? "Estatísticas públicas" : "Estatísticas privadas",
+        description: newValue 
+          ? "O painel de números está visível na homepage." 
+          : "O painel de números foi ocultado da homepage.",
+      });
+    }
+  };
 
   const fetchProjects = async () => {
     const { data, error } = await supabase
@@ -272,6 +315,20 @@ const AdminDashboard = () => {
             <Home className="w-4 h-4 mr-2" />
             Destaques Homepage
           </Button>
+          
+          {/* Stats Visibility Toggle */}
+          <div className="flex items-center gap-3 ml-auto px-4 py-2 rounded-lg border border-border bg-card">
+            <BarChart3 className="w-4 h-4 text-muted-foreground" />
+            <span className="text-sm font-medium">Estatísticas</span>
+            <Switch 
+              checked={statsVisible} 
+              onCheckedChange={toggleStatsVisibility}
+              disabled={loadingSettings}
+            />
+            <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${statsVisible ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'}`}>
+              {statsVisible ? "Público" : "Privado"}
+            </span>
+          </div>
         </div>
 
         {/* Contacts Section */}
