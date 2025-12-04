@@ -26,7 +26,9 @@ import {
   Star,
   StarOff,
   Home,
-  BarChart3
+  BarChart3,
+  Download,
+  Eraser
 } from "lucide-react";
 
 interface Project {
@@ -247,6 +249,89 @@ const AdminDashboard = () => {
     }
   };
 
+  const downloadContactsCSV = () => {
+    const csvContacts = projects
+      .filter(p => p.responsavel_nome || p.responsavel_email || p.responsavel_telefone)
+      .map(p => ({
+        nome: p.responsavel_nome || "",
+        email: p.responsavel_email || "",
+        telefone: p.responsavel_telefone || "",
+        projeto: p.title,
+        status: p.status
+      }));
+
+    if (csvContacts.length === 0) {
+      toast({
+        title: "Nenhum cadastro",
+        description: "Não há cadastros para exportar.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const headers = ["Nome", "Email", "Telefone", "Projeto", "Status"];
+    const csvContent = [
+      headers.join(";"),
+      ...csvContacts.map(c => 
+        [c.nome, c.email, c.telefone, c.projeto, c.status].join(";")
+      )
+    ].join("\n");
+
+    const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `cadastros_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+
+    toast({
+      title: "CSV exportado!",
+      description: `${csvContacts.length} cadastros exportados com sucesso.`,
+    });
+  };
+
+  const clearContacts = async () => {
+    const contactsCount = projects.filter(p => 
+      p.responsavel_nome || p.responsavel_email || p.responsavel_telefone
+    ).length;
+
+    if (contactsCount === 0) {
+      toast({
+        title: "Nenhum cadastro",
+        description: "Não há cadastros para limpar.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!confirm(`Tem certeza que deseja limpar ${contactsCount} cadastros? Esta ação não pode ser desfeita.`)) return;
+
+    const { error } = await supabase
+      .from("projects")
+      .update({
+        responsavel_nome: null,
+        responsavel_email: null,
+        responsavel_telefone: null
+      })
+      .not("responsavel_nome", "is", null);
+
+    if (error) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível limpar os cadastros.",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Cadastros limpos!",
+        description: "Os dados de contato foram removidos com sucesso.",
+      });
+      fetchProjects();
+    }
+  };
+
+
   const handleSignOut = () => {
     localStorage.removeItem("isAdminLoggedIn");
     navigate("/");
@@ -451,21 +536,34 @@ const AdminDashboard = () => {
 
             {/* Tabs */}
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="mb-6">
-                <TabsTrigger value="pending" className="gap-2">
-                  <Clock className="w-4 h-4" />
-                  Pendentes
-                </TabsTrigger>
-                <TabsTrigger value="approved" className="gap-2">
-                  <CheckCircle className="w-4 h-4" />
-                  Aprovados
-                </TabsTrigger>
-                <TabsTrigger value="rejected" className="gap-2">
-                  <XCircle className="w-4 h-4" />
-                  Rejeitados
-                </TabsTrigger>
-                <TabsTrigger value="all">Todos</TabsTrigger>
-              </TabsList>
+              <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+                <TabsList>
+                  <TabsTrigger value="pending" className="gap-2">
+                    <Clock className="w-4 h-4" />
+                    Pendentes
+                  </TabsTrigger>
+                  <TabsTrigger value="approved" className="gap-2">
+                    <CheckCircle className="w-4 h-4" />
+                    Aprovados
+                  </TabsTrigger>
+                  <TabsTrigger value="rejected" className="gap-2">
+                    <XCircle className="w-4 h-4" />
+                    Rejeitados
+                  </TabsTrigger>
+                  <TabsTrigger value="all">Todos</TabsTrigger>
+                </TabsList>
+                
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={downloadContactsCSV}>
+                    <Download className="w-4 h-4 mr-2" />
+                    Baixar CSV
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={clearContacts} className="text-destructive hover:text-destructive">
+                    <Eraser className="w-4 h-4 mr-2" />
+                    Limpar Cadastros
+                  </Button>
+                </div>
+              </div>
 
               <TabsContent value={activeTab}>
                 {loadingProjects ? (
