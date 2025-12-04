@@ -58,11 +58,25 @@ const HomePage = () => {
     uniqueCreators: 0,
     successRate: 0
   });
+  const [statsVisible, setStatsVisible] = useState(true);
 
   useEffect(() => {
     fetchFeaturedProjects();
     fetchStats();
+    fetchStatsVisibility();
   }, []);
+
+  const fetchStatsVisibility = async () => {
+    const { data } = await supabase
+      .from("settings")
+      .select("value")
+      .eq("key", "stats_visible")
+      .single();
+    
+    if (data) {
+      setStatsVisible((data.value as { enabled: boolean }).enabled);
+    }
+  };
 
   const fetchStats = async () => {
     // Fetch total projects count
@@ -162,34 +176,36 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Animated Stats Section */}
-      <AnimatedStats stats={[
-        {
-          label: "Projetos Cadastrados",
-          value: stats.totalProjects,
-          icon: <Briefcase className="w-8 h-8 text-white" />,
-          color: "bg-gradient-to-br from-primary to-blue-600"
-        },
-        {
-          label: "Criadores Culturais",
-          value: stats.uniqueCreators,
-          icon: <Users className="w-8 h-8 text-white" />,
-          color: "bg-gradient-to-br from-emerald-500 to-emerald-600"
-        },
-        {
-          label: "Projetos Aprovados",
-          value: stats.approvedProjects,
-          icon: <Award className="w-8 h-8 text-white" />,
-          color: "bg-gradient-to-br from-violet-500 to-violet-600"
-        },
-        {
-          label: "Taxa de Sucesso",
-          value: stats.successRate,
-          suffix: "%",
-          icon: <TrendingUp className="w-8 h-8 text-white" />,
-          color: "bg-gradient-to-br from-amber-500 to-orange-500"
-        }
-      ]} />
+      {/* Animated Stats Section - conditionally rendered */}
+      {statsVisible && (
+        <AnimatedStats stats={[
+          {
+            label: "Projetos Cadastrados",
+            value: stats.totalProjects,
+            icon: <Briefcase className="w-8 h-8 text-white" />,
+            color: "bg-gradient-to-br from-primary to-blue-600"
+          },
+          {
+            label: "Criadores Culturais",
+            value: stats.uniqueCreators,
+            icon: <Users className="w-8 h-8 text-white" />,
+            color: "bg-gradient-to-br from-emerald-500 to-emerald-600"
+          },
+          {
+            label: "Projetos Aprovados",
+            value: stats.approvedProjects,
+            icon: <Award className="w-8 h-8 text-white" />,
+            color: "bg-gradient-to-br from-violet-500 to-violet-600"
+          },
+          {
+            label: "Taxa de Sucesso",
+            value: stats.successRate,
+            suffix: "%",
+            icon: <TrendingUp className="w-8 h-8 text-white" />,
+            color: "bg-gradient-to-br from-amber-500 to-orange-500"
+          }
+        ]} />
+      )}
 
       {/* Featured Projects Section */}
       <section className="py-20 lg:py-28 relative overflow-hidden">
