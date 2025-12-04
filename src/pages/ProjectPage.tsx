@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
+import { Navbar } from "@/components/Navbar";
 import { 
   ArrowLeft, 
   MapPin, 
@@ -64,13 +65,7 @@ const ProjectPage = () => {
   if (!project) {
     return (
       <div className="min-h-screen bg-background">
-        <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-50">
-          <div className="container mx-auto px-4 h-16 flex items-center">
-            <Link to="/" className="text-2xl font-handwritten font-bold text-primary">
-              Porto de Ideias
-            </Link>
-          </div>
-        </header>
+        <Navbar showNav={false} />
         <main className="container mx-auto px-4 py-16 text-center">
           <Sparkles className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
           <h1 className="text-2xl font-handwritten font-bold mb-2">Projeto não encontrado</h1>
@@ -90,20 +85,7 @@ const ProjectPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link to="/" className="text-2xl font-handwritten font-bold text-primary">
-            Porto de Ideias
-          </Link>
-          
-          <nav className="flex items-center gap-4">
-            <Link to="/submit">
-              <Button variant="ghost" size="sm">Cadastrar Projeto</Button>
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <Navbar />
 
       {/* Hero Image */}
       <div className="relative h-64 md:h-96 overflow-hidden bg-muted">

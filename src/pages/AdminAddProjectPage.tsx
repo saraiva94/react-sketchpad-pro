@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Navbar } from "@/components/Navbar";
 
 interface TeamMember {
   nome: string;
@@ -151,14 +152,7 @@ const AdminAddProjectPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link to="/" className="text-2xl font-handwritten font-bold text-primary">
-            Porto de Ideias
-          </Link>
-        </div>
-      </header>
+      <Navbar showNav={false} />
 
       <div className="py-8 px-4">
         <div className="container mx-auto max-w-3xl">

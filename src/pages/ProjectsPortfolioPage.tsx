@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
+import { Navbar } from "@/components/Navbar";
 import { 
   Search,
   Users,
@@ -61,26 +62,7 @@ const ProjectsPortfolioPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link to="/" className="text-2xl font-handwritten font-bold text-primary">
-            Porto de Ideias
-          </Link>
-          
-          <nav className="hidden md:flex items-center gap-6">
-            <Link to="/" className="text-sm text-foreground hover:text-primary transition-colors">Início</Link>
-            <a href="/#sobre" className="text-sm text-foreground hover:text-primary transition-colors">Sobre</a>
-            <a href="/#plataforma" className="text-sm text-foreground hover:text-primary transition-colors">Plataforma</a>
-            <span className="text-sm text-primary font-medium">Projetos</span>
-            <a href="/#contato" className="text-sm text-foreground hover:text-primary transition-colors">Contato</a>
-          </nav>
-
-          <Link to="/submit">
-            <Button size="sm">Cadastrar Projeto</Button>
-          </Link>
-        </div>
-      </header>
+      <Navbar currentPage="projetos" />
 
       <main className="container mx-auto px-4 py-8">
         {/* Back button */}

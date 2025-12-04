@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { Navbar } from "@/components/Navbar";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 
 const ADMIN_USERNAME = "Admin2025";
@@ -44,20 +45,17 @@ const AuthPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link to="/" className="text-2xl font-handwritten font-bold text-primary">
-            Porto de Ideias
-          </Link>
+      <Navbar 
+        showNav={false} 
+        rightContent={
           <Link to="/">
             <Button variant="ghost" size="sm">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Voltar
             </Button>
           </Link>
-        </div>
-      </header>
+        }
+      />
 
       {/* Auth Form */}
       <main className="container mx-auto px-4 py-16 flex items-center justify-center min-h-[calc(100vh-4rem)]">

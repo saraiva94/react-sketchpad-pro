@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Navbar } from "@/components/Navbar";
 import { 
   CheckCircle, 
   XCircle, 
@@ -230,27 +231,15 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link to="/" className="text-2xl font-handwritten font-bold text-primary">
-            Porto de Ideias
-          </Link>
-          
-          <nav className="hidden md:flex items-center gap-6">
-            <Link to="/" className="text-sm text-foreground hover:text-primary transition-colors">Início</Link>
-            <span className="text-sm text-muted-foreground">Sobre</span>
-            <span className="text-sm text-muted-foreground">Plataforma</span>
-            <Link to="/projetos" className="text-sm text-foreground hover:text-primary transition-colors">Projetos</Link>
-            <span className="text-sm text-muted-foreground">Contato</span>
-          </nav>
-
+      <Navbar 
+        showNav={false} 
+        rightContent={
           <Button variant="outline" size="sm" onClick={handleSignOut}>
             <LogOut className="w-4 h-4 mr-2" />
             Sair
           </Button>
-        </div>
-      </header>
+        }
+      />
 
       <main className="container mx-auto px-4 py-8">
         {/* Page Header */}
