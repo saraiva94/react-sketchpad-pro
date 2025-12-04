@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
+import { Navbar } from "@/components/Navbar";
 import { 
   Users, 
   Target, 
@@ -24,7 +25,6 @@ import {
   MapPinned,
   Anchor
 } from "lucide-react";
-import { ThemeToggle } from "@/components/ThemeToggle";
 
 interface Project {
   id: string;
@@ -61,28 +61,7 @@ const HomePage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border/50 bg-card/80 backdrop-blur-md sticky top-0 z-50 shadow-soft">
-        <div className="container mx-auto px-4 h-20 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-glow group-hover:scale-110 transition-transform duration-300">
-              <Anchor className="w-5 h-5 text-primary-foreground" />
-            </div>
-            <span className="text-3xl md:text-4xl font-handwritten font-bold text-primary pulse-glow">
-              Porto de Ideias
-            </span>
-          </Link>
-          
-          <nav className="hidden md:flex items-center gap-8">
-            <a href="#inicio" className="text-base font-medium text-foreground hover:text-primary transition-colors elegant-link">Início</a>
-            <a href="#sobre" className="text-base font-medium text-foreground hover:text-primary transition-colors elegant-link">Sobre</a>
-            <a href="#plataforma" className="text-base font-medium text-foreground hover:text-primary transition-colors elegant-link">Plataforma</a>
-            <Link to="/projetos" className="text-base font-medium text-foreground hover:text-primary transition-colors elegant-link">Projetos</Link>
-            <a href="#contato" className="text-base font-medium text-foreground hover:text-primary transition-colors elegant-link">Contato</a>
-            <ThemeToggle />
-          </nav>
-        </div>
-      </header>
+      <Navbar currentPage="home" />
 
       {/* Hero Section */}
       <section id="inicio" className="relative py-28 lg:py-40 overflow-hidden">
