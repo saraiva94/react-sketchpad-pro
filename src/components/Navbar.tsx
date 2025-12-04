@@ -80,22 +80,44 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
             <ThemeToggle />
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="w-10 h-10">
-                  <Menu className="h-6 w-6" />
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="w-10 h-10 relative overflow-hidden"
+                >
                   <span className="sr-only">Abrir menu</span>
+                  <Menu 
+                    className={`h-6 w-6 absolute transition-all duration-300 ease-in-out ${
+                      isOpen ? "rotate-90 opacity-0 scale-0" : "rotate-0 opacity-100 scale-100"
+                    }`} 
+                  />
+                  <X 
+                    className={`h-6 w-6 absolute transition-all duration-300 ease-in-out ${
+                      isOpen ? "rotate-0 opacity-100 scale-100" : "-rotate-90 opacity-0 scale-0"
+                    }`} 
+                  />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-[280px] bg-card border-border">
-                <nav className="flex flex-col gap-6 mt-8">
-                  {navLinks.map((link) => (
+              <SheetContent 
+                side="right" 
+                className="w-[280px] bg-card border-border"
+              >
+                <nav className="flex flex-col gap-2 mt-8">
+                  {navLinks.map((link, index) => (
                     link.isLink ? (
                       <Link 
                         key={link.to}
                         to={link.to}
                         onClick={handleNavClick}
-                        className={`text-lg font-medium transition-colors ${
-                          currentPage === link.id ? "text-primary" : "text-foreground hover:text-primary"
+                        className={`text-lg font-medium py-3 px-4 rounded-lg transition-all duration-300 hover:bg-primary/10 hover:translate-x-2 ${
+                          currentPage === link.id 
+                            ? "text-primary bg-primary/5" 
+                            : "text-foreground hover:text-primary"
                         }`}
+                        style={{ 
+                          animationDelay: `${index * 50}ms`,
+                          animation: isOpen ? `slideInRight 0.3s ease-out ${index * 50}ms forwards` : 'none'
+                        }}
                       >
                         {link.label}
                       </Link>
@@ -104,16 +126,25 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
                         key={link.to}
                         href={link.to}
                         onClick={handleNavClick}
-                        className="text-lg font-medium text-foreground hover:text-primary transition-colors"
+                        className="text-lg font-medium py-3 px-4 rounded-lg text-foreground hover:text-primary hover:bg-primary/10 transition-all duration-300 hover:translate-x-2"
+                        style={{ 
+                          animationDelay: `${index * 50}ms`,
+                          animation: isOpen ? `slideInRight 0.3s ease-out ${index * 50}ms forwards` : 'none'
+                        }}
                       >
                         {link.label}
                       </a>
                     )
                   ))}
                   
-                  <div className="pt-4 border-t border-border">
+                  <div 
+                    className="pt-6 mt-4 border-t border-border"
+                    style={{ 
+                      animation: isOpen ? `slideInRight 0.3s ease-out ${navLinks.length * 50}ms forwards` : 'none'
+                    }}
+                  >
                     <Link to="/submit" onClick={handleNavClick}>
-                      <Button className="w-full">
+                      <Button className="w-full transition-transform duration-300 hover:scale-105">
                         Cadastrar Projeto
                       </Button>
                     </Link>
