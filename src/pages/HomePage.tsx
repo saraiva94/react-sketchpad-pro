@@ -42,13 +42,60 @@ interface Project {
   link_pagamento: string | null;
 }
 
+interface ProjectStats {
+  totalProjects: number;
+  approvedProjects: number;
+  uniqueCreators: number;
+  successRate: number;
+}
+
 const HomePage = () => {
   const [featuredProjects, setFeaturedProjects] = useState<Project[]>([]);
   const [loadingProjects, setLoadingProjects] = useState(true);
+  const [stats, setStats] = useState<ProjectStats>({
+    totalProjects: 0,
+    approvedProjects: 0,
+    uniqueCreators: 0,
+    successRate: 0
+  });
 
   useEffect(() => {
     fetchFeaturedProjects();
+    fetchStats();
   }, []);
+
+  const fetchStats = async () => {
+    // Fetch total projects count
+    const { count: totalCount } = await supabase
+      .from("projects")
+      .select("*", { count: "exact", head: true });
+
+    // Fetch approved projects count
+    const { count: approvedCount } = await supabase
+      .from("projects")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "approved");
+
+    // Fetch unique creators (distinct responsavel_nome or responsavel_email)
+    const { data: creatorsData } = await supabase
+      .from("projects")
+      .select("responsavel_email")
+      .not("responsavel_email", "is", null);
+    
+    const uniqueCreators = new Set(creatorsData?.map(p => p.responsavel_email)).size;
+
+    // Calculate success rate
+    const successRate = totalCount && totalCount > 0 
+      ? Math.round((approvedCount || 0) / totalCount * 100) 
+      : 0;
+
+    setStats({
+      totalProjects: totalCount || 0,
+      approvedProjects: approvedCount || 0,
+      uniqueCreators: uniqueCreators || 0,
+      successRate: successRate
+    });
+  };
 
   const fetchFeaturedProjects = async () => {
     const { data } = await supabase
@@ -119,27 +166,25 @@ const HomePage = () => {
       <AnimatedStats stats={[
         {
           label: "Projetos Cadastrados",
-          value: 150,
-          suffix: "+",
+          value: stats.totalProjects,
           icon: <Briefcase className="w-8 h-8 text-white" />,
           color: "bg-gradient-to-br from-primary to-blue-600"
         },
         {
           label: "Criadores Culturais",
-          value: 85,
-          suffix: "+",
+          value: stats.uniqueCreators,
           icon: <Users className="w-8 h-8 text-white" />,
           color: "bg-gradient-to-br from-emerald-500 to-emerald-600"
         },
         {
           label: "Projetos Aprovados",
-          value: 42,
+          value: stats.approvedProjects,
           icon: <Award className="w-8 h-8 text-white" />,
           color: "bg-gradient-to-br from-violet-500 to-violet-600"
         },
         {
           label: "Taxa de Sucesso",
-          value: 95,
+          value: stats.successRate,
           suffix: "%",
           icon: <TrendingUp className="w-8 h-8 text-white" />,
           color: "bg-gradient-to-br from-amber-500 to-orange-500"
