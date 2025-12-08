@@ -109,6 +109,7 @@ export type Database = {
           responsavel_email: string | null
           responsavel_nome: string | null
           responsavel_telefone: string | null
+          stage: string | null
           status: Database["public"]["Enums"]["project_status"]
           synopsis: string
           title: string
@@ -139,6 +140,7 @@ export type Database = {
           responsavel_email?: string | null
           responsavel_nome?: string | null
           responsavel_telefone?: string | null
+          stage?: string | null
           status?: Database["public"]["Enums"]["project_status"]
           synopsis: string
           title: string
@@ -169,6 +171,7 @@ export type Database = {
           responsavel_email?: string | null
           responsavel_nome?: string | null
           responsavel_telefone?: string | null
+          stage?: string | null
           status?: Database["public"]["Enums"]["project_status"]
           synopsis?: string
           title?: string
