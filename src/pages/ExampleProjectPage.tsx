@@ -491,38 +491,38 @@ const ExampleProjectPage = () => {
       </div>
 
       {/* Footer */}
-      <footer className="bg-foreground text-background py-12 md:py-16 mt-12 md:mt-16">
+      <footer className="bg-foreground text-background py-6 md:py-8 mt-8 md:mt-10">
         <div className="container mx-auto px-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
             <div className="col-span-2 md:col-span-1">
-              <div className="flex items-center gap-2 mb-4">
-                <Anchor className="w-8 h-8 text-primary" />
-                <span className="text-xl md:text-2xl font-handwritten font-bold text-primary">
+              <div className="flex items-center gap-1.5 mb-2">
+                <Anchor className="w-5 h-5 text-primary" />
+                <span className="text-base md:text-lg font-handwritten font-bold text-primary">
                   Porto de Ideias
                 </span>
               </div>
-              <p className="text-background/70 mb-4 text-sm">
-                O Porto de Ideias é uma iniciativa da Porto Bello Filmes, criada para aproximar cultura e investimento.
+              <p className="text-background/70 mb-2 text-xs leading-relaxed">
+                Iniciativa da Porto Bello Filmes para aproximar cultura e investimento.
               </p>
-              <div className="flex space-x-3">
-                <div className="w-9 h-9 bg-primary rounded-full flex items-center justify-center cursor-pointer hover:bg-primary/80 transition-colors">
-                  <Facebook className="w-4 h-4 text-primary-foreground" />
+              <div className="flex space-x-2">
+                <div className="w-7 h-7 bg-primary rounded-full flex items-center justify-center cursor-pointer hover:bg-primary/80 transition-colors">
+                  <Facebook className="w-3 h-3 text-primary-foreground" />
                 </div>
-                <div className="w-9 h-9 bg-primary rounded-full flex items-center justify-center cursor-pointer hover:bg-primary/80 transition-colors">
-                  <Twitter className="w-4 h-4 text-primary-foreground" />
+                <div className="w-7 h-7 bg-primary rounded-full flex items-center justify-center cursor-pointer hover:bg-primary/80 transition-colors">
+                  <Twitter className="w-3 h-3 text-primary-foreground" />
                 </div>
-                <div className="w-9 h-9 bg-primary rounded-full flex items-center justify-center cursor-pointer hover:bg-primary/80 transition-colors">
-                  <Instagram className="w-4 h-4 text-primary-foreground" />
+                <div className="w-7 h-7 bg-primary rounded-full flex items-center justify-center cursor-pointer hover:bg-primary/80 transition-colors">
+                  <Instagram className="w-3 h-3 text-primary-foreground" />
                 </div>
-                <div className="w-9 h-9 bg-primary rounded-full flex items-center justify-center cursor-pointer hover:bg-primary/80 transition-colors">
-                  <Linkedin className="w-4 h-4 text-primary-foreground" />
+                <div className="w-7 h-7 bg-primary rounded-full flex items-center justify-center cursor-pointer hover:bg-primary/80 transition-colors">
+                  <Linkedin className="w-3 h-3 text-primary-foreground" />
                 </div>
               </div>
             </div>
 
             <div>
-              <h3 className="font-bold text-base mb-4 text-background">Plataforma</h3>
-              <ul className="space-y-2 text-background/70 text-sm">
+              <h3 className="font-bold text-sm mb-2 text-background">Plataforma</h3>
+              <ul className="space-y-1 text-background/70 text-xs">
                 <li><a href="#" className="hover:text-background transition-colors">Como Funciona</a></li>
                 <li><a href="#" className="hover:text-background transition-colors">Enviar Projeto</a></li>
                 <li><a href="#" className="hover:text-background transition-colors">Investidores</a></li>
@@ -530,8 +530,8 @@ const ExampleProjectPage = () => {
             </div>
 
             <div>
-              <h3 className="font-bold text-base mb-4 text-background">Suporte</h3>
-              <ul className="space-y-2 text-background/70 text-sm">
+              <h3 className="font-bold text-sm mb-2 text-background">Suporte</h3>
+              <ul className="space-y-1 text-background/70 text-xs">
                 <li><a href="#" className="hover:text-background transition-colors">FAQ</a></li>
                 <li><a href="#" className="hover:text-background transition-colors">Ajuda</a></li>
                 <li><a href="#" className="hover:text-background transition-colors">Termos</a></li>
@@ -539,21 +539,21 @@ const ExampleProjectPage = () => {
             </div>
 
             <div>
-              <h3 className="font-bold text-base mb-4 text-background">Contato</h3>
-              <ul className="space-y-2 text-background/70 text-sm">
-                <li className="flex items-center space-x-2">
-                  <Mail className="w-4 h-4 flex-shrink-0" />
+              <h3 className="font-bold text-sm mb-2 text-background">Contato</h3>
+              <ul className="space-y-1 text-background/70 text-xs">
+                <li className="flex items-center space-x-1.5">
+                  <Mail className="w-3 h-3 flex-shrink-0" />
                   <span className="truncate">portobellofilmes@gmail.com</span>
                 </li>
-                <li className="flex items-center space-x-2">
-                  <Phone className="w-4 h-4 flex-shrink-0" />
+                <li className="flex items-center space-x-1.5">
+                  <Phone className="w-3 h-3 flex-shrink-0" />
                   <span>+55 (11) 9999-9999</span>
                 </li>
               </ul>
             </div>
           </div>
 
-          <div className="border-t border-background/20 mt-8 md:mt-12 pt-6 md:pt-8 text-center text-background/70 text-sm">
+          <div className="border-t border-background/20 mt-4 md:mt-6 pt-4 text-center text-background/70 text-xs">
             <p>&copy; 2024 Porto de Ideias. Todos os direitos reservados.</p>
           </div>
         </div>
