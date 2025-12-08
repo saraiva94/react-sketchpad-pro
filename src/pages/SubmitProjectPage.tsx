@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Send, CheckCircle2, ArrowLeft, Plus, X, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -26,6 +26,7 @@ interface TeamMember {
 
 const SubmitProjectPage = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   // Responsável
   const [responsavelNome, setResponsavelNome] = useState("");
@@ -204,10 +205,13 @@ const SubmitProjectPage = () => {
 
       <div className="py-8 px-4">
         <div className="container mx-auto max-w-3xl">
-          <Link to="/" className="inline-flex items-center text-muted-foreground hover:text-foreground mb-6">
+          <button 
+            onClick={() => navigate(-1)} 
+            className="inline-flex items-center text-muted-foreground hover:text-foreground mb-6"
+          >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Voltar ao Menu
-          </Link>
+            Voltar
+          </button>
 
           <Card className="shadow-lg">
             <CardHeader className="text-center space-y-2">
