@@ -250,13 +250,13 @@ const ExampleProjectPage = () => {
       <header className="border-b border-border/50 bg-card/80 backdrop-blur-md sticky top-0 z-50 shadow-soft">
         <div className="container mx-auto px-4 h-20 flex items-center justify-between">
           {/* Back Button - Left */}
-          <button 
-            onClick={() => navigate(-1)}
+          <Link 
+            to="/porto-de-ideias"
             className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors group"
           >
             <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
             <span className="font-medium">Voltar</span>
-          </button>
+          </Link>
           
           {/* Homepage - Center */}
           <Link to="/" className="flex items-center gap-3 group absolute left-1/2 -translate-x-1/2">
