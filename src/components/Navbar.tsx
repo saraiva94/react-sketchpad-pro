@@ -30,10 +30,10 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
     <header className="border-b border-border/50 bg-card/80 backdrop-blur-md sticky top-0 z-50 shadow-soft">
       <div className="container mx-auto px-4 h-20 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-3 group">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-glow group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
-            <Anchor className="w-5 h-5 text-primary-foreground" />
+          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-glow group-hover:scale-110 group-hover:rotate-12 transition-all duration-300 flex-shrink-0">
+            <Anchor className="w-6 h-6 text-primary-foreground" />
           </div>
-          <span className="text-4xl md:text-5xl font-handwritten font-bold text-primary pulse-glow leading-[0.8] flex items-center">
+          <span className="text-3xl md:text-4xl font-handwritten font-bold text-primary pulse-glow group-hover:text-accent transition-colors duration-300 translate-y-[2px]">
             Porto Bello
           </span>
         </Link>
