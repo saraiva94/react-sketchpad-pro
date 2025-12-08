@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Footer } from "@/components/Footer";
+import { Navbar } from "@/components/Navbar";
 import { ArtisticBackground } from "@/components/ArtisticBackground";
 import { supabase } from "@/integrations/supabase/client";
 import { 
@@ -301,7 +302,8 @@ const PortoDeIdeiasPage = () => {
       {/* Artistic Background Animation */}
       <ArtisticBackground />
       
-      {/* Navbar removed for cleaner responsiveness */}
+      {/* Navbar */}
+      <Navbar currentPage="porto-de-ideias" />
 
       {/* Header */}
       <section className="bg-gradient-to-br from-primary/10 via-accent/5 to-background py-12 md:py-16">
