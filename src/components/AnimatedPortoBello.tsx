@@ -51,7 +51,7 @@ export function AnimatedPortoBello() {
       >
         <svg
           viewBox="0 0 1000 300"
-          className="w-[75vw] max-w-[1200px] h-auto"
+          className="w-[83vw] max-w-[1320px] h-auto"
           style={{
             filter: "drop-shadow(0 0 40px hsl(var(--primary) / 0.06))",
           }}
@@ -77,7 +77,7 @@ export function AnimatedPortoBello() {
                 dominantBaseline="middle"
                 className="font-handwritten"
                 style={{
-                  fontSize: "180px",
+                  fontSize: "200px",
                   fontFamily: "Sacramento, cursive",
                   fill: "white",
                 }}
@@ -104,7 +104,7 @@ export function AnimatedPortoBello() {
               dominantBaseline="middle"
               className="font-handwritten"
               style={{
-                fontSize: "180px",
+                fontSize: "200px",
                 fontFamily: "Sacramento, cursive",
                 fill: "url(#textGradient)",
               }}
@@ -121,7 +121,7 @@ export function AnimatedPortoBello() {
             dominantBaseline="middle"
             className="font-handwritten"
             style={{
-              fontSize: "180px",
+              fontSize: "200px",
               fontFamily: "Sacramento, cursive",
               fill: "none",
               stroke: "url(#strokeGradient)",
