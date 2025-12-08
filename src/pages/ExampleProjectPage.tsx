@@ -1,7 +1,7 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Navbar } from "@/components/Navbar";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { 
   ArrowLeft, 
   MapPin, 
@@ -24,7 +24,8 @@ import {
   Sparkles,
   Heart,
   MessageCircle,
-  HandHeart
+  HandHeart,
+  Home
 } from "lucide-react";
 
 // Dados fictícios dos projetos de exemplo
@@ -179,6 +180,7 @@ const exampleProjects: Record<string, {
 };
 
 const ExampleProjectPage = () => {
+  const navigate = useNavigate();
   const { exampleId } = useParams();
   const project = exampleId ? exampleProjects[exampleId] : null;
 
@@ -211,7 +213,18 @@ const ExampleProjectPage = () => {
   if (!project) {
     return (
       <div className="min-h-screen bg-background">
-        <Navbar showNav={false} />
+        <header className="border-b border-border/50 bg-card/80 backdrop-blur-md sticky top-0 z-50 shadow-soft">
+          <div className="container mx-auto px-4 h-20 flex items-center justify-center">
+            <Link to="/" className="flex items-center gap-3 group">
+              <div className="w-12 h-12 rounded-full flex items-center justify-center shadow-glow group-hover:scale-110 group-hover:rotate-12 transition-all duration-300 flex-shrink-0 bg-gradient-to-br from-primary/80 to-accent/80 group-hover:from-primary group-hover:to-accent">
+                <Home className="w-6 h-6 text-primary-foreground" />
+              </div>
+              <span className="text-xl md:text-2xl font-semibold transition-colors duration-300 text-foreground group-hover:text-primary">
+                Homepage
+              </span>
+            </Link>
+          </div>
+        </header>
         <main className="container mx-auto px-4 py-16 text-center">
           <Sparkles className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
           <h1 className="text-2xl font-serif font-bold mb-2">Projeto de exemplo não encontrado</h1>
@@ -233,7 +246,32 @@ const ExampleProjectPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar currentPage="porto-de-ideias" />
+      {/* Custom Navbar for Project Page */}
+      <header className="border-b border-border/50 bg-card/80 backdrop-blur-md sticky top-0 z-50 shadow-soft">
+        <div className="container mx-auto px-4 h-20 flex items-center justify-between">
+          {/* Back Button - Left */}
+          <button 
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors group"
+          >
+            <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+            <span className="font-medium">Voltar</span>
+          </button>
+          
+          {/* Homepage - Center */}
+          <Link to="/" className="flex items-center gap-3 group absolute left-1/2 -translate-x-1/2">
+            <div className="w-12 h-12 rounded-full flex items-center justify-center shadow-glow group-hover:scale-110 group-hover:rotate-12 transition-all duration-300 flex-shrink-0 bg-gradient-to-br from-primary/80 to-accent/80 group-hover:from-primary group-hover:to-accent">
+              <Home className="w-6 h-6 text-primary-foreground" />
+            </div>
+            <span className="text-xl md:text-2xl font-semibold transition-colors duration-300 text-foreground group-hover:text-primary hidden md:inline">
+              Homepage
+            </span>
+          </Link>
+          
+          {/* Theme Toggle - Right */}
+          <ThemeToggle />
+        </div>
+      </header>
 
       {/* Example Banner */}
       <div className="bg-gradient-to-r from-primary/20 via-accent/20 to-primary/20 border-b border-primary/20">
