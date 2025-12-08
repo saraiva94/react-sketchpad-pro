@@ -28,7 +28,9 @@ import {
   Home,
   BarChart3,
   Download,
-  Eraser
+  FileText,
+  Phone,
+  MessageSquare
 } from "lucide-react";
 
 interface Project {
@@ -61,17 +63,29 @@ interface Project {
   featured_on_homepage: boolean;
 }
 
+interface AccessRequest {
+  id: string;
+  nome: string;
+  telefone: string;
+  interesse: string;
+  project_title: string | null;
+  status: string;
+  created_at: string;
+}
+
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
   const [projects, setProjects] = useState<Project[]>([]);
+  const [accessRequests, setAccessRequests] = useState<AccessRequest[]>([]);
   const [loadingProjects, setLoadingProjects] = useState(true);
+  const [loadingRequests, setLoadingRequests] = useState(true);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [showDetails, setShowDetails] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [activeTab, setActiveTab] = useState("pending");
-  const [activeSection, setActiveSection] = useState<"projects" | "contacts" | "featured">("projects");
+  const [activeSection, setActiveSection] = useState<"projects" | "requests" | "contacts" | "featured" | "settings">("projects");
   const [statsVisible, setStatsVisible] = useState(true);
   const [loadingSettings, setLoadingSettings] = useState(true);
 
@@ -87,6 +101,7 @@ const AdminDashboard = () => {
       navigate("/auth");
     } else {
       fetchProjects();
+      fetchAccessRequests();
       fetchStatsVisibility();
     }
   }, [navigate]);
@@ -141,6 +156,18 @@ const AdminDashboard = () => {
     setLoadingProjects(false);
   };
 
+  const fetchAccessRequests = async () => {
+    const { data, error } = await supabase
+      .from("access_requests")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (!error && data) {
+      setAccessRequests(data as AccessRequest[]);
+    }
+    setLoadingRequests(false);
+  };
+
   const updateProjectStatus = async (projectId: string, status: "approved" | "rejected") => {
     const { error } = await supabase
       .from("projects")
@@ -162,6 +189,49 @@ const AdminDashboard = () => {
       });
       fetchProjects();
       setShowDetails(false);
+    }
+  };
+
+  const updateRequestStatus = async (requestId: string, status: "approved" | "rejected") => {
+    const { error } = await supabase
+      .from("access_requests")
+      .update({ status })
+      .eq("id", requestId);
+
+    if (error) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível atualizar o status da solicitação.",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: status === "approved" ? "Solicitação aprovada!" : "Solicitação rejeitada",
+      });
+      fetchAccessRequests();
+    }
+  };
+
+  const deleteAccessRequest = async (requestId: string) => {
+    if (!confirm("Tem certeza que deseja excluir esta solicitação?")) return;
+
+    const { error } = await supabase
+      .from("access_requests")
+      .delete()
+      .eq("id", requestId);
+
+    if (error) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível excluir a solicitação.",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Excluída",
+        description: "A solicitação foi excluída com sucesso.",
+      });
+      fetchAccessRequests();
     }
   };
 
@@ -291,46 +361,37 @@ const AdminDashboard = () => {
     });
   };
 
-  const clearContacts = async () => {
-    const contactsCount = projects.filter(p => 
-      p.responsavel_nome || p.responsavel_email || p.responsavel_telefone
-    ).length;
-
-    if (contactsCount === 0) {
+  const downloadAccessRequestsCSV = () => {
+    if (accessRequests.length === 0) {
       toast({
-        title: "Nenhum cadastro",
-        description: "Não há cadastros para limpar.",
+        title: "Nenhuma solicitação",
+        description: "Não há solicitações para exportar.",
         variant: "destructive",
       });
       return;
     }
 
-    if (!confirm(`Tem certeza que deseja limpar ${contactsCount} cadastros? Esta ação não pode ser desfeita.`)) return;
+    const headers = ["Nome", "Telefone", "Interesse", "Projeto", "Status", "Data"];
+    const csvContent = [
+      headers.join(";"),
+      ...accessRequests.map(r => 
+        [r.nome, r.telefone, r.interesse, r.project_title || "", r.status, new Date(r.created_at).toLocaleDateString("pt-BR")].join(";")
+      )
+    ].join("\n");
 
-    const { error } = await supabase
-      .from("projects")
-      .update({
-        responsavel_nome: null,
-        responsavel_email: null,
-        responsavel_telefone: null
-      })
-      .or("responsavel_nome.not.is.null,responsavel_email.not.is.null,responsavel_telefone.not.is.null");
+    const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `solicitacoes_acesso_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
 
-    if (error) {
-      toast({
-        title: "Erro",
-        description: "Não foi possível limpar os cadastros.",
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Cadastros limpos!",
-        description: "Os dados de contato foram removidos com sucesso.",
-      });
-      fetchProjects();
-    }
+    toast({
+      title: "CSV exportado!",
+      description: `${accessRequests.length} solicitações exportadas com sucesso.`,
+    });
   };
-
 
   const handleSignOut = () => {
     localStorage.removeItem("isAdminLoggedIn");
@@ -356,6 +417,7 @@ const AdminDashboard = () => {
     projeto: p.title,
   })).filter(c => c.nome || c.email || c.telefone);
 
+  const pendingRequests = accessRequests.filter(r => r.status === "pending");
 
   return (
     <div className="min-h-screen bg-background">
@@ -374,53 +436,223 @@ const AdminDashboard = () => {
         <div className="mb-8">
           <h1 className="text-3xl font-handwritten font-bold text-foreground">Painel Administrativo</h1>
           <p className="text-muted-foreground mt-1">
-            Gerencie os projetos submetidos à plataforma.
+            Gerencie projetos, solicitações e configurações da plataforma.
           </p>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex flex-wrap gap-4 mb-8">
-          <Link to="/admin/add-project">
-            <Button>
-              <Plus className="w-4 h-4 mr-2" />
-              Adicionar Projeto
-            </Button>
-          </Link>
+        {/* Navigation Tabs */}
+        <div className="flex flex-wrap gap-2 mb-8 p-1 bg-muted rounded-lg">
           <Button 
-            variant={activeSection === "contacts" ? "default" : "outline"}
-            onClick={() => setActiveSection(activeSection === "contacts" ? "projects" : "contacts")}
+            variant={activeSection === "projects" ? "default" : "ghost"}
+            size="sm"
+            onClick={() => setActiveSection("projects")}
+            className="rounded-md"
+          >
+            <FileText className="w-4 h-4 mr-2" />
+            Projetos
+            <Badge variant="secondary" className="ml-2">{projects.length}</Badge>
+          </Button>
+          <Button 
+            variant={activeSection === "requests" ? "default" : "ghost"}
+            size="sm"
+            onClick={() => setActiveSection("requests")}
+            className="rounded-md"
+          >
+            <MessageSquare className="w-4 h-4 mr-2" />
+            Solicitações
+            {pendingRequests.length > 0 && (
+              <Badge variant="destructive" className="ml-2">{pendingRequests.length}</Badge>
+            )}
+          </Button>
+          <Button 
+            variant={activeSection === "contacts" ? "default" : "ghost"}
+            size="sm"
+            onClick={() => setActiveSection("contacts")}
+            className="rounded-md"
           >
             <Users className="w-4 h-4 mr-2" />
             Cadastros
           </Button>
           <Button 
-            variant={activeSection === "featured" ? "default" : "outline"}
-            onClick={() => setActiveSection(activeSection === "featured" ? "projects" : "featured")}
+            variant={activeSection === "featured" ? "default" : "ghost"}
+            size="sm"
+            onClick={() => setActiveSection("featured")}
+            className="rounded-md"
           >
             <Home className="w-4 h-4 mr-2" />
-            Destaques Homepage
+            Destaques
           </Button>
-          
-          {/* Stats Visibility Toggle */}
-          <div className="flex items-center gap-3 ml-auto px-4 py-2 rounded-lg border border-border bg-card">
-            <BarChart3 className="w-4 h-4 text-muted-foreground" />
-            <span className="text-sm font-medium">Estatísticas</span>
-            <Switch 
-              checked={statsVisible} 
-              onCheckedChange={toggleStatsVisibility}
-              disabled={loadingSettings}
-            />
-            <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${statsVisible ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'}`}>
-              {statsVisible ? "Público" : "Privado"}
-            </span>
-          </div>
+          <Button 
+            variant={activeSection === "settings" ? "default" : "ghost"}
+            size="sm"
+            onClick={() => setActiveSection("settings")}
+            className="rounded-md"
+          >
+            <BarChart3 className="w-4 h-4 mr-2" />
+            Configurações
+          </Button>
         </div>
+
+        {/* Settings Section */}
+        {activeSection === "settings" && (
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Configurações da Homepage</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between p-4 border rounded-lg">
+                  <div>
+                    <h4 className="font-medium">Estatísticas Públicas</h4>
+                    <p className="text-sm text-muted-foreground">Mostrar painel de números na homepage</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Switch 
+                      checked={statsVisible} 
+                      onCheckedChange={toggleStatsVisibility}
+                      disabled={loadingSettings}
+                    />
+                    <Badge variant={statsVisible ? "default" : "secondary"}>
+                      {statsVisible ? "Público" : "Privado"}
+                    </Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Ações Rápidas</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-3">
+                  <Link to="/admin/add-project">
+                    <Button>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Adicionar Projeto
+                    </Button>
+                  </Link>
+                  <Button variant="outline" onClick={downloadContactsCSV}>
+                    <Download className="w-4 h-4 mr-2" />
+                    Exportar Cadastros
+                  </Button>
+                  <Button variant="outline" onClick={downloadAccessRequestsCSV}>
+                    <Download className="w-4 h-4 mr-2" />
+                    Exportar Solicitações
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Access Requests Section */}
+        {activeSection === "requests" && (
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>Solicitações de Acesso a Documentos</CardTitle>
+              <Button variant="outline" size="sm" onClick={downloadAccessRequestsCSV}>
+                <Download className="w-4 h-4 mr-2" />
+                Exportar CSV
+              </Button>
+            </CardHeader>
+            <CardContent>
+              {loadingRequests ? (
+                <div className="space-y-4">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="animate-pulse p-4 border rounded-lg">
+                      <div className="h-4 bg-muted rounded w-1/4 mb-2" />
+                      <div className="h-3 bg-muted rounded w-1/2" />
+                    </div>
+                  ))}
+                </div>
+              ) : accessRequests.length > 0 ? (
+                <div className="space-y-4">
+                  {accessRequests.map((request) => (
+                    <div key={request.id} className="p-4 border rounded-lg hover:bg-muted/50 transition-colors">
+                      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <h4 className="font-semibold">{request.nome}</h4>
+                            <Badge variant={
+                              request.status === "approved" ? "default" :
+                              request.status === "rejected" ? "destructive" : "secondary"
+                            }>
+                              {request.status === "approved" ? "Aprovado" :
+                               request.status === "rejected" ? "Rejeitado" : "Pendente"}
+                            </Badge>
+                          </div>
+                          <div className="text-sm text-muted-foreground space-y-1">
+                            <p className="flex items-center gap-2">
+                              <Phone className="w-3 h-3" />
+                              {request.telefone}
+                            </p>
+                            {request.project_title && (
+                              <p className="flex items-center gap-2">
+                                <FileText className="w-3 h-3" />
+                                Projeto: {request.project_title}
+                              </p>
+                            )}
+                            <p className="mt-2 p-2 bg-muted rounded text-foreground">
+                              <strong>Interesse:</strong> {request.interesse}
+                            </p>
+                            <p className="text-xs">
+                              Enviado em {new Date(request.created_at).toLocaleDateString("pt-BR")} às {new Date(request.created_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {request.status === "pending" && (
+                            <>
+                              <Button
+                                size="sm"
+                                onClick={() => updateRequestStatus(request.id, "approved")}
+                                className="bg-green-600 hover:bg-green-700"
+                              >
+                                <CheckCircle className="w-4 h-4 mr-1" />
+                                Aprovar
+                              </Button>
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => updateRequestStatus(request.id, "rejected")}
+                              >
+                                <XCircle className="w-4 h-4 mr-1" />
+                                Rejeitar
+                              </Button>
+                            </>
+                          )}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => deleteAccessRequest(request.id)}
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-center text-muted-foreground py-8">
+                  Nenhuma solicitação de acesso recebida.
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Contacts Section */}
         {activeSection === "contacts" && (
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle>Cadastros - Dados de Contato</CardTitle>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>Cadastros - Dados de Contato dos Projetos</CardTitle>
+              <Button variant="outline" size="sm" onClick={downloadContactsCSV}>
+                <Download className="w-4 h-4 mr-2" />
+                Exportar CSV
+              </Button>
             </CardHeader>
             <CardContent>
               {contacts.length > 0 ? (
@@ -457,7 +689,7 @@ const AdminDashboard = () => {
 
         {/* Featured Projects Section */}
         {activeSection === "featured" && (
-          <Card className="mb-8">
+          <Card>
             <CardHeader>
               <CardTitle>Projetos em Destaque na Homepage</CardTitle>
             </CardHeader>
@@ -471,7 +703,7 @@ const AdminDashboard = () => {
                         <div>
                           <h4 className="font-medium">{project.title}</h4>
                           <p className="text-sm text-muted-foreground">
-                            Adicionado em {new Date(project.created_at).toLocaleDateString("pt-BR")}
+                            {project.project_type} • {project.location || "Sem localização"}
                           </p>
                         </div>
                       </div>
@@ -553,16 +785,12 @@ const AdminDashboard = () => {
                   <TabsTrigger value="all">Todos</TabsTrigger>
                 </TabsList>
                 
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={downloadContactsCSV}>
-                    <Download className="w-4 h-4 mr-2" />
-                    Baixar CSV
+                <Link to="/admin/add-project">
+                  <Button size="sm">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Novo Projeto
                   </Button>
-                  <Button variant="outline" size="sm" onClick={clearContacts} className="text-destructive hover:text-destructive">
-                    <Eraser className="w-4 h-4 mr-2" />
-                    Limpar Cadastros
-                  </Button>
-                </div>
+                </Link>
               </div>
 
               <TabsContent value={activeTab}>
@@ -645,7 +873,7 @@ const AdminDashboard = () => {
                                   {project.featured_on_homepage ? (
                                     <>
                                       <StarOff className="w-4 h-4 mr-1" />
-                                      Remover Destaque
+                                      Remover
                                     </>
                                   ) : (
                                     <>
