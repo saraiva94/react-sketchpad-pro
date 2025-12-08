@@ -16,6 +16,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Footer, SocialLinksDisplay } from "@/components/Footer";
+import { Navbar } from "@/components/Navbar";
 
 interface TeamMember {
   nome: string;
@@ -201,7 +202,8 @@ const SubmitProjectPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Navbar removed for cleaner responsiveness */}
+      {/* Navbar */}
+      <Navbar currentPage="submit" />
 
       <div className="py-8 px-4">
         <div className="container mx-auto max-w-3xl">
