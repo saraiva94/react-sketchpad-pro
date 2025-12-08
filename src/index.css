@@ -278,4 +278,26 @@
   .menu-item-hover {
     @apply transition-all duration-300 hover:translate-x-2 hover:bg-primary/10;
   }
+
+  /* Lightbulb flicker animation - like electrical short */
+  .animate-flicker {
+    animation: flicker 3s ease-in-out infinite;
+  }
+
+  @keyframes flicker {
+    0%, 100% { opacity: 0.4; }
+    5% { opacity: 0.8; }
+    10% { opacity: 0.3; }
+    15% { opacity: 0.9; }
+    20% { opacity: 0.4; }
+    25% { opacity: 0.7; }
+    30% { opacity: 0.3; }
+    35%, 65% { opacity: 0.5; }
+    70% { opacity: 0.8; }
+    75% { opacity: 0.4; }
+    80% { opacity: 0.9; }
+    85% { opacity: 0.5; }
+    90% { opacity: 0.7; }
+    95% { opacity: 0.3; }
+  }
 }
