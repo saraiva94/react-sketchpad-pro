@@ -16,10 +16,7 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
 
   const navLinks = [
     { to: "/", label: "Início", isLink: true, id: "home" },
-    { to: "/#sobre", label: "Sobre", isLink: false },
-    { to: "/#plataforma", label: "Plataforma", isLink: false },
     { to: "/porto-de-ideias", label: "Porto de Idéias", isLink: true, id: "porto-de-ideias" },
-    { to: "/#contato", label: "Contato", isLink: false },
   ];
 
   const handleNavClick = () => {
