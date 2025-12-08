@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Anchor, Menu, X } from "lucide-react";
+import { Anchor, Menu, X, Lightbulb } from "lucide-react";
 
 interface NavbarProps {
   showNav?: boolean;
@@ -36,28 +36,26 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
         
         {/* Desktop Navigation */}
         {showNav && (
-          <nav className="hidden md:flex items-center gap-8">
-            {navLinks.map((link) => (
-              link.isLink ? (
-                <Link 
-                  key={link.to}
-                  to={link.to} 
-                  className={`text-base font-medium transition-colors elegant-link ${
-                    currentPage === link.id ? "text-primary" : "text-foreground hover:text-primary"
-                  }`}
-                >
-                  {link.label}
-                </Link>
-              ) : (
-                <a 
-                  key={link.to}
-                  href={link.to} 
-                  className="text-base font-medium text-foreground hover:text-primary transition-colors elegant-link"
-                >
-                  {link.label}
-                </a>
-              )
-            ))}
+          <nav className="hidden md:flex items-center gap-6">
+            <Link 
+              to="/porto-de-ideias"
+              className="group flex items-center gap-2"
+            >
+              <div className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:rotate-12 ${
+                currentPage === "porto-de-ideias" 
+                  ? "bg-gradient-to-br from-accent to-primary shadow-glow" 
+                  : "bg-gradient-to-br from-accent/80 to-primary/80 group-hover:from-accent group-hover:to-primary group-hover:shadow-glow"
+              }`}>
+                <Lightbulb className="w-4 h-4 text-primary-foreground" />
+              </div>
+              <span className={`text-xl md:text-2xl font-handwritten font-bold transition-colors duration-300 ${
+                currentPage === "porto-de-ideias" 
+                  ? "text-accent" 
+                  : "text-foreground group-hover:text-accent"
+              }`}>
+                Porto de Idéias
+              </span>
+            </Link>
             <ThemeToggle />
           </nav>
         )}
@@ -98,41 +96,27 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
                 side="right" 
                 className="w-[280px] bg-card border-border"
               >
-                <nav className="flex flex-col gap-2 mt-8">
-                  {navLinks.map((link, index) => (
-                    link.isLink ? (
-                      <Link 
-                        key={link.to}
-                        to={link.to}
-                        onClick={handleNavClick}
-                        className={`text-lg font-medium py-3 px-4 rounded-lg transition-all duration-300 hover:bg-primary/10 hover:translate-x-2 ${
-                          currentPage === link.id 
-                            ? "text-primary bg-primary/5" 
-                            : "text-foreground hover:text-primary"
-                        }`}
-                        style={{ 
-                          animationDelay: `${index * 50}ms`,
-                          animation: isOpen ? `slideInRight 0.3s ease-out ${index * 50}ms forwards` : 'none'
-                        }}
-                      >
-                        {link.label}
-                      </Link>
-                    ) : (
-                      <a 
-                        key={link.to}
-                        href={link.to}
-                        onClick={handleNavClick}
-                        className="text-lg font-medium py-3 px-4 rounded-lg text-foreground hover:text-primary hover:bg-primary/10 transition-all duration-300 hover:translate-x-2"
-                        style={{ 
-                          animationDelay: `${index * 50}ms`,
-                          animation: isOpen ? `slideInRight 0.3s ease-out ${index * 50}ms forwards` : 'none'
-                        }}
-                      >
-                        {link.label}
-                      </a>
-                    )
-                  ))}
-                  
+                <nav className="flex flex-col gap-4 mt-8">
+                  <Link 
+                    to="/porto-de-ideias"
+                    onClick={handleNavClick}
+                    className="group flex items-center gap-3"
+                  >
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:rotate-12 ${
+                      currentPage === "porto-de-ideias" 
+                        ? "bg-gradient-to-br from-accent to-primary shadow-glow" 
+                        : "bg-gradient-to-br from-accent/80 to-primary/80 group-hover:from-accent group-hover:to-primary"
+                    }`}>
+                      <Lightbulb className="w-5 h-5 text-primary-foreground" />
+                    </div>
+                    <span className={`text-2xl font-handwritten font-bold transition-colors duration-300 ${
+                      currentPage === "porto-de-ideias" 
+                        ? "text-accent" 
+                        : "text-foreground group-hover:text-accent"
+                    }`}>
+                      Porto de Idéias
+                    </span>
+                  </Link>
                 </nav>
               </SheetContent>
             </Sheet>
