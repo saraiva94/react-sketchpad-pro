@@ -188,7 +188,7 @@ const HomePage = () => {
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
               </Link>
-              <Link to="/projetos">
+              <Link to="/porto-de-ideias">
                 <Button size="lg" variant="outline" className="w-full sm:w-auto text-base px-8 py-6 rounded-full border-2 border-primary/30 text-primary hover:bg-primary/5 hover:border-primary transition-all duration-300">
                   Explorar Projetos
                 </Button>
@@ -367,7 +367,7 @@ const HomePage = () => {
 
           {featuredProjects.length > 0 && (
             <div className="text-center mt-12">
-              <Link to="/projetos">
+              <Link to="/porto-de-ideias">
                 <Button variant="outline" size="lg" className="rounded-full px-10 border-2 hover:bg-primary/5">
                   Ver Todos os Projetos
                   <ArrowRight className="w-4 h-4 ml-2" />
