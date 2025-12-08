@@ -12,8 +12,6 @@ import {
   Search,
   MapPin,
   ArrowRight,
-  LayoutGrid,
-  List,
   X,
   Shield,
   SlidersHorizontal,
@@ -67,7 +65,7 @@ const sortOptions = [
 const PortoDeIdeiasPage = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  // viewMode removed - using grid as default
   const [filtersOpen, setFiltersOpen] = useState(false);
   
   // Filters
@@ -373,31 +371,6 @@ const PortoDeIdeiasPage = () => {
       {/* Projects List */}
       <section className="py-6 md:py-8">
         <div className="container mx-auto px-6">
-          {/* Results Header */}
-          <div className="flex items-center justify-between mb-6">
-            <p className="text-base md:text-lg font-medium text-foreground">
-              {sortedProjects.length} projeto{sortedProjects.length !== 1 ? 's' : ''} encontrado{sortedProjects.length !== 1 ? 's' : ''}
-            </p>
-            <div className="flex items-center gap-2">
-              <Button
-                variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
-                size="icon"
-                onClick={() => setViewMode('grid')}
-                className="rounded-lg"
-              >
-                <LayoutGrid className="w-4 h-4" />
-              </Button>
-              <Button
-                variant={viewMode === 'list' ? 'secondary' : 'ghost'}
-                size="icon"
-                onClick={() => setViewMode('list')}
-                className="rounded-lg hidden md:flex"
-              >
-                <List className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
-
           {/* Loading State */}
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
@@ -413,10 +386,7 @@ const PortoDeIdeiasPage = () => {
               ))}
             </div>
           ) : sortedProjects.length > 0 ? (
-            <div className={viewMode === 'grid' 
-              ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6" 
-              : "flex flex-col gap-4"
-            }>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {sortedProjects.map((project, index) => {
                 const budgetInfo = getBudgetRange(project.valor_sugerido);
                 const stageInfo = getStageInfo(project.stage);
@@ -428,13 +398,9 @@ const PortoDeIdeiasPage = () => {
                     className="block group animate-fade-in"
                     style={{ animationDelay: `${index * 50}ms` }}
                   >
-                    <div className={`bg-card border border-border rounded-2xl overflow-hidden hover:shadow-xl hover:border-primary/30 transition-all duration-300 ${
-                      viewMode === 'list' ? 'flex' : ''
-                    }`}>
+                    <div className="bg-card border border-border rounded-2xl overflow-hidden hover:shadow-xl hover:border-primary/30 transition-all duration-300">
                       {/* Image */}
-                      <div className={`relative overflow-hidden ${
-                        viewMode === 'list' ? 'w-64 flex-shrink-0' : 'h-48'
-                      }`}>
+                      <div className="relative overflow-hidden h-48">
                         {project.image_url ? (
                           <img
                             src={project.image_url}
