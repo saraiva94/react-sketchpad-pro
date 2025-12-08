@@ -1,0 +1,207 @@
+import { useEffect, useRef } from "react";
+
+interface Particle {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  size: number;
+  opacity: number;
+  hue: number;
+}
+
+export function ArtisticBackground() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const particlesRef = useRef<Particle[]>([]);
+  const mouseRef = useRef({ x: 0, y: 0 });
+  const animationRef = useRef<number>();
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const resizeCanvas = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+
+    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
+
+    // Initialize particles
+    const particleCount = 60;
+    particlesRef.current = Array.from({ length: particleCount }, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      vx: (Math.random() - 0.5) * 0.3,
+      vy: (Math.random() - 0.5) * 0.3,
+      size: Math.random() * 3 + 1,
+      opacity: Math.random() * 0.3 + 0.1,
+      hue: Math.random() * 40 + 180, // Blue to teal range
+    }));
+
+    const handleMouseMove = (e: MouseEvent) => {
+      mouseRef.current = { x: e.clientX, y: e.clientY };
+    };
+    window.addEventListener("mousemove", handleMouseMove);
+
+    let time = 0;
+
+    const animate = () => {
+      time += 0.005;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw flowing gradient waves
+      const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+      gradient.addColorStop(0, `hsla(200, 70%, 50%, 0.03)`);
+      gradient.addColorStop(0.5, `hsla(170, 60%, 45%, 0.02)`);
+      gradient.addColorStop(1, `hsla(200, 70%, 50%, 0.03)`);
+
+      // Draw organic flowing curves
+      ctx.beginPath();
+      ctx.moveTo(0, canvas.height * 0.5);
+      
+      for (let x = 0; x <= canvas.width; x += 20) {
+        const y = canvas.height * 0.5 + 
+          Math.sin(x * 0.003 + time) * 100 + 
+          Math.sin(x * 0.005 + time * 1.5) * 50;
+        ctx.lineTo(x, y);
+      }
+      
+      ctx.lineTo(canvas.width, canvas.height);
+      ctx.lineTo(0, canvas.height);
+      ctx.closePath();
+      ctx.fillStyle = `hsla(200, 60%, 50%, 0.02)`;
+      ctx.fill();
+
+      // Second wave
+      ctx.beginPath();
+      ctx.moveTo(0, canvas.height * 0.6);
+      
+      for (let x = 0; x <= canvas.width; x += 20) {
+        const y = canvas.height * 0.6 + 
+          Math.sin(x * 0.004 + time * 0.8) * 80 + 
+          Math.cos(x * 0.002 + time * 1.2) * 60;
+        ctx.lineTo(x, y);
+      }
+      
+      ctx.lineTo(canvas.width, canvas.height);
+      ctx.lineTo(0, canvas.height);
+      ctx.closePath();
+      ctx.fillStyle = `hsla(170, 50%, 45%, 0.015)`;
+      ctx.fill();
+
+      // Draw particles
+      particlesRef.current.forEach((particle, i) => {
+        // Update position with flowing motion
+        particle.x += particle.vx + Math.sin(time + i * 0.1) * 0.2;
+        particle.y += particle.vy + Math.cos(time + i * 0.1) * 0.2;
+
+        // Wrap around edges
+        if (particle.x < 0) particle.x = canvas.width;
+        if (particle.x > canvas.width) particle.x = 0;
+        if (particle.y < 0) particle.y = canvas.height;
+        if (particle.y > canvas.height) particle.y = 0;
+
+        // Draw particle with glow
+        const gradient = ctx.createRadialGradient(
+          particle.x, particle.y, 0,
+          particle.x, particle.y, particle.size * 3
+        );
+        gradient.addColorStop(0, `hsla(${particle.hue}, 60%, 55%, ${particle.opacity})`);
+        gradient.addColorStop(1, `hsla(${particle.hue}, 60%, 55%, 0)`);
+
+        ctx.beginPath();
+        ctx.arc(particle.x, particle.y, particle.size * 3, 0, Math.PI * 2);
+        ctx.fillStyle = gradient;
+        ctx.fill();
+
+        // Draw connections between nearby particles
+        particlesRef.current.slice(i + 1).forEach((other) => {
+          const dx = particle.x - other.x;
+          const dy = particle.y - other.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+
+          if (distance < 150) {
+            ctx.beginPath();
+            ctx.moveTo(particle.x, particle.y);
+            ctx.lineTo(other.x, other.y);
+            ctx.strokeStyle = `hsla(190, 50%, 50%, ${0.05 * (1 - distance / 150)})`;
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+          }
+        });
+      });
+
+      // Draw floating geometric shapes
+      for (let i = 0; i < 5; i++) {
+        const x = canvas.width * (0.2 + i * 0.15) + Math.sin(time + i) * 30;
+        const y = canvas.height * 0.3 + Math.cos(time * 0.7 + i * 0.5) * 50;
+        const size = 20 + Math.sin(time + i * 2) * 10;
+        const rotation = time * 0.5 + i;
+
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(rotation);
+        ctx.beginPath();
+
+        // Alternate between shapes
+        if (i % 3 === 0) {
+          // Triangle
+          ctx.moveTo(0, -size);
+          ctx.lineTo(size * 0.866, size * 0.5);
+          ctx.lineTo(-size * 0.866, size * 0.5);
+          ctx.closePath();
+        } else if (i % 3 === 1) {
+          // Diamond
+          ctx.moveTo(0, -size);
+          ctx.lineTo(size * 0.7, 0);
+          ctx.lineTo(0, size);
+          ctx.lineTo(-size * 0.7, 0);
+          ctx.closePath();
+        } else {
+          // Circle
+          ctx.arc(0, 0, size * 0.5, 0, Math.PI * 2);
+        }
+
+        ctx.strokeStyle = `hsla(${180 + i * 10}, 50%, 50%, 0.08)`;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // Subtle mouse interaction glow
+      const mouseGradient = ctx.createRadialGradient(
+        mouseRef.current.x, mouseRef.current.y, 0,
+        mouseRef.current.x, mouseRef.current.y, 200
+      );
+      mouseGradient.addColorStop(0, `hsla(190, 60%, 50%, 0.03)`);
+      mouseGradient.addColorStop(1, `hsla(190, 60%, 50%, 0)`);
+      ctx.fillStyle = mouseGradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      animationRef.current = requestAnimationFrame(animate);
+    };
+
+    animate();
+
+    return () => {
+      window.removeEventListener("resize", resizeCanvas);
+      window.removeEventListener("mousemove", handleMouseMove);
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className="fixed inset-0 pointer-events-none z-0"
+      style={{ opacity: 0.8 }}
+    />
+  );
+}
