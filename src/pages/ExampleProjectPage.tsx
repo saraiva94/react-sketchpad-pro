@@ -1,7 +1,11 @@
+import { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { toast } from "sonner";
 import { 
   ArrowLeft, 
   MapPin, 
@@ -25,8 +29,129 @@ import {
   Heart,
   MessageCircle,
   HandHeart,
-  Home
+  Home,
+  Send,
+  X
 } from "lucide-react";
+
+// Component for Documents Access Request
+const DocumentsAccessSection = () => {
+  const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState({
+    nome: "",
+    telefone: "",
+    interesse: ""
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.nome.trim() || !formData.telefone.trim() || !formData.interesse.trim()) {
+      toast.error("Por favor, preencha todos os campos");
+      return;
+    }
+    
+    setIsSubmitting(true);
+    
+    // Simulate submission
+    setTimeout(() => {
+      toast.success("Solicitação enviada com sucesso! A administração entrará em contato.");
+      setShowForm(false);
+      setFormData({ nome: "", telefone: "", interesse: "" });
+      setIsSubmitting(false);
+    }, 1000);
+  };
+
+  return (
+    <section>
+      <h2 className="text-2xl font-serif font-bold text-foreground mb-6 flex items-center gap-2">
+        <FileText className="w-6 h-6 text-primary" />
+        Documentos do Projeto
+      </h2>
+      <div className="p-6 md:p-8 bg-muted/50 rounded-2xl border border-border">
+        {!showForm ? (
+          <div className="text-center">
+            <Lock className="w-12 h-12 text-muted-foreground/50 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-foreground mb-2">Documentos Restritos</h3>
+            <p className="text-muted-foreground mb-6">
+              Para acessar os documentos completos do projeto, solicite acesso à administração.
+            </p>
+            <Button 
+              className="rounded-full"
+              onClick={() => setShowForm(true)}
+            >
+              Solicitar Acesso
+            </Button>
+          </div>
+        ) : (
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-foreground">Solicitar Acesso aos Documentos</h3>
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={() => setShowForm(false)}
+                className="rounded-full"
+              >
+                <X className="w-5 h-5" />
+              </Button>
+            </div>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1.5">Nome</label>
+                <Input
+                  type="text"
+                  placeholder="Seu nome completo"
+                  value={formData.nome}
+                  onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
+                  className="rounded-lg"
+                  maxLength={100}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1.5">Telefone</label>
+                <Input
+                  type="tel"
+                  placeholder="(00) 00000-0000"
+                  value={formData.telefone}
+                  onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
+                  className="rounded-lg"
+                  maxLength={20}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1.5">O que gostaria de acessar?</label>
+                <Textarea
+                  placeholder="Descreva brevemente quais documentos ou informações você precisa..."
+                  value={formData.interesse}
+                  onChange={(e) => setFormData({ ...formData, interesse: e.target.value })}
+                  className="rounded-lg resize-none"
+                  rows={3}
+                  maxLength={500}
+                />
+              </div>
+              <Button 
+                type="submit" 
+                className="w-full rounded-full"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  "Enviando..."
+                ) : (
+                  <>
+                    <Send className="w-4 h-4 mr-2" />
+                    Enviar Solicitação
+                  </>
+                )}
+              </Button>
+            </form>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+};
 
 // Dados fictícios dos projetos de exemplo
 const exampleProjects: Record<string, {
@@ -433,22 +558,7 @@ const ExampleProjectPage = () => {
             )}
 
             {/* Documents Section */}
-            <section>
-              <h2 className="text-2xl font-serif font-bold text-foreground mb-6 flex items-center gap-2">
-                <FileText className="w-6 h-6 text-primary" />
-                Documentos do Projeto
-              </h2>
-              <div className="text-center p-8 bg-muted/50 rounded-2xl border border-border">
-                <Lock className="w-12 h-12 text-muted-foreground/50 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-foreground mb-2">Documentos Restritos</h3>
-                <p className="text-muted-foreground mb-6">Para acessar os documentos completos do projeto, você precisa ter uma conta verificada.</p>
-                <Link to="/auth">
-                  <Button className="rounded-full">
-                    Criar Conta Verificada
-                  </Button>
-                </Link>
-              </div>
-            </section>
+            <DocumentsAccessSection />
           </div>
 
           {/* Sidebar */}
