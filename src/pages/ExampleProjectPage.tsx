@@ -242,7 +242,7 @@ const ExampleProjectPage = () => {
             <Sparkles className="w-4 h-4" />
             <span className="font-medium">Este é um exemplo de como seu projeto pode ser apresentado.</span>
             <Link to="/submit" className="underline hover:no-underline font-semibold">
-              Submeta o seu!
+              Cadastre-se!
             </Link>
           </div>
         </div>
