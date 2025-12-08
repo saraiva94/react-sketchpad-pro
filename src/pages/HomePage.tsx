@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
 import { AnimatedStats, defaultStats } from "@/components/AnimatedStats";
-import { AnimatedPortoBello } from "@/components/AnimatedPortoBello";
+import { ArtisticBackground } from "@/components/ArtisticBackground";
 import { 
   Users, 
   Target, 
@@ -149,8 +149,8 @@ const HomePage = () => {
 
   return (
     <div className="min-h-screen bg-background relative">
-      {/* Animated Porto Bello Background */}
-      <AnimatedPortoBello />
+      {/* Artistic Background Animation */}
+      <ArtisticBackground />
       
       <Navbar currentPage="home" />
 
@@ -192,10 +192,15 @@ const HomePage = () => {
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
               </Link>
-              <Link to="/porto-de-ideias">
-                <Button size="lg" variant="outline" className="w-full sm:w-auto text-base px-8 py-6 rounded-full border-2 border-primary/30 text-primary hover:bg-primary/5 hover:border-primary transition-all duration-300">
-                  Explorar Projetos
-                </Button>
+              <Link to="/porto-de-ideias" className="group">
+                <div className="flex items-center gap-3 px-6 py-4 rounded-full border-2 border-accent/30 bg-background/50 backdrop-blur-sm hover:border-accent hover:bg-accent/5 transition-all duration-300 hover:-translate-y-1">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-accent to-primary flex items-center justify-center group-hover:scale-110 group-hover:rotate-12 transition-all duration-300">
+                    <Lightbulb className="w-5 h-5 text-primary-foreground" />
+                  </div>
+                  <span className="text-xl font-handwritten font-bold text-foreground group-hover:text-accent transition-colors">
+                    Porto de Idéias
+                  </span>
+                </div>
               </Link>
             </div>
           </div>
