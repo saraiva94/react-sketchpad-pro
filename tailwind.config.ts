@@ -14,9 +14,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        handwritten: ['Caveat', 'cursive'],
-        serif: ['Cormorant Garamond', 'serif'],
-        sans: ['Inter', 'sans-serif'],
+        display: ['Playfair Display', 'serif'],
+        handwritten: ['Sacramento', 'cursive'],
+        sans: ['Montserrat', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -62,11 +62,20 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        "blue-light": "hsl(var(--blue-light))",
-        "blue-medium": "hsl(var(--blue-medium))",
-        "blue-dark": "hsl(var(--blue-dark))",
-        "blue-mist": "hsl(var(--blue-mist))",
-        "gold-accent": "hsl(var(--gold-accent))",
+        navy: {
+          DEFAULT: "hsl(var(--navy))",
+          light: "hsl(var(--navy-light))",
+        },
+        turquoise: {
+          DEFAULT: "hsl(var(--turquoise))",
+          light: "hsl(var(--turquoise-light))",
+        },
+        gold: {
+          DEFAULT: "hsl(var(--gold))",
+          light: "hsl(var(--gold-light))",
+        },
+        sand: "hsl(var(--sand))",
+        "ocean-mist": "hsl(var(--ocean-mist))",
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -76,7 +85,9 @@ export default {
       boxShadow: {
         'soft': '0 4px 30px hsl(var(--shadow-soft))',
         'elegant': '0 10px 40px hsl(var(--shadow-elegant))',
+        'gold': '0 8px 30px hsl(var(--shadow-gold))',
         'glow': '0 0 40px hsl(var(--primary) / 0.15)',
+        'glow-gold': '0 0 40px hsl(var(--gold) / 0.25)',
       },
       keyframes: {
         "accordion-down": {

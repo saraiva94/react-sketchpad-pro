@@ -1,4 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Caveat:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+/* Porto Bello - Design System */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Sacramento&family=Montserrat:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,112 +7,128 @@
 
 @layer base {
   :root {
-    --background: 210 40% 98%;
-    --foreground: 222 47% 11%;
+    /* Porto Bello - Paleta náutica elegante */
+    --background: 200 25% 98%;
+    --foreground: 215 50% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 215 50% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover-foreground: 215 50% 15%;
 
-    --primary: 210 60% 45%;
+    /* Azul marinho profundo como primário */
+    --primary: 205 70% 35%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222 47% 11%;
+    --secondary: 200 30% 95%;
+    --secondary-foreground: 215 50% 15%;
 
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
+    --muted: 200 20% 94%;
+    --muted-foreground: 215 20% 45%;
 
-    --accent: 200 80% 55%;
+    /* Turquesa/Água-marinha como accent */
+    --accent: 175 55% 45%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84% 60%;
+    --destructive: 0 75% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 210 60% 45%;
+    --border: 200 25% 88%;
+    --input: 200 25% 88%;
+    --ring: 205 70% 35%;
 
-    --radius: 0.75rem;
+    --radius: 0.5rem;
 
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 210 60% 45%;
+    --sidebar-background: 200 25% 98%;
+    --sidebar-foreground: 215 50% 15%;
+    --sidebar-primary: 205 70% 35%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 40% 96%;
-    --sidebar-accent-foreground: 222 47% 11%;
-    --sidebar-border: 214 32% 91%;
-    --sidebar-ring: 210 60% 45%;
+    --sidebar-accent: 200 30% 95%;
+    --sidebar-accent-foreground: 215 50% 15%;
+    --sidebar-border: 200 25% 88%;
+    --sidebar-ring: 205 70% 35%;
 
-    /* Custom elegant tokens */
-    --blue-light: 210 60% 95%;
-    --blue-medium: 210 60% 45%;
-    --blue-dark: 210 60% 35%;
-    --blue-mist: 200 30% 97%;
-    --gold-accent: 38 75% 55%;
-    --shadow-soft: 210 60% 45% / 0.08;
-    --shadow-elegant: 210 60% 25% / 0.12;
+    /* Porto Bello - Tokens personalizados */
+    --navy: 205 70% 25%;
+    --navy-light: 205 50% 40%;
+    --turquoise: 175 55% 45%;
+    --turquoise-light: 175 40% 85%;
+    --gold: 42 85% 55%;
+    --gold-light: 42 70% 75%;
+    --sand: 35 30% 92%;
+    --ocean-mist: 195 30% 97%;
+    
+    /* Sombras elegantes */
+    --shadow-soft: 205 70% 35% / 0.08;
+    --shadow-elegant: 205 70% 20% / 0.15;
+    --shadow-gold: 42 85% 55% / 0.2;
 
-    /* Gradient colors */
-    --gradient-start: 210 60% 98%;
-    --gradient-end: 200 50% 93%;
+    /* Gradientes */
+    --gradient-start: 200 40% 98%;
+    --gradient-end: 195 35% 94%;
+    --gradient-ocean: linear-gradient(135deg, hsl(205 70% 35%), hsl(175 55% 45%));
+    --gradient-sunset: linear-gradient(135deg, hsl(42 85% 55%), hsl(25 80% 55%));
 
-    /* Font families */
-    --font-handwritten: 'Caveat', cursive;
-    --font-serif: 'Cormorant Garamond', serif;
-    --font-sans: 'Inter', sans-serif;
+    /* Fontes Porto Bello */
+    --font-display: 'Playfair Display', serif;
+    --font-handwritten: 'Sacramento', cursive;
+    --font-sans: 'Montserrat', sans-serif;
   }
 
   .dark {
-    --background: 222 47% 11%;
-    --foreground: 210 40% 98%;
+    --background: 215 50% 10%;
+    --foreground: 200 25% 95%;
 
-    --card: 222 47% 15%;
-    --card-foreground: 210 40% 98%;
+    --card: 215 45% 14%;
+    --card-foreground: 200 25% 95%;
 
-    --popover: 222 47% 15%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 215 45% 14%;
+    --popover-foreground: 200 25% 95%;
 
-    --primary: 210 60% 55%;
+    --primary: 205 65% 50%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 217 33% 17%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 215 40% 18%;
+    --secondary-foreground: 200 25% 95%;
 
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 215 40% 18%;
+    --muted-foreground: 200 25% 70%;
 
-    --accent: 200 80% 55%;
+    --accent: 175 50% 50%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 62% 50%;
+    --destructive: 0 65% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 217 33% 17%;
-    --input: 217 33% 17%;
-    --ring: 210 60% 55%;
+    --border: 215 40% 20%;
+    --input: 215 40% 20%;
+    --ring: 205 65% 50%;
 
-    --sidebar-background: 222 47% 11%;
-    --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 210 60% 55%;
+    --sidebar-background: 215 50% 10%;
+    --sidebar-foreground: 200 25% 95%;
+    --sidebar-primary: 205 65% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 217 33% 17%;
-    --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 217 33% 17%;
-    --sidebar-ring: 210 60% 55%;
+    --sidebar-accent: 215 40% 18%;
+    --sidebar-accent-foreground: 200 25% 95%;
+    --sidebar-border: 215 40% 20%;
+    --sidebar-ring: 205 65% 50%;
 
-    --blue-light: 217 50% 20%;
-    --blue-medium: 210 60% 55%;
-    --blue-dark: 210 60% 70%;
-    --blue-mist: 220 40% 15%;
-    --gold-accent: 38 75% 55%;
-    --shadow-soft: 0 0% 0% / 0.3;
-    --shadow-elegant: 0 0% 0% / 0.4;
+    --navy: 205 60% 60%;
+    --navy-light: 205 50% 70%;
+    --turquoise: 175 50% 55%;
+    --turquoise-light: 175 35% 25%;
+    --gold: 42 85% 55%;
+    --gold-light: 42 60% 35%;
+    --sand: 35 15% 18%;
+    --ocean-mist: 215 45% 12%;
+    
+    --shadow-soft: 0 0% 0% / 0.35;
+    --shadow-elegant: 0 0% 0% / 0.5;
+    --shadow-gold: 42 85% 55% / 0.15;
 
-    --gradient-start: 222 47% 13%;
-    --gradient-end: 220 45% 16%;
+    --gradient-start: 215 50% 12%;
+    --gradient-end: 215 45% 15%;
   }
 }
 
@@ -129,8 +146,8 @@
     font-family: var(--font-handwritten);
   }
 
-  .font-serif {
-    font-family: var(--font-serif);
+  .font-display {
+    font-family: var(--font-display);
   }
 }
 
