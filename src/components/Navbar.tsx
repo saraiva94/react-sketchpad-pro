@@ -34,7 +34,7 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
             <Anchor className="w-5 h-5 text-primary-foreground" />
           </div>
           <span className="text-3xl md:text-4xl font-handwritten font-bold text-primary pulse-glow">
-            Porto de Ideias
+            Porto Bello
           </span>
         </Link>
         
