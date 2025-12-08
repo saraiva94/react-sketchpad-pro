@@ -233,35 +233,7 @@ const ExampleProjectPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Navigation Breadcrumb */}
-      <nav className="bg-card/80 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-border/50">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Link to="/" className="flex items-center gap-2 group">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                  <Anchor className="w-5 h-5 text-primary-foreground" />
-                </div>
-                <span className="text-xl font-handwritten font-bold text-primary group-hover:text-accent transition-colors">
-                  Porto de Ideias
-                </span>
-              </Link>
-              <span className="text-muted-foreground hidden md:inline">•</span>
-              <Link to="/porto-de-ideias" className="text-muted-foreground hover:text-primary transition-colors hidden md:inline">Projetos</Link>
-              <span className="text-muted-foreground hidden md:inline">•</span>
-              <span className="text-foreground font-medium truncate max-w-[200px] hidden md:inline">{project.title}</span>
-            </div>
-            
-            <div className="flex items-center space-x-4">
-              <Link to="/submit">
-                <Button className="rounded-full">
-                  Submeter Meu Projeto
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <Navbar currentPage="porto-de-ideias" />
 
       {/* Example Banner */}
       <div className="bg-gradient-to-r from-primary/20 via-accent/20 to-primary/20 border-b border-primary/20">
@@ -519,55 +491,70 @@ const ExampleProjectPage = () => {
       </div>
 
       {/* Footer */}
-      <footer className="bg-card border-t border-border py-12 mt-12">
+      <footer className="bg-foreground text-background py-12 md:py-16 mt-12 md:mt-16">
         <div className="container mx-auto px-6">
-          <div className="grid md:grid-cols-4 gap-8">
-            <div className="md:col-span-2">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            <div className="col-span-2 md:col-span-1">
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                  <Anchor className="w-5 h-5 text-primary-foreground" />
-                </div>
-                <span className="text-2xl font-handwritten font-bold text-primary">Porto de Ideias</span>
+                <Anchor className="w-8 h-8 text-primary" />
+                <span className="text-xl md:text-2xl font-handwritten font-bold text-primary">
+                  Porto de Ideias
+                </span>
               </div>
-              <p className="text-muted-foreground mb-4 max-w-md">
-                Conectando projetos culturais a investidores e patrocinadores. Transformando ideias em realidade através da cultura.
+              <p className="text-background/70 mb-4 text-sm">
+                O Porto de Ideias é uma iniciativa da Porto Bello Filmes, criada para aproximar cultura e investimento.
               </p>
-              <div className="flex gap-4">
-                <a href="#" className="w-10 h-10 rounded-full bg-muted flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-colors">
-                  <Facebook className="w-5 h-5" />
-                </a>
-                <a href="#" className="w-10 h-10 rounded-full bg-muted flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-colors">
-                  <Instagram className="w-5 h-5" />
-                </a>
-                <a href="#" className="w-10 h-10 rounded-full bg-muted flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-colors">
-                  <Linkedin className="w-5 h-5" />
-                </a>
+              <div className="flex space-x-3">
+                <div className="w-9 h-9 bg-primary rounded-full flex items-center justify-center cursor-pointer hover:bg-primary/80 transition-colors">
+                  <Facebook className="w-4 h-4 text-primary-foreground" />
+                </div>
+                <div className="w-9 h-9 bg-primary rounded-full flex items-center justify-center cursor-pointer hover:bg-primary/80 transition-colors">
+                  <Twitter className="w-4 h-4 text-primary-foreground" />
+                </div>
+                <div className="w-9 h-9 bg-primary rounded-full flex items-center justify-center cursor-pointer hover:bg-primary/80 transition-colors">
+                  <Instagram className="w-4 h-4 text-primary-foreground" />
+                </div>
+                <div className="w-9 h-9 bg-primary rounded-full flex items-center justify-center cursor-pointer hover:bg-primary/80 transition-colors">
+                  <Linkedin className="w-4 h-4 text-primary-foreground" />
+                </div>
               </div>
             </div>
+
             <div>
-              <h4 className="font-semibold text-foreground mb-4">Links</h4>
-              <ul className="space-y-2 text-muted-foreground">
-                <li><Link to="/" className="hover:text-primary transition-colors">Início</Link></li>
-                <li><Link to="/porto-de-ideias" className="hover:text-primary transition-colors">Projetos</Link></li>
-                <li><Link to="/submit" className="hover:text-primary transition-colors">Submeter Projeto</Link></li>
+              <h3 className="font-bold text-base mb-4 text-background">Plataforma</h3>
+              <ul className="space-y-2 text-background/70 text-sm">
+                <li><a href="#" className="hover:text-background transition-colors">Como Funciona</a></li>
+                <li><a href="#" className="hover:text-background transition-colors">Enviar Projeto</a></li>
+                <li><a href="#" className="hover:text-background transition-colors">Investidores</a></li>
               </ul>
             </div>
+
             <div>
-              <h4 className="font-semibold text-foreground mb-4">Contato</h4>
-              <ul className="space-y-2 text-muted-foreground">
-                <li className="flex items-center gap-2">
-                  <Mail className="w-4 h-4" />
-                  contato@portodeideias.com.br
+              <h3 className="font-bold text-base mb-4 text-background">Suporte</h3>
+              <ul className="space-y-2 text-background/70 text-sm">
+                <li><a href="#" className="hover:text-background transition-colors">FAQ</a></li>
+                <li><a href="#" className="hover:text-background transition-colors">Ajuda</a></li>
+                <li><a href="#" className="hover:text-background transition-colors">Termos</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="font-bold text-base mb-4 text-background">Contato</h3>
+              <ul className="space-y-2 text-background/70 text-sm">
+                <li className="flex items-center space-x-2">
+                  <Mail className="w-4 h-4 flex-shrink-0" />
+                  <span className="truncate">portobellofilmes@gmail.com</span>
                 </li>
-                <li className="flex items-center gap-2">
-                  <Phone className="w-4 h-4" />
-                  (11) 99999-9999
+                <li className="flex items-center space-x-2">
+                  <Phone className="w-4 h-4 flex-shrink-0" />
+                  <span>+55 (11) 9999-9999</span>
                 </li>
               </ul>
             </div>
           </div>
-          <div className="border-t border-border mt-8 pt-8 text-center text-muted-foreground text-sm">
-            © {new Date().getFullYear()} Porto de Ideias. Todos os direitos reservados.
+
+          <div className="border-t border-background/20 mt-8 md:mt-12 pt-6 md:pt-8 text-center text-background/70 text-sm">
+            <p>&copy; 2024 Porto de Ideias. Todos os direitos reservados.</p>
           </div>
         </div>
       </footer>
