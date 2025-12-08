@@ -37,10 +37,11 @@ export function AnimatedPortoBello() {
         }}
       >
         <svg
-          viewBox="0 0 1200 400"
-          className="w-[90vw] max-w-[1400px] h-auto"
+          viewBox="0 0 1000 300"
+          className="w-[95vw] max-w-[1800px] h-auto"
           style={{
-            filter: "drop-shadow(0 0 40px hsl(var(--primary) / 0.1))",
+            filter: "drop-shadow(0 0 60px hsl(var(--primary) / 0.08))",
+            transform: "scale(1.3)",
           }}
         >
           <defs>
@@ -58,7 +59,7 @@ export function AnimatedPortoBello() {
                 dominantBaseline="middle"
                 className="font-handwritten"
                 style={{
-                  fontSize: "180px",
+                  fontSize: "220px",
                   fontFamily: "Sacramento, cursive",
                   fill: "white",
                 }}
@@ -85,7 +86,7 @@ export function AnimatedPortoBello() {
               dominantBaseline="middle"
               className="font-handwritten"
               style={{
-                fontSize: "180px",
+                fontSize: "220px",
                 fontFamily: "Sacramento, cursive",
                 fill: "url(#textGradient)",
               }}
@@ -102,13 +103,13 @@ export function AnimatedPortoBello() {
             dominantBaseline="middle"
             className="font-handwritten"
             style={{
-              fontSize: "180px",
+              fontSize: "220px",
               fontFamily: "Sacramento, cursive",
               fill: "none",
-              stroke: "hsl(var(--primary) / 0.15)",
+              stroke: "hsl(var(--primary) / 0.12)",
               strokeWidth: "1px",
-              strokeDasharray: "3000",
-              strokeDashoffset: `${3000 - (strokeProgress * 30)}`,
+              strokeDasharray: "4000",
+              strokeDashoffset: `${4000 - (strokeProgress * 40)}`,
               transition: "stroke-dashoffset 0.1s ease-out",
             }}
           >
