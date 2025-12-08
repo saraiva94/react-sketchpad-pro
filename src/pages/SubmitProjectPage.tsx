@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Navbar } from "@/components/Navbar";
+import { Footer, SocialLinksDisplay } from "@/components/Footer";
 
 interface TeamMember {
   nome: string;
@@ -201,7 +201,7 @@ const SubmitProjectPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar showNav={false} />
+      {/* Navbar removed for cleaner responsiveness */}
 
       <div className="py-8 px-4">
         <div className="container mx-auto max-w-3xl">
@@ -214,13 +214,17 @@ const SubmitProjectPage = () => {
           </button>
 
           <Card className="shadow-lg">
-            <CardHeader className="text-center space-y-2">
+            <CardHeader className="text-center space-y-4">
               <CardTitle className="text-3xl font-bold text-foreground">
                 Cadastrar Projeto Cultural
               </CardTitle>
               <CardDescription className="text-muted-foreground">
                 Preencha o formulário abaixo para submeter seu projeto para análise
               </CardDescription>
+              <div className="pt-2">
+                <p className="text-sm text-muted-foreground mb-3">Siga-nos nas redes sociais</p>
+                <SocialLinksDisplay />
+              </div>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-8">
@@ -580,6 +584,8 @@ const SubmitProjectPage = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      <Footer />
     </div>
   );
 };
