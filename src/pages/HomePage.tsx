@@ -383,10 +383,11 @@ const HomePage = () => {
       </section>
 
       {/* Mission Section */}
-      <section id="sobre" className="py-20 lg:py-28 bg-background relative">
+      <section id="sobre" className="py-20 lg:py-28 relative z-10">
+        <div className="absolute inset-0 bg-background/70 backdrop-blur-[2px]" />
         <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent" />
         
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-3xl mx-auto text-center mb-16">
             <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
               Quem Somos
