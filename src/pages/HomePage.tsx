@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
 import { AnimatedStats, defaultStats } from "@/components/AnimatedStats";
+import { AnimatedPortoBello } from "@/components/AnimatedPortoBello";
 import { 
   Users, 
   Target, 
@@ -147,7 +148,10 @@ const HomePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative">
+      {/* Animated Porto Bello Background */}
+      <AnimatedPortoBello />
+      
       <Navbar currentPage="home" />
 
       {/* Hero Section */}

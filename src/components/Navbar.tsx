@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Anchor, Menu, X, Lightbulb } from "lucide-react";
+import { Lightbulb, Menu, X, Home } from "lucide-react";
 
 interface NavbarProps {
   showNav?: boolean;
@@ -14,10 +14,6 @@ interface NavbarProps {
 export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProps) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const navLinks = [
-    { to: "/porto-de-ideias", label: "Porto de Idéias", isLink: true, id: "porto-de-ideias" },
-  ];
-
   const handleNavClick = () => {
     setIsOpen(false);
   };
@@ -25,36 +21,35 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
   return (
     <header className="border-b border-border/50 bg-card/80 backdrop-blur-md sticky top-0 z-50 shadow-soft">
       <div className="container mx-auto px-4 h-20 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-3 group">
-          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-glow group-hover:scale-110 group-hover:rotate-12 transition-all duration-300 flex-shrink-0">
-            <Anchor className="w-6 h-6 text-primary-foreground" />
+        {/* Logo - Porto de Idéias */}
+        <Link to="/porto-de-ideias" className="flex items-center gap-3 group">
+          <div className={`w-12 h-12 rounded-full flex items-center justify-center shadow-glow group-hover:scale-110 group-hover:rotate-12 transition-all duration-300 flex-shrink-0 ${
+            currentPage === "porto-de-ideias" 
+              ? "bg-gradient-to-br from-accent to-primary" 
+              : "bg-gradient-to-br from-primary to-accent group-hover:from-accent group-hover:to-primary"
+          }`}>
+            <Lightbulb className="w-6 h-6 text-primary-foreground" />
           </div>
-          <span className="text-3xl md:text-4xl font-handwritten font-bold text-primary group-hover:text-accent transition-colors duration-300 translate-y-[2px]">
-            Porto Bello
+          <span className={`text-3xl md:text-4xl font-handwritten font-bold transition-colors duration-300 translate-y-[2px] ${
+            currentPage === "porto-de-ideias" 
+              ? "text-accent" 
+              : "text-primary group-hover:text-accent"
+          }`}>
+            Porto de Idéias
           </span>
         </Link>
         
         {/* Desktop Navigation */}
         {showNav && (
-          <nav className="hidden md:flex items-center gap-6">
-            <Link 
-              to="/porto-de-ideias"
-              className="group flex items-center gap-2"
-            >
-              <div className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:rotate-12 ${
-                currentPage === "porto-de-ideias" 
-                  ? "bg-gradient-to-br from-accent to-primary shadow-glow" 
-                  : "bg-gradient-to-br from-accent/80 to-primary/80 group-hover:from-accent group-hover:to-primary group-hover:shadow-glow"
-              }`}>
-                <Lightbulb className="w-4 h-4 text-primary-foreground" />
-              </div>
-              <span className={`text-xl md:text-2xl font-handwritten font-bold transition-colors duration-300 ${
-                currentPage === "porto-de-ideias" 
-                  ? "text-accent" 
-                  : "text-foreground group-hover:text-accent"
-              }`}>
-                Porto de Idéias
-              </span>
+          <nav className="hidden md:flex items-center gap-4">
+            <Link to="/">
+              <Button 
+                variant={currentPage === "home" ? "default" : "outline"}
+                className="rounded-full px-6 gap-2 transition-all duration-300 hover:scale-105"
+              >
+                <Home className="w-4 h-4" />
+                Homepage
+              </Button>
             </Link>
             <ThemeToggle />
           </nav>
@@ -97,15 +92,30 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
                 className="w-[280px] bg-card border-border"
               >
                 <nav className="flex flex-col gap-4 mt-8">
+                  {/* Homepage Button */}
+                  <Link 
+                    to="/"
+                    onClick={handleNavClick}
+                  >
+                    <Button 
+                      variant={currentPage === "home" ? "default" : "outline"}
+                      className="w-full rounded-full gap-2 justify-start px-4"
+                    >
+                      <Home className="w-5 h-5" />
+                      Homepage
+                    </Button>
+                  </Link>
+                  
+                  {/* Porto de Idéias */}
                   <Link 
                     to="/porto-de-ideias"
                     onClick={handleNavClick}
-                    className="group flex items-center gap-3"
+                    className="group flex items-center gap-3 py-2"
                   >
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:rotate-12 ${
                       currentPage === "porto-de-ideias" 
                         ? "bg-gradient-to-br from-accent to-primary shadow-glow" 
-                        : "bg-gradient-to-br from-accent/80 to-primary/80 group-hover:from-accent group-hover:to-primary"
+                        : "bg-gradient-to-br from-primary to-accent group-hover:from-accent group-hover:to-primary"
                     }`}>
                       <Lightbulb className="w-5 h-5 text-primary-foreground" />
                     </div>
