@@ -551,7 +551,7 @@ const AdminDashboard = () => {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Solicitações de Acesso a Documentos</CardTitle>
-              <Button variant="outline" size="sm" onClick={downloadAccessRequestsCSV}>
+              <Button variant="outline" size="sm" onClick={downloadAccessRequestsCSV} className="bg-green-600 hover:bg-green-700 text-white border-green-600">
                 <Download className="w-4 h-4 mr-2" />
                 Exportar CSV
               </Button>
@@ -649,7 +649,7 @@ const AdminDashboard = () => {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Cadastros - Dados de Contato dos Projetos</CardTitle>
-              <Button variant="outline" size="sm" onClick={downloadContactsCSV}>
+              <Button variant="outline" size="sm" onClick={downloadContactsCSV} className="bg-green-600 hover:bg-green-700 text-white border-green-600">
                 <Download className="w-4 h-4 mr-2" />
                 Exportar CSV
               </Button>
