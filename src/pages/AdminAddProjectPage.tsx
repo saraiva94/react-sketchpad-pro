@@ -172,6 +172,51 @@ const AdminAddProjectPage = () => {
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-8">
+                {/* Thumbnail Preview */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-foreground border-b pb-2">
+                    Capa do Projeto
+                  </h3>
+                  
+                  <div className="flex flex-col items-center gap-4">
+                    {/* Preview */}
+                    <div className="w-full max-w-md aspect-video rounded-lg border-2 border-dashed border-muted-foreground/30 overflow-hidden bg-muted/50 flex items-center justify-center">
+                      {imageUrl ? (
+                        <img 
+                          src={imageUrl} 
+                          alt="Preview da capa"
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = 'none';
+                          }}
+                        />
+                      ) : (
+                        <div className="text-center p-6">
+                          <Upload className="w-12 h-12 mx-auto mb-3 text-muted-foreground/50" />
+                          <p className="text-sm text-muted-foreground">
+                            Cole a URL da imagem abaixo para visualizar
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* URL Input */}
+                    <div className="w-full max-w-md">
+                      <Label htmlFor="imageUrlPreview">URL da Imagem de Capa</Label>
+                      <Input
+                        id="imageUrlPreview"
+                        value={imageUrl}
+                        onChange={(e) => setImageUrl(e.target.value)}
+                        placeholder="https://exemplo.com/imagem.jpg"
+                        className="mt-1"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Esta será a imagem exibida como thumbnail do projeto
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Responsável */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-foreground border-b pb-2">
@@ -254,15 +299,6 @@ const AdminAddProjectPage = () => {
                     </div>
                   </div>
 
-                  <div>
-                    <Label htmlFor="imageUrl">URL da Imagem</Label>
-                    <Input
-                      id="imageUrl"
-                      value={imageUrl}
-                      onChange={(e) => setImageUrl(e.target.value)}
-                      placeholder="https://..."
-                    />
-                  </div>
 
                   <div>
                     <Label htmlFor="descricao">Descrição Completa *</Label>

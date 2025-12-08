@@ -695,11 +695,18 @@ const AdminDashboard = () => {
             </CardHeader>
             <CardContent>
               {featuredProjects.length > 0 ? (
-                <div className="space-y-4">
+                <div className="space-y-2">
                   {featuredProjects.map((project, index) => (
-                    <div key={project.id} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div key={project.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors group">
                       <div className="flex items-center gap-4">
-                        <span className="text-sm text-muted-foreground w-8">{index + 1}.</span>
+                        <span className="text-sm text-muted-foreground w-6">{index + 1}.</span>
+                        {project.image_url && (
+                          <img 
+                            src={project.image_url} 
+                            alt={project.title}
+                            className="w-12 h-12 rounded object-cover"
+                          />
+                        )}
                         <div>
                           <h4 className="font-medium">{project.title}</h4>
                           <p className="text-sm text-muted-foreground">
@@ -709,11 +716,11 @@ const AdminDashboard = () => {
                       </div>
                       <Button
                         variant="ghost"
-                        size="sm"
+                        size="icon"
                         onClick={() => toggleFeatured(project.id, true)}
+                        className="text-destructive hover:text-destructive hover:bg-destructive/10 opacity-60 group-hover:opacity-100 transition-opacity"
                       >
-                        <StarOff className="w-4 h-4 mr-1" />
-                        Remover
+                        <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
                   ))}
@@ -864,24 +871,22 @@ const AdminDashboard = () => {
                                 <Edit className="w-4 h-4 mr-1" />
                                 Editar
                               </Button>
-                              {project.status === "approved" && (
+                              {project.status === "approved" && !project.featured_on_homepage && (
                                 <Button
                                   variant="outline"
-                                  size="sm"
-                                  onClick={() => toggleFeatured(project.id, project.featured_on_homepage)}
+                                  size="icon"
+                                  onClick={() => toggleFeatured(project.id, false)}
+                                  title="Adicionar aos destaques"
+                                  className="text-yellow-600 hover:text-yellow-700 hover:bg-yellow-50 dark:hover:bg-yellow-950"
                                 >
-                                  {project.featured_on_homepage ? (
-                                    <>
-                                      <StarOff className="w-4 h-4 mr-1" />
-                                      Remover
-                                    </>
-                                  ) : (
-                                    <>
-                                      <Star className="w-4 h-4 mr-1" />
-                                      Destacar
-                                    </>
-                                  )}
+                                  <Plus className="w-4 h-4" />
                                 </Button>
+                              )}
+                              {project.status === "approved" && project.featured_on_homepage && (
+                                <Badge className="bg-yellow-500 gap-1">
+                                  <Star className="w-3 h-3" />
+                                  Destaque
+                                </Badge>
                               )}
                               {project.status === "pending" && (
                                 <>
