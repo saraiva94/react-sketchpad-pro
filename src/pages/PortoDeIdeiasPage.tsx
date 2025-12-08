@@ -535,15 +535,212 @@ const PortoDeIdeiasPage = () => {
               })}
             </div>
           ) : (
-            <div className="text-center py-16">
-              <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
-                <Search className="w-10 h-10 text-muted-foreground/50" />
+            /* Placeholder Cards - Incentive Messages */
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+              {/* Card 1 - Add Your Project */}
+              <Link 
+                to="/submit"
+                className="block group animate-fade-in"
+                style={{ animationDelay: '0ms' }}
+              >
+                <div className="bg-gradient-to-br from-primary/10 via-accent/5 to-card border-2 border-dashed border-primary/30 rounded-2xl overflow-hidden hover:shadow-xl hover:border-primary/60 transition-all duration-300 h-full">
+                  <div className="relative h-48 bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+                    <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center animate-pulse">
+                      <span className="text-4xl">✨</span>
+                    </div>
+                  </div>
+                  <div className="p-5">
+                    <Badge className="mb-3 rounded-full bg-primary/20 text-primary hover:bg-primary/30">
+                      Novo Projeto
+                    </Badge>
+                    <h3 className="text-lg font-serif font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
+                      Adicione seu Projeto
+                    </h3>
+                    <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
+                      Sua ideia cultural merece ganhar vida! Submeta seu projeto e conecte-se com investidores interessados em transformar cultura em realidade.
+                    </p>
+                    <div className="flex items-center justify-between pt-3 border-t border-border">
+                      <span className="text-sm text-muted-foreground">Comece agora</span>
+                      <span className="text-sm font-medium text-primary flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                        Submeter
+                        <ArrowRight className="w-4 h-4" />
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+
+              {/* Card 2 - Inspire Others */}
+              <div 
+                className="block animate-fade-in"
+                style={{ animationDelay: '100ms' }}
+              >
+                <div className="bg-gradient-to-br from-accent/10 via-primary/5 to-card border border-border rounded-2xl overflow-hidden h-full">
+                  <div className="relative h-48 bg-gradient-to-br from-accent/20 to-primary/20 flex items-center justify-center">
+                    <div className="w-20 h-20 rounded-full bg-accent/20 flex items-center justify-center">
+                      <span className="text-4xl animate-bounce">🎭</span>
+                    </div>
+                  </div>
+                  <div className="p-5">
+                    <Badge variant="secondary" className="mb-3 rounded-full">
+                      Inspire
+                    </Badge>
+                    <h3 className="text-lg font-serif font-bold text-foreground mb-2">
+                      Sua Cultura, Seu Legado
+                    </h3>
+                    <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
+                      Cada projeto cultural conta uma história única. Seja parte dessa rede de criadores que estão transformando o cenário cultural brasileiro.
+                    </p>
+                    <div className="flex items-center justify-between pt-3 border-t border-border">
+                      <div className="flex -space-x-2">
+                        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-rose-400 to-rose-600 flex items-center justify-center border-2 border-card">
+                          <span className="text-xs text-white">🎨</span>
+                        </div>
+                        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center border-2 border-card">
+                          <span className="text-xs text-white">🎵</span>
+                        </div>
+                        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center border-2 border-card">
+                          <span className="text-xs text-white">📽️</span>
+                        </div>
+                      </div>
+                      <span className="text-sm text-muted-foreground">+150 criadores</span>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <h3 className="text-xl font-semibold text-foreground mb-2">Nenhum projeto encontrado</h3>
-              <p className="text-muted-foreground mb-6">Tente ajustar os filtros ou buscar por outros termos.</p>
-              <Button onClick={clearFilters} variant="outline" className="rounded-full">
-                Limpar Filtros
-              </Button>
+
+              {/* Card 3 - Connect */}
+              <div 
+                className="block animate-fade-in"
+                style={{ animationDelay: '200ms' }}
+              >
+                <div className="bg-gradient-to-br from-primary/5 via-card to-accent/10 border border-border rounded-2xl overflow-hidden h-full">
+                  <div className="relative h-48 bg-gradient-to-br from-primary/15 to-accent/25 flex items-center justify-center">
+                    <div className="relative">
+                      <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center">
+                        <span className="text-4xl">🤝</span>
+                      </div>
+                      <div className="absolute -top-2 -right-2 w-8 h-8 bg-accent rounded-full flex items-center justify-center animate-ping opacity-75">
+                        <span className="text-sm">💡</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-5">
+                    <Badge variant="outline" className="mb-3 rounded-full border-accent text-accent">
+                      Conecte-se
+                    </Badge>
+                    <h3 className="text-lg font-serif font-bold text-foreground mb-2">
+                      Investidores Aguardam
+                    </h3>
+                    <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
+                      Uma rede de investidores e patrocinadores interessados em apoiar projetos culturais está esperando por você. Faça a conexão acontecer!
+                    </p>
+                    <div className="flex items-center justify-between pt-3 border-t border-border">
+                      <div className="flex items-center gap-1">
+                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                        <span className="text-sm text-emerald-600 dark:text-emerald-400">Online agora</span>
+                      </div>
+                      <span className="text-sm text-muted-foreground">85 investidores</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 4 - Success Stories */}
+              <div 
+                className="block animate-fade-in"
+                style={{ animationDelay: '300ms' }}
+              >
+                <div className="bg-gradient-to-br from-amber-50 dark:from-amber-900/20 via-card to-orange-50 dark:to-orange-900/20 border border-amber-200/50 dark:border-amber-800/30 rounded-2xl overflow-hidden h-full">
+                  <div className="relative h-48 bg-gradient-to-br from-amber-100 dark:from-amber-900/40 to-orange-100 dark:to-orange-900/40 flex items-center justify-center">
+                    <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg">
+                      <span className="text-4xl">🏆</span>
+                    </div>
+                  </div>
+                  <div className="p-5">
+                    <Badge className="mb-3 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 hover:bg-amber-200">
+                      Sucesso
+                    </Badge>
+                    <h3 className="text-lg font-serif font-bold text-foreground mb-2">
+                      Histórias de Sucesso
+                    </h3>
+                    <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
+                      Projetos que começaram aqui já impactaram milhares de pessoas. O próximo sucesso pode ser o seu!
+                    </p>
+                    <div className="flex items-center justify-between pt-3 border-t border-border">
+                      <div className="flex items-center gap-1">
+                        <span className="text-amber-500">★★★★★</span>
+                      </div>
+                      <span className="text-sm text-muted-foreground">92% taxa de sucesso</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 5 - Funding */}
+              <div 
+                className="block animate-fade-in"
+                style={{ animationDelay: '400ms' }}
+              >
+                <div className="bg-gradient-to-br from-emerald-50 dark:from-emerald-900/20 via-card to-teal-50 dark:to-teal-900/20 border border-emerald-200/50 dark:border-emerald-800/30 rounded-2xl overflow-hidden h-full">
+                  <div className="relative h-48 bg-gradient-to-br from-emerald-100 dark:from-emerald-900/40 to-teal-100 dark:to-teal-900/40 flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-emerald-600 dark:text-emerald-400 mb-1">R$ 10M+</div>
+                      <div className="text-sm text-emerald-700 dark:text-emerald-300">já financiados</div>
+                    </div>
+                  </div>
+                  <div className="p-5">
+                    <Badge className="mb-3 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-200">
+                      Financiamento
+                    </Badge>
+                    <h3 className="text-lg font-serif font-bold text-foreground mb-2">
+                      Recursos Disponíveis
+                    </h3>
+                    <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
+                      Conectamos projetos a recursos via Lei Rouanet, PROAC, e investimento direto. Encontre o modelo ideal para você.
+                    </p>
+                    <div className="flex items-center justify-between pt-3 border-t border-border">
+                      <div className="flex gap-2">
+                        <Badge variant="outline" className="text-xs">Rouanet</Badge>
+                        <Badge variant="outline" className="text-xs">PROAC</Badge>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 6 - CTA */}
+              <Link 
+                to="/submit"
+                className="block group animate-fade-in"
+                style={{ animationDelay: '500ms' }}
+              >
+                <div className="bg-gradient-to-br from-primary via-primary/90 to-accent border border-primary/50 rounded-2xl overflow-hidden hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 h-full">
+                  <div className="relative h-48 flex items-center justify-center">
+                    <div className="text-center text-primary-foreground">
+                      <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+                        <Anchor className="w-8 h-8" />
+                      </div>
+                      <div className="text-lg font-medium">Pronto para começar?</div>
+                    </div>
+                  </div>
+                  <div className="p-5 text-primary-foreground">
+                    <h3 className="text-lg font-serif font-bold mb-2">
+                      Embarque Nessa Jornada
+                    </h3>
+                    <p className="text-sm text-primary-foreground/80 line-clamp-3 mb-4">
+                      Submeta seu projeto cultural agora e faça parte da maior plataforma de conexão entre cultura e investimento do Brasil.
+                    </p>
+                    <div className="flex items-center justify-between pt-3 border-t border-white/20">
+                      <span className="text-sm text-primary-foreground/70">Gratuito</span>
+                      <span className="text-sm font-medium flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                        Começar Agora
+                        <ArrowRight className="w-4 h-4" />
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </Link>
             </div>
           )}
         </div>
