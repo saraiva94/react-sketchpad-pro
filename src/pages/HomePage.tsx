@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/c
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { Footer } from "@/components/Footer";
+import { Navbar } from "@/components/Navbar";
 import { AnimatedStats, defaultStats } from "@/components/AnimatedStats";
 import { ArtisticBackground } from "@/components/ArtisticBackground";
 import { 
@@ -146,7 +147,8 @@ const HomePage = () => {
       {/* Artistic Background Animation */}
       <ArtisticBackground />
       
-      {/* Navbar removed for cleaner responsiveness */}
+      {/* Navbar */}
+      <Navbar currentPage="home" />
 
       {/* Hero Section */}
       <section id="inicio" className="relative py-28 lg:py-40 overflow-hidden">
