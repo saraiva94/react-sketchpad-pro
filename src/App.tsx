@@ -12,6 +12,7 @@ import SubmitProjectPage from "./pages/SubmitProjectPage";
 import ProjectPage from "./pages/ProjectPage";
 import ProjectsPortfolioPage from "./pages/ProjectsPortfolioPage";
 import PortoDeIdeiasPage from "./pages/PortoDeIdeiasPage";
+import ExampleProjectPage from "./pages/ExampleProjectPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +33,7 @@ const App = () => (
             <Route path="/projetos" element={<ProjectsPortfolioPage />} />
             <Route path="/porto-de-ideias" element={<PortoDeIdeiasPage />} />
             <Route path="/project/:id" element={<ProjectPage />} />
+            <Route path="/exemplo/:exampleId" element={<ExampleProjectPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
