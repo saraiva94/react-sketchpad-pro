@@ -185,19 +185,26 @@ const HomePage = () => {
               Conectamos criadores visionários com investidores que acreditam no poder transformador da cultura.
             </p>
             
-            <div className="animate-fade-in-up delay-300 flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/submit">
-                <Button size="lg" className="w-full sm:w-auto text-base px-8 py-6 rounded-full shadow-elegant hover:shadow-glow transition-all duration-300 hover:-translate-y-1">
-                  Cadastre seu Projeto
-                  <ArrowRight className="w-5 h-5 ml-2" />
-                </Button>
-              </Link>
+            <div className="animate-fade-in-up delay-300 flex justify-center">
               <Link to="/porto-de-ideias" className="group">
-                <div className="flex items-center gap-3 px-6 py-4 rounded-full border-2 border-accent/30 bg-background/50 backdrop-blur-sm hover:border-accent hover:bg-accent/5 transition-all duration-300 hover:-translate-y-1">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-accent to-primary flex items-center justify-center group-hover:scale-110 group-hover:rotate-12 transition-all duration-300">
-                    <Lightbulb className="w-5 h-5 text-primary-foreground" />
+                <div className="flex items-center gap-4 px-8 py-5 rounded-full border-2 border-accent/30 bg-background/60 backdrop-blur-sm hover:border-accent hover:bg-accent/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-glow">
+                  {/* Animated Lightbulb Container */}
+                  <div className="relative w-12 h-12 rounded-full bg-gradient-to-br from-accent/20 to-primary/20 flex items-center justify-center group-hover:from-accent group-hover:to-primary transition-all duration-500">
+                    {/* Flickering glow effect */}
+                    <div className="absolute inset-0 rounded-full bg-gradient-to-br from-amber-400/0 to-yellow-300/0 group-hover:from-amber-400/60 group-hover:to-yellow-300/40 blur-sm transition-all duration-300" />
+                    
+                    {/* Lightbulb icon with flicker animation */}
+                    <Lightbulb className="w-6 h-6 text-muted-foreground/60 group-hover:text-white animate-flicker group-hover:animate-none transition-colors duration-300 relative z-10" />
+                    
+                    {/* Light rays on hover */}
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                      <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-2 w-0.5 h-3 bg-gradient-to-t from-amber-400 to-transparent" />
+                      <div className="absolute top-1 right-0 translate-x-1 w-3 h-0.5 bg-gradient-to-r from-amber-400 to-transparent rotate-45" />
+                      <div className="absolute top-1 left-0 -translate-x-1 w-3 h-0.5 bg-gradient-to-l from-amber-400 to-transparent -rotate-45" />
+                    </div>
                   </div>
-                  <span className="text-xl font-handwritten font-bold text-foreground group-hover:text-accent transition-colors">
+                  
+                  <span className="text-2xl font-handwritten font-bold text-foreground group-hover:text-accent transition-colors duration-300">
                     Porto de Idéias
                   </span>
                 </div>
