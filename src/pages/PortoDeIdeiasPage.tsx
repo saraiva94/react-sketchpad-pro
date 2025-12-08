@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Navbar } from "@/components/Navbar";
+import { ArtisticBackground } from "@/components/ArtisticBackground";
 import { supabase } from "@/integrations/supabase/client";
 import { 
   Search,
@@ -304,7 +305,10 @@ const PortoDeIdeiasPage = () => {
   );
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative">
+      {/* Artistic Background Animation */}
+      <ArtisticBackground />
+      
       <Navbar currentPage="porto-de-ideias" />
 
       {/* Header */}
@@ -695,11 +699,10 @@ const PortoDeIdeiasPage = () => {
                 className="block group animate-fade-in"
                 style={{ animationDelay: '400ms' }}
               >
-                <div className="bg-gradient-to-br from-emerald-50 dark:from-emerald-900/20 via-card to-teal-50 dark:to-teal-900/20 border border-emerald-200/50 dark:border-emerald-800/30 rounded-2xl overflow-hidden h-full">
+                <div className="bg-gradient-to-br from-emerald-50 dark:from-emerald-900/20 via-card to-teal-50 dark:to-teal-900/20 border border-emerald-200/50 dark:border-emerald-800/30 rounded-2xl overflow-hidden h-full hover:shadow-xl hover:border-emerald-400/50 transition-all duration-300">
                   <div className="relative h-48 bg-gradient-to-br from-emerald-100 dark:from-emerald-900/40 to-teal-100 dark:to-teal-900/40 flex items-center justify-center">
-                    <div className="text-center">
-                      <div className="text-3xl font-bold text-emerald-600 dark:text-emerald-400 mb-1">R$ 10M+</div>
-                      <div className="text-sm text-emerald-700 dark:text-emerald-300">já financiados</div>
+                    <div className="w-20 h-20 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-lg">
+                      <span className="text-4xl animate-bounce">💰</span>
                     </div>
                   </div>
                   <div className="p-5">
