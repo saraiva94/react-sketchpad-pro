@@ -575,10 +575,10 @@ const HomePage = () => {
                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
                   <Anchor className="w-5 h-5 text-white" />
                 </div>
-                <h3 className="font-handwritten text-2xl font-bold text-white">Porto de Ideias</h3>
+                <h3 className="font-handwritten text-2xl font-bold text-white">Porto Bello</h3>
               </div>
               <p className="text-sm mb-4 text-slate-400 leading-relaxed">
-                Uma iniciativa da Porto Bello Filmes, criada para aproximar cultura e investimento.
+                Uma plataforma criada para aproximar cultura e investimento.
               </p>
               <p className="text-sm italic text-slate-500">
                 "Onde a cultura encontra o investimento."
@@ -608,8 +608,8 @@ const HomePage = () => {
               <ul className="space-y-3 text-sm">
                 <li className="flex items-center gap-2">
                   <Mail className="w-4 h-4 text-primary" />
-                  <a href="mailto:contato@portodeideias.com.br" className="hover:text-primary transition-colors">
-                    contato@portodeideias.com.br
+                  <a href="mailto:contato@portobello.com.br" className="hover:text-primary transition-colors">
+                    contato@portobello.com.br
                   </a>
                 </li>
                 <li className="flex items-center gap-2">
@@ -636,8 +636,8 @@ const HomePage = () => {
           </div>
           
           <div className="border-t border-slate-800 pt-8 text-center text-sm text-slate-500">
-            <p>&copy; {new Date().getFullYear()} Porto de Ideias. Todos os direitos reservados.</p>
-            <p className="mt-2">Uma iniciativa <span className="text-primary">Porto Bello Filmes</span></p>
+            <p>&copy; {new Date().getFullYear()} Porto Bello. Todos os direitos reservados.</p>
+            <p className="mt-2">Plataforma <span className="text-primary">Porto Bello</span></p>
           </div>
         </div>
       </footer>
