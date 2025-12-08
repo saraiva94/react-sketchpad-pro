@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
-import { Navbar } from "@/components/Navbar";
+import { Footer } from "@/components/Footer";
 import { AnimatedStats, defaultStats } from "@/components/AnimatedStats";
 import { ArtisticBackground } from "@/components/ArtisticBackground";
 import { 
@@ -19,12 +19,6 @@ import {
   Presentation,
   Search,
   FileText,
-  Facebook,
-  Instagram,
-  Linkedin,
-  Mail,
-  Phone,
-  MapPinned,
   Anchor,
   Briefcase,
   Award,
@@ -152,7 +146,7 @@ const HomePage = () => {
       {/* Artistic Background Animation */}
       <ArtisticBackground />
       
-      <Navbar currentPage="home" />
+      {/* Navbar removed for cleaner responsiveness */}
 
       {/* Hero Section */}
       <section id="inicio" className="relative py-28 lg:py-40 overflow-hidden">
@@ -431,75 +425,7 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer id="contato" className="py-8 relative overflow-hidden z-10">
-        <div className="absolute inset-0 bg-slate-900/90 backdrop-blur-sm" />
-        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-slate-700 to-transparent" />
-        
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="grid md:grid-cols-4 gap-6 mb-6">
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                  <Anchor className="w-4 h-4 text-white" />
-                </div>
-                <h3 className="font-handwritten text-xl font-bold text-white">Porto Bello</h3>
-              </div>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Uma plataforma criada para aproximar cultura e investimento.
-              </p>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold text-white mb-2 text-sm">Navegação</h4>
-              <ul className="space-y-1 text-xs">
-                <li><a href="#inicio" className="text-slate-300 hover:text-primary transition-colors">Início</a></li>
-                <li><a href="#sobre" className="text-slate-300 hover:text-primary transition-colors">Sobre</a></li>
-                <li><Link to="/porto-de-ideias" className="text-slate-300 hover:text-primary transition-colors">Porto de Idéias</Link></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold text-white mb-2 text-sm">Ações</h4>
-              <ul className="space-y-1 text-xs">
-                <li><Link to="/submit" className="text-slate-300 hover:text-primary transition-colors">Cadastrar Projeto</Link></li>
-                <li><Link to="/porto-de-ideias" className="text-slate-300 hover:text-primary transition-colors">Explorar Projetos</Link></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold text-white mb-2 text-sm">Contato</h4>
-              <ul className="space-y-1 text-xs text-slate-300">
-                <li className="flex items-center gap-2">
-                  <Mail className="w-3 h-3 text-primary" />
-                  <a href="mailto:contato@portobello.com.br" className="hover:text-primary transition-colors">
-                    contato@portobello.com.br
-                  </a>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Phone className="w-3 h-3 text-primary" />
-                  <span>(11) 99999-9999</span>
-                </li>
-              </ul>
-              <div className="flex gap-2 mt-3">
-                <a href="#" className="w-7 h-7 rounded-full bg-slate-800 flex items-center justify-center hover:bg-primary transition-colors">
-                  <Facebook className="w-3 h-3 text-slate-300" />
-                </a>
-                <a href="#" className="w-7 h-7 rounded-full bg-slate-800 flex items-center justify-center hover:bg-primary transition-colors">
-                  <Instagram className="w-3 h-3 text-slate-300" />
-                </a>
-                <a href="#" className="w-7 h-7 rounded-full bg-slate-800 flex items-center justify-center hover:bg-primary transition-colors">
-                  <Linkedin className="w-3 h-3 text-slate-300" />
-                </a>
-              </div>
-            </div>
-          </div>
-          
-          <div className="border-t border-slate-800 pt-4 text-center text-xs text-slate-500">
-            <p>&copy; {new Date().getFullYear()} Porto Bello. Todos os direitos reservados.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };
