@@ -1,17 +1,36 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
 import { 
   ArrowLeft, 
   MapPin, 
-  DollarSign, 
-  ExternalLink,
+  DollarSign,
   Calendar,
-  Sparkles
+  Sparkles,
+  Heart,
+  MessageCircle,
+  HandHeart,
+  Download,
+  Users,
+  Target,
+  Globe,
+  Star,
+  FileText,
+  Shield,
+  BarChart,
+  Lock,
+  CheckCircle,
+  Play,
+  Mail,
+  Phone,
+  Anchor,
+  Facebook,
+  Twitter,
+  Instagram,
+  Linkedin
 } from "lucide-react";
 
 interface Project {
@@ -27,16 +46,36 @@ interface Project {
   budget: string | null;
   location: string | null;
   created_at: string;
+  categorias_tags: string[] | null;
+  responsavel_nome: string | null;
+  responsavel_email: string | null;
+  link_video: string | null;
+  link_pagamento: string | null;
+  impacto_cultural: string | null;
+  impacto_social: string | null;
+  publico_alvo: string | null;
+  diferenciais: string | null;
+  valor_sugerido: number | null;
+}
+
+interface ProjectMember {
+  id: string;
+  nome: string;
+  funcao: string | null;
+  email: string | null;
 }
 
 const ProjectPage = () => {
   const { id } = useParams();
   const [project, setProject] = useState<Project | null>(null);
+  const [members, setMembers] = useState<ProjectMember[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isFavorited, setIsFavorited] = useState(false);
 
   useEffect(() => {
     if (id) {
       fetchProject();
+      fetchMembers();
     }
   }, [id]);
 
@@ -54,10 +93,56 @@ const ProjectPage = () => {
     setLoading(false);
   };
 
+  const fetchMembers = async () => {
+    const { data } = await supabase
+      .from("project_members")
+      .select("id, nome, funcao, email")
+      .eq("project_id", id);
+    
+    if (data) {
+      setMembers(data);
+    }
+  };
+
+  const formatBudget = (value: number | null): string => {
+    if (!value) return "A definir";
+    if (value >= 1000000) {
+      return `R$ ${(value / 1000000).toFixed(1)}M`;
+    } else if (value >= 1000) {
+      return `R$ ${(value / 1000).toFixed(0)}k`;
+    }
+    return `R$ ${value.toLocaleString('pt-BR')}`;
+  };
+
+  const getVideoEmbedUrl = (url: string | null): string | null => {
+    if (!url) return null;
+    
+    // YouTube
+    const youtubeMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]+)/);
+    if (youtubeMatch) {
+      return `https://www.youtube.com/embed/${youtubeMatch[1]}`;
+    }
+    
+    // Vimeo
+    const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
+    if (vimeoMatch) {
+      return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+    }
+    
+    return url;
+  };
+
+  const getInitials = (name: string): string => {
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Carregando projeto...</p>
+        </div>
       </div>
     );
   }
@@ -68,7 +153,7 @@ const ProjectPage = () => {
         <Navbar showNav={false} />
         <main className="container mx-auto px-4 py-16 text-center">
           <Sparkles className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
-          <h1 className="text-2xl font-handwritten font-bold mb-2">Projeto não encontrado</h1>
+          <h1 className="text-2xl font-serif font-bold mb-2">Projeto não encontrado</h1>
           <p className="text-muted-foreground mb-6">
             Este projeto pode não existir ou não estar aprovado ainda.
           </p>
@@ -83,136 +168,391 @@ const ProjectPage = () => {
     );
   }
 
+  const embedUrl = getVideoEmbedUrl(project.link_video);
+
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
-
-      {/* Hero Image */}
-      <div className="relative h-64 md:h-96 overflow-hidden bg-muted">
-        {project.image_url ? (
-          <img
-            src={project.image_url}
-            alt={project.title}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/5">
-            <span className="text-6xl font-handwritten text-primary/30">
-              {project.title.charAt(0)}
-            </span>
+      {/* Navigation Breadcrumb */}
+      <nav className="bg-card/80 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-border/50">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <Link to="/" className="flex items-center gap-2 group">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                  <Anchor className="w-5 h-5 text-primary-foreground" />
+                </div>
+                <span className="text-xl font-handwritten font-bold text-primary group-hover:text-accent transition-colors">
+                  Porto de Ideias
+                </span>
+              </Link>
+              <span className="text-muted-foreground">•</span>
+              <Link to="/porto-de-ideias" className="text-muted-foreground hover:text-primary transition-colors">Projetos</Link>
+              <span className="text-muted-foreground">•</span>
+              <span className="text-foreground font-medium truncate max-w-[200px]">{project.title}</span>
+            </div>
+            
+            <div className="flex items-center space-x-4">
+              <button 
+                onClick={() => setIsFavorited(!isFavorited)}
+                className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
+                  isFavorited ? 'bg-red-100 text-red-600 dark:bg-red-900/30' : 'bg-muted text-muted-foreground hover:text-red-600'
+                }`}
+              >
+                <Heart className={`w-5 h-5 ${isFavorited ? 'fill-current' : ''}`} />
+              </button>
+              <Link to="/auth">
+                <Button className="rounded-full">
+                  Entrar na Plataforma
+                </Button>
+              </Link>
+            </div>
           </div>
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
-      </div>
+        </div>
+      </nav>
 
-      {/* Content */}
-      <main className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto -mt-24 relative z-10">
-          <Card className="shadow-lg">
-            <CardContent className="p-8">
-              {/* Header */}
-              <div className="mb-6">
-                <div className="flex flex-wrap items-center gap-3 mb-4">
-                  <Badge>{project.project_type}</Badge>
-                  {project.has_incentive_law && (
-                    <Badge className="bg-primary/10 text-primary border-primary/20">
-                      Lei de Incentivo
-                    </Badge>
+      {/* Hero Section */}
+      <section className="relative">
+        <div className="w-full h-96 overflow-hidden">
+          {project.image_url ? (
+            <img 
+              src={project.image_url}
+              alt={project.title}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-primary/20 via-accent/10 to-primary/20 flex items-center justify-center">
+              <span className="text-8xl font-handwritten text-primary/30">{project.title.charAt(0)}</span>
+            </div>
+          )}
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
+        <div className="absolute bottom-0 left-0 right-0 p-8">
+          <div className="container mx-auto">
+            <div className="max-w-4xl">
+              <h1 className="text-4xl md:text-5xl font-serif font-bold text-white mb-4">{project.title}</h1>
+              <div className="flex flex-wrap items-center gap-3 text-white/90 mb-6">
+                <Badge className="bg-white/20 hover:bg-white/30 text-white border-0">{project.project_type}</Badge>
+                {project.location && (
+                  <span className="flex items-center text-sm">
+                    <MapPin className="w-4 h-4 mr-1" />{project.location}
+                  </span>
+                )}
+                {project.has_incentive_law && (
+                  <Badge className="bg-violet-500/80 hover:bg-violet-500 text-white border-0">
+                    <Shield className="w-3 h-3 mr-1" />Lei de Incentivo
+                  </Badge>
+                )}
+              </div>
+              <Button variant="secondary" className="rounded-full">
+                <Download className="w-4 h-4 mr-2" />
+                Baixar apresentação em PDF
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div className="container mx-auto px-6 py-12">
+        <div className="grid lg:grid-cols-3 gap-12">
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-12">
+            {/* Video */}
+            {embedUrl && (
+              <section>
+                <h2 className="text-2xl font-serif font-bold text-foreground mb-6 flex items-center gap-2">
+                  <Play className="w-6 h-6 text-primary" />
+                  Vídeo de Apresentação
+                </h2>
+                <div className="relative w-full h-0 pb-[56.25%] rounded-2xl overflow-hidden shadow-lg">
+                  <iframe
+                    src={embedUrl}
+                    className="absolute top-0 left-0 w-full h-full"
+                    frameBorder="0"
+                    allowFullScreen
+                    title="Vídeo de apresentação do projeto"
+                  ></iframe>
+                </div>
+              </section>
+            )}
+
+            {/* Synopsis and Description */}
+            <section>
+              <h2 className="text-2xl font-serif font-bold text-foreground mb-6">Sobre o Projeto</h2>
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-lg font-semibold text-foreground mb-3">Sinopse</h3>
+                  <p className="text-muted-foreground text-lg leading-relaxed">{project.synopsis}</p>
+                </div>
+                {project.description && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-foreground mb-3">Descrição Completa</h3>
+                    <p className="text-muted-foreground leading-relaxed whitespace-pre-line">{project.description}</p>
+                  </div>
+                )}
+              </div>
+            </section>
+
+            {/* Team */}
+            {members.length > 0 && (
+              <section>
+                <h2 className="text-2xl font-serif font-bold text-foreground mb-6 flex items-center gap-2">
+                  <Users className="w-6 h-6 text-primary" />
+                  Ficha Técnica
+                </h2>
+                <div className="grid md:grid-cols-2 gap-4">
+                  {members.map((member) => (
+                    <div key={member.id} className="flex items-center space-x-3 p-4 bg-muted/50 rounded-xl border border-border/50">
+                      <div className="w-12 h-12 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center flex-shrink-0">
+                        <span className="text-primary-foreground text-sm font-semibold">
+                          {getInitials(member.nome)}
+                        </span>
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h4 className="font-semibold text-foreground text-sm">{member.nome}</h4>
+                        {member.funcao && (
+                          <p className="text-xs text-muted-foreground">{member.funcao}</p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Impact */}
+            {(project.impacto_cultural || project.impacto_social || project.publico_alvo || project.diferenciais) && (
+              <section>
+                <h2 className="text-2xl font-serif font-bold text-foreground mb-6 flex items-center gap-2">
+                  <Target className="w-6 h-6 text-primary" />
+                  Impacto do Projeto
+                </h2>
+                <div className="grid md:grid-cols-2 gap-6">
+                  {project.impacto_cultural && (
+                    <div className="bg-primary/5 p-6 rounded-2xl border border-primary/10">
+                      <h3 className="font-semibold text-foreground mb-3 flex items-center">
+                        <Sparkles className="w-5 h-5 text-primary mr-2" />
+                        Impacto Cultural
+                      </h3>
+                      <p className="text-muted-foreground">{project.impacto_cultural}</p>
+                    </div>
+                  )}
+                  {project.impacto_social && (
+                    <div className="bg-emerald-500/5 p-6 rounded-2xl border border-emerald-500/10">
+                      <h3 className="font-semibold text-foreground mb-3 flex items-center">
+                        <Globe className="w-5 h-5 text-emerald-600 dark:text-emerald-400 mr-2" />
+                        Impacto Social
+                      </h3>
+                      <p className="text-muted-foreground">{project.impacto_social}</p>
+                    </div>
+                  )}
+                  {project.publico_alvo && (
+                    <div className="bg-violet-500/5 p-6 rounded-2xl border border-violet-500/10">
+                      <h3 className="font-semibold text-foreground mb-3 flex items-center">
+                        <Users className="w-5 h-5 text-violet-600 dark:text-violet-400 mr-2" />
+                        Público Estimado
+                      </h3>
+                      <p className="text-muted-foreground">{project.publico_alvo}</p>
+                    </div>
+                  )}
+                  {project.diferenciais && (
+                    <div className="bg-amber-500/5 p-6 rounded-2xl border border-amber-500/10">
+                      <h3 className="font-semibold text-foreground mb-3 flex items-center">
+                        <Star className="w-5 h-5 text-amber-600 dark:text-amber-400 mr-2" />
+                        Diferenciais
+                      </h3>
+                      <p className="text-muted-foreground">{project.diferenciais}</p>
+                    </div>
                   )}
                 </div>
-                <h1 className="text-3xl md:text-4xl font-handwritten font-bold text-foreground mb-4">
-                  {project.title}
-                </h1>
-                <p className="text-lg text-muted-foreground">
-                  {project.synopsis}
-                </p>
-              </div>
+              </section>
+            )}
 
-              {/* Meta Info */}
-              <div className="grid md:grid-cols-3 gap-4 mb-8 p-4 bg-muted/50 rounded-lg">
-                {project.location && (
-                  <div className="flex items-center gap-2">
-                    <MapPin className="w-5 h-5 text-muted-foreground" />
-                    <div>
-                      <p className="text-xs text-muted-foreground">Localização</p>
-                      <p className="font-medium">{project.location}</p>
-                    </div>
-                  </div>
-                )}
-                {project.budget && (
-                  <div className="flex items-center gap-2">
-                    <DollarSign className="w-5 h-5 text-muted-foreground" />
-                    <div>
-                      <p className="text-xs text-muted-foreground">Orçamento</p>
-                      <p className="font-medium">{project.budget}</p>
-                    </div>
-                  </div>
-                )}
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-5 h-5 text-muted-foreground" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">Publicado em</p>
-                    <p className="font-medium">
-                      {new Date(project.created_at).toLocaleDateString("pt-BR")}
-                    </p>
-                  </div>
+            {/* Incentive Law */}
+            {project.has_incentive_law && project.incentive_law_details && (
+              <section>
+                <h2 className="text-2xl font-serif font-bold text-foreground mb-6 flex items-center gap-2">
+                  <Shield className="w-6 h-6 text-primary" />
+                  Lei de Incentivo
+                </h2>
+                <div className="p-6 bg-primary/5 border border-primary/20 rounded-2xl">
+                  <p className="text-muted-foreground">{project.incentive_law_details}</p>
                 </div>
-              </div>
+              </section>
+            )}
 
-              {/* Description */}
-              {project.description && (
-                <div className="mb-8">
-                  <h2 className="text-xl font-handwritten font-semibold mb-4">Sobre o Projeto</h2>
-                  <div className="prose prose-neutral max-w-none">
-                    <p className="text-muted-foreground whitespace-pre-wrap">
-                      {project.description}
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {/* Incentive Law */}
-              {project.has_incentive_law && project.incentive_law_details && (
-                <div className="mb-8 p-4 bg-primary/5 border border-primary/20 rounded-lg">
-                  <h3 className="font-semibold mb-2 text-primary">Lei de Incentivo</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {project.incentive_law_details}
-                  </p>
-                </div>
-              )}
-
-              {/* Media Link */}
-              {project.media_url && (
-                <div className="mb-8">
-                  <h3 className="font-semibold mb-2">Material de Apoio</h3>
-                  <a
-                    href={project.media_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-primary hover:underline"
-                  >
-                    Acessar material
-                    <ExternalLink className="w-4 h-4" />
-                  </a>
-                </div>
-              )}
-
-              {/* Actions */}
-              <div className="mt-8 pt-6 border-t flex flex-wrap gap-4">
-                <Link to="/">
-                  <Button variant="outline">
-                    <ArrowLeft className="w-4 h-4 mr-2" />
-                    Voltar
+            {/* Documents Section */}
+            <section>
+              <h2 className="text-2xl font-serif font-bold text-foreground mb-6 flex items-center gap-2">
+                <FileText className="w-6 h-6 text-primary" />
+                Documentos do Projeto
+              </h2>
+              <div className="text-center p-8 bg-muted/50 rounded-2xl border border-border">
+                <Lock className="w-12 h-12 text-muted-foreground/50 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-foreground mb-2">Documentos Restritos</h3>
+                <p className="text-muted-foreground mb-6">Para acessar os documentos completos do projeto, você precisa ter uma conta verificada.</p>
+                <Link to="/auth">
+                  <Button className="rounded-full">
+                    Criar Conta Verificada
                   </Button>
                 </Link>
-                <Button>
-                  Entrar em Contato
+              </div>
+            </section>
+          </div>
+
+          {/* Sidebar */}
+          <div className="lg:col-span-1">
+            <div className="sticky top-24 space-y-6">
+              {/* Project Info */}
+              <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+                <h3 className="font-serif font-bold text-xl text-foreground mb-4">Informações do Projeto</h3>
+                <div className="space-y-4">
+                  <div>
+                    <span className="text-sm text-muted-foreground">Orçamento Total</span>
+                    <div className="text-2xl font-bold text-foreground">
+                      {project.valor_sugerido ? formatBudget(project.valor_sugerido) : (project.budget || "A definir")}
+                    </div>
+                  </div>
+                  <div>
+                    <span className="text-sm text-muted-foreground">Publicado em</span>
+                    <div className="font-medium text-foreground">
+                      {new Date(project.created_at).toLocaleDateString("pt-BR")}
+                    </div>
+                  </div>
+                  {project.categorias_tags && project.categorias_tags.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {project.categorias_tags.map((tag, index) => (
+                        <Badge key={index} variant="secondary" className="rounded-full">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-4">
+                <h3 className="font-serif font-bold text-lg text-foreground mb-4">Ações</h3>
+                <Button className="w-full rounded-full" size="lg">
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  Solicitar Conexão
+                </Button>
+                {project.link_pagamento && (
+                  <a href={project.link_pagamento} target="_blank" rel="noopener noreferrer" className="block">
+                    <Button variant="secondary" className="w-full rounded-full bg-emerald-500 hover:bg-emerald-600 text-white" size="lg">
+                      <HandHeart className="w-4 h-4 mr-2" />
+                      Quero Apoiar
+                    </Button>
+                  </a>
+                )}
+                <Button 
+                  variant="outline"
+                  className={`w-full rounded-full ${isFavorited ? 'bg-red-50 text-red-600 border-red-200 dark:bg-red-900/20 dark:border-red-800' : ''}`}
+                  size="lg"
+                  onClick={() => setIsFavorited(!isFavorited)}
+                >
+                  <Heart className={`w-4 h-4 mr-2 ${isFavorited ? 'fill-current' : ''}`} />
+                  {isFavorited ? 'Salvo nos Favoritos' : 'Salvar nos Favoritos'}
                 </Button>
               </div>
-            </CardContent>
-          </Card>
+
+              {/* Creator Info */}
+              <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+                <h3 className="font-serif font-bold text-lg text-foreground mb-4">Criador do Projeto</h3>
+                <div className="flex items-center space-x-3 mb-4">
+                  <div className="w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center">
+                    <span className="text-primary-foreground text-lg font-semibold">
+                      {project.responsavel_nome ? getInitials(project.responsavel_nome) : 'PC'}
+                    </span>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-foreground flex items-center">
+                      {project.responsavel_nome || "Produtor Cultural"}
+                      <CheckCircle className="w-4 h-4 text-primary ml-2" />
+                    </h4>
+                    <p className="text-sm text-muted-foreground">Produtor(a) Cultural</p>
+                  </div>
+                </div>
+                <Button variant="outline" className="w-full rounded-full">
+                  Ver Perfil Completo
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
-      </main>
+      </div>
+
+      {/* Footer */}
+      <footer className="bg-foreground text-background py-16 mt-16">
+        <div className="container mx-auto px-6">
+          <div className="grid md:grid-cols-4 gap-8">
+            <div className="col-span-2 md:col-span-1">
+              <div className="flex items-center gap-2 mb-4">
+                <Anchor className="w-8 h-8 text-primary" />
+                <span className="text-2xl font-handwritten font-bold text-primary">
+                  Porto de Ideias
+                </span>
+              </div>
+              <p className="text-background/70 mb-4">
+                O Porto de Ideias é uma iniciativa da Porto Bello Filmes, criada para aproximar cultura e investimento.
+              </p>
+              <p className="text-background/70 mb-6 text-sm">
+                Onde a cultura encontra o investimento, e o investimento encontra propósito.
+              </p>
+              <div className="flex space-x-4">
+                <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center cursor-pointer hover:bg-primary/80 transition-colors">
+                  <Facebook className="w-5 h-5 text-primary-foreground" />
+                </div>
+                <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center cursor-pointer hover:bg-primary/80 transition-colors">
+                  <Twitter className="w-5 h-5 text-primary-foreground" />
+                </div>
+                <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center cursor-pointer hover:bg-primary/80 transition-colors">
+                  <Instagram className="w-5 h-5 text-primary-foreground" />
+                </div>
+                <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center cursor-pointer hover:bg-primary/80 transition-colors">
+                  <Linkedin className="w-5 h-5 text-primary-foreground" />
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="font-bold text-lg mb-4 text-background">Plataforma</h3>
+              <ul className="space-y-2 text-background/70">
+                <li><a href="#" className="hover:text-background transition-colors cursor-pointer">Como Funciona</a></li>
+                <li><a href="#" className="hover:text-background transition-colors cursor-pointer">Enviar Projeto</a></li>
+                <li><a href="#" className="hover:text-background transition-colors cursor-pointer">Encontrar Investidores</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="font-bold text-lg mb-4 text-background">Recursos</h3>
+              <ul className="space-y-2 text-background/70">
+                <li><a href="#" className="hover:text-background transition-colors cursor-pointer">Blog</a></li>
+                <li><a href="#" className="hover:text-background transition-colors cursor-pointer">Guias</a></li>
+                <li><a href="#" className="hover:text-background transition-colors cursor-pointer">FAQ</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="font-bold text-lg mb-4 text-background">Contato</h3>
+              <ul className="space-y-2 text-background/70">
+                <li className="flex items-center space-x-2">
+                  <Mail className="w-4 h-4" />
+                  <span>portobellofilmes@gmail.com</span>
+                </li>
+                <li className="flex items-center space-x-2">
+                  <Phone className="w-4 h-4" />
+                  <span>+55 (11) 9999-9999</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="border-t border-background/20 mt-12 pt-8 text-center text-background/70">
+            <p>&copy; 2024 Porto de Ideias. Todos os direitos reservados.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };
