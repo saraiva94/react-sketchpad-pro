@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, X, Home, Lightbulb } from "lucide-react";
+import { Menu, X, Home } from "lucide-react";
 
 interface NavbarProps {
   showNav?: boolean;
@@ -42,22 +42,6 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
         {/* Desktop Navigation */}
         {showNav && (
           <nav className="hidden md:flex items-center gap-4">
-            <Link to="/porto-de-ideias" className="group flex items-center gap-2">
-              <div className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:rotate-12 ${
-                currentPage === "porto-de-ideias" 
-                  ? "bg-gradient-to-br from-accent to-primary shadow-glow" 
-                  : "bg-gradient-to-br from-accent/80 to-primary/80 group-hover:from-accent group-hover:to-primary group-hover:shadow-glow"
-              }`}>
-                <Lightbulb className="w-4 h-4 text-primary-foreground" />
-              </div>
-              <span className={`text-xl font-handwritten font-bold transition-colors duration-300 ${
-                currentPage === "porto-de-ideias" 
-                  ? "text-accent" 
-                  : "text-foreground group-hover:text-accent"
-              }`}>
-                Porto de Idéias
-              </span>
-            </Link>
             <ThemeToggle />
           </nav>
         )}
@@ -118,28 +102,6 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
                         : "text-foreground group-hover:text-primary"
                     }`}>
                       Homepage
-                    </span>
-                  </Link>
-                  
-                  {/* Porto de Idéias */}
-                  <Link 
-                    to="/porto-de-ideias"
-                    onClick={handleNavClick}
-                    className="group flex items-center gap-3"
-                  >
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:rotate-12 ${
-                      currentPage === "porto-de-ideias" 
-                        ? "bg-gradient-to-br from-accent to-primary shadow-glow" 
-                        : "bg-gradient-to-br from-accent/80 to-primary/80 group-hover:from-accent group-hover:to-primary"
-                    }`}>
-                      <Lightbulb className="w-5 h-5 text-primary-foreground" />
-                    </div>
-                    <span className={`text-2xl font-handwritten font-bold transition-colors duration-300 ${
-                      currentPage === "porto-de-ideias" 
-                        ? "text-accent" 
-                        : "text-foreground group-hover:text-accent"
-                    }`}>
-                      Porto de Idéias
                     </span>
                   </Link>
                 </nav>
