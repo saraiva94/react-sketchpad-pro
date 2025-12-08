@@ -1,366 +1,477 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Navbar } from "@/components/Navbar";
+import { supabase } from "@/integrations/supabase/client";
 import { 
-  Lightbulb, 
-  Handshake, 
-  TrendingUp,
-  Presentation,
-  Shield,
-  BarChart3,
   Search,
-  FileText,
-  Heart,
+  MapPin,
   ArrowRight,
+  LayoutGrid,
+  List,
+  X,
+  Shield,
+  Anchor,
   Mail,
   Phone,
-  MapPin,
   Facebook,
-  Instagram,
-  Linkedin,
   Twitter,
-  Anchor
+  Instagram,
+  Linkedin
 } from "lucide-react";
 
+interface Project {
+  id: string;
+  title: string;
+  synopsis: string;
+  project_type: string;
+  image_url: string | null;
+  location: string | null;
+  categorias_tags: string[] | null;
+  responsavel_nome: string | null;
+  valor_sugerido: number | null;
+  budget: string | null;
+  has_incentive_law: boolean;
+  incentive_law_details: string | null;
+}
+
+const categories = ["Todos", "Artes Visuais", "Teatro", "Música", "Audiovisual", "Educação Cultural", "Dança", "Literatura", "Patrimônio"];
+const locations = ["Todas", "São Paulo", "Rio de Janeiro", "Belo Horizonte", "Brasília", "Salvador", "Recife", "Porto Alegre", "Manaus", "Curitiba"];
+const budgetRanges = [
+  { value: "all", label: "Todos os Portes" },
+  { value: "small", label: "Pequeno Porte" },
+  { value: "medium", label: "Médio Porte" },
+  { value: "large", label: "Grande Porte" }
+];
+const projectStages = [
+  { value: "all", label: "Todos os Estágios" },
+  { value: "development", label: "Desenvolvimento" },
+  { value: "production", label: "Produção" },
+  { value: "distribution", label: "Difusão" }
+];
+const incentiveLaws = [
+  { value: "all", label: "Todas as Leis" },
+  { value: "rouanet", label: "Lei Rouanet" },
+  { value: "audiovisual", label: "Lei do Audiovisual" },
+  { value: "proac", label: "PROAC" },
+  { value: "none", label: "Sem Lei de Incentivo" }
+];
+const sortOptions = [
+  { value: "recent", label: "Mais Recentes" },
+  { value: "name", label: "Nome A-Z" },
+  { value: "budget-asc", label: "Menor Orçamento" },
+  { value: "budget-desc", label: "Maior Orçamento" }
+];
+
 const PortoDeIdeiasPage = () => {
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  
+  // Filters
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("Todos");
+  const [selectedLocation, setSelectedLocation] = useState("Todas");
+  const [selectedBudgetRange, setSelectedBudgetRange] = useState("all");
+  const [selectedStage, setSelectedStage] = useState("all");
+  const [selectedIncentiveLaw, setSelectedIncentiveLaw] = useState("all");
+  const [sortBy, setSortBy] = useState("recent");
+
+  useEffect(() => {
+    fetchProjects();
+  }, []);
+
+  const fetchProjects = async () => {
+    const { data } = await supabase
+      .from("projects")
+      .select("id, title, synopsis, project_type, image_url, location, categorias_tags, responsavel_nome, valor_sugerido, budget, has_incentive_law, incentive_law_details")
+      .eq("status", "approved")
+      .order("created_at", { ascending: false });
+    
+    setProjects(data || []);
+    setLoading(false);
+  };
+
+  const formatBudget = (value: number | null): string => {
+    if (!value) return "A definir";
+    if (value >= 1000000) {
+      return `R$ ${(value / 1000000).toFixed(1)}M`;
+    } else if (value >= 1000) {
+      return `R$ ${(value / 1000).toFixed(0)}k`;
+    }
+    return `R$ ${value.toLocaleString('pt-BR')}`;
+  };
+
+  const getBudgetRange = (value: number | null): { label: string; color: string } => {
+    if (!value) return { label: "A definir", color: "bg-muted text-muted-foreground" };
+    if (value < 100000) return { label: "Pequeno", color: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400" };
+    if (value < 500000) return { label: "Médio", color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400" };
+    return { label: "Grande", color: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400" };
+  };
+
+  const getStageInfo = (): { label: string; color: string } => {
+    // Simulating stage based on project - in real app this would come from DB
+    const stages = [
+      { label: "Desenvolvimento", color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400" },
+      { label: "Produção", color: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400" },
+      { label: "Difusão", color: "bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-400" }
+    ];
+    return stages[Math.floor(Math.random() * stages.length)];
+  };
+
+  const getInitials = (name: string | null): string => {
+    if (!name) return "PC";
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  };
+
+  const filteredProjects = projects.filter(project => {
+    const matchesSearch = 
+      project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      project.synopsis.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      project.categorias_tags?.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+    
+    const matchesCategory = selectedCategory === "Todos" || project.project_type === selectedCategory;
+    const matchesLocation = selectedLocation === "Todas" || project.location === selectedLocation;
+    
+    let matchesBudgetRange = true;
+    if (selectedBudgetRange !== "all" && project.valor_sugerido) {
+      if (selectedBudgetRange === "small") matchesBudgetRange = project.valor_sugerido < 100000;
+      else if (selectedBudgetRange === "medium") matchesBudgetRange = project.valor_sugerido >= 100000 && project.valor_sugerido < 500000;
+      else if (selectedBudgetRange === "large") matchesBudgetRange = project.valor_sugerido >= 500000;
+    }
+
+    let matchesIncentiveLaw = true;
+    if (selectedIncentiveLaw !== "all") {
+      if (selectedIncentiveLaw === "none") matchesIncentiveLaw = !project.has_incentive_law;
+      else matchesIncentiveLaw = project.has_incentive_law;
+    }
+
+    return matchesSearch && matchesCategory && matchesLocation && matchesBudgetRange && matchesIncentiveLaw;
+  });
+
+  const sortedProjects = [...filteredProjects].sort((a, b) => {
+    switch (sortBy) {
+      case "name":
+        return a.title.localeCompare(b.title);
+      case "budget-asc":
+        return (a.valor_sugerido || 0) - (b.valor_sugerido || 0);
+      case "budget-desc":
+        return (b.valor_sugerido || 0) - (a.valor_sugerido || 0);
+      default:
+        return 0; // Already sorted by recent from DB
+    }
+  });
+
+  const clearFilters = () => {
+    setSearchTerm("");
+    setSelectedCategory("Todos");
+    setSelectedLocation("Todas");
+    setSelectedBudgetRange("all");
+    setSelectedStage("all");
+    setSelectedIncentiveLaw("all");
+    setSortBy("recent");
+  };
+
+  const hasActiveFilters = searchTerm || selectedCategory !== "Todos" || selectedLocation !== "Todas" || 
+    selectedBudgetRange !== "all" || selectedStage !== "all" || selectedIncentiveLaw !== "all";
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar currentPage="porto-de-ideias" />
 
-      {/* Hero Section */}
-      <section id="home" className="relative py-20 lg:py-32 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-accent/5 to-background" />
-        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
-        
-        <div className="container mx-auto px-6 relative z-10">
-          <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-4xl md:text-6xl font-serif font-bold text-foreground mb-6 leading-tight">
-              Onde a Cultura Encontra o <span className="text-primary">Investimento</span>
-            </h1>
-            <p className="text-xl md:text-2xl text-muted-foreground mb-8 leading-relaxed">
-              Conectando o setor cultural com empreendedores e investidores, criando um espaço onde projetos ganham visibilidade e se conectam com os parceiros certos.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6">
-              <Link to="/auth">
-                <Button size="lg" className="px-8 py-6 rounded-full text-lg font-semibold shadow-lg hover:shadow-glow transition-all">
-                  Cadastre seu Projeto Agora
-                </Button>
-              </Link>
-              <Link to="/projetos">
-                <Button size="lg" variant="outline" className="px-8 py-6 rounded-full text-lg font-semibold border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all">
-                  Descubra Projetos para Apoiar
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Projects Preview */}
-      <section id="projects" className="py-20 bg-card">
+      {/* Header */}
+      <section className="bg-gradient-to-br from-primary/10 via-accent/5 to-background py-16">
         <div className="container mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-serif font-bold text-foreground mb-6">Projetos Culturais em Destaque</h2>
+          <div className="text-center">
+            <h1 className="text-3xl md:text-4xl font-serif font-bold text-foreground mb-4">Explore Projetos Culturais</h1>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Descubra iniciativas culturais inovadoras que buscam oportunidades de investimento e parceria.
+              Descubra iniciativas culturais inovadoras em busca de investimento e parceria estratégica.
             </p>
           </div>
+        </div>
+      </section>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Project Card 1 */}
-            <div className="bg-background border border-border rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow cursor-pointer group">
-              <div className="h-48 bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-                <span className="text-6xl">🎨</span>
-              </div>
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="bg-primary/10 text-primary text-sm font-medium px-3 py-1 rounded-full">Artes Visuais</span>
-                  <span className="text-muted-foreground text-sm">São Paulo</span>
-                </div>
-                <h3 className="font-bold text-xl text-foreground mb-3">Galeria de Arte Contemporânea</h3>
-                <p className="text-muted-foreground mb-4">Um espaço de galeria moderna dedicado a artistas contemporâneos emergentes, oferecendo oportunidades de exposição.</p>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
-                      <span className="text-primary text-sm font-bold">MS</span>
-                    </div>
-                    <span className="text-sm text-muted-foreground">Maria Santos</span>
-                  </div>
-                  <span className="text-primary font-semibold group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
-                    Ver Detalhes <ArrowRight className="w-4 h-4" />
-                  </span>
-                </div>
-              </div>
+      {/* Filters */}
+      <section className="py-6 bg-card border-b border-border sticky top-20 z-40">
+        <div className="container mx-auto px-6">
+          <div className="flex flex-wrap gap-3 items-center">
+            {/* Search */}
+            <div className="relative flex-1 min-w-[200px] max-w-xs">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Buscar projetos..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-9 rounded-full"
+              />
             </div>
 
-            {/* Project Card 2 */}
-            <div className="bg-background border border-border rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow cursor-pointer group">
-              <div className="h-48 bg-gradient-to-br from-violet-500/20 to-purple-500/20 flex items-center justify-center">
-                <span className="text-6xl">🎭</span>
-              </div>
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="bg-violet-500/10 text-violet-600 dark:text-violet-400 text-sm font-medium px-3 py-1 rounded-full">Teatro</span>
-                  <span className="text-muted-foreground text-sm">Rio de Janeiro</span>
-                </div>
-                <h3 className="font-bold text-xl text-foreground mb-3">Iniciativa de Teatro Comunitário</h3>
-                <p className="text-muted-foreground mb-4">Construindo um espaço teatral comunitário que reúne talentos locais e oferece entretenimento cultural acessível.</p>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-8 h-8 bg-violet-500/20 rounded-full flex items-center justify-center">
-                      <span className="text-violet-600 dark:text-violet-400 text-sm font-bold">JS</span>
-                    </div>
-                    <span className="text-sm text-muted-foreground">João Silva</span>
-                  </div>
-                  <span className="text-primary font-semibold group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
-                    Ver Detalhes <ArrowRight className="w-4 h-4" />
-                  </span>
-                </div>
-              </div>
-            </div>
+            {/* Category */}
+            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <SelectTrigger className="w-[140px] rounded-full">
+                <SelectValue placeholder="Categoria" />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.map(cat => (
+                  <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
-            {/* Project Card 3 */}
-            <div className="bg-background border border-border rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow cursor-pointer group">
-              <div className="h-48 bg-gradient-to-br from-emerald-500/20 to-green-500/20 flex items-center justify-center">
-                <span className="text-6xl">🎵</span>
-              </div>
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-sm font-medium px-3 py-1 rounded-full">Música</span>
-                  <span className="text-muted-foreground text-sm">Belo Horizonte</span>
-                </div>
-                <h3 className="font-bold text-xl text-foreground mb-3">Festival Cultural de Música</h3>
-                <p className="text-muted-foreground mb-4">Festival anual celebrando tradições musicais regionais enquanto promove artistas emergentes e diversidade cultural.</p>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-8 h-8 bg-emerald-500/20 rounded-full flex items-center justify-center">
-                      <span className="text-emerald-600 dark:text-emerald-400 text-sm font-bold">AC</span>
-                    </div>
-                    <span className="text-sm text-muted-foreground">Ana Costa</span>
-                  </div>
-                  <span className="text-primary font-semibold group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
-                    Ver Detalhes <ArrowRight className="w-4 h-4" />
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
+            {/* Budget Range */}
+            <Select value={selectedBudgetRange} onValueChange={setSelectedBudgetRange}>
+              <SelectTrigger className="w-[150px] rounded-full">
+                <SelectValue placeholder="Porte" />
+              </SelectTrigger>
+              <SelectContent>
+                {budgetRanges.map(range => (
+                  <SelectItem key={range.value} value={range.value}>{range.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
-          <div className="text-center mt-12">
-            <Link to="/projetos">
-              <Button variant="outline" size="lg" className="rounded-full px-8 border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground">
-                Ver Todos os Projetos
+            {/* Stage */}
+            <Select value={selectedStage} onValueChange={setSelectedStage}>
+              <SelectTrigger className="w-[160px] rounded-full">
+                <SelectValue placeholder="Estágio" />
+              </SelectTrigger>
+              <SelectContent>
+                {projectStages.map(stage => (
+                  <SelectItem key={stage.value} value={stage.value}>{stage.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* Incentive Law */}
+            <Select value={selectedIncentiveLaw} onValueChange={setSelectedIncentiveLaw}>
+              <SelectTrigger className="w-[140px] rounded-full">
+                <SelectValue placeholder="Lei" />
+              </SelectTrigger>
+              <SelectContent>
+                {incentiveLaws.map(law => (
+                  <SelectItem key={law.value} value={law.value}>{law.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* Location */}
+            <Select value={selectedLocation} onValueChange={setSelectedLocation}>
+              <SelectTrigger className="w-[130px] rounded-full">
+                <SelectValue placeholder="Local" />
+              </SelectTrigger>
+              <SelectContent>
+                {locations.map(loc => (
+                  <SelectItem key={loc} value={loc}>{loc}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* Sort */}
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="w-[150px] rounded-full">
+                <SelectValue placeholder="Ordenar" />
+              </SelectTrigger>
+              <SelectContent>
+                {sortOptions.map(opt => (
+                  <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* Clear Filters */}
+            {hasActiveFilters && (
+              <Button variant="outline" size="sm" onClick={clearFilters} className="rounded-full">
+                <X className="w-4 h-4 mr-1" />
+                Limpar Filtros
               </Button>
-            </Link>
+            )}
           </div>
         </div>
       </section>
 
-      {/* Mission Section */}
-      <section id="about" className="py-20 bg-muted/50">
+      {/* Projects List */}
+      <section className="py-8">
         <div className="container mx-auto px-6">
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl font-serif font-bold text-foreground mb-8">Nossa Missão</h2>
-            <p className="text-xl text-muted-foreground leading-relaxed mb-12">
-              Nossa missão é simples, mas transformadora: garantir que as iniciativas culturais recebam a atenção que merecem, aproximando criadores daqueles que podem apoiar, financiar e fortalecer a cultura.
+          {/* Results Header */}
+          <div className="flex items-center justify-between mb-6">
+            <p className="text-lg font-medium text-foreground">
+              {sortedProjects.length} projeto{sortedProjects.length !== 1 ? 's' : ''} encontrado{sortedProjects.length !== 1 ? 's' : ''}
             </p>
-            
-            <div className="grid md:grid-cols-3 gap-8">
-              <div className="bg-background p-8 rounded-2xl shadow-sm border border-border hover:shadow-lg transition-shadow">
-                <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-6">
-                  <Lightbulb className="w-8 h-8 text-primary-foreground" />
-                </div>
-                <h3 className="text-xl font-bold text-foreground mb-4">Para Criadores</h3>
-                <p className="text-muted-foreground">
-                  Mostre seu projeto para quem pode investir de verdade. Não mais apresentações perdidas ou projetos esquecidos em gavetas.
-                </p>
-              </div>
-
-              <div className="bg-background p-8 rounded-2xl shadow-sm border border-border hover:shadow-lg transition-shadow">
-                <div className="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <Handshake className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="text-xl font-bold text-foreground mb-4">Para Investidores</h3>
-                <p className="text-muted-foreground">
-                  💰 Encontre oportunidades culturais seguras e bem estruturadas. Projetos curados, sérios e prontos para decolar.
-                </p>
-              </div>
-
-              <div className="bg-background p-8 rounded-2xl shadow-sm border border-border hover:shadow-lg transition-shadow">
-                <div className="w-16 h-16 bg-violet-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <TrendingUp className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="text-xl font-bold text-foreground mb-4">Para Todos</h3>
-                <p className="text-muted-foreground">
-                  🌟 Criamos um ciclo virtuoso: cultura ganha força, investidores encontram propósito, e a sociedade se beneficia.
-                </p>
-              </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
+                size="icon"
+                onClick={() => setViewMode('grid')}
+                className="rounded-lg"
+              >
+                <LayoutGrid className="w-4 h-4" />
+              </Button>
+              <Button
+                variant={viewMode === 'list' ? 'secondary' : 'ghost'}
+                size="icon"
+                onClick={() => setViewMode('list')}
+                className="rounded-lg"
+              >
+                <List className="w-4 h-4" />
+              </Button>
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* Platform Features */}
-      <section id="platform" className="py-20 bg-background">
-        <div className="container mx-auto px-6">
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-serif font-bold text-foreground mb-6">Um Ecossistema de Conexões</h2>
-              <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-                Mais que uma vitrine, somos um porto seguro onde as ideias atracam, ganham força e partem para o mundo.
-              </p>
-            </div>
-
-            <div className="grid lg:grid-cols-2 gap-16 items-center mb-20">
-              {/* For Producers */}
-              <div>
-                <h3 className="text-2xl font-bold text-foreground mb-6">Para Produtores Culturais</h3>
-                <div className="space-y-6">
-                  <div className="flex items-start space-x-4">
-                    <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
-                      <Presentation className="text-primary-foreground w-6 h-6" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-foreground mb-2">Vitrine de Projetos</h4>
-                      <p className="text-muted-foreground">Apresente suas iniciativas culturais com visibilidade profissional e informações detalhadas do projeto.</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start space-x-4">
-                    <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
-                      <Shield className="text-primary-foreground w-6 h-6" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-foreground mb-2">Credibilidade e Confiança</h4>
-                      <p className="text-muted-foreground">Construa confiança com perfis verificados e documentação abrangente do projeto.</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start space-x-4">
-                    <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
-                      <BarChart3 className="text-primary-foreground w-6 h-6" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-foreground mb-2">Dashboard Completo</h4>
-                      <p className="text-muted-foreground">Acompanhe visualizações, favoritos e conexões solicitadas em tempo real.</p>
-                    </div>
+          {/* Loading State */}
+          {loading ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i} className="animate-pulse bg-card rounded-2xl overflow-hidden border border-border">
+                  <div className="h-48 bg-muted" />
+                  <div className="p-5 space-y-3">
+                    <div className="h-4 bg-muted rounded w-1/3" />
+                    <div className="h-6 bg-muted rounded w-3/4" />
+                    <div className="h-16 bg-muted rounded" />
                   </div>
                 </div>
+              ))}
+            </div>
+          ) : sortedProjects.length > 0 ? (
+            <div className={viewMode === 'grid' 
+              ? "grid md:grid-cols-2 lg:grid-cols-3 gap-6" 
+              : "flex flex-col gap-4"
+            }>
+              {sortedProjects.map((project, index) => {
+                const budgetInfo = getBudgetRange(project.valor_sugerido);
+                const stageInfo = getStageInfo();
+                
+                return (
+                  <Link 
+                    key={project.id}
+                    to={`/project/${project.id}`}
+                    className="block group animate-fade-in"
+                    style={{ animationDelay: `${index * 50}ms` }}
+                  >
+                    <div className={`bg-card border border-border rounded-2xl overflow-hidden hover:shadow-xl hover:border-primary/30 transition-all duration-300 ${
+                      viewMode === 'list' ? 'flex' : ''
+                    }`}>
+                      {/* Image */}
+                      <div className={`relative overflow-hidden ${
+                        viewMode === 'list' ? 'w-64 flex-shrink-0' : 'h-48'
+                      }`}>
+                        {project.image_url ? (
+                          <img
+                            src={project.image_url}
+                            alt={project.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-primary/20 via-accent/10 to-primary/20 flex items-center justify-center">
+                            <span className="text-4xl font-handwritten text-primary/40">{project.title.charAt(0)}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Content */}
+                      <div className="p-5 flex-1">
+                        {/* Category, Budget Range, Location */}
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-2">
+                            <Badge variant="secondary" className="rounded-full text-xs">
+                              {project.project_type}
+                            </Badge>
+                            <Badge className={`rounded-full text-xs ${budgetInfo.color}`}>
+                              {budgetInfo.label}
+                            </Badge>
+                          </div>
+                          {project.location && (
+                            <span className="flex items-center text-xs text-muted-foreground">
+                              <MapPin className="w-3 h-3 mr-1" />
+                              {project.location}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Title */}
+                        <h3 className="font-bold text-lg text-foreground mb-2 line-clamp-1 group-hover:text-primary transition-colors">
+                          {project.title}
+                        </h3>
+
+                        {/* Synopsis */}
+                        <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                          {project.synopsis}
+                        </p>
+
+                        {/* Budget & Stage */}
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="font-bold text-foreground">
+                            {formatBudget(project.valor_sugerido)}
+                          </span>
+                          <Badge className={`rounded-full text-xs ${stageInfo.color}`}>
+                            {stageInfo.label}
+                          </Badge>
+                        </div>
+
+                        {/* Incentive Law */}
+                        {project.has_incentive_law && (
+                          <div className="mb-3">
+                            <Badge variant="outline" className="rounded-full text-xs border-primary/30 text-primary">
+                              <Shield className="w-3 h-3 mr-1" />
+                              {project.incentive_law_details || "Lei de Incentivo"}
+                            </Badge>
+                          </div>
+                        )}
+
+                        {/* Tags */}
+                        {project.categorias_tags && project.categorias_tags.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mb-4">
+                            {project.categorias_tags.slice(0, 3).map((tag, i) => (
+                              <Badge key={i} variant="outline" className="rounded-full text-xs bg-muted/50">
+                                {tag}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Creator & Link */}
+                        <div className="flex items-center justify-between pt-3 border-t border-border">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                              <span className="text-xs text-primary-foreground font-semibold">
+                                {getInitials(project.responsavel_nome)}
+                              </span>
+                            </div>
+                            <span className="text-sm text-muted-foreground">
+                              {project.responsavel_nome || "Produtor Cultural"}
+                            </span>
+                          </div>
+                          <span className="text-sm font-medium text-primary flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            Ver Detalhes
+                            <ArrowRight className="w-4 h-4" />
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="text-center py-16">
+              <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
+                <Search className="w-10 h-10 text-muted-foreground/50" />
               </div>
-
-              <div className="relative">
-                <div className="w-full h-80 bg-gradient-to-br from-primary/10 via-accent/10 to-primary/5 rounded-2xl shadow-xl flex items-center justify-center">
-                  <div className="text-center">
-                    <span className="text-8xl">🎨</span>
-                    <p className="mt-4 text-muted-foreground font-medium">Produtores Culturais</p>
-                  </div>
-                </div>
-              </div>
+              <h3 className="text-xl font-semibold text-foreground mb-2">Nenhum projeto encontrado</h3>
+              <p className="text-muted-foreground mb-6">Tente ajustar os filtros ou buscar por outros termos.</p>
+              <Button onClick={clearFilters} variant="outline" className="rounded-full">
+                Limpar Filtros
+              </Button>
             </div>
-
-            <div className="grid lg:grid-cols-2 gap-16 items-center">
-              <div className="lg:order-2">
-                <h3 className="text-2xl font-bold text-foreground mb-6">Para Empreendedores e Investidores</h3>
-                <div className="space-y-6">
-                  <div className="flex items-start space-x-4">
-                    <div className="w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center flex-shrink-0">
-                      <Search className="text-white w-6 h-6" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-foreground mb-2">Seleção Curada</h4>
-                      <p className="text-muted-foreground">Acesso a uma seleção cuidadosamente curada de propostas culturais sérias, criativas e bem estruturadas.</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start space-x-4">
-                    <div className="w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center flex-shrink-0">
-                      <FileText className="text-white w-6 h-6" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-foreground mb-2">Marco Legal</h4>
-                      <p className="text-muted-foreground">Projetos prontos para financiamento através de leis de incentivo cultural ou patrocínio direto.</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start space-x-4">
-                    <div className="w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center flex-shrink-0">
-                      <Heart className="text-white w-6 h-6" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-foreground mb-2">Dashboard Personalizado</h4>
-                      <p className="text-muted-foreground">Gerencie projetos salvos, histórico de contatos e relatórios de impacto das iniciativas apoiadas.</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="lg:order-1 relative">
-                <div className="w-full h-80 bg-gradient-to-br from-emerald-500/10 via-green-500/10 to-emerald-500/5 rounded-2xl shadow-xl flex items-center justify-center">
-                  <div className="text-center">
-                    <span className="text-8xl">💼</span>
-                    <p className="mt-4 text-muted-foreground font-medium">Investidores</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Statistics */}
-      <section className="py-20 bg-primary">
-        <div className="container mx-auto px-6">
-          <div className="grid md:grid-cols-4 gap-8 text-center text-primary-foreground">
-            <div>
-              <div className="text-4xl font-bold mb-2">150+</div>
-              <div className="text-primary-foreground/80">Projetos Culturais</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold mb-2">85</div>
-              <div className="text-primary-foreground/80">Investidores Ativos</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold mb-2">R$ 10M</div>
-              <div className="text-primary-foreground/80">Total Financiado</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold mb-2">92%</div>
-              <div className="text-primary-foreground/80">Taxa de Sucesso</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-primary to-accent">
-        <div className="container mx-auto px-6 text-center">
-          <div className="max-w-3xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-serif font-bold text-primary-foreground mb-6">
-              Pronto para Transformar o Investimento Cultural?
-            </h2>
-            <p className="text-xl text-primary-foreground/90 mb-8">
-              Entre no Porto de Ideias hoje e faça parte de um ecossistema onde a cultura encontra o investimento, e o investimento encontra propósito.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6">
-              <Link to="/auth">
-                <Button size="lg" variant="secondary" className="px-8 py-6 rounded-full text-lg font-semibold shadow-lg">
-                  Cadastre seu Projeto Agora
-                </Button>
-              </Link>
-              <Link to="/projetos">
-                <Button size="lg" variant="outline" className="px-8 py-6 rounded-full text-lg font-semibold border-2 border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary">
-                  Descubra Projetos para Apoiar
-                </Button>
-              </Link>
-            </div>
-          </div>
+          )}
         </div>
       </section>
 
       {/* Footer */}
-      <footer id="contact" className="bg-foreground text-background py-16">
+      <footer className="bg-foreground text-background py-16 mt-16">
         <div className="container mx-auto px-6">
           <div className="grid md:grid-cols-4 gap-8">
             <div className="col-span-2 md:col-span-1">
@@ -372,9 +483,6 @@ const PortoDeIdeiasPage = () => {
               </div>
               <p className="text-background/70 mb-4">
                 O Porto de Ideias é uma iniciativa da Porto Bello Filmes, criada para aproximar cultura e investimento.
-              </p>
-              <p className="text-background/70 mb-6 text-sm">
-                Onde a cultura encontra o investimento, e o investimento encontra propósito.
               </p>
               <div className="flex space-x-4">
                 <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center cursor-pointer hover:bg-primary/80 transition-colors">
@@ -395,20 +503,18 @@ const PortoDeIdeiasPage = () => {
             <div>
               <h3 className="font-bold text-lg mb-4 text-background">Plataforma</h3>
               <ul className="space-y-2 text-background/70">
-                <li><a href="#" className="hover:text-background transition-colors cursor-pointer">Como Funciona</a></li>
-                <li><a href="#" className="hover:text-background transition-colors cursor-pointer">Enviar Projeto</a></li>
-                <li><a href="#" className="hover:text-background transition-colors cursor-pointer">Encontrar Investidores</a></li>
-                <li><a href="#" className="hover:text-background transition-colors cursor-pointer">Histórias de Sucesso</a></li>
+                <li><a href="#" className="hover:text-background transition-colors">Como Funciona</a></li>
+                <li><a href="#" className="hover:text-background transition-colors">Enviar Projeto</a></li>
+                <li><a href="#" className="hover:text-background transition-colors">Encontrar Investidores</a></li>
               </ul>
             </div>
 
             <div>
               <h3 className="font-bold text-lg mb-4 text-background">Suporte</h3>
               <ul className="space-y-2 text-background/70">
-                <li><a href="#" className="hover:text-background transition-colors cursor-pointer">FAQ</a></li>
-                <li><a href="#" className="hover:text-background transition-colors cursor-pointer">Ajuda</a></li>
-                <li><a href="#" className="hover:text-background transition-colors cursor-pointer">Termos de Uso</a></li>
-                <li><a href="#" className="hover:text-background transition-colors cursor-pointer">Privacidade</a></li>
+                <li><a href="#" className="hover:text-background transition-colors">FAQ</a></li>
+                <li><a href="#" className="hover:text-background transition-colors">Ajuda</a></li>
+                <li><a href="#" className="hover:text-background transition-colors">Termos de Uso</a></li>
               </ul>
             </div>
 
@@ -422,10 +528,6 @@ const PortoDeIdeiasPage = () => {
                 <li className="flex items-center space-x-2">
                   <Phone className="w-4 h-4" />
                   <span>+55 (11) 9999-9999</span>
-                </li>
-                <li className="flex items-center space-x-2">
-                  <MapPin className="w-4 h-4" />
-                  <span>São Paulo, Brasil</span>
                 </li>
               </ul>
             </div>
