@@ -571,11 +571,12 @@ const PortoDeIdeiasPage = () => {
               </Link>
 
               {/* Card 2 - Inspire Others */}
-              <div 
-                className="block animate-fade-in"
+              <Link 
+                to="/exemplo/cultura-legado"
+                className="block group animate-fade-in"
                 style={{ animationDelay: '100ms' }}
               >
-                <div className="bg-gradient-to-br from-accent/10 via-primary/5 to-card border border-border rounded-2xl overflow-hidden h-full">
+                <div className="bg-gradient-to-br from-accent/10 via-primary/5 to-card border border-border rounded-2xl overflow-hidden h-full hover:shadow-xl hover:border-primary/30 transition-all duration-300">
                   <div className="relative h-48 bg-gradient-to-br from-accent/20 to-primary/20 flex items-center justify-center">
                     <div className="w-20 h-20 rounded-full bg-accent/20 flex items-center justify-center">
                       <span className="text-4xl animate-bounce">🎭</span>
@@ -585,7 +586,7 @@ const PortoDeIdeiasPage = () => {
                     <Badge variant="secondary" className="mb-3 rounded-full">
                       Inspire
                     </Badge>
-                    <h3 className="text-lg font-serif font-bold text-foreground mb-2">
+                    <h3 className="text-lg font-serif font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
                       Sua Cultura, Seu Legado
                     </h3>
                     <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
@@ -603,18 +604,22 @@ const PortoDeIdeiasPage = () => {
                           <span className="text-xs text-white">📽️</span>
                         </div>
                       </div>
-                      <span className="text-sm text-muted-foreground">+150 criadores</span>
+                      <span className="text-sm font-medium text-primary flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        Ver Exemplo
+                        <ArrowRight className="w-4 h-4" />
+                      </span>
                     </div>
                   </div>
                 </div>
-              </div>
+              </Link>
 
               {/* Card 3 - Connect */}
-              <div 
-                className="block animate-fade-in"
+              <Link 
+                to="/exemplo/investidores-aguardam"
+                className="block group animate-fade-in"
                 style={{ animationDelay: '200ms' }}
               >
-                <div className="bg-gradient-to-br from-primary/5 via-card to-accent/10 border border-border rounded-2xl overflow-hidden h-full">
+                <div className="bg-gradient-to-br from-primary/5 via-card to-accent/10 border border-border rounded-2xl overflow-hidden h-full hover:shadow-xl hover:border-primary/30 transition-all duration-300">
                   <div className="relative h-48 bg-gradient-to-br from-primary/15 to-accent/25 flex items-center justify-center">
                     <div className="relative">
                       <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center">
@@ -629,7 +634,7 @@ const PortoDeIdeiasPage = () => {
                     <Badge variant="outline" className="mb-3 rounded-full border-accent text-accent">
                       Conecte-se
                     </Badge>
-                    <h3 className="text-lg font-serif font-bold text-foreground mb-2">
+                    <h3 className="text-lg font-serif font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
                       Investidores Aguardam
                     </h3>
                     <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
@@ -640,18 +645,22 @@ const PortoDeIdeiasPage = () => {
                         <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                         <span className="text-sm text-emerald-600 dark:text-emerald-400">Online agora</span>
                       </div>
-                      <span className="text-sm text-muted-foreground">85 investidores</span>
+                      <span className="text-sm font-medium text-primary flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        Ver Exemplo
+                        <ArrowRight className="w-4 h-4" />
+                      </span>
                     </div>
                   </div>
                 </div>
-              </div>
+              </Link>
 
               {/* Card 4 - Success Stories */}
-              <div 
-                className="block animate-fade-in"
+              <Link 
+                to="/exemplo/historias-sucesso"
+                className="block group animate-fade-in"
                 style={{ animationDelay: '300ms' }}
               >
-                <div className="bg-gradient-to-br from-amber-50 dark:from-amber-900/20 via-card to-orange-50 dark:to-orange-900/20 border border-amber-200/50 dark:border-amber-800/30 rounded-2xl overflow-hidden h-full">
+                <div className="bg-gradient-to-br from-amber-50 dark:from-amber-900/20 via-card to-orange-50 dark:to-orange-900/20 border border-amber-200/50 dark:border-amber-800/30 rounded-2xl overflow-hidden h-full hover:shadow-xl hover:border-amber-400/50 transition-all duration-300">
                   <div className="relative h-48 bg-gradient-to-br from-amber-100 dark:from-amber-900/40 to-orange-100 dark:to-orange-900/40 flex items-center justify-center">
                     <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg">
                       <span className="text-4xl">🏆</span>
@@ -661,7 +670,7 @@ const PortoDeIdeiasPage = () => {
                     <Badge className="mb-3 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 hover:bg-amber-200">
                       Sucesso
                     </Badge>
-                    <h3 className="text-lg font-serif font-bold text-foreground mb-2">
+                    <h3 className="text-lg font-serif font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
                       Histórias de Sucesso
                     </h3>
                     <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
@@ -671,15 +680,19 @@ const PortoDeIdeiasPage = () => {
                       <div className="flex items-center gap-1">
                         <span className="text-amber-500">★★★★★</span>
                       </div>
-                      <span className="text-sm text-muted-foreground">92% taxa de sucesso</span>
+                      <span className="text-sm font-medium text-primary flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        Ver Exemplo
+                        <ArrowRight className="w-4 h-4" />
+                      </span>
                     </div>
                   </div>
                 </div>
-              </div>
+              </Link>
 
               {/* Card 5 - Funding */}
-              <div 
-                className="block animate-fade-in"
+              <Link 
+                to="/exemplo/recursos-disponiveis"
+                className="block group animate-fade-in"
                 style={{ animationDelay: '400ms' }}
               >
                 <div className="bg-gradient-to-br from-emerald-50 dark:from-emerald-900/20 via-card to-teal-50 dark:to-teal-900/20 border border-emerald-200/50 dark:border-emerald-800/30 rounded-2xl overflow-hidden h-full">
@@ -693,7 +706,7 @@ const PortoDeIdeiasPage = () => {
                     <Badge className="mb-3 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-200">
                       Financiamento
                     </Badge>
-                    <h3 className="text-lg font-serif font-bold text-foreground mb-2">
+                    <h3 className="text-lg font-serif font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
                       Recursos Disponíveis
                     </h3>
                     <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
@@ -704,10 +717,14 @@ const PortoDeIdeiasPage = () => {
                         <Badge variant="outline" className="text-xs">Rouanet</Badge>
                         <Badge variant="outline" className="text-xs">PROAC</Badge>
                       </div>
+                      <span className="text-sm font-medium text-primary flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        Ver Exemplo
+                        <ArrowRight className="w-4 h-4" />
+                      </span>
                     </div>
                   </div>
                 </div>
-              </div>
+              </Link>
 
               {/* Card 6 - CTA */}
               <Link 
