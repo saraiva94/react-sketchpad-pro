@@ -33,7 +33,7 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-glow group-hover:scale-110 transition-transform duration-300">
             <Anchor className="w-5 h-5 text-primary-foreground" />
           </div>
-          <span className="text-3xl md:text-4xl font-handwritten font-bold text-primary pulse-glow">
+          <span className="text-4xl md:text-5xl font-handwritten font-bold text-primary pulse-glow leading-none">
             Porto Bello
           </span>
         </Link>
