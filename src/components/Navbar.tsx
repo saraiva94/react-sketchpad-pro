@@ -15,7 +15,6 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
   const [isOpen, setIsOpen] = useState(false);
 
   const navLinks = [
-    { to: "/", label: "Início", isLink: true, id: "home" },
     { to: "/porto-de-ideias", label: "Porto de Idéias", isLink: true, id: "porto-de-ideias" },
   ];
 
