@@ -18,7 +18,7 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
     { to: "/", label: "Início", isLink: true, id: "home" },
     { to: "/#sobre", label: "Sobre", isLink: false },
     { to: "/#plataforma", label: "Plataforma", isLink: false },
-    { to: "/projetos", label: "Projetos", isLink: true, id: "projetos" },
+    { to: "/porto-de-ideias", label: "Porto de Idéias", isLink: true, id: "porto-de-ideias" },
     { to: "/#contato", label: "Contato", isLink: false },
   ];
 
@@ -137,18 +137,6 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
                     )
                   ))}
                   
-                  <div 
-                    className="pt-6 mt-4 border-t border-border"
-                    style={{ 
-                      animation: isOpen ? `slideInRight 0.3s ease-out ${navLinks.length * 50}ms forwards` : 'none'
-                    }}
-                  >
-                    <Link to="/submit" onClick={handleNavClick}>
-                      <Button className="w-full transition-transform duration-300 hover:scale-105">
-                        Cadastrar Projeto
-                      </Button>
-                    </Link>
-                  </div>
                 </nav>
               </SheetContent>
             </Sheet>
