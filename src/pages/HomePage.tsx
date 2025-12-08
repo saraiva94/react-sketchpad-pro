@@ -569,80 +569,71 @@ const HomePage = () => {
       </section>
 
       {/* Footer */}
-      <footer id="contato" className="py-16 bg-slate-900 text-slate-300 relative overflow-hidden">
+      <footer id="contato" className="py-8 relative overflow-hidden z-10">
+        <div className="absolute inset-0 bg-slate-900/90 backdrop-blur-sm" />
         <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-slate-700 to-transparent" />
-        <div className="absolute top-20 right-20 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
         
-        <div className="container mx-auto px-4 relative">
-          <div className="grid md:grid-cols-4 gap-10 mb-12">
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="grid md:grid-cols-4 gap-6 mb-6">
             <div>
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                  <Anchor className="w-5 h-5 text-white" />
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                  <Anchor className="w-4 h-4 text-white" />
                 </div>
-                <h3 className="font-handwritten text-2xl font-bold text-white">Porto Bello</h3>
+                <h3 className="font-handwritten text-xl font-bold text-white">Porto Bello</h3>
               </div>
-              <p className="text-sm mb-4 text-slate-400 leading-relaxed">
+              <p className="text-xs text-slate-400 leading-relaxed">
                 Uma plataforma criada para aproximar cultura e investimento.
               </p>
-              <p className="text-sm italic text-slate-500">
-                "Onde a cultura encontra o investimento."
-              </p>
             </div>
             
             <div>
-              <h4 className="font-semibold text-white mb-4 text-lg">Navegação</h4>
-              <ul className="space-y-3 text-sm">
-                <li><a href="#inicio" className="hover:text-primary transition-colors">Início</a></li>
-                <li><a href="#sobre" className="hover:text-primary transition-colors">Sobre</a></li>
-                <li><a href="#plataforma" className="hover:text-primary transition-colors">Plataforma</a></li>
-                <li><Link to="/projetos" className="hover:text-primary transition-colors">Projetos</Link></li>
+              <h4 className="font-semibold text-white mb-2 text-sm">Navegação</h4>
+              <ul className="space-y-1 text-xs">
+                <li><a href="#inicio" className="text-slate-300 hover:text-primary transition-colors">Início</a></li>
+                <li><a href="#sobre" className="text-slate-300 hover:text-primary transition-colors">Sobre</a></li>
+                <li><Link to="/porto-de-ideias" className="text-slate-300 hover:text-primary transition-colors">Porto de Idéias</Link></li>
               </ul>
             </div>
             
             <div>
-              <h4 className="font-semibold text-white mb-4 text-lg">Ações</h4>
-              <ul className="space-y-3 text-sm">
-                <li><Link to="/submit" className="hover:text-primary transition-colors">Cadastrar Projeto</Link></li>
-                <li><Link to="/projetos" className="hover:text-primary transition-colors">Explorar Projetos</Link></li>
+              <h4 className="font-semibold text-white mb-2 text-sm">Ações</h4>
+              <ul className="space-y-1 text-xs">
+                <li><Link to="/submit" className="text-slate-300 hover:text-primary transition-colors">Cadastrar Projeto</Link></li>
+                <li><Link to="/porto-de-ideias" className="text-slate-300 hover:text-primary transition-colors">Explorar Projetos</Link></li>
               </ul>
             </div>
             
             <div>
-              <h4 className="font-semibold text-white mb-4 text-lg">Contato</h4>
-              <ul className="space-y-3 text-sm">
+              <h4 className="font-semibold text-white mb-2 text-sm">Contato</h4>
+              <ul className="space-y-1 text-xs text-slate-300">
                 <li className="flex items-center gap-2">
-                  <Mail className="w-4 h-4 text-primary" />
+                  <Mail className="w-3 h-3 text-primary" />
                   <a href="mailto:contato@portobello.com.br" className="hover:text-primary transition-colors">
                     contato@portobello.com.br
                   </a>
                 </li>
                 <li className="flex items-center gap-2">
-                  <Phone className="w-4 h-4 text-primary" />
+                  <Phone className="w-3 h-3 text-primary" />
                   <span>(11) 99999-9999</span>
                 </li>
-                <li className="flex items-center gap-2">
-                  <MapPinned className="w-4 h-4 text-primary" />
-                  <span>São Paulo, SP</span>
-                </li>
               </ul>
-              <div className="flex gap-3 mt-6">
-                <a href="#" className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-primary transition-colors">
-                  <Facebook className="w-4 h-4" />
+              <div className="flex gap-2 mt-3">
+                <a href="#" className="w-7 h-7 rounded-full bg-slate-800 flex items-center justify-center hover:bg-primary transition-colors">
+                  <Facebook className="w-3 h-3 text-slate-300" />
                 </a>
-                <a href="#" className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-primary transition-colors">
-                  <Instagram className="w-4 h-4" />
+                <a href="#" className="w-7 h-7 rounded-full bg-slate-800 flex items-center justify-center hover:bg-primary transition-colors">
+                  <Instagram className="w-3 h-3 text-slate-300" />
                 </a>
-                <a href="#" className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-primary transition-colors">
-                  <Linkedin className="w-4 h-4" />
+                <a href="#" className="w-7 h-7 rounded-full bg-slate-800 flex items-center justify-center hover:bg-primary transition-colors">
+                  <Linkedin className="w-3 h-3 text-slate-300" />
                 </a>
               </div>
             </div>
           </div>
           
-          <div className="border-t border-slate-800 pt-8 text-center text-sm text-slate-500">
+          <div className="border-t border-slate-800 pt-4 text-center text-xs text-slate-500">
             <p>&copy; {new Date().getFullYear()} Porto Bello. Todos os direitos reservados.</p>
-            <p className="mt-2">Plataforma <span className="text-primary">Porto Bello</span></p>
           </div>
         </div>
       </footer>
