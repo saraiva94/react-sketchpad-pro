@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import { 
   ArrowLeft, 
   MapPin, 
@@ -35,7 +36,7 @@ import {
 } from "lucide-react";
 
 // Component for Documents Access Request
-const DocumentsAccessSection = () => {
+const DocumentsAccessSection = ({ projectTitle }: { projectTitle: string }) => {
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
     nome: "",
@@ -44,7 +45,7 @@ const DocumentsAccessSection = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!formData.nome.trim() || !formData.telefone.trim() || !formData.interesse.trim()) {
@@ -54,13 +55,26 @@ const DocumentsAccessSection = () => {
     
     setIsSubmitting(true);
     
-    // Simulate submission
-    setTimeout(() => {
-      toast.success("Solicitação enviada com sucesso! A administração entrará em contato.");
-      setShowForm(false);
-      setFormData({ nome: "", telefone: "", interesse: "" });
+    const { error } = await supabase
+      .from("access_requests")
+      .insert({
+        nome: formData.nome.trim(),
+        telefone: formData.telefone.trim(),
+        interesse: formData.interesse.trim(),
+        project_title: projectTitle,
+        status: "pending"
+      });
+
+    if (error) {
+      toast.error("Erro ao enviar solicitação. Tente novamente.");
       setIsSubmitting(false);
-    }, 1000);
+      return;
+    }
+
+    toast.success("Solicitação enviada com sucesso! A administração entrará em contato.");
+    setShowForm(false);
+    setFormData({ nome: "", telefone: "", interesse: "" });
+    setIsSubmitting(false);
   };
 
   return (
@@ -558,7 +572,7 @@ const ExampleProjectPage = () => {
             )}
 
             {/* Documents Section */}
-            <DocumentsAccessSection />
+            <DocumentsAccessSection projectTitle={project.title} />
           </div>
 
           {/* Sidebar */}

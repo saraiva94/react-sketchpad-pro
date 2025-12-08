@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      access_requests: {
+        Row: {
+          created_at: string
+          id: string
+          interesse: string
+          nome: string
+          project_id: string | null
+          project_title: string | null
+          status: string
+          telefone: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          interesse: string
+          nome: string
+          project_id?: string | null
+          project_title?: string | null
+          status?: string
+          telefone: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          interesse?: string
+          nome?: string
+          project_id?: string | null
+          project_title?: string | null
+          status?: string
+          telefone?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
