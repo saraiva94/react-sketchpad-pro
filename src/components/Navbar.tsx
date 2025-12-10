@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Home } from "lucide-react";
 import portobelloLogo from "@/assets/portobello-logo.png";
 
 interface NavbarProps {
@@ -23,11 +23,18 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
     <header className="border-b border-border/50 bg-card/80 backdrop-blur-md sticky top-0 z-50 shadow-soft">
       <div className="container mx-auto px-4 h-20 flex items-center justify-between">
         {/* Logo - Homepage */}
-        <Link to="/" className="flex items-center group">
+        <Link to="/" className="flex items-center gap-3 group">
+          <div className={`w-12 h-12 rounded-full flex items-center justify-center shadow-glow group-hover:scale-110 group-hover:rotate-12 transition-all duration-300 flex-shrink-0 ${
+            currentPage === "home" 
+              ? "bg-gradient-to-br from-primary to-accent" 
+              : "bg-gradient-to-br from-primary/80 to-accent/80 group-hover:from-primary group-hover:to-accent"
+          }`}>
+            <Home className="w-6 h-6 text-primary-foreground" />
+          </div>
           <img 
             src={portobelloLogo} 
             alt="Porto Bello" 
-            className="h-12 md:h-14 w-auto group-hover:scale-105 transition-transform duration-300"
+            className="h-36 md:h-42 w-auto group-hover:scale-105 transition-transform duration-300"
           />
         </Link>
         
@@ -79,12 +86,19 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
                   <Link 
                     to="/"
                     onClick={handleNavClick}
-                    className="group flex items-center"
+                    className="group flex items-center gap-3"
                   >
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-110 ${
+                      currentPage === "home" 
+                        ? "bg-gradient-to-br from-primary to-accent shadow-glow" 
+                        : "bg-gradient-to-br from-primary/80 to-accent/80 group-hover:from-primary group-hover:to-accent"
+                    }`}>
+                      <Home className="w-5 h-5 text-primary-foreground" />
+                    </div>
                     <img 
                       src={portobelloLogo} 
                       alt="Porto Bello" 
-                      className="h-10 w-auto group-hover:scale-105 transition-transform duration-300"
+                      className="h-24 w-auto group-hover:scale-105 transition-transform duration-300"
                     />
                   </Link>
                 </nav>
