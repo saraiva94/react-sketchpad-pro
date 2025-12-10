@@ -450,7 +450,11 @@ const ExampleProjectPage = () => {
                   </Badge>
                 )}
               </div>
-              <Button variant="secondary" className="rounded-full">
+              <Button 
+                variant="secondary" 
+                className="rounded-full"
+                onClick={() => toast.info("Este é um projeto de exemplo. Em projetos reais, você poderá baixar o PDF de apresentação.")}
+              >
                 <Download className="w-4 h-4 mr-2" />
                 Baixar apresentação em PDF
               </Button>
@@ -607,15 +611,29 @@ const ExampleProjectPage = () => {
               {/* Action Buttons */}
               <div className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-4">
                 <h3 className="font-serif font-bold text-lg text-foreground mb-4">Ações</h3>
-                <Button className="w-full rounded-full" size="lg">
+                <Button 
+                  className="w-full rounded-full" 
+                  size="lg"
+                  onClick={() => toast.info("Este é um projeto de exemplo. Em projetos reais, você poderá solicitar conexão com o produtor.")}
+                >
                   <MessageCircle className="w-4 h-4 mr-2" />
                   Solicitar Conexão
                 </Button>
-                <Button variant="secondary" className="w-full rounded-full" size="lg">
+                <Button 
+                  variant="secondary" 
+                  className="w-full rounded-full" 
+                  size="lg"
+                  onClick={() => toast.info("Este é um projeto de exemplo. Em projetos reais, você será direcionado para apoiar financeiramente.")}
+                >
                   <HandHeart className="w-4 h-4 mr-2" />
                   Apoiar Projeto
                 </Button>
-                <Button variant="outline" className="w-full rounded-full" size="lg">
+                <Button 
+                  variant="outline" 
+                  className="w-full rounded-full" 
+                  size="lg"
+                  onClick={() => toast.success("Projeto salvo nos favoritos! (demonstração)")}
+                >
                   <Heart className="w-4 h-4 mr-2" />
                   Salvar nos Favoritos
                 </Button>
@@ -667,36 +685,36 @@ const ExampleProjectPage = () => {
                 Iniciativa da Porto Bello Filmes para aproximar cultura e investimento.
               </p>
               <div className="flex space-x-2">
-                <div className="w-7 h-7 bg-primary rounded-full flex items-center justify-center cursor-pointer hover:bg-primary/80 transition-colors">
+                <a href="https://facebook.com/portobellofilmes" target="_blank" rel="noopener noreferrer" className="w-7 h-7 bg-primary rounded-full flex items-center justify-center cursor-pointer hover:bg-primary/80 transition-colors">
                   <Facebook className="w-3 h-3 text-primary-foreground" />
-                </div>
-                <div className="w-7 h-7 bg-primary rounded-full flex items-center justify-center cursor-pointer hover:bg-primary/80 transition-colors">
+                </a>
+                <a href="https://twitter.com/portobellofilmes" target="_blank" rel="noopener noreferrer" className="w-7 h-7 bg-primary rounded-full flex items-center justify-center cursor-pointer hover:bg-primary/80 transition-colors">
                   <Twitter className="w-3 h-3 text-primary-foreground" />
-                </div>
-                <div className="w-7 h-7 bg-primary rounded-full flex items-center justify-center cursor-pointer hover:bg-primary/80 transition-colors">
+                </a>
+                <a href="https://instagram.com/portobellofilmes" target="_blank" rel="noopener noreferrer" className="w-7 h-7 bg-primary rounded-full flex items-center justify-center cursor-pointer hover:bg-primary/80 transition-colors">
                   <Instagram className="w-3 h-3 text-primary-foreground" />
-                </div>
-                <div className="w-7 h-7 bg-primary rounded-full flex items-center justify-center cursor-pointer hover:bg-primary/80 transition-colors">
+                </a>
+                <a href="https://linkedin.com/company/portobellofilmes" target="_blank" rel="noopener noreferrer" className="w-7 h-7 bg-primary rounded-full flex items-center justify-center cursor-pointer hover:bg-primary/80 transition-colors">
                   <Linkedin className="w-3 h-3 text-primary-foreground" />
-                </div>
+                </a>
               </div>
             </div>
 
             <div>
               <h3 className="font-bold text-sm mb-2 text-background">Plataforma</h3>
               <ul className="space-y-1 text-background/70 text-xs">
-                <li><a href="#" className="hover:text-background transition-colors">Como Funciona</a></li>
-                <li><a href="#" className="hover:text-background transition-colors">Enviar Projeto</a></li>
-                <li><a href="#" className="hover:text-background transition-colors">Investidores</a></li>
+                <li><Link to="/" className="hover:text-background transition-colors">Como Funciona</Link></li>
+                <li><Link to="/submit" className="hover:text-background transition-colors">Enviar Projeto</Link></li>
+                <li><Link to="/porto-de-ideias" className="hover:text-background transition-colors">Projetos</Link></li>
               </ul>
             </div>
 
             <div>
               <h3 className="font-bold text-sm mb-2 text-background">Suporte</h3>
               <ul className="space-y-1 text-background/70 text-xs">
-                <li><a href="#" className="hover:text-background transition-colors">FAQ</a></li>
-                <li><a href="#" className="hover:text-background transition-colors">Ajuda</a></li>
-                <li><a href="#" className="hover:text-background transition-colors">Termos</a></li>
+                <li><a href="mailto:portobellofilmes@gmail.com" className="hover:text-background transition-colors">FAQ</a></li>
+                <li><a href="mailto:portobellofilmes@gmail.com" className="hover:text-background transition-colors">Ajuda</a></li>
+                <li><Link to="/" className="hover:text-background transition-colors">Termos</Link></li>
               </ul>
             </div>
 
