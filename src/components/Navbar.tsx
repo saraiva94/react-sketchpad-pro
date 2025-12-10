@@ -23,7 +23,7 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
     <header className="border-b border-border/50 bg-card/80 backdrop-blur-md sticky top-0 z-50 shadow-soft">
       <div className="container mx-auto px-4 h-20 flex items-center justify-between">
         {/* Logo - Homepage */}
-        <Link to="/" className="flex items-center group -ml-6">
+        <Link to="/" className="flex items-center group -ml-12">
           <img 
             src={portobelloLogo} 
             alt="Porto Bello" 
