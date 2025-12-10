@@ -34,7 +34,7 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
           <img 
             src={portobelloLogo} 
             alt="Porto Bello" 
-            className="h-44 md:h-52 w-auto group-hover:scale-105 transition-transform duration-300"
+            className="h-44 md:h-52 w-auto -ml-4 group-hover:scale-105 transition-transform duration-300"
           />
         </Link>
         
