@@ -95,6 +95,8 @@ export function ArtisticBackground() {
       ctx.fill();
 
       // Draw particles
+      const lightRadius = 200; // Same as mouse glow radius
+      
       particlesRef.current.forEach((particle, i) => {
         // Update position with flowing motion
         particle.x += particle.vx + Math.sin(time + i * 0.1) * 0.2;
@@ -106,31 +108,69 @@ export function ArtisticBackground() {
         if (particle.y < 0) particle.y = canvas.height;
         if (particle.y > canvas.height) particle.y = 0;
 
-        // Draw particle with glow
-        const gradient = ctx.createRadialGradient(
+        // Calculate distance from cursor
+        const dx = particle.x - mouseRef.current.x;
+        const dy = particle.y - mouseRef.current.y;
+        const distanceFromCursor = Math.sqrt(dx * dx + dy * dy);
+        
+        // Calculate glow intensity based on proximity to cursor
+        const isInLight = distanceFromCursor < lightRadius;
+        const proximityFactor = isInLight ? 1 - (distanceFromCursor / lightRadius) : 0;
+        
+        // Enhanced opacity and size when in light
+        const glowOpacity = particle.opacity + (proximityFactor * 0.6);
+        const glowSize = particle.size * (1 + proximityFactor * 1.5);
+        const glowHue = isInLight ? particle.hue + proximityFactor * 20 : particle.hue; // Shift towards lighter color
+
+        // Draw particle with enhanced glow when near cursor
+        const particleGradient = ctx.createRadialGradient(
           particle.x, particle.y, 0,
-          particle.x, particle.y, particle.size * 3
+          particle.x, particle.y, glowSize * 3
         );
-        gradient.addColorStop(0, `hsla(${particle.hue}, 60%, 55%, ${particle.opacity})`);
-        gradient.addColorStop(1, `hsla(${particle.hue}, 60%, 55%, 0)`);
+        
+        if (isInLight) {
+          // Bright glow effect when in cursor light
+          particleGradient.addColorStop(0, `hsla(${glowHue}, 80%, 75%, ${glowOpacity})`);
+          particleGradient.addColorStop(0.3, `hsla(${glowHue}, 70%, 65%, ${glowOpacity * 0.7})`);
+          particleGradient.addColorStop(1, `hsla(${glowHue}, 60%, 55%, 0)`);
+        } else {
+          particleGradient.addColorStop(0, `hsla(${particle.hue}, 60%, 55%, ${particle.opacity})`);
+          particleGradient.addColorStop(1, `hsla(${particle.hue}, 60%, 55%, 0)`);
+        }
 
         ctx.beginPath();
-        ctx.arc(particle.x, particle.y, particle.size * 3, 0, Math.PI * 2);
-        ctx.fillStyle = gradient;
+        ctx.arc(particle.x, particle.y, glowSize * 3, 0, Math.PI * 2);
+        ctx.fillStyle = particleGradient;
         ctx.fill();
+        
+        // Add extra bright core when in light
+        if (isInLight && proximityFactor > 0.3) {
+          ctx.beginPath();
+          ctx.arc(particle.x, particle.y, glowSize * 0.8, 0, Math.PI * 2);
+          ctx.fillStyle = `hsla(${glowHue + 30}, 90%, 85%, ${proximityFactor * 0.8})`;
+          ctx.fill();
+        }
 
-        // Draw connections between nearby particles
+        // Draw connections between nearby particles (enhanced when both in light)
         particlesRef.current.slice(i + 1).forEach((other) => {
-          const dx = particle.x - other.x;
-          const dy = particle.y - other.y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
+          const odx = particle.x - other.x;
+          const ody = particle.y - other.y;
+          const distance = Math.sqrt(odx * odx + ody * ody);
 
           if (distance < 150) {
+            // Check if both particles are in light
+            const otherDx = other.x - mouseRef.current.x;
+            const otherDy = other.y - mouseRef.current.y;
+            const otherDistFromCursor = Math.sqrt(otherDx * otherDx + otherDy * otherDy);
+            const bothInLight = isInLight && otherDistFromCursor < lightRadius;
+            
+            const connectionOpacity = bothInLight ? 0.15 : 0.05;
+            
             ctx.beginPath();
             ctx.moveTo(particle.x, particle.y);
             ctx.lineTo(other.x, other.y);
-            ctx.strokeStyle = `hsla(190, 50%, 50%, ${0.05 * (1 - distance / 150)})`;
-            ctx.lineWidth = 0.5;
+            ctx.strokeStyle = `hsla(190, ${bothInLight ? 70 : 50}%, ${bothInLight ? 60 : 50}%, ${connectionOpacity * (1 - distance / 150)})`;
+            ctx.lineWidth = bothInLight ? 1 : 0.5;
             ctx.stroke();
           }
         });
