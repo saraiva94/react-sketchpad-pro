@@ -151,8 +151,21 @@ const PortoDeIdeiasPage = () => {
 
     let matchesIncentiveLaw = true;
     if (selectedIncentiveLaw !== "all") {
-      if (selectedIncentiveLaw === "none") matchesIncentiveLaw = !project.has_incentive_law;
-      else matchesIncentiveLaw = project.has_incentive_law;
+      if (selectedIncentiveLaw === "none") {
+        matchesIncentiveLaw = !project.has_incentive_law;
+      } else {
+        // Check if project has incentive law and matches the selected type
+        const lawDetails = project.incentive_law_details?.toLowerCase() || "";
+        if (selectedIncentiveLaw === "rouanet") {
+          matchesIncentiveLaw = project.has_incentive_law && lawDetails.includes("rouanet");
+        } else if (selectedIncentiveLaw === "audiovisual") {
+          matchesIncentiveLaw = project.has_incentive_law && lawDetails.includes("audiovisual");
+        } else if (selectedIncentiveLaw === "proac") {
+          matchesIncentiveLaw = project.has_incentive_law && lawDetails.includes("proac");
+        } else {
+          matchesIncentiveLaw = project.has_incentive_law;
+        }
+      }
     }
 
     return matchesSearch && matchesCategory && matchesLocation && matchesBudgetRange && matchesStage && matchesIncentiveLaw;
