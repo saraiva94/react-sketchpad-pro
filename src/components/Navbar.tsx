@@ -23,19 +23,19 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
     <header className="border-b border-border/50 bg-card/80 backdrop-blur-md sticky top-0 z-50 shadow-soft">
       <div className="container mx-auto px-4 h-20 flex items-center justify-between">
         {/* Logo - Homepage */}
-        <Link to="/" className="flex items-center group">
+        <Link to="/" className="flex items-center gap-3 group">
+          <div className={`w-12 h-12 rounded-full flex items-center justify-center shadow-glow group-hover:scale-110 group-hover:rotate-12 transition-all duration-300 flex-shrink-0 ${
+            currentPage === "home" 
+              ? "bg-gradient-to-br from-primary to-accent" 
+              : "bg-gradient-to-br from-primary/80 to-accent/80 group-hover:from-primary group-hover:to-accent"
+          }`}>
+            <Home className="w-6 h-6 text-primary-foreground" />
+          </div>
           <img 
             src={portobelloLogo} 
             alt="Porto Bello" 
             className="h-36 md:h-42 w-auto group-hover:scale-105 transition-transform duration-300"
           />
-        </Link>
-        
-        {/* Home Icon - fixed right side, also links to homepage */}
-        <Link to="/" className="fixed top-6 right-20 md:right-24 z-50">
-          <div className="w-12 h-12 rounded-full flex items-center justify-center shadow-glow hover:scale-110 hover:rotate-12 transition-all duration-300 bg-gradient-to-br from-primary to-accent">
-            <Home className="w-6 h-6 text-primary-foreground" />
-          </div>
         </Link>
         
         {/* Desktop Navigation */}
