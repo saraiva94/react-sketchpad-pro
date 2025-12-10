@@ -176,16 +176,41 @@ export function ArtisticBackground() {
         });
       });
 
-      // Draw floating geometric shapes
+      // Draw floating geometric shapes with cursor interaction
+      const shapeRadius = 250; // Light interaction radius for shapes
+      
       for (let i = 0; i < 5; i++) {
         const x = canvas.width * (0.2 + i * 0.15) + Math.sin(time + i) * 30;
         const y = canvas.height * 0.3 + Math.cos(time * 0.7 + i * 0.5) * 50;
         const size = 20 + Math.sin(time + i * 2) * 10;
         const rotation = time * 0.5 + i;
 
+        // Calculate distance from cursor
+        const dx = x - mouseRef.current.x;
+        const dy = y - mouseRef.current.y;
+        const distanceFromCursor = Math.sqrt(dx * dx + dy * dy);
+        
+        // Calculate glow intensity based on proximity
+        const isInLight = distanceFromCursor < shapeRadius;
+        const proximityFactor = isInLight ? 1 - (distanceFromCursor / shapeRadius) : 0;
+        
+        // Enhanced properties when illuminated
+        const glowOpacity = 0.08 + (proximityFactor * 0.5);
+        const glowLineWidth = 1 + (proximityFactor * 2);
+        const hue = 180 + i * 10 + (proximityFactor * 30);
+        const lightness = 50 + (proximityFactor * 25);
+        const saturation = 50 + (proximityFactor * 30);
+
         ctx.save();
         ctx.translate(x, y);
         ctx.rotate(rotation);
+        
+        // Draw outer glow when in light
+        if (isInLight && proximityFactor > 0.2) {
+          ctx.shadowColor = `hsla(${hue}, ${saturation}%, ${lightness}%, ${proximityFactor * 0.8})`;
+          ctx.shadowBlur = 15 + proximityFactor * 20;
+        }
+        
         ctx.beginPath();
 
         // Alternate between shapes
@@ -207,9 +232,16 @@ export function ArtisticBackground() {
           ctx.arc(0, 0, size * 0.5, 0, Math.PI * 2);
         }
 
-        ctx.strokeStyle = `hsla(${180 + i * 10}, 50%, 50%, 0.08)`;
-        ctx.lineWidth = 1;
+        ctx.strokeStyle = `hsla(${hue}, ${saturation}%, ${lightness}%, ${glowOpacity})`;
+        ctx.lineWidth = glowLineWidth;
         ctx.stroke();
+        
+        // Add fill glow when very close
+        if (isInLight && proximityFactor > 0.4) {
+          ctx.fillStyle = `hsla(${hue}, ${saturation}%, ${lightness + 10}%, ${proximityFactor * 0.15})`;
+          ctx.fill();
+        }
+        
         ctx.restore();
       }
 
