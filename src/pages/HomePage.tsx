@@ -165,9 +165,11 @@ const HomePage = () => {
         <div className="container mx-auto px-4 relative">
           <div className="max-w-4xl mx-auto text-center">
             <div className="animate-fade-in-up">
-              <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-8">
-                <Sparkles className="w-4 h-4" />
-                Conectando Cultura e Investimento
+              <span className="group inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-8 cursor-default transition-all duration-500 hover:bg-primary/20 hover:shadow-[0_0_30px_rgba(var(--primary-rgb),0.4),0_0_60px_rgba(var(--primary-rgb),0.2)] hover:scale-105">
+                <Sparkles className="w-4 h-4 transition-all duration-500 group-hover:text-accent group-hover:drop-shadow-[0_0_8px_rgba(var(--accent-rgb),0.8)] group-hover:animate-pulse" />
+                <span className="transition-all duration-500 group-hover:text-foreground group-hover:drop-shadow-[0_0_6px_rgba(var(--primary-rgb),0.6)]">
+                  Conectando Cultura e Investimento
+                </span>
               </span>
             </div>
             

@@ -68,6 +68,10 @@
     --shadow-soft: 0 0% 0% / 0.08;
     --shadow-elegant: 0 0% 0% / 0.15;
     --shadow-gold: 42 85% 55% / 0.2;
+    
+    /* RGB values for glow effects */
+    --primary-rgb: 38, 38, 38;
+    --accent-rgb: 52, 168, 158;
 
     /* Gradientes */
     --gradient-start: 0 0% 98%;
@@ -136,6 +140,10 @@
     --shadow-soft: 0 0% 0% / 0.35;
     --shadow-elegant: 0 0% 0% / 0.5;
     --shadow-gold: 42 85% 55% / 0.15;
+    
+    /* RGB values for glow effects - dark mode */
+    --primary-rgb: 217, 217, 217;
+    --accent-rgb: 64, 191, 179;
 
     --gradient-start: 0 0% 8%;
     --gradient-end: 0 0% 12%;
