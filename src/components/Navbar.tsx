@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, X } from "lucide-react";
 import portobelloLogo from "@/assets/portobello-logo.png";
@@ -31,17 +30,9 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
           />
         </Link>
         
-        {/* Desktop Navigation */}
-        {showNav && (
-          <nav className="hidden md:flex items-center gap-4">
-            <ThemeToggle />
-          </nav>
-        )}
-
         {/* Right Content (for pages without nav) */}
-        {!showNav && (
+        {!showNav && rightContent && (
           <div className="flex items-center gap-4">
-            <ThemeToggle />
             {rightContent}
           </div>
         )}
@@ -49,7 +40,6 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
         {/* Mobile Menu */}
         {showNav && (
           <div className="md:hidden flex items-center gap-2">
-            <ThemeToggle />
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
               <SheetTrigger asChild>
                 <Button 

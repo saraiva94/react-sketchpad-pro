@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { 
@@ -403,9 +402,6 @@ const ExampleProjectPage = () => {
               className="h-44 md:h-52 w-auto group-hover:scale-105 transition-transform duration-300"
             />
           </Link>
-          
-          {/* Theme Toggle - Right */}
-          <ThemeToggle />
         </div>
       </header>
 
