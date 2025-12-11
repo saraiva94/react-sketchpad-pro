@@ -177,19 +177,19 @@ const ProjectPage = () => {
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <Link to="/" className="flex items-center gap-2 group">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                  <Anchor className="w-5 h-5 text-primary-foreground" />
-                </div>
-                <span className="text-xl font-handwritten font-bold text-primary group-hover:text-accent transition-colors">
-                  Porto de Ideias
-                </span>
+              <Link to="/porto-de-ideias" className="flex items-center text-muted-foreground hover:text-primary transition-colors">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Voltar
               </Link>
-              <span className="text-muted-foreground">•</span>
-              <Link to="/porto-de-ideias" className="text-muted-foreground hover:text-primary transition-colors">Projetos</Link>
-              <span className="text-muted-foreground">•</span>
-              <span className="text-foreground font-medium truncate max-w-[200px]">{project.title}</span>
             </div>
+            
+            <Link to="/" className="flex items-center group -ml-12">
+              <img 
+                src="/src/assets/portobello-logo.png" 
+                alt="Porto Bello" 
+                className="h-44 md:h-52 w-auto group-hover:scale-105 transition-transform duration-300"
+              />
+            </Link>
             
             <div className="flex items-center space-x-4">
               <button 
@@ -200,11 +200,6 @@ const ProjectPage = () => {
               >
                 <Heart className={`w-5 h-5 ${isFavorited ? 'fill-current' : ''}`} />
               </button>
-              <Link to="/auth">
-                <Button className="rounded-full">
-                  Entrar na Plataforma
-                </Button>
-              </Link>
             </div>
           </div>
         </div>

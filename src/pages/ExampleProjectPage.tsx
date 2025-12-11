@@ -30,7 +30,6 @@ import {
   Heart,
   MessageCircle,
   HandHeart,
-  Home,
   Send,
   X
 } from "lucide-react";
@@ -354,13 +353,12 @@ const ExampleProjectPage = () => {
       <div className="min-h-screen bg-background">
         <header className="border-b border-border/50 bg-card/80 backdrop-blur-md sticky top-0 z-50 shadow-soft">
           <div className="container mx-auto px-4 h-20 flex items-center justify-center">
-            <Link to="/" className="flex items-center gap-3 group">
-              <div className="w-12 h-12 rounded-full flex items-center justify-center shadow-glow group-hover:scale-110 group-hover:rotate-12 transition-all duration-300 flex-shrink-0 bg-gradient-to-br from-primary/80 to-accent/80 group-hover:from-primary group-hover:to-accent">
-                <Home className="w-6 h-6 text-primary-foreground" />
-              </div>
-              <span className="text-xl md:text-2xl font-semibold transition-colors duration-300 text-foreground group-hover:text-primary">
-                Homepage
-              </span>
+            <Link to="/" className="flex items-center group">
+              <img 
+                src="/src/assets/portobello-logo.png" 
+                alt="Porto Bello" 
+                className="h-44 md:h-52 w-auto group-hover:scale-105 transition-transform duration-300"
+              />
             </Link>
           </div>
         </header>
@@ -397,14 +395,13 @@ const ExampleProjectPage = () => {
             <span className="font-medium">Voltar</span>
           </Link>
           
-          {/* Homepage - Center */}
-          <Link to="/" className="flex items-center gap-3 group absolute left-1/2 -translate-x-1/2">
-            <div className="w-12 h-12 rounded-full flex items-center justify-center shadow-glow group-hover:scale-110 group-hover:rotate-12 transition-all duration-300 flex-shrink-0 bg-gradient-to-br from-primary/80 to-accent/80 group-hover:from-primary group-hover:to-accent">
-              <Home className="w-6 h-6 text-primary-foreground" />
-            </div>
-            <span className="text-xl md:text-2xl font-semibold transition-colors duration-300 text-foreground group-hover:text-primary hidden md:inline">
-              Homepage
-            </span>
+          {/* Logo - Center */}
+          <Link to="/" className="flex items-center group absolute left-1/2 -translate-x-1/2">
+            <img 
+              src="/src/assets/portobello-logo.png" 
+              alt="Porto Bello" 
+              className="h-44 md:h-52 w-auto group-hover:scale-105 transition-transform duration-300"
+            />
           </Link>
           
           {/* Theme Toggle - Right */}
