@@ -1,29 +1,31 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
-import { AnimatedStats, defaultStats } from "@/components/AnimatedStats";
+import { AnimatedStats } from "@/components/AnimatedStats";
 import { ArtisticBackground } from "@/components/ArtisticBackground";
 import { 
   Users, 
   Target, 
   Heart, 
-  CheckCircle, 
-  ArrowRight,
-  Sparkles,
   Lightbulb,
-  BarChart3,
-  Presentation,
-  Search,
-  FileText,
-  Anchor,
   Briefcase,
   Award,
-  TrendingUp
+  TrendingUp,
+  Film,
+  Settings,
+  FileText,
+  DollarSign,
+  Calendar,
+  Megaphone,
+  Mic,
+  HelpCircle,
+  MapPin,
+  Play
 } from "lucide-react";
 
 interface Project {
@@ -142,6 +144,17 @@ const HomePage = () => {
     setLoadingProjects(false);
   };
 
+  const services = [
+    { icon: Film, text: "Desenvolvimento de projetos culturais e audiovisuais" },
+    { icon: Settings, text: "Produção executiva e gestão de equipe" },
+    { icon: FileText, text: "Estruturação para leis de incentivo" },
+    { icon: DollarSign, text: "Captação de recursos públicos e privados" },
+    { icon: Calendar, text: "Produção de obras audiovisuais e eventos culturais" },
+    { icon: Megaphone, text: "Distribuição, comunicação e lançamento de projetos" },
+    { icon: Mic, text: "Criação e roteirização de videocasts e podcasts" },
+    { icon: HelpCircle, text: "Consultoria para formatação de projetos" },
+  ];
+
   return (
     <div className="min-h-screen bg-background relative">
       {/* Artistic Background Animation */}
@@ -150,63 +163,24 @@ const HomePage = () => {
       {/* Navbar */}
       <Navbar currentPage="home" />
 
-      {/* Hero Section */}
+      {/* Hero Section - Video Placeholder */}
       <section id="inicio" className="relative py-28 lg:py-40 overflow-hidden">
         {/* Background decorations */}
         <div className="absolute inset-0 bg-gradient-to-b from-blue-mist via-background to-background" />
         <div className="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
         
-        {/* Decorative elements */}
-        <div className="absolute top-1/4 right-[15%] w-2 h-2 bg-primary/40 rounded-full float-gentle" />
-        <div className="absolute top-1/3 left-[20%] w-3 h-3 bg-accent/30 rounded-full float-gentle" style={{ animationDelay: '1s' }} />
-        <div className="absolute bottom-1/4 right-[25%] w-2 h-2 bg-primary/30 rounded-full float-gentle" style={{ animationDelay: '2s' }} />
-        
         <div className="container mx-auto px-4 relative">
-          <div className="max-w-4xl mx-auto text-center">
-            <div className="animate-fade-in-up">
-              <span className="group inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-8 cursor-default transition-all duration-500 hover:bg-primary/20 hover:shadow-[0_0_30px_rgba(var(--primary-rgb),0.4),0_0_60px_rgba(var(--primary-rgb),0.2)] hover:scale-105">
-                <Sparkles className="w-4 h-4 transition-all duration-500 group-hover:text-accent group-hover:drop-shadow-[0_0_8px_rgba(var(--accent-rgb),0.8)] group-hover:animate-pulse" />
-                <span className="transition-all duration-500 group-hover:text-foreground group-hover:drop-shadow-[0_0_6px_rgba(var(--primary-rgb),0.6)]">
-                  Conectando Cultura e Investimento
-                </span>
-              </span>
-            </div>
-            
-            <h1 className="animate-fade-in-up delay-100 text-4xl md:text-5xl lg:text-7xl font-serif font-semibold text-foreground mb-6 leading-tight tracking-tight">
-              Onde a <span className="font-handwritten text-5xl md:text-6xl lg:text-8xl gradient-text">Cultura</span> Encontra o{" "}
-              <span className="text-primary">Investimento</span>
-            </h1>
-            
-            <p className="animate-fade-in-up delay-200 text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
-              Um porto seguro onde projetos culturais encontram parceiros ideais. 
-              Conectamos criadores visionários com investidores que acreditam no poder transformador da cultura.
-            </p>
-            
-            <div className="animate-fade-in-up delay-300 flex justify-center">
-              <Link to="/porto-de-ideias" className="group">
-                <div className="flex items-center gap-4 px-8 py-5 rounded-full border-2 border-accent/30 bg-background/60 backdrop-blur-sm hover:border-accent hover:bg-accent/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-glow">
-                  {/* Animated Lightbulb Container */}
-                  <div className="relative w-12 h-12 rounded-full bg-gradient-to-br from-accent/20 to-primary/20 flex items-center justify-center group-hover:from-accent group-hover:to-primary transition-all duration-500 flex-shrink-0">
-                    {/* Flickering glow effect */}
-                    <div className="absolute inset-0 rounded-full bg-gradient-to-br from-amber-400/0 to-yellow-300/0 group-hover:from-amber-400/60 group-hover:to-yellow-300/40 blur-sm transition-all duration-300" />
-                    
-                    {/* Lightbulb icon with flicker animation */}
-                    <Lightbulb className="w-6 h-6 text-muted-foreground/60 group-hover:text-white animate-flicker group-hover:animate-none transition-colors duration-300 relative z-10" />
-                    
-                    {/* Light rays on hover */}
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                      <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-2 w-0.5 h-3 bg-gradient-to-t from-amber-400 to-transparent" />
-                      <div className="absolute top-1 right-0 translate-x-1 w-3 h-0.5 bg-gradient-to-r from-amber-400 to-transparent rotate-45" />
-                      <div className="absolute top-1 left-0 -translate-x-1 w-3 h-0.5 bg-gradient-to-l from-amber-400 to-transparent -rotate-45" />
-                    </div>
-                  </div>
-                  
-                  <span className="text-4xl md:text-5xl font-handwritten font-bold text-foreground group-hover:text-accent transition-colors duration-300 whitespace-nowrap">
-                    Porto de Idéias
-                  </span>
+          <div className="max-w-4xl mx-auto">
+            {/* Video Skeleton Placeholder */}
+            <div className="relative aspect-video rounded-2xl overflow-hidden bg-card/50 backdrop-blur-sm border border-border/50 shadow-elegant">
+              <Skeleton className="absolute inset-0 w-full h-full" />
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
+                <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center">
+                  <Play className="w-10 h-10 text-primary ml-1" />
                 </div>
-              </Link>
+                <p className="text-muted-foreground text-sm">Vídeo institucional em breve</p>
+              </div>
             </div>
           </div>
         </div>
@@ -243,7 +217,7 @@ const HomePage = () => {
         ]} />
       )}
 
-      {/* Mission Section */}
+      {/* Quem Somos Section */}
       <section id="sobre" className="py-20 lg:py-28 relative z-10">
         <div className="absolute inset-0 bg-background/70 backdrop-blur-[2px]" />
         <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent" />
@@ -254,12 +228,22 @@ const HomePage = () => {
               Quem Somos
             </span>
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif font-semibold text-foreground mb-6 decorative-line">
-              Nossa Missão
+              Porto Bello Filmes
             </h2>
-            <p className="text-lg text-muted-foreground mt-8 leading-relaxed">
-              Garantir que as iniciativas culturais recebam a atenção que merecem, 
-              aproximando criadores daqueles que podem apoiar, financiar e fortalecer a cultura brasileira.
-            </p>
+            <div className="text-base md:text-lg text-muted-foreground mt-8 leading-relaxed space-y-6 text-left">
+              <p>
+                A Porto Bello Filmes é uma produtora audiovisual que nasce da vontade de realização que pulsa em cada uma de nós. Às vezes as coisas que a gente sonha realmente acontecem, o que a gente precisa é correr atrás na prática cotidiana e acreditar que o nosso movimento também movimenta a vida. A nossa equipe une a capacidade de colocar a mão na massa com a sensibilidade de transformar vivências em narrativas para compartilhar com o mundo.
+              </p>
+              <p>
+                Nossos projetos nascem de uma escuta atenta e são atravessados por experiências pessoais e profissionais diversas. Contamos com um time de parceiros que somam seus repertórios e especialidades em cada etapa. Isso fortalece nossas trocas e a forma como organizamos o trabalho para criar, produzir, finalizar e fazer acontecer.
+              </p>
+              <p>
+                Desenvolvemos projetos autorais e também abraçamos histórias que chegam até nós com vontade de ganhar forma. A gente escuta, estrutura, soma e ajuda a colocar no mundo. Essas diferentes perspectivas ampliam nosso repertório e guiam nossas escolhas criativas.
+              </p>
+              <p>
+                Acreditamos no valor do trabalho bem feito, realizado em conjunto com pessoas competentes e comprometidas. É assim que seguimos: com clareza, escuta e entrega.
+              </p>
+            </div>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
@@ -269,8 +253,7 @@ const HomePage = () => {
               </div>
               <CardTitle className="text-xl font-serif mb-3">Para Criadores</CardTitle>
               <CardDescription className="text-base leading-relaxed">
-                Mostre seu projeto para quem pode investir de verdade. 
-                Não mais apresentações perdidas ou projetos esquecidos.
+                Histórias potentes merecem estrutura sólida. Atuamos no desenvolvimento, organização e produção para tirar ideias do papel e transformá-las em obras realizadas.
               </CardDescription>
             </Card>
 
@@ -280,8 +263,7 @@ const HomePage = () => {
               </div>
               <CardTitle className="text-xl font-serif mb-3">Para Investidores</CardTitle>
               <CardDescription className="text-base leading-relaxed">
-                Encontre oportunidades culturais seguras e bem estruturadas. 
-                Projetos curados, sérios e prontos para decolar.
+                Projetos prontos para investimento, com identidade, força de execução e potencial de retorno institucional.
               </CardDescription>
             </Card>
 
@@ -291,141 +273,151 @@ const HomePage = () => {
               </div>
               <CardTitle className="text-xl font-serif mb-3">Para a Sociedade</CardTitle>
               <CardDescription className="text-base leading-relaxed">
-                Criamos um ciclo virtuoso: cultura ganha força, 
-                investidores encontram propósito, e todos se beneficiam.
+                Criamos experiências que atravessam. Conectamos narrativas a quem importa: as pessoas.
               </CardDescription>
             </Card>
           </div>
         </div>
       </section>
 
-      {/* Platform Section */}
-      <section id="plataforma" className="py-20 lg:py-28 relative overflow-hidden">
+      {/* Nossos Serviços Section */}
+      <section className="py-20 lg:py-28 relative z-10">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-mist via-background to-background" />
+        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="text-center mb-16">
+            <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
+              O Que Fazemos
+            </span>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif font-semibold text-foreground mb-4 decorative-line">
+              Nossos Serviços
+            </h2>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+            {services.map((service, index) => (
+              <Card key={index} className="p-6 bg-card/80 backdrop-blur-sm border-border/50 card-hover group">
+                <div className="flex flex-col items-center text-center gap-4">
+                  <div className="w-14 h-14 bg-gradient-to-br from-primary/20 to-primary/10 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                    <service.icon className="w-7 h-7 text-primary" />
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {service.text}
+                  </p>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Porto de Ideias Section */}
+      <section id="porto-de-ideias" className="py-20 lg:py-28 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-mist via-blue-light/30 to-blue-mist" />
         
         <div className="container mx-auto px-4 relative">
           <div className="text-center mb-16">
             <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
-              Como Funciona
+              Curadoria e Fomento
             </span>
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif font-semibold text-foreground mb-4 decorative-line">
-              Um Ecossistema de Conexões
+              Porto de Ideias
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto mt-8">
-              Mais que uma vitrine, somos um porto seguro onde as ideias atracam, ganham força e partem para o mundo.
-            </p>
+            <div className="text-base md:text-lg text-muted-foreground max-w-3xl mx-auto mt-8 space-y-4">
+              <p>
+                A Porto de Ideias é nosso espaço de seleção e desenvolvimento de projetos culturais e audiovisuais em parceria com criadores. Através dela, abraçamos propostas que se conectam com nossa forma de ver e fazer arte.
+              </p>
+              <p>
+                Nossa curadoria prioriza projetos com identidade, diversidade e potência criativa, que estejam alinhados aos nossos valores e estejam prontos para ganhar o mundo.
+              </p>
+              <p>
+                Aqui, oferecemos estrutura, orientação e produção compartilhada — uma ponte entre a criação e a realização.
+              </p>
+            </div>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-16 items-center mb-24">
-            <div>
-              <h3 className="text-2xl md:text-3xl font-serif font-semibold text-foreground mb-10">
-                Para Produtores Culturais
+          {/* Featured Projects */}
+          {loadingProjects ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[1, 2, 3].map((i) => (
+                <Card key={i} className="overflow-hidden bg-card/80 backdrop-blur-sm border-border/50">
+                  <Skeleton className="h-48 w-full" />
+                  <CardContent className="p-6">
+                    <Skeleton className="h-6 w-3/4 mb-2" />
+                    <Skeleton className="h-4 w-full mb-4" />
+                    <Skeleton className="h-4 w-1/2" />
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : featuredProjects.length > 0 ? (
+            <>
+              <h3 className="text-xl md:text-2xl font-serif font-semibold text-foreground mb-8 text-center">
+                Projetos em Destaque
               </h3>
-              
-              <div className="space-y-8">
-                <div className="flex gap-5 group">
-                  <div className="w-14 h-14 bg-gradient-to-br from-primary/20 to-primary/10 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
-                    <Presentation className="w-7 h-7 text-primary" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-foreground mb-2 text-lg">Vitrine de Projetos</h4>
-                    <p className="text-muted-foreground leading-relaxed">
-                      Apresente suas iniciativas culturais com visibilidade profissional e informações detalhadas.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex gap-5 group">
-                  <div className="w-14 h-14 bg-gradient-to-br from-primary/20 to-primary/10 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
-                    <CheckCircle className="w-7 h-7 text-primary" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-foreground mb-2 text-lg">Credibilidade</h4>
-                    <p className="text-muted-foreground leading-relaxed">
-                      Construa confiança com perfis verificados e documentação completa do projeto.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex gap-5 group">
-                  <div className="w-14 h-14 bg-gradient-to-br from-primary/20 to-primary/10 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
-                    <BarChart3 className="w-7 h-7 text-primary" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-foreground mb-2 text-lg">Dashboard Completo</h4>
-                    <p className="text-muted-foreground leading-relaxed">
-                      Acompanhe visualizações, favoritos e conexões solicitadas em tempo real.
-                    </p>
-                  </div>
-                </div>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {featuredProjects.map((project) => (
+                  <Link key={project.id} to={`/project/${project.id}`}>
+                    <Card className="overflow-hidden bg-card/80 backdrop-blur-sm border-border/50 card-hover h-full">
+                      <div className="relative h-48 overflow-hidden">
+                        {project.image_url ? (
+                          <img
+                            src={project.image_url}
+                            alt={project.title}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+                            <Film className="w-12 h-12 text-primary/40" />
+                          </div>
+                        )}
+                        {project.project_type && (
+                          <Badge className="absolute top-4 left-4 bg-primary/90 text-primary-foreground">
+                            {project.project_type}
+                          </Badge>
+                        )}
+                      </div>
+                      <CardContent className="p-6">
+                        <CardTitle className="text-lg font-serif mb-2 line-clamp-1">
+                          {project.title}
+                        </CardTitle>
+                        <CardDescription className="text-sm line-clamp-2 mb-3">
+                          {project.synopsis}
+                        </CardDescription>
+                        {project.location && (
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <MapPin className="w-3 h-3" />
+                            {project.location}
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </Link>
+                ))}
               </div>
-            </div>
-
-            <div className="relative">
-              <div className="absolute -inset-4 bg-gradient-to-br from-primary/20 to-accent/10 rounded-3xl blur-2xl" />
-              <img
-                src="https://images.unsplash.com/photo-1594608661623-aa0bd3a69d98?w=800"
-                alt="Galeria de arte"
-                className="relative rounded-2xl shadow-elegant w-full h-[450px] object-cover"
-              />
-            </div>
-          </div>
-
-          {/* For Investors */}
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <div className="order-2 lg:order-1 relative">
-              <div className="absolute -inset-4 bg-gradient-to-br from-emerald-500/20 to-primary/10 rounded-3xl blur-2xl" />
-              <img
-                src="https://images.unsplash.com/photo-1556761175-4b46a572b786?w=800"
-                alt="Reunião de negócios"
-                className="relative rounded-2xl shadow-elegant w-full h-[450px] object-cover"
-              />
-            </div>
-
-            <div className="order-1 lg:order-2">
-              <h3 className="text-2xl md:text-3xl font-serif font-semibold text-foreground mb-10">
-                Para Empreendedores e Investidores
-              </h3>
-              
-              <div className="space-y-8">
-                <div className="flex gap-5 group">
-                  <div className="w-14 h-14 bg-gradient-to-br from-emerald-500/20 to-emerald-500/10 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
-                    <Search className="w-7 h-7 text-emerald-600" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-foreground mb-2 text-lg">Seleção Curada</h4>
-                    <p className="text-muted-foreground leading-relaxed">
-                      Acesso a propostas culturais sérias, criativas e bem estruturadas.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex gap-5 group">
-                  <div className="w-14 h-14 bg-gradient-to-br from-emerald-500/20 to-emerald-500/10 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
-                    <FileText className="w-7 h-7 text-emerald-600" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-foreground mb-2 text-lg">Marco Legal</h4>
-                    <p className="text-muted-foreground leading-relaxed">
-                      Projetos prontos para financiamento através de leis de incentivo ou patrocínio direto.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex gap-5 group">
-                  <div className="w-14 h-14 bg-gradient-to-br from-emerald-500/20 to-emerald-500/10 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
-                    <Heart className="w-7 h-7 text-emerald-600" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-foreground mb-2 text-lg">Impacto Real</h4>
-                    <p className="text-muted-foreground leading-relaxed">
-                      Gerencie projetos salvos, histórico de contatos e relatórios de impacto.
-                    </p>
-                  </div>
-                </div>
+              <div className="text-center mt-12">
+                <Link 
+                  to="/porto-de-ideias" 
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+                >
+                  Ver Todos os Projetos
+                </Link>
               </div>
+            </>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground mb-6">
+                Em breve, novos projetos em destaque.
+              </p>
+              <Link 
+                to="/porto-de-ideias" 
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+              >
+                Explorar Projetos
+              </Link>
             </div>
-          </div>
+          )}
         </div>
       </section>
 

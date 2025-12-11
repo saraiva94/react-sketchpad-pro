@@ -19,7 +19,7 @@ const SOCIAL_LINKS = {
 
 const CONTACT_INFO = {
   email: "portobellofilmes@gmail.com",
-  phone: "+55 (11) 9999-9999"
+  phone: "(21) 96726-4730"
 };
 
 export function Footer() {
