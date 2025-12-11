@@ -24,9 +24,9 @@ const CONTACT_INFO = {
 
 export function Footer() {
   return (
-    <footer className="py-8 relative overflow-hidden z-10 mt-8">
-      <div className="absolute inset-0 bg-background/95 backdrop-blur-sm" />
-      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-muted to-transparent" />
+    <footer className="py-8 relative overflow-hidden z-10 mt-8 bg-black">
+      <div className="absolute inset-0 bg-black" />
+      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-gray-700 to-transparent" />
       
       <div className="container mx-auto px-4 relative z-10">
         <div className="grid md:grid-cols-4 gap-6 mb-6">
@@ -35,32 +35,32 @@ export function Footer() {
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
                 <Anchor className="w-4 h-4 text-primary-foreground" />
               </div>
-              <h3 className="font-handwritten text-xl font-bold text-foreground">Porto Bello</h3>
+              <h3 className="font-handwritten text-xl font-bold text-white">Porto Bello</h3>
             </div>
-            <p className="text-xs text-muted-foreground leading-relaxed">
+            <p className="text-xs text-gray-400 leading-relaxed">
               Uma plataforma criada para aproximar cultura e investimento.
             </p>
           </div>
           
           <div>
-            <h4 className="font-semibold text-foreground mb-2 text-sm">Navegação</h4>
+            <h4 className="font-semibold text-white mb-2 text-sm">Navegação</h4>
             <ul className="space-y-1 text-xs">
-              <li><Link to="/" className="text-muted-foreground hover:text-primary transition-colors">Início</Link></li>
-              <li><Link to="/porto-de-ideias" className="text-muted-foreground hover:text-primary transition-colors">Porto de Idéias</Link></li>
+              <li><Link to="/" className="text-gray-400 hover:text-primary transition-colors">Início</Link></li>
+              <li><Link to="/porto-de-ideias" className="text-gray-400 hover:text-primary transition-colors">Porto de Idéias</Link></li>
             </ul>
           </div>
           
           <div>
-            <h4 className="font-semibold text-foreground mb-2 text-sm">Ações</h4>
+            <h4 className="font-semibold text-white mb-2 text-sm">Ações</h4>
             <ul className="space-y-1 text-xs">
-              <li><Link to="/submit" className="text-muted-foreground hover:text-primary transition-colors">Cadastrar Projeto</Link></li>
-              <li><Link to="/porto-de-ideias" className="text-muted-foreground hover:text-primary transition-colors">Explorar Projetos</Link></li>
+              <li><Link to="/submit" className="text-gray-400 hover:text-primary transition-colors">Cadastrar Projeto</Link></li>
+              <li><Link to="/porto-de-ideias" className="text-gray-400 hover:text-primary transition-colors">Explorar Projetos</Link></li>
             </ul>
           </div>
           
           <div>
-            <h4 className="font-semibold text-foreground mb-2 text-sm">Contato</h4>
-            <ul className="space-y-1 text-xs text-muted-foreground">
+            <h4 className="font-semibold text-white mb-2 text-sm">Contato</h4>
+            <ul className="space-y-1 text-xs text-gray-400">
               <li className="flex items-center gap-2">
                 <Mail className="w-3 h-3 text-accent" />
                 <a href={`mailto:${CONTACT_INFO.email}`} className="hover:text-primary transition-colors">
@@ -113,7 +113,7 @@ export function Footer() {
           </div>
         </div>
         
-        <div className="border-t border-border pt-4 text-center text-xs text-muted-foreground">
+        <div className="border-t border-gray-800 pt-4 text-center text-xs text-gray-500">
           <p>&copy; {new Date().getFullYear()} Porto Bello. Todos os direitos reservados.</p>
         </div>
       </div>
