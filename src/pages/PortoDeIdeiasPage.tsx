@@ -413,7 +413,7 @@ const PortoDeIdeiasPage = () => {
                     className="block group animate-fade-in"
                     style={{ animationDelay: `${index * 50}ms` }}
                   >
-                    <div className="bg-card/95 backdrop-blur-sm border border-border/50 rounded-2xl overflow-hidden hover:shadow-xl hover:shadow-primary/10 hover:border-primary/30 transition-all duration-300">
+                    <div className="card-3d bg-card/95 backdrop-blur-sm border border-border/50 rounded-2xl overflow-hidden">
                       {/* Image */}
                       <div className="relative overflow-hidden h-48">
                         {project.image_url ? (
@@ -522,7 +522,7 @@ const PortoDeIdeiasPage = () => {
                 className="block group animate-fade-in"
                 style={{ animationDelay: '0ms' }}
               >
-                <div className="bg-card/95 backdrop-blur-sm border-2 border-dashed border-primary/30 rounded-2xl overflow-hidden hover:shadow-xl hover:shadow-primary/10 hover:border-primary/60 transition-all duration-300 h-full">
+                <div className="card-3d bg-card/95 backdrop-blur-sm border-2 border-dashed border-primary/30 rounded-2xl overflow-hidden h-full">
                   <div className="relative h-48 bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
                     <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center animate-pulse">
                       <span className="text-4xl">✨</span>
@@ -555,7 +555,7 @@ const PortoDeIdeiasPage = () => {
                 className="block group animate-fade-in"
                 style={{ animationDelay: '100ms' }}
               >
-                <div className="bg-card/95 backdrop-blur-sm border border-border/50 rounded-2xl overflow-hidden h-full hover:shadow-xl hover:shadow-primary/10 hover:border-primary/30 transition-all duration-300">
+                <div className="card-3d bg-card/95 backdrop-blur-sm border border-border/50 rounded-2xl overflow-hidden h-full">
                   <div className="relative h-48 bg-gradient-to-br from-accent/20 to-primary/20 flex items-center justify-center">
                     <div className="w-20 h-20 rounded-full bg-accent/20 flex items-center justify-center">
                       <span className="text-4xl animate-bounce">🎭</span>
@@ -598,7 +598,7 @@ const PortoDeIdeiasPage = () => {
                 className="block group animate-fade-in"
                 style={{ animationDelay: '200ms' }}
               >
-                <div className="bg-card/95 backdrop-blur-sm border border-border/50 rounded-2xl overflow-hidden h-full hover:shadow-xl hover:shadow-primary/10 hover:border-primary/30 transition-all duration-300">
+                <div className="card-3d bg-card/95 backdrop-blur-sm border border-border/50 rounded-2xl overflow-hidden h-full">
                   <div className="relative h-48 bg-gradient-to-br from-primary/15 to-accent/25 flex items-center justify-center">
                     <div className="relative">
                       <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center">
@@ -639,7 +639,7 @@ const PortoDeIdeiasPage = () => {
                 className="block group animate-fade-in"
                 style={{ animationDelay: '300ms' }}
               >
-                <div className="bg-card/95 backdrop-blur-sm border border-amber-500/30 rounded-2xl overflow-hidden h-full hover:shadow-xl hover:shadow-amber/10 hover:border-amber-400/50 transition-all duration-300">
+                <div className="card-3d bg-card/95 backdrop-blur-sm border border-amber-500/30 rounded-2xl overflow-hidden h-full">
                   <div className="relative h-48 bg-gradient-to-br from-amber-100 dark:from-amber-900/40 to-orange-100 dark:to-orange-900/40 flex items-center justify-center">
                     <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg">
                       <span className="text-4xl">🏆</span>
@@ -674,7 +674,7 @@ const PortoDeIdeiasPage = () => {
                 className="block group animate-fade-in"
                 style={{ animationDelay: '400ms' }}
               >
-                <div className="bg-card/95 backdrop-blur-sm border border-emerald-500/30 rounded-2xl overflow-hidden h-full hover:shadow-xl hover:shadow-emerald/10 hover:border-emerald-400/50 transition-all duration-300">
+                <div className="card-3d bg-card/95 backdrop-blur-sm border border-emerald-500/30 rounded-2xl overflow-hidden h-full">
                   <div className="relative h-48 bg-gradient-to-br from-emerald-100 dark:from-emerald-900/40 to-teal-100 dark:to-teal-900/40 flex items-center justify-center">
                     <div className="w-20 h-20 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-lg">
                       <span className="text-4xl animate-bounce">💰</span>
@@ -710,7 +710,7 @@ const PortoDeIdeiasPage = () => {
                 className="block group animate-fade-in"
                 style={{ animationDelay: '500ms' }}
               >
-                <div className="bg-gradient-to-br from-primary via-primary/95 to-accent border border-primary/50 rounded-2xl overflow-hidden hover:shadow-2xl hover:shadow-primary/20 hover:scale-[1.02] transition-all duration-300 h-full">
+                <div className="card-3d bg-gradient-to-br from-primary via-primary/95 to-accent border border-primary/50 rounded-2xl overflow-hidden h-full">
                   <div className="relative h-48 flex items-center justify-center">
                     <div className="text-center text-primary-foreground">
                       <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
