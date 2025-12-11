@@ -664,7 +664,7 @@ const ExampleProjectPage = () => {
       </div>
 
       {/* Footer */}
-      <footer className="bg-foreground text-background py-6 md:py-8 mt-8 md:mt-10">
+      <footer className="bg-black text-white py-6 md:py-8 mt-8 md:mt-10">
         <div className="container mx-auto px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
             <div className="col-span-2 md:col-span-1">
@@ -674,7 +674,7 @@ const ExampleProjectPage = () => {
                   Porto de Ideias
                 </span>
               </div>
-              <p className="text-background/70 mb-2 text-xs leading-relaxed">
+              <p className="text-gray-400 mb-2 text-xs leading-relaxed">
                 Iniciativa da Porto Bello Filmes para aproximar cultura e investimento.
               </p>
               <div className="flex space-x-2">
@@ -694,26 +694,26 @@ const ExampleProjectPage = () => {
             </div>
 
             <div>
-              <h3 className="font-bold text-sm mb-2 text-background">Plataforma</h3>
-              <ul className="space-y-1 text-background/70 text-xs">
-                <li><Link to="/" className="hover:text-background transition-colors">Como Funciona</Link></li>
-                <li><Link to="/submit" className="hover:text-background transition-colors">Enviar Projeto</Link></li>
-                <li><Link to="/porto-de-ideias" className="hover:text-background transition-colors">Projetos</Link></li>
+              <h3 className="font-bold text-sm mb-2 text-white">Plataforma</h3>
+              <ul className="space-y-1 text-gray-400 text-xs">
+                <li><Link to="/" className="hover:text-white transition-colors">Como Funciona</Link></li>
+                <li><Link to="/submit" className="hover:text-white transition-colors">Enviar Projeto</Link></li>
+                <li><Link to="/porto-de-ideias" className="hover:text-white transition-colors">Projetos</Link></li>
               </ul>
             </div>
 
             <div>
-              <h3 className="font-bold text-sm mb-2 text-background">Suporte</h3>
-              <ul className="space-y-1 text-background/70 text-xs">
-                <li><a href="mailto:portobellofilmes@gmail.com" className="hover:text-background transition-colors">FAQ</a></li>
-                <li><a href="mailto:portobellofilmes@gmail.com" className="hover:text-background transition-colors">Ajuda</a></li>
-                <li><Link to="/" className="hover:text-background transition-colors">Termos</Link></li>
+              <h3 className="font-bold text-sm mb-2 text-white">Suporte</h3>
+              <ul className="space-y-1 text-gray-400 text-xs">
+                <li><a href="mailto:portobellofilmes@gmail.com" className="hover:text-white transition-colors">FAQ</a></li>
+                <li><a href="mailto:portobellofilmes@gmail.com" className="hover:text-white transition-colors">Ajuda</a></li>
+                <li><Link to="/" className="hover:text-white transition-colors">Termos</Link></li>
               </ul>
             </div>
 
             <div>
-              <h3 className="font-bold text-sm mb-2 text-background">Contato</h3>
-              <ul className="space-y-1 text-background/70 text-xs">
+              <h3 className="font-bold text-sm mb-2 text-white">Contato</h3>
+              <ul className="space-y-1 text-gray-400 text-xs">
                 <li className="flex items-center space-x-1.5">
                   <Mail className="w-3 h-3 flex-shrink-0" />
                   <span className="truncate">portobellofilmes@gmail.com</span>
@@ -726,7 +726,7 @@ const ExampleProjectPage = () => {
             </div>
           </div>
 
-          <div className="border-t border-background/20 mt-4 md:mt-6 pt-4 text-center text-background/70 text-xs">
+          <div className="border-t border-gray-800 mt-4 md:mt-6 pt-4 text-center text-gray-500 text-xs">
             <p>&copy; 2024 Porto de Ideias. Todos os direitos reservados.</p>
           </div>
         </div>
