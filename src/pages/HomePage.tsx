@@ -294,9 +294,6 @@ const HomePage = () => {
         
         <div className="container mx-auto px-4 relative z-10">
           <div className={`max-w-3xl mx-auto text-center mb-16 transition-all duration-700 ${quemSomosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-            <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
-              Quem Somos
-            </span>
             <ShinyText className="inline-block" delay={200}>
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif font-semibold text-foreground mb-6 decorative-line">
                 Porto Bello Filmes
@@ -349,9 +346,6 @@ const HomePage = () => {
         
         <div className="container mx-auto px-4 relative z-10">
           <div className={`text-center mb-16 transition-all duration-700 ${servicosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-            <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
-              O Que Fazemos
-            </span>
             <ShinyText className="inline-block" delay={200}>
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif font-semibold text-foreground mb-4 decorative-line">
                 Nossos Serviços
