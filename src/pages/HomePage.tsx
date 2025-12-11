@@ -296,7 +296,7 @@ const HomePage = () => {
           <div className={`max-w-3xl mx-auto text-center mb-16 transition-all duration-700 ${quemSomosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
             <ShinyText className="inline-block" delay={200}>
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif font-semibold text-foreground mb-6 decorative-line">
-                Porto Bello Filmes
+                Quem Somos
               </h2>
             </ShinyText>
             <div className="text-base md:text-lg text-muted-foreground mt-8 leading-relaxed space-y-6 text-left">
