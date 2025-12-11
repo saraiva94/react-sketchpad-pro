@@ -57,11 +57,14 @@ const HomePage = () => {
     successRate: 0
   });
   const [statsVisible, setStatsVisible] = useState(true);
+  const [institutionalVideoUrl, setInstitutionalVideoUrl] = useState<string | null>(null);
+  const [loadingVideo, setLoadingVideo] = useState(true);
 
   useEffect(() => {
     fetchFeaturedProjects();
     fetchStats();
     fetchStatsVisibility();
+    fetchInstitutionalVideo();
 
     // Subscribe to settings changes for real-time sync
     const channel = supabase
@@ -71,12 +74,15 @@ const HomePage = () => {
         {
           event: 'UPDATE',
           schema: 'public',
-          table: 'settings',
-          filter: 'key=eq.stats_visible'
+          table: 'settings'
         },
         (payload) => {
-          const newValue = (payload.new as { value: { enabled: boolean } }).value;
-          setStatsVisible(newValue.enabled);
+          const record = payload.new as { key: string; value: any };
+          if (record.key === 'stats_visible') {
+            setStatsVisible(record.value.enabled);
+          } else if (record.key === 'institutional_video') {
+            setInstitutionalVideoUrl(record.value.url);
+          }
         }
       )
       .subscribe();
@@ -96,6 +102,19 @@ const HomePage = () => {
     if (data) {
       setStatsVisible((data.value as { enabled: boolean }).enabled);
     }
+  };
+
+  const fetchInstitutionalVideo = async () => {
+    const { data } = await supabase
+      .from("settings")
+      .select("value")
+      .eq("key", "institutional_video")
+      .single();
+    
+    if (data) {
+      setInstitutionalVideoUrl((data.value as { url: string }).url || null);
+    }
+    setLoadingVideo(false);
   };
 
   const fetchStats = async () => {
@@ -163,24 +182,61 @@ const HomePage = () => {
       {/* Navbar */}
       <Navbar currentPage="home" />
 
-      {/* Hero Section - Video Placeholder */}
-      <section id="inicio" className="relative py-28 lg:py-40 overflow-hidden">
+      {/* Hero Section - Institutional Video */}
+      <section id="inicio" className="relative py-20 lg:py-32 overflow-hidden">
         {/* Background decorations */}
-        <div className="absolute inset-0 bg-gradient-to-b from-blue-mist via-background to-background" />
-        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background" />
+        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
         
         <div className="container mx-auto px-4 relative">
-          <div className="max-w-4xl mx-auto">
-            {/* Video Skeleton Placeholder */}
-            <div className="relative aspect-video rounded-2xl overflow-hidden bg-card/50 backdrop-blur-sm border border-border/50 shadow-elegant">
-              <Skeleton className="absolute inset-0 w-full h-full" />
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
-                <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center">
-                  <Play className="w-10 h-10 text-primary ml-1" />
-                </div>
-                <p className="text-muted-foreground text-sm">Vídeo institucional em breve</p>
-              </div>
+          <div className="max-w-5xl mx-auto">
+            {/* Video Container */}
+            <div className="relative aspect-video rounded-3xl overflow-hidden shadow-2xl border border-border/30 bg-gradient-to-br from-card via-card/95 to-card/90">
+              {loadingVideo ? (
+                <>
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
+                  <Skeleton className="absolute inset-0 w-full h-full" />
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-6">
+                    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center backdrop-blur-sm border border-primary/20 shadow-lg animate-pulse">
+                      <Play className="w-12 h-12 text-primary ml-1" />
+                    </div>
+                    <div className="text-center">
+                      <p className="text-muted-foreground text-sm">Carregando...</p>
+                    </div>
+                  </div>
+                </>
+              ) : institutionalVideoUrl ? (
+                <video
+                  src={institutionalVideoUrl}
+                  controls
+                  className="w-full h-full object-cover"
+                  poster=""
+                >
+                  Seu navegador não suporta vídeos.
+                </video>
+              ) : (
+                <>
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-6">
+                    <div className="relative">
+                      <div className="absolute inset-0 w-28 h-28 rounded-full bg-primary/20 blur-xl animate-pulse" />
+                      <div className="relative w-24 h-24 rounded-full bg-gradient-to-br from-primary/40 to-primary/20 flex items-center justify-center backdrop-blur-sm border border-primary/30 shadow-2xl group hover:scale-105 transition-transform duration-300">
+                        <Play className="w-12 h-12 text-primary ml-1 group-hover:scale-110 transition-transform" />
+                      </div>
+                    </div>
+                    <div className="text-center space-y-2">
+                      <p className="text-foreground/80 font-medium text-lg">Vídeo Institucional</p>
+                      <p className="text-muted-foreground text-sm">Em breve</p>
+                    </div>
+                  </div>
+                  {/* Decorative corners */}
+                  <div className="absolute top-4 left-4 w-12 h-12 border-l-2 border-t-2 border-primary/30 rounded-tl-lg" />
+                  <div className="absolute top-4 right-4 w-12 h-12 border-r-2 border-t-2 border-primary/30 rounded-tr-lg" />
+                  <div className="absolute bottom-4 left-4 w-12 h-12 border-l-2 border-b-2 border-primary/30 rounded-bl-lg" />
+                  <div className="absolute bottom-4 right-4 w-12 h-12 border-r-2 border-b-2 border-primary/30 rounded-br-lg" />
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -297,12 +353,22 @@ const HomePage = () => {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
             {services.map((service, index) => (
-              <Card key={index} className="p-6 bg-card/80 backdrop-blur-sm border-border/50 card-hover group">
-                <div className="flex flex-col items-center text-center gap-4">
-                  <div className="w-14 h-14 bg-gradient-to-br from-primary/20 to-primary/10 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                    <service.icon className="w-7 h-7 text-primary" />
+              <Card 
+                key={index} 
+                className="group relative overflow-hidden bg-gradient-to-br from-card via-card to-card/80 backdrop-blur-sm border-border/50 hover:border-primary/30 transition-all duration-500 hover:shadow-xl hover:shadow-primary/5"
+              >
+                {/* Hover gradient overlay */}
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                
+                <div className="relative p-6 flex flex-col items-center text-center gap-4">
+                  <div className="relative">
+                    {/* Glow effect */}
+                    <div className="absolute inset-0 w-16 h-16 bg-primary/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    <div className="relative w-16 h-16 bg-gradient-to-br from-primary/20 via-primary/15 to-primary/10 rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 border border-primary/10 group-hover:border-primary/30 shadow-lg">
+                      <service.icon className="w-8 h-8 text-primary group-hover:text-primary transition-colors" />
+                    </div>
                   </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
+                  <p className="text-sm text-muted-foreground leading-relaxed group-hover:text-foreground/80 transition-colors duration-300 font-medium">
                     {service.text}
                   </p>
                 </div>

@@ -30,7 +30,10 @@ import {
   Download,
   FileText,
   Phone,
-  MessageSquare
+  MessageSquare,
+  Upload,
+  Video,
+  X
 } from "lucide-react";
 
 interface Project {
@@ -88,6 +91,8 @@ const AdminDashboard = () => {
   const [activeSection, setActiveSection] = useState<"projects" | "requests" | "contacts" | "featured" | "settings">("projects");
   const [statsVisible, setStatsVisible] = useState(true);
   const [loadingSettings, setLoadingSettings] = useState(true);
+  const [institutionalVideoUrl, setInstitutionalVideoUrl] = useState("");
+  const [uploadingVideo, setUploadingVideo] = useState(false);
 
   // Edit form state
   const [editImageUrl, setEditImageUrl] = useState("");
@@ -107,15 +112,26 @@ const AdminDashboard = () => {
   }, [navigate]);
 
   const fetchStatsVisibility = async () => {
-    const { data } = await supabase
+    const { data: statsData } = await supabase
       .from("settings")
       .select("value")
       .eq("key", "stats_visible")
       .single();
     
-    if (data) {
-      setStatsVisible((data.value as { enabled: boolean }).enabled);
+    if (statsData) {
+      setStatsVisible((statsData.value as { enabled: boolean }).enabled);
     }
+
+    const { data: videoData } = await supabase
+      .from("settings")
+      .select("value")
+      .eq("key", "institutional_video")
+      .single();
+    
+    if (videoData) {
+      setInstitutionalVideoUrl((videoData.value as { url: string }).url || "");
+    }
+    
     setLoadingSettings(false);
   };
 
@@ -496,6 +512,158 @@ const AdminDashboard = () => {
         {/* Settings Section */}
         {activeSection === "settings" && (
           <div className="space-y-6">
+            {/* Vídeo Institucional */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Video className="w-5 h-5" />
+                  Vídeo Institucional
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Configure o vídeo que será exibido na seção principal da homepage.
+                </p>
+                
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="video-url">URL do Vídeo</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="video-url"
+                        placeholder="https://exemplo.com/video.mp4"
+                        value={institutionalVideoUrl}
+                        onChange={(e) => setInstitutionalVideoUrl(e.target.value)}
+                        className="flex-1"
+                      />
+                      {institutionalVideoUrl && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setInstitutionalVideoUrl("")}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Cole a URL direta do vídeo (MP4, WebM) ou faça upload no storage.
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <Button 
+                      onClick={async () => {
+                        setUploadingVideo(true);
+                        // Check if setting exists
+                        const { data: existing } = await supabase
+                          .from("settings")
+                          .select("id")
+                          .eq("key", "institutional_video")
+                          .single();
+                        
+                        if (existing) {
+                          await supabase
+                            .from("settings")
+                            .update({ value: { url: institutionalVideoUrl } })
+                            .eq("key", "institutional_video");
+                        } else {
+                          await supabase
+                            .from("settings")
+                            .insert({ key: "institutional_video", value: { url: institutionalVideoUrl } });
+                        }
+                        
+                        setUploadingVideo(false);
+                        toast({
+                          title: "Salvo!",
+                          description: institutionalVideoUrl 
+                            ? "Vídeo institucional atualizado com sucesso." 
+                            : "Vídeo institucional removido.",
+                        });
+                      }}
+                      disabled={uploadingVideo}
+                    >
+                      {uploadingVideo ? "Salvando..." : "Salvar Vídeo"}
+                    </Button>
+
+                    <Label
+                      htmlFor="video-upload"
+                      className="cursor-pointer inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
+                    >
+                      <Upload className="w-4 h-4" />
+                      Upload para Storage
+                    </Label>
+                    <input
+                      id="video-upload"
+                      type="file"
+                      accept="video/*"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        
+                        setUploadingVideo(true);
+                        const fileName = `institutional-${Date.now()}.${file.name.split('.').pop()}`;
+                        
+                        const { data, error } = await supabase.storage
+                          .from("project-media")
+                          .upload(fileName, file);
+                        
+                        if (error) {
+                          toast({
+                            title: "Erro no upload",
+                            description: error.message,
+                            variant: "destructive",
+                          });
+                        } else {
+                          const { data: urlData } = supabase.storage
+                            .from("project-media")
+                            .getPublicUrl(fileName);
+                          
+                          setInstitutionalVideoUrl(urlData.publicUrl);
+                          
+                          // Save to settings
+                          const { data: existing } = await supabase
+                            .from("settings")
+                            .select("id")
+                            .eq("key", "institutional_video")
+                            .single();
+                          
+                          if (existing) {
+                            await supabase
+                              .from("settings")
+                              .update({ value: { url: urlData.publicUrl } })
+                              .eq("key", "institutional_video");
+                          } else {
+                            await supabase
+                              .from("settings")
+                              .insert({ key: "institutional_video", value: { url: urlData.publicUrl } });
+                          }
+                          
+                          toast({
+                            title: "Upload concluído!",
+                            description: "Vídeo enviado e salvo com sucesso.",
+                          });
+                        }
+                        
+                        setUploadingVideo(false);
+                      }}
+                    />
+                  </div>
+
+                  {institutionalVideoUrl && (
+                    <div className="mt-4 rounded-lg overflow-hidden border">
+                      <video
+                        src={institutionalVideoUrl}
+                        controls
+                        className="w-full max-h-64 object-contain bg-black"
+                      />
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
             <Card>
               <CardHeader>
                 <CardTitle>Configurações da Homepage</CardTitle>
