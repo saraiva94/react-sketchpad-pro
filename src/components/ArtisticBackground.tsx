@@ -31,15 +31,15 @@ export function ArtisticBackground() {
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
 
-    // Initialize particles
-    const particleCount = 60;
+    // Initialize particles - increased count and visibility
+    const particleCount = 100;
     particlesRef.current = Array.from({ length: particleCount }, () => ({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
-      vx: (Math.random() - 0.5) * 0.3,
-      vy: (Math.random() - 0.5) * 0.3,
-      size: Math.random() * 3 + 1,
-      opacity: Math.random() * 0.3 + 0.1,
+      vx: (Math.random() - 0.5) * 0.4,
+      vy: (Math.random() - 0.5) * 0.4,
+      size: Math.random() * 4 + 2,
+      opacity: Math.random() * 0.5 + 0.2,
       hue: Math.random() * 40 + 180, // Blue to teal range
     }));
 
@@ -272,8 +272,8 @@ export function ArtisticBackground() {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 pointer-events-none z-0"
-      style={{ opacity: 0.8 }}
+      className="fixed inset-0 pointer-events-none"
+      style={{ opacity: 1, zIndex: 1 }}
     />
   );
 }

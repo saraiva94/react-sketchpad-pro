@@ -8,6 +8,7 @@ import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
 import { AnimatedStats } from "@/components/AnimatedStats";
 import { ArtisticBackground } from "@/components/ArtisticBackground";
+import { ShinyText } from "@/components/ShinyText";
 import { useInView } from "@/hooks/useInView";
 import { 
   Users, 
@@ -26,7 +27,13 @@ import {
   Mic,
   HelpCircle,
   MapPin,
-  Play
+  Play,
+  LayoutGrid,
+  ShieldCheck,
+  BarChart3,
+  Search,
+  FileCheck,
+  HeartHandshake
 } from "lucide-react";
 
 interface Project {
@@ -190,13 +197,13 @@ const HomePage = () => {
       <Navbar currentPage="home" />
 
       {/* Hero Section - Institutional Video */}
-      <section ref={heroRef} id="inicio" className="relative py-20 lg:py-32 overflow-hidden">
-        {/* Background decorations */}
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background" />
-        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+      <section ref={heroRef} id="inicio" className="relative py-20 lg:py-32 overflow-hidden z-10">
+        {/* Semi-transparent background to let particles show through */}
+        <div className="absolute inset-0 bg-background/60" />
+        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
         
-        <div className="container mx-auto px-4 relative">
+        <div className="container mx-auto px-4 relative z-10">
           <div className={`max-w-5xl mx-auto transition-all duration-1000 ${heroInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
             {/* Video Container */}
             <div className="relative aspect-video rounded-3xl overflow-hidden shadow-2xl border border-border/30 bg-gradient-to-br from-card via-card/95 to-card/90">
@@ -282,7 +289,7 @@ const HomePage = () => {
 
       {/* Quem Somos Section */}
       <section ref={quemSomosRef} id="sobre" className="py-20 lg:py-28 relative z-10">
-        <div className="absolute inset-0 bg-background/70 backdrop-blur-[2px]" />
+        <div className="absolute inset-0 bg-background/80 backdrop-blur-[1px]" />
         <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent" />
         
         <div className="container mx-auto px-4 relative z-10">
@@ -290,9 +297,11 @@ const HomePage = () => {
             <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
               Quem Somos
             </span>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif font-semibold text-foreground mb-6 decorative-line">
-              Porto Bello Filmes
-            </h2>
+            <ShinyText className="inline-block" delay={200}>
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif font-semibold text-foreground mb-6 decorative-line">
+                Porto Bello Filmes
+              </h2>
+            </ShinyText>
             <div className="text-base md:text-lg text-muted-foreground mt-8 leading-relaxed space-y-6 text-left">
               <p>
                 A Porto Bello Filmes é uma produtora audiovisual que nasce da vontade de realização que pulsa em cada uma de nós. Às vezes as coisas que a gente sonha realmente acontecem, o que a gente precisa é correr atrás na prática cotidiana e acreditar que o nosso movimento também movimenta a vida. A nossa equipe une a capacidade de colocar a mão na massa com a sensibilidade de transformar vivências em narrativas para compartilhar com o mundo.
@@ -335,7 +344,7 @@ const HomePage = () => {
 
       {/* Nossos Serviços Section */}
       <section ref={servicosRef} className="py-20 lg:py-28 relative z-10">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-mist via-background to-background" />
+        <div className="absolute inset-0 bg-background/80 backdrop-blur-[1px]" />
         <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent" />
         
         <div className="container mx-auto px-4 relative z-10">
@@ -343,9 +352,11 @@ const HomePage = () => {
             <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
               O Que Fazemos
             </span>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif font-semibold text-foreground mb-4 decorative-line">
-              Nossos Serviços
-            </h2>
+            <ShinyText className="inline-block" delay={200}>
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif font-semibold text-foreground mb-4 decorative-line">
+                Nossos Serviços
+              </h2>
+            </ShinyText>
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
@@ -376,115 +387,116 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Porto de Ideias Section */}
-      <section ref={portoIdeiasRef} id="porto-de-ideias" className="py-20 lg:py-28 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-mist via-blue-light/30 to-blue-mist" />
+      {/* Porto de Ideias Section - Ecossistema de Conexões */}
+      <section ref={portoIdeiasRef} id="porto-de-ideias" className="py-20 lg:py-28 relative overflow-hidden z-10">
+        <div className="absolute inset-0 bg-background/80 backdrop-blur-[1px]" />
         
         <div className="container mx-auto px-4 relative">
-          <div className={`text-center mb-16 transition-all duration-700 ${portoIdeiasInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-            <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
-              Curadoria e Fomento
-            </span>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif font-semibold text-foreground mb-4 decorative-line">
-              Porto de Ideias
-            </h2>
-            <div className="text-base md:text-lg text-muted-foreground max-w-3xl mx-auto mt-8 space-y-4">
-              <p>
-                A Porto de Ideias é nosso espaço de seleção e desenvolvimento de projetos culturais e audiovisuais em parceria com criadores. Através dela, abraçamos propostas que se conectam com nossa forma de ver e fazer arte.
-              </p>
-              <p>
-                Nossa curadoria prioriza projetos com identidade, diversidade e potência criativa, que estejam alinhados aos nossos valores e estejam prontos para ganhar o mundo.
-              </p>
-              <p>
-                Aqui, oferecemos estrutura, orientação e produção compartilhada — uma ponte entre a criação e a realização.
-              </p>
+          {/* Header */}
+          <div className={`text-center mb-20 transition-all duration-700 ${portoIdeiasInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+            <ShinyText className="inline-block" delay={300}>
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif font-semibold text-foreground mb-4">
+                Um Ecossistema de Conexões
+              </h2>
+            </ShinyText>
+            <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto mt-6">
+              Mais que uma vitrine, somos um porto seguro onde as ideias atracam, ganham força e partem para o mundo.
+            </p>
+          </div>
+
+          {/* Para Produtores Culturais */}
+          <div className={`grid lg:grid-cols-2 gap-12 items-center mb-24 transition-all duration-700 ${portoIdeiasInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`} style={{ transitionDelay: '200ms' }}>
+            <div className="space-y-8">
+              <ShinyText delay={400}>
+                <h3 className="text-2xl md:text-3xl font-serif font-semibold text-foreground">
+                  Para Produtores Culturais
+                </h3>
+              </ShinyText>
+              
+              <div className="space-y-6">
+                {[
+                  { icon: LayoutGrid, title: "Vitrine de Projetos", description: "Apresente suas iniciativas culturais com visibilidade profissional e informações detalhadas do projeto.", color: "bg-primary" },
+                  { icon: ShieldCheck, title: "Credibilidade e Confiança", description: "Construa confiança com perfis verificados e documentação abrangente do projeto.", color: "bg-primary" },
+                  { icon: BarChart3, title: "Dashboard Completo", description: "Acompanhe visualizações, favoritos e conexões solicitadas em tempo real.", color: "bg-primary" },
+                ].map((item, index) => (
+                  <div 
+                    key={item.title} 
+                    className={`flex gap-4 items-start transition-all duration-500 ${portoIdeiasInView ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'}`}
+                    style={{ transitionDelay: portoIdeiasInView ? `${(index + 3) * 150}ms` : '0ms' }}
+                  >
+                    <div className={`${item.color} w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg`}>
+                      <item.icon className="w-6 h-6 text-primary-foreground" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-foreground mb-1">{item.title}</h4>
+                      <p className="text-sm text-muted-foreground leading-relaxed">{item.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            <div className={`relative transition-all duration-700 ${portoIdeiasInView ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`} style={{ transitionDelay: '500ms' }}>
+              <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl border border-border/30 bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center">
+                <div className="text-center p-8">
+                  <Film className="w-16 h-16 text-primary/40 mx-auto mb-4" />
+                  <p className="text-muted-foreground">Imagem ilustrativa</p>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Featured Projects */}
-          {loadingProjects ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {[1, 2, 3].map((i) => (
-                <Card key={i} className="overflow-hidden bg-card/80 backdrop-blur-sm border-border/50">
-                  <Skeleton className="h-48 w-full" />
-                  <CardContent className="p-6">
-                    <Skeleton className="h-6 w-3/4 mb-2" />
-                    <Skeleton className="h-4 w-full mb-4" />
-                    <Skeleton className="h-4 w-1/2" />
-                  </CardContent>
-                </Card>
-              ))}
+          {/* Para Empreendedores e Investidores */}
+          <div className={`grid lg:grid-cols-2 gap-12 items-center transition-all duration-700 ${portoIdeiasInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`} style={{ transitionDelay: '600ms' }}>
+            <div className={`relative order-2 lg:order-1 transition-all duration-700 ${portoIdeiasInView ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`} style={{ transitionDelay: '700ms' }}>
+              <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl border border-border/30 bg-gradient-to-br from-emerald-500/10 to-primary/10 flex items-center justify-center">
+                <div className="text-center p-8">
+                  <Users className="w-16 h-16 text-emerald-500/40 mx-auto mb-4" />
+                  <p className="text-muted-foreground">Imagem ilustrativa</p>
+                </div>
+              </div>
             </div>
-          ) : featuredProjects.length > 0 ? (
-            <>
-              <h3 className={`text-xl md:text-2xl font-serif font-semibold text-foreground mb-8 text-center transition-all duration-700 ${portoIdeiasInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`} style={{ transitionDelay: '200ms' }}>
-                Projetos em Destaque
-              </h3>
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {featuredProjects.map((project, index) => (
-                  <Link key={project.id} to={`/project/${project.id}`}>
-                    <Card 
-                      className={`overflow-hidden bg-card/80 backdrop-blur-sm border-border/50 card-hover h-full transition-all duration-700 ${portoIdeiasInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
-                      style={{ transitionDelay: portoIdeiasInView ? `${(index + 2) * 150}ms` : '0ms' }}
-                    >
-                      <div className="relative h-48 overflow-hidden">
-                        {project.image_url ? (
-                          <img
-                            src={project.image_url}
-                            alt={project.title}
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                          />
-                        ) : (
-                          <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-                            <Film className="w-12 h-12 text-primary/40" />
-                          </div>
-                        )}
-                        {project.project_type && (
-                          <Badge className="absolute top-4 left-4 bg-primary/90 text-primary-foreground">
-                            {project.project_type}
-                          </Badge>
-                        )}
-                      </div>
-                      <CardContent className="p-6">
-                        <CardTitle className="text-lg font-serif mb-2 line-clamp-1">
-                          {project.title}
-                        </CardTitle>
-                        <CardDescription className="text-sm line-clamp-2 mb-3">
-                          {project.synopsis}
-                        </CardDescription>
-                        {project.location && (
-                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                            <MapPin className="w-3 h-3" />
-                            {project.location}
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  </Link>
+            
+            <div className="space-y-8 order-1 lg:order-2">
+              <ShinyText delay={700}>
+                <h3 className="text-2xl md:text-3xl font-serif font-semibold text-foreground">
+                  Para Empreendedores e Investidores
+                </h3>
+              </ShinyText>
+              
+              <div className="space-y-6">
+                {[
+                  { icon: Search, title: "Seleção Curada", description: "Acesso a uma seleção cuidadosamente curada de propostas culturais sérias, criativas e bem estruturadas.", color: "bg-emerald-500" },
+                  { icon: FileCheck, title: "Marco Legal", description: "Projetos prontos para financiamento através de leis de incentivo cultural ou patrocínio direto.", color: "bg-emerald-500" },
+                  { icon: HeartHandshake, title: "Dashboard Personalizado", description: "Gerencie projetos salvos, histórico de contatos e relatórios de impacto das iniciativas apoiadas.", color: "bg-emerald-500" },
+                ].map((item, index) => (
+                  <div 
+                    key={item.title} 
+                    className={`flex gap-4 items-start transition-all duration-500 ${portoIdeiasInView ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10'}`}
+                    style={{ transitionDelay: portoIdeiasInView ? `${(index + 6) * 150}ms` : '0ms' }}
+                  >
+                    <div className={`${item.color} w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg`}>
+                      <item.icon className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-foreground mb-1">{item.title}</h4>
+                      <p className="text-sm text-muted-foreground leading-relaxed">{item.description}</p>
+                    </div>
+                  </div>
                 ))}
               </div>
-              <div className={`text-center mt-12 transition-all duration-700 ${portoIdeiasInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`} style={{ transitionDelay: '600ms' }}>
-                <Link 
-                  to="/porto-de-ideias" 
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-                >
-                  Ver Todos os Projetos
-                </Link>
-              </div>
-            </>
-          ) : (
-            <div className={`text-center py-12 transition-all duration-700 ${portoIdeiasInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`} style={{ transitionDelay: '300ms' }}>
-              <p className="text-muted-foreground mb-6">
-                Em breve, novos projetos em destaque.
-              </p>
-              <Link 
-                to="/porto-de-ideias" 
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-              >
-                Explorar Projetos
-              </Link>
             </div>
-          )}
+          </div>
+
+          {/* CTA Button */}
+          <div className={`text-center mt-16 transition-all duration-700 ${portoIdeiasInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`} style={{ transitionDelay: '900ms' }}>
+            <Link 
+              to="/porto-de-ideias" 
+              className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 text-lg font-medium"
+            >
+              Explorar Porto de Ideias
+            </Link>
+          </div>
         </div>
       </section>
 
