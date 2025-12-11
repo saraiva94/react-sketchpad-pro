@@ -478,73 +478,70 @@ const ProjectPage = () => {
       </div>
 
       {/* Footer */}
-      <footer className="bg-foreground text-background py-16 mt-16">
+      <footer className="bg-black text-white py-8 mt-8">
         <div className="container mx-auto px-6">
-          <div className="grid md:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-4 gap-6">
             <div className="col-span-2 md:col-span-1">
-              <div className="flex items-center gap-2 mb-4">
-                <Anchor className="w-8 h-8 text-primary" />
-                <span className="text-2xl font-handwritten font-bold text-primary">
-                  Porto de Ideias
+              <div className="flex items-center gap-2 mb-3">
+                <Anchor className="w-6 h-6 text-primary" />
+                <span className="text-xl font-handwritten font-bold text-white">
+                  Porto Bello
                 </span>
               </div>
-              <p className="text-background/70 mb-4">
-                O Porto de Ideias é uma iniciativa da Porto Bello Filmes, criada para aproximar cultura e investimento.
+              <p className="text-gray-400 mb-3 text-xs">
+                Uma plataforma criada para aproximar cultura e investimento.
               </p>
-              <p className="text-background/70 mb-6 text-sm">
-                Onde a cultura encontra o investimento, e o investimento encontra propósito.
-              </p>
-              <div className="flex space-x-4">
-                <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center cursor-pointer hover:bg-primary/80 transition-colors">
-                  <Facebook className="w-5 h-5 text-primary-foreground" />
+              <div className="flex space-x-2">
+                <div className="w-7 h-7 bg-primary rounded-full flex items-center justify-center cursor-pointer hover:bg-primary/80 transition-colors">
+                  <Facebook className="w-3 h-3 text-primary-foreground" />
                 </div>
-                <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center cursor-pointer hover:bg-primary/80 transition-colors">
-                  <Twitter className="w-5 h-5 text-primary-foreground" />
+                <div className="w-7 h-7 bg-primary rounded-full flex items-center justify-center cursor-pointer hover:bg-primary/80 transition-colors">
+                  <Twitter className="w-3 h-3 text-primary-foreground" />
                 </div>
-                <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center cursor-pointer hover:bg-primary/80 transition-colors">
-                  <Instagram className="w-5 h-5 text-primary-foreground" />
+                <div className="w-7 h-7 bg-primary rounded-full flex items-center justify-center cursor-pointer hover:bg-primary/80 transition-colors">
+                  <Instagram className="w-3 h-3 text-primary-foreground" />
                 </div>
-                <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center cursor-pointer hover:bg-primary/80 transition-colors">
-                  <Linkedin className="w-5 h-5 text-primary-foreground" />
+                <div className="w-7 h-7 bg-primary rounded-full flex items-center justify-center cursor-pointer hover:bg-primary/80 transition-colors">
+                  <Linkedin className="w-3 h-3 text-primary-foreground" />
                 </div>
               </div>
             </div>
 
             <div>
-              <h3 className="font-bold text-lg mb-4 text-background">Plataforma</h3>
-              <ul className="space-y-2 text-background/70">
-                <li><a href="#" className="hover:text-background transition-colors cursor-pointer">Como Funciona</a></li>
-                <li><a href="#" className="hover:text-background transition-colors cursor-pointer">Enviar Projeto</a></li>
-                <li><a href="#" className="hover:text-background transition-colors cursor-pointer">Encontrar Investidores</a></li>
+              <h3 className="font-bold text-sm mb-2 text-white">Plataforma</h3>
+              <ul className="space-y-1 text-gray-400 text-xs">
+                <li><Link to="/" className="hover:text-white transition-colors">Como Funciona</Link></li>
+                <li><Link to="/submit" className="hover:text-white transition-colors">Enviar Projeto</Link></li>
+                <li><Link to="/porto-de-ideias" className="hover:text-white transition-colors">Projetos</Link></li>
               </ul>
             </div>
 
             <div>
-              <h3 className="font-bold text-lg mb-4 text-background">Recursos</h3>
-              <ul className="space-y-2 text-background/70">
-                <li><a href="#" className="hover:text-background transition-colors cursor-pointer">Blog</a></li>
-                <li><a href="#" className="hover:text-background transition-colors cursor-pointer">Guias</a></li>
-                <li><a href="#" className="hover:text-background transition-colors cursor-pointer">FAQ</a></li>
+              <h3 className="font-bold text-sm mb-2 text-white">Suporte</h3>
+              <ul className="space-y-1 text-gray-400 text-xs">
+                <li><a href="mailto:portobellofilmes@gmail.com" className="hover:text-white transition-colors">FAQ</a></li>
+                <li><a href="mailto:portobellofilmes@gmail.com" className="hover:text-white transition-colors">Ajuda</a></li>
+                <li><Link to="/" className="hover:text-white transition-colors">Termos</Link></li>
               </ul>
             </div>
 
             <div>
-              <h3 className="font-bold text-lg mb-4 text-background">Contato</h3>
-              <ul className="space-y-2 text-background/70">
-                <li className="flex items-center space-x-2">
-                  <Mail className="w-4 h-4" />
+              <h3 className="font-bold text-sm mb-2 text-white">Contato</h3>
+              <ul className="space-y-1 text-gray-400 text-xs">
+                <li className="flex items-center space-x-1.5">
+                  <Mail className="w-3 h-3" />
                   <span>portobellofilmes@gmail.com</span>
                 </li>
-                <li className="flex items-center space-x-2">
-                  <Phone className="w-4 h-4" />
+                <li className="flex items-center space-x-1.5">
+                  <Phone className="w-3 h-3" />
                   <span>+55 (11) 9999-9999</span>
                 </li>
               </ul>
             </div>
           </div>
 
-          <div className="border-t border-background/20 mt-12 pt-8 text-center text-background/70">
-            <p>&copy; 2024 Porto de Ideias. Todos os direitos reservados.</p>
+          <div className="border-t border-gray-800 mt-4 pt-4 text-center text-gray-500 text-xs">
+            <p>&copy; {new Date().getFullYear()} Porto Bello. Todos os direitos reservados.</p>
           </div>
         </div>
       </footer>
