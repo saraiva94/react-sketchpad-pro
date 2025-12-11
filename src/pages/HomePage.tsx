@@ -164,14 +164,14 @@ const HomePage = () => {
   };
 
   const services = [
-    { icon: Film, text: "Desenvolvimento de projetos culturais e audiovisuais" },
-    { icon: Settings, text: "Produção executiva e gestão de equipe" },
-    { icon: FileText, text: "Estruturação para leis de incentivo" },
-    { icon: DollarSign, text: "Captação de recursos públicos e privados" },
-    { icon: Calendar, text: "Produção de obras audiovisuais e eventos culturais" },
-    { icon: Megaphone, text: "Distribuição, comunicação e lançamento de projetos" },
-    { icon: Mic, text: "Criação e roteirização de videocasts e podcasts" },
-    { icon: HelpCircle, text: "Consultoria para formatação de projetos" },
+    { icon: Film, text: "Desenvolvimento de projetos culturais e audiovisuais", hoverColor: "group-hover:text-rose-500", glowColor: "group-hover:bg-rose-500/20", borderColor: "group-hover:border-rose-500/30" },
+    { icon: Settings, text: "Produção executiva e gestão de equipe", hoverColor: "group-hover:text-amber-500", glowColor: "group-hover:bg-amber-500/20", borderColor: "group-hover:border-amber-500/30" },
+    { icon: FileText, text: "Estruturação para leis de incentivo", hoverColor: "group-hover:text-emerald-500", glowColor: "group-hover:bg-emerald-500/20", borderColor: "group-hover:border-emerald-500/30" },
+    { icon: DollarSign, text: "Captação de recursos públicos e privados", hoverColor: "group-hover:text-cyan-500", glowColor: "group-hover:bg-cyan-500/20", borderColor: "group-hover:border-cyan-500/30" },
+    { icon: Calendar, text: "Produção de obras audiovisuais e eventos culturais", hoverColor: "group-hover:text-violet-500", glowColor: "group-hover:bg-violet-500/20", borderColor: "group-hover:border-violet-500/30" },
+    { icon: Megaphone, text: "Distribuição, comunicação e lançamento de projetos", hoverColor: "group-hover:text-pink-500", glowColor: "group-hover:bg-pink-500/20", borderColor: "group-hover:border-pink-500/30" },
+    { icon: Mic, text: "Criação e roteirização de videocasts e podcasts", hoverColor: "group-hover:text-orange-500", glowColor: "group-hover:bg-orange-500/20", borderColor: "group-hover:border-orange-500/30" },
+    { icon: HelpCircle, text: "Consultoria para formatação de projetos", hoverColor: "group-hover:text-sky-500", glowColor: "group-hover:bg-sky-500/20", borderColor: "group-hover:border-sky-500/30" },
   ];
 
   return (
@@ -355,17 +355,17 @@ const HomePage = () => {
             {services.map((service, index) => (
               <Card 
                 key={index} 
-                className="group relative overflow-hidden bg-gradient-to-br from-card via-card to-card/80 backdrop-blur-sm border-border/50 hover:border-primary/30 transition-all duration-500 hover:shadow-xl hover:shadow-primary/5"
+                className={`group relative overflow-hidden bg-gradient-to-br from-card via-card to-card/80 backdrop-blur-sm border-border/50 ${service.borderColor} transition-all duration-500 hover:shadow-xl`}
               >
                 {/* Hover gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className={`absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-transparent ${service.glowColor} opacity-0 group-hover:opacity-30 transition-opacity duration-500`} />
                 
                 <div className="relative p-6 flex flex-col items-center text-center gap-4">
                   <div className="relative">
                     {/* Glow effect */}
-                    <div className="absolute inset-0 w-16 h-16 bg-primary/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                    <div className="relative w-16 h-16 bg-gradient-to-br from-primary/20 via-primary/15 to-primary/10 rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 border border-primary/10 group-hover:border-primary/30 shadow-lg">
-                      <service.icon className="w-8 h-8 text-primary group-hover:text-primary transition-colors" />
+                    <div className={`absolute inset-0 w-16 h-16 bg-primary/20 ${service.glowColor} rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+                    <div className={`relative w-16 h-16 bg-gradient-to-br from-primary/20 via-primary/15 to-primary/10 rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 border border-primary/10 ${service.borderColor} shadow-lg`}>
+                      <service.icon className={`w-8 h-8 text-primary ${service.hoverColor} transition-colors duration-300`} />
                     </div>
                   </div>
                   <p className="text-sm text-muted-foreground leading-relaxed group-hover:text-foreground/80 transition-colors duration-300 font-medium">
