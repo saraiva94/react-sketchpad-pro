@@ -8,6 +8,7 @@ import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
 import { AnimatedStats } from "@/components/AnimatedStats";
 import { ArtisticBackground } from "@/components/ArtisticBackground";
+import { useInView } from "@/hooks/useInView";
 import { 
   Users, 
   Target, 
@@ -174,6 +175,12 @@ const HomePage = () => {
     { icon: HelpCircle, text: "Consultoria para formatação de projetos", hoverColor: "group-hover:text-sky-500", glowColor: "group-hover:bg-sky-500/20", borderColor: "group-hover:border-sky-500/30" },
   ];
 
+  // Intersection observers for animations
+  const { ref: heroRef, isInView: heroInView } = useInView<HTMLElement>();
+  const { ref: quemSomosRef, isInView: quemSomosInView } = useInView<HTMLElement>();
+  const { ref: servicosRef, isInView: servicosInView } = useInView<HTMLElement>();
+  const { ref: portoIdeiasRef, isInView: portoIdeiasInView } = useInView<HTMLElement>();
+
   return (
     <div className="min-h-screen bg-background relative">
       {/* Artistic Background Animation */}
@@ -183,14 +190,14 @@ const HomePage = () => {
       <Navbar currentPage="home" />
 
       {/* Hero Section - Institutional Video */}
-      <section id="inicio" className="relative py-20 lg:py-32 overflow-hidden">
+      <section ref={heroRef} id="inicio" className="relative py-20 lg:py-32 overflow-hidden">
         {/* Background decorations */}
         <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background" />
         <div className="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
         
         <div className="container mx-auto px-4 relative">
-          <div className="max-w-5xl mx-auto">
+          <div className={`max-w-5xl mx-auto transition-all duration-1000 ${heroInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
             {/* Video Container */}
             <div className="relative aspect-video rounded-3xl overflow-hidden shadow-2xl border border-border/30 bg-gradient-to-br from-card via-card/95 to-card/90">
               {loadingVideo ? (
@@ -274,12 +281,12 @@ const HomePage = () => {
       )}
 
       {/* Quem Somos Section */}
-      <section id="sobre" className="py-20 lg:py-28 relative z-10">
+      <section ref={quemSomosRef} id="sobre" className="py-20 lg:py-28 relative z-10">
         <div className="absolute inset-0 bg-background/70 backdrop-blur-[2px]" />
         <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent" />
         
         <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-3xl mx-auto text-center mb-16">
+          <div className={`max-w-3xl mx-auto text-center mb-16 transition-all duration-700 ${quemSomosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
             <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
               Quem Somos
             </span>
@@ -303,46 +310,36 @@ const HomePage = () => {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            <Card className="text-center p-8 bg-card/80 backdrop-blur-sm border-border/50 card-hover group">
-              <div className="w-20 h-20 bg-gradient-to-br from-primary to-primary/80 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-elegant group-hover:scale-110 transition-transform duration-300">
-                <Lightbulb className="w-10 h-10 text-primary-foreground" />
-              </div>
-              <CardTitle className="text-xl font-serif mb-3">Para Criadores</CardTitle>
-              <CardDescription className="text-base leading-relaxed">
-                Histórias potentes merecem estrutura sólida. Atuamos no desenvolvimento, organização e produção para tirar ideias do papel e transformá-las em obras realizadas.
-              </CardDescription>
-            </Card>
-
-            <Card className="text-center p-8 bg-card/80 backdrop-blur-sm border-border/50 card-hover group">
-              <div className="w-20 h-20 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-elegant group-hover:scale-110 transition-transform duration-300">
-                <Target className="w-10 h-10 text-white" />
-              </div>
-              <CardTitle className="text-xl font-serif mb-3">Para Investidores</CardTitle>
-              <CardDescription className="text-base leading-relaxed">
-                Projetos prontos para investimento, com identidade, força de execução e potencial de retorno institucional.
-              </CardDescription>
-            </Card>
-
-            <Card className="text-center p-8 bg-card/80 backdrop-blur-sm border-border/50 card-hover group">
-              <div className="w-20 h-20 bg-gradient-to-br from-violet-500 to-violet-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-elegant group-hover:scale-110 transition-transform duration-300">
-                <Heart className="w-10 h-10 text-white" />
-              </div>
-              <CardTitle className="text-xl font-serif mb-3">Para a Sociedade</CardTitle>
-              <CardDescription className="text-base leading-relaxed">
-                Criamos experiências que atravessam. Conectamos narrativas a quem importa: as pessoas.
-              </CardDescription>
-            </Card>
+            {[
+              { icon: Lightbulb, title: "Para Criadores", description: "Histórias potentes merecem estrutura sólida. Atuamos no desenvolvimento, organização e produção para tirar ideias do papel e transformá-las em obras realizadas.", color: "from-primary to-primary/80", textColor: "text-primary-foreground" },
+              { icon: Target, title: "Para Investidores", description: "Projetos prontos para investimento, com identidade, força de execução e potencial de retorno institucional.", color: "from-emerald-500 to-emerald-600", textColor: "text-white" },
+              { icon: Heart, title: "Para a Sociedade", description: "Criamos experiências que atravessam. Conectamos narrativas a quem importa: as pessoas.", color: "from-violet-500 to-violet-600", textColor: "text-white" },
+            ].map((card, index) => (
+              <Card 
+                key={card.title}
+                className={`text-center p-8 bg-card/80 backdrop-blur-sm border-border/50 card-hover group transition-all duration-700 ${quemSomosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+                style={{ transitionDelay: quemSomosInView ? `${(index + 1) * 150}ms` : '0ms' }}
+              >
+                <div className={`w-20 h-20 bg-gradient-to-br ${card.color} rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-elegant group-hover:scale-110 transition-transform duration-300`}>
+                  <card.icon className={`w-10 h-10 ${card.textColor}`} />
+                </div>
+                <CardTitle className="text-xl font-serif mb-3">{card.title}</CardTitle>
+                <CardDescription className="text-base leading-relaxed">
+                  {card.description}
+                </CardDescription>
+              </Card>
+            ))}
           </div>
         </div>
       </section>
 
       {/* Nossos Serviços Section */}
-      <section className="py-20 lg:py-28 relative z-10">
+      <section ref={servicosRef} className="py-20 lg:py-28 relative z-10">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-mist via-background to-background" />
         <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent" />
         
         <div className="container mx-auto px-4 relative z-10">
-          <div className="text-center mb-16">
+          <div className={`text-center mb-16 transition-all duration-700 ${servicosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
             <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
               O Que Fazemos
             </span>
@@ -355,7 +352,8 @@ const HomePage = () => {
             {services.map((service, index) => (
               <Card 
                 key={index} 
-                className={`group relative overflow-hidden bg-gradient-to-br from-card via-card to-card/80 backdrop-blur-sm border-border/50 ${service.borderColor} transition-all duration-500 hover:shadow-xl`}
+                className={`group relative overflow-hidden bg-gradient-to-br from-card via-card to-card/80 backdrop-blur-sm border-border/50 ${service.borderColor} transition-all duration-500 hover:shadow-xl ${servicosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+                style={{ transitionDelay: servicosInView ? `${(index + 1) * 100}ms` : '0ms' }}
               >
                 {/* Hover gradient overlay */}
                 <div className={`absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-transparent ${service.glowColor} opacity-0 group-hover:opacity-30 transition-opacity duration-500`} />
@@ -379,11 +377,11 @@ const HomePage = () => {
       </section>
 
       {/* Porto de Ideias Section */}
-      <section id="porto-de-ideias" className="py-20 lg:py-28 relative overflow-hidden">
+      <section ref={portoIdeiasRef} id="porto-de-ideias" className="py-20 lg:py-28 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-mist via-blue-light/30 to-blue-mist" />
         
         <div className="container mx-auto px-4 relative">
-          <div className="text-center mb-16">
+          <div className={`text-center mb-16 transition-all duration-700 ${portoIdeiasInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
             <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
               Curadoria e Fomento
             </span>
@@ -419,13 +417,16 @@ const HomePage = () => {
             </div>
           ) : featuredProjects.length > 0 ? (
             <>
-              <h3 className="text-xl md:text-2xl font-serif font-semibold text-foreground mb-8 text-center">
+              <h3 className={`text-xl md:text-2xl font-serif font-semibold text-foreground mb-8 text-center transition-all duration-700 ${portoIdeiasInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`} style={{ transitionDelay: '200ms' }}>
                 Projetos em Destaque
               </h3>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {featuredProjects.map((project) => (
+                {featuredProjects.map((project, index) => (
                   <Link key={project.id} to={`/project/${project.id}`}>
-                    <Card className="overflow-hidden bg-card/80 backdrop-blur-sm border-border/50 card-hover h-full">
+                    <Card 
+                      className={`overflow-hidden bg-card/80 backdrop-blur-sm border-border/50 card-hover h-full transition-all duration-700 ${portoIdeiasInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+                      style={{ transitionDelay: portoIdeiasInView ? `${(index + 2) * 150}ms` : '0ms' }}
+                    >
                       <div className="relative h-48 overflow-hidden">
                         {project.image_url ? (
                           <img
@@ -462,7 +463,7 @@ const HomePage = () => {
                   </Link>
                 ))}
               </div>
-              <div className="text-center mt-12">
+              <div className={`text-center mt-12 transition-all duration-700 ${portoIdeiasInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`} style={{ transitionDelay: '600ms' }}>
                 <Link 
                   to="/porto-de-ideias" 
                   className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
@@ -472,7 +473,7 @@ const HomePage = () => {
               </div>
             </>
           ) : (
-            <div className="text-center py-12">
+            <div className={`text-center py-12 transition-all duration-700 ${portoIdeiasInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`} style={{ transitionDelay: '300ms' }}>
               <p className="text-muted-foreground mb-6">
                 Em breve, novos projetos em destaque.
               </p>
