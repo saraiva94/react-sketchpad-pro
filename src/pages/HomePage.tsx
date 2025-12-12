@@ -264,7 +264,28 @@ const HomePage = () => {
       impacto_cultural: "Conexão entre arte e comunidade através de experiências teatrais transformadoras.",
       link: "/exemplo/historias-sucesso",
     },
+    {
+      id: "exemplo-recursos-disponiveis",
+      title: "Recursos Disponíveis",
+      synopsis: "Conectamos projetos a recursos via Lei Rouanet, PROAC, e investimento direto. Encontre o modelo ideal para você.",
+      project_type: "Música",
+      image_url: null,
+      location: "Belo Horizonte",
+      responsavel_nome: "Ana Costa",
+      valor_sugerido: 320000,
+      has_incentive_law: true,
+      incentive_law_details: "Lei do Audiovisual",
+      stage: "distribution" as const,
+      impacto_cultural: "Ampliação do acesso à música brasileira através de plataformas digitais e eventos presenciais.",
+      link: "/exemplo/recursos-disponiveis",
+    },
   ];
+
+  // Mescla projetos reais com exemplos para completar 3 slots
+  const displayProjects = [
+    ...featuredProjects.slice(0, 3),
+    ...exampleProjects.slice(0, Math.max(0, 3 - featuredProjects.length))
+  ].slice(0, 3);
 
   const services = [
     { icon: Film, text: "Desenvolvimento de projetos culturais e audiovisuais", hoverColor: "group-hover:text-rose-500" },
@@ -417,9 +438,9 @@ const HomePage = () => {
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-              {/* Show real featured projects if available, otherwise show example projects */}
-              {(featuredProjects.length > 0 ? featuredProjects : exampleProjects).slice(0, 2).map((project, index) => {
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+              {/* Mescla projetos reais com exemplos para completar 3 slots */}
+              {displayProjects.map((project, index) => {
                 const budgetInfo = getBudgetRange(project.valor_sugerido);
                 const stageInfo = getStageInfo(project.stage);
                 const isExample = !('categorias_tags' in project);
