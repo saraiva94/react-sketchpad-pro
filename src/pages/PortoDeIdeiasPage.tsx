@@ -541,7 +541,7 @@ const PortoDeIdeiasPage = () => {
                       transition: `all 0.6s ease-out ${index * 100}ms`
                     }}
                   >
-                    <div className="card-3d card-solid card-glow bg-card border border-border rounded-2xl overflow-hidden shadow-2xl h-full">
+                    <div className="card-solid bg-card border border-border rounded-2xl overflow-hidden shadow-2xl h-full hover:-translate-y-2 transition-transform duration-300">
                       {/* Image */}
                       <div className="relative overflow-hidden h-48">
                         {project.image_url ? (
@@ -656,7 +656,7 @@ const PortoDeIdeiasPage = () => {
                       transition: `all 0.6s ease-out ${cardIndex * 100}ms`
                     }}
                   >
-                    <div className={`card-3d card-solid card-glow bg-card ${example.borderClass || 'border border-border'} rounded-2xl overflow-hidden h-full shadow-2xl`}>
+                    <div className={`card-solid bg-card ${example.borderClass || 'border border-border'} rounded-2xl overflow-hidden h-full shadow-2xl hover:-translate-y-2 transition-transform duration-300`}>
                       <div className={`relative h-48 bg-gradient-to-br ${example.gradientClass || 'from-accent/20 to-primary/20'} flex items-center justify-center`}>
                         <div className={`w-20 h-20 rounded-full ${example.emojiBgClass || 'bg-accent/20'} flex items-center justify-center`}>
                           <span className={`text-4xl ${example.emojiAnimate ? 'animate-pulse' : ''}`}>{example.emoji}</span>
@@ -698,7 +698,7 @@ const PortoDeIdeiasPage = () => {
                   transition: `all 0.6s ease-out ${Math.min(sortedProjects.length, displaySlots) * 100 + (displaySlots - Math.min(sortedProjects.length, displaySlots)) * 100}ms`
                 }}
               >
-                <div className="card-3d card-solid card-glow bg-gradient-to-br from-primary via-primary/95 to-accent border border-primary rounded-2xl overflow-hidden h-full shadow-2xl">
+                <div className="card-solid bg-gradient-to-br from-primary via-primary to-accent border border-primary rounded-2xl overflow-hidden h-full shadow-2xl hover:-translate-y-2 transition-transform duration-300">
                   <div className="relative h-48 flex items-center justify-center">
                     <div className="text-center text-primary-foreground">
                       <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
