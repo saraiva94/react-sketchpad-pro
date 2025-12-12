@@ -29,13 +29,8 @@ import {
   Mic,
   HelpCircle,
   MapPin,
-  Play,
-  LayoutGrid,
-  ShieldCheck,
-  BarChart3,
-  Search,
-  FileCheck,
-  HeartHandshake
+  Shield,
+  ArrowRight
 } from "lucide-react";
 
 interface Project {
@@ -48,6 +43,12 @@ interface Project {
   categorias_tags: string[] | null;
   responsavel_nome: string | null;
   link_pagamento: string | null;
+  valor_sugerido: number | null;
+  has_incentive_law: boolean;
+  incentive_law_details: string | null;
+  stage: string | null;
+  impacto_cultural: string | null;
+  impacto_social: string | null;
 }
 
 interface ProjectStats {
@@ -74,17 +75,12 @@ const HomePage = () => {
   const [statsVisible, setStatsVisible] = useState(true);
   const [institutionalVideos, setInstitutionalVideos] = useState<VideoItem[]>([]);
   const [loadingVideo, setLoadingVideo] = useState(true);
-  
-  // Mídias da seção Ecossistema
-  const [ecossistemaProducerMedia, setEcossistemaProducerMedia] = useState<{ url: string; type: 'image' | 'video' } | null>(null);
-  const [ecossistemaInvestorMedia, setEcossistemaInvestorMedia] = useState<{ url: string; type: 'image' | 'video' } | null>(null);
 
   useEffect(() => {
     fetchFeaturedProjects();
     fetchStats();
     fetchStatsVisibility();
     fetchInstitutionalVideo();
-    fetchEcossistemaMedia();
 
     // Subscribe to settings changes for real-time sync
     const channel = supabase
@@ -102,17 +98,30 @@ const HomePage = () => {
             setStatsVisible(record.value.enabled);
           } else if (record.key === 'institutional_videos') {
             setInstitutionalVideos(record.value.videos || []);
-          } else if (record.key === 'ecossistema_producer_media') {
-            setEcossistemaProducerMedia(record.value);
-          } else if (record.key === 'ecossistema_investor_media') {
-            setEcossistemaInvestorMedia(record.value);
           }
+        }
+      )
+      .subscribe();
+
+    // Subscribe to projects changes for real-time featured projects sync
+    const projectsChannel = supabase
+      .channel('projects-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'projects'
+        },
+        () => {
+          fetchFeaturedProjects();
         }
       )
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
+      supabase.removeChannel(projectsChannel);
     };
   }, []);
 
@@ -140,28 +149,6 @@ const HomePage = () => {
       setInstitutionalVideos(videos);
     }
     setLoadingVideo(false);
-  };
-
-  const fetchEcossistemaMedia = async () => {
-    const { data: producerData } = await supabase
-      .from("settings")
-      .select("value")
-      .eq("key", "ecossistema_producer_media")
-      .single();
-    
-    if (producerData) {
-      setEcossistemaProducerMedia(producerData.value as { url: string; type: 'image' | 'video' });
-    }
-
-    const { data: investorData } = await supabase
-      .from("settings")
-      .select("value")
-      .eq("key", "ecossistema_investor_media")
-      .single();
-    
-    if (investorData) {
-      setEcossistemaInvestorMedia(investorData.value as { url: string; type: 'image' | 'video' });
-    }
   };
 
   const fetchStats = async () => {
@@ -200,7 +187,7 @@ const HomePage = () => {
   const fetchFeaturedProjects = async () => {
     const { data } = await supabase
       .from("projects")
-      .select("id, title, synopsis, project_type, image_url, location, categorias_tags, responsavel_nome, link_pagamento")
+      .select("id, title, synopsis, project_type, image_url, location, categorias_tags, responsavel_nome, link_pagamento, valor_sugerido, has_incentive_law, incentive_law_details, stage, impacto_cultural, impacto_social")
       .eq("status", "approved")
       .eq("featured_on_homepage", true)
       .order("created_at", { ascending: true })
@@ -208,6 +195,41 @@ const HomePage = () => {
     
     setFeaturedProjects(data || []);
     setLoadingProjects(false);
+  };
+
+  const formatBudget = (value: number | null): string => {
+    if (!value) return "A definir";
+    if (value >= 1000000) {
+      return `R$ ${(value / 1000000).toFixed(1)}M`;
+    } else if (value >= 1000) {
+      return `R$ ${(value / 1000).toFixed(0)}k`;
+    }
+    return `R$ ${value.toLocaleString('pt-BR')}`;
+  };
+
+  const getBudgetRange = (value: number | null): { label: string; color: string } => {
+    if (!value) return { label: "A definir", color: "bg-muted text-muted-foreground" };
+    if (value < 100000) return { label: "Pequeno", color: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400" };
+    if (value < 500000) return { label: "Médio", color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400" };
+    return { label: "Grande", color: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400" };
+  };
+
+  const getStageInfo = (stage: string | null): { label: string; color: string } => {
+    switch (stage) {
+      case 'development':
+        return { label: "Desenvolvimento", color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400" };
+      case 'production':
+        return { label: "Produção", color: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400" };
+      case 'distribution':
+        return { label: "Difusão", color: "bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-400" };
+      default:
+        return { label: "Desenvolvimento", color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400" };
+    }
+  };
+
+  const getInitials = (name: string | null): string => {
+    if (!name) return "PC";
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
 
   const services = [
@@ -329,13 +351,13 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Porto de Ideias Section - Ecossistema de Conexões */}
+      {/* Porto de Ideias Section - Ecossistema de Conexões (Projetos em Destaque) */}
       <section ref={portoIdeiasRef} id="porto-de-ideias" className="py-20 lg:py-28 relative overflow-hidden z-10">
         <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent" />
         
         <div className="container mx-auto px-4 relative">
           {/* Header */}
-          <div className={`text-center mb-20 transition-all duration-700 ${portoIdeiasInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+          <div className={`text-center mb-16 transition-all duration-700 ${portoIdeiasInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
             <ShinyText className="inline-block" delay={300}>
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif font-semibold text-foreground mb-4">
                 Um Ecossistema de Conexões
@@ -346,125 +368,143 @@ const HomePage = () => {
             </p>
           </div>
 
-          {/* Para Produtores Culturais */}
-          <div className={`grid lg:grid-cols-2 gap-12 items-center mb-24 transition-all duration-700 ${portoIdeiasInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`} style={{ transitionDelay: '200ms' }}>
-            <div className="space-y-8">
-              <ShinyText delay={400}>
-                <h3 className="text-2xl md:text-3xl font-serif font-semibold text-foreground">
-                  Para Produtores Culturais
-                </h3>
-              </ShinyText>
-              
-              <div className="space-y-6">
-                {[
-                  { icon: LayoutGrid, title: "Vitrine de Projetos", description: "Apresente suas iniciativas culturais com visibilidade profissional e informações detalhadas do projeto.", color: "bg-primary" },
-                  { icon: ShieldCheck, title: "Credibilidade e Confiança", description: "Construa confiança com perfis verificados e documentação abrangente do projeto.", color: "bg-primary" },
-                  { icon: BarChart3, title: "Dashboard Completo", description: "Acompanhe visualizações, favoritos e conexões solicitadas em tempo real.", color: "bg-primary" },
-                ].map((item, index) => (
-                  <div 
-                    key={item.title} 
-                    className={`flex gap-4 items-start transition-all duration-500 ${portoIdeiasInView ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'}`}
-                    style={{ transitionDelay: portoIdeiasInView ? `${(index + 3) * 150}ms` : '0ms' }}
+          {/* Featured Projects Grid */}
+          {loadingProjects ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="animate-pulse bg-card card-solid rounded-2xl overflow-hidden border border-border shadow-2xl">
+                  <div className="h-48 bg-muted" />
+                  <div className="p-5 space-y-3">
+                    <div className="h-4 bg-muted rounded w-1/3" />
+                    <div className="h-6 bg-muted rounded w-3/4" />
+                    <div className="h-16 bg-muted rounded" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : featuredProjects.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {featuredProjects.map((project, index) => {
+                const budgetInfo = getBudgetRange(project.valor_sugerido);
+                const stageInfo = getStageInfo(project.stage);
+                
+                return (
+                  <Link 
+                    key={project.id}
+                    to={`/project/${project.id}`}
+                    className={`block group transition-all duration-700 ${portoIdeiasInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+                    style={{ transitionDelay: portoIdeiasInView ? `${(index + 1) * 150}ms` : '0ms' }}
                   >
-                    <div className={`${item.color} w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg`}>
-                      <item.icon className="w-6 h-6 text-primary-foreground" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-foreground mb-1">{item.title}</h4>
-                      <p className="text-sm text-muted-foreground leading-relaxed">{item.description}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            
-            <div className={`relative transition-all duration-700 ${portoIdeiasInView ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`} style={{ transitionDelay: '500ms' }}>
-              <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl border border-border card-solid bg-card">
-                {ecossistemaProducerMedia?.url ? (
-                  ecossistemaProducerMedia.type === 'video' ? (
-                    <video
-                      src={ecossistemaProducerMedia.url}
-                      controls
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <img
-                      src={ecossistemaProducerMedia.url}
-                      alt="Para Produtores Culturais"
-                      className="w-full h-full object-cover"
-                    />
-                  )
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary to-accent">
-                    <div className="text-center p-8">
-                      <Film className="w-16 h-16 text-primary-foreground mx-auto mb-4" />
-                      <p className="text-primary-foreground">Imagem ilustrativa</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
+                    <div className="card-solid bg-card border border-border rounded-2xl overflow-hidden shadow-2xl h-full hover:-translate-y-2 transition-transform duration-300">
+                      {/* Image */}
+                      <div className="relative overflow-hidden h-48">
+                        {project.image_url ? (
+                          <img
+                            src={project.image_url}
+                            alt={project.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-primary to-accent flex items-center justify-center min-h-[192px]">
+                            <span className="text-4xl font-handwritten text-primary-foreground">{project.title.charAt(0)}</span>
+                          </div>
+                        )}
+                      </div>
 
-          {/* Para Empreendedores e Investidores */}
-          <div className={`grid lg:grid-cols-2 gap-12 items-center transition-all duration-700 ${portoIdeiasInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`} style={{ transitionDelay: '600ms' }}>
-            <div className={`relative order-2 lg:order-1 transition-all duration-700 ${portoIdeiasInView ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`} style={{ transitionDelay: '700ms' }}>
-              <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl border border-border card-solid bg-card">
-                {ecossistemaInvestorMedia?.url ? (
-                  ecossistemaInvestorMedia.type === 'video' ? (
-                    <video
-                      src={ecossistemaInvestorMedia.url}
-                      controls
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <img
-                      src={ecossistemaInvestorMedia.url}
-                      alt="Para Empreendedores e Investidores"
-                      className="w-full h-full object-cover"
-                    />
-                  )
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-emerald-500 to-teal-500">
-                    <div className="text-center p-8">
-                      <Users className="w-16 h-16 text-white mx-auto mb-4" />
-                      <p className="text-white">Imagem ilustrativa</p>
+                      {/* Content */}
+                      <div className="p-4 md:p-5 flex-1">
+                        {/* Category, Budget Range, Location */}
+                        <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <Badge variant="secondary" className="rounded-full text-xs">
+                              {project.project_type}
+                            </Badge>
+                            <Badge className={`rounded-full text-xs ${budgetInfo.color}`}>
+                              {budgetInfo.label}
+                            </Badge>
+                          </div>
+                          {project.location && (
+                            <span className="flex items-center text-xs text-muted-foreground">
+                              <MapPin className="w-3 h-3 mr-1" />
+                              {project.location}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Title */}
+                        <h3 className="font-bold text-lg text-foreground mb-2 line-clamp-1 group-hover:text-primary transition-colors">
+                          {project.title}
+                        </h3>
+
+                        {/* Synopsis */}
+                        <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                          {project.synopsis}
+                        </p>
+
+                        {/* Budget & Stage */}
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="font-bold text-foreground">
+                            {formatBudget(project.valor_sugerido)}
+                          </span>
+                          <Badge className={`rounded-full text-xs ${stageInfo.color}`}>
+                            {stageInfo.label}
+                          </Badge>
+                        </div>
+
+                        {/* Incentive Law */}
+                        {project.has_incentive_law && (
+                          <div className="mb-3">
+                            <Badge variant="outline" className="rounded-full text-xs border-primary/30 text-primary">
+                              <Shield className="w-3 h-3 mr-1" />
+                              {project.incentive_law_details || "Lei de Incentivo"}
+                            </Badge>
+                          </div>
+                        )}
+
+                        {/* Impact Info */}
+                        {(project.impacto_cultural || project.impacto_social) && (
+                          <div className="mb-3 text-xs text-muted-foreground line-clamp-2">
+                            {project.impacto_cultural || project.impacto_social}
+                          </div>
+                        )}
+
+                        {/* Creator & Link */}
+                        <div className="flex items-center justify-between pt-3 border-t border-border">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                              <span className="text-xs text-primary-foreground font-semibold">
+                                {getInitials(project.responsavel_nome)}
+                              </span>
+                            </div>
+                            <span className="text-sm text-muted-foreground truncate max-w-[120px]">
+                              {project.responsavel_nome || "Produtor Cultural"}
+                            </span>
+                          </div>
+                          <span className="text-sm font-medium text-primary flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            Ver Detalhes
+                            <ArrowRight className="w-4 h-4" />
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                )}
-              </div>
+                  </Link>
+                );
+              })}
             </div>
-            
-            <div className="space-y-8 order-1 lg:order-2">
-              <ShinyText delay={700}>
-                <h3 className="text-2xl md:text-3xl font-serif font-semibold text-foreground">
-                  Para Empreendedores e Investidores
-                </h3>
-              </ShinyText>
-              
-              <div className="space-y-6">
-                {[
-                  { icon: Search, title: "Seleção Curada", description: "Acesso a uma seleção cuidadosamente curada de propostas culturais sérias, criativas e bem estruturadas.", color: "bg-emerald-500" },
-                  { icon: FileCheck, title: "Marco Legal", description: "Projetos prontos para financiamento através de leis de incentivo cultural ou patrocínio direto.", color: "bg-emerald-500" },
-                  { icon: HeartHandshake, title: "Dashboard Personalizado", description: "Gerencie projetos salvos, histórico de contatos e relatórios de impacto das iniciativas apoiadas.", color: "bg-emerald-500" },
-                ].map((item, index) => (
-                  <div 
-                    key={item.title} 
-                    className={`flex gap-4 items-start transition-all duration-500 ${portoIdeiasInView ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10'}`}
-                    style={{ transitionDelay: portoIdeiasInView ? `${(index + 6) * 150}ms` : '0ms' }}
-                  >
-                    <div className={`${item.color} w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg`}>
-                      <item.icon className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-foreground mb-1">{item.title}</h4>
-                      <p className="text-sm text-muted-foreground leading-relaxed">{item.description}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+          ) : (
+            <div className={`text-center py-16 transition-all duration-700 ${portoIdeiasInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+              <Film className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-xl font-serif text-foreground mb-2">Projetos em Destaque</h3>
+              <p className="text-muted-foreground mb-6">
+                Em breve, projetos culturais selecionados estarão disponíveis aqui.
+              </p>
+              <Link to="/porto-de-ideias">
+                <Badge variant="outline" className="text-base px-6 py-2 cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors">
+                  Explorar Porto de Ideias
+                </Badge>
+              </Link>
             </div>
-          </div>
+          )}
         </div>
       </section>
 
