@@ -9,6 +9,7 @@ import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
 import { ArtisticBackground } from "@/components/ArtisticBackground";
 import { supabase } from "@/integrations/supabase/client";
+import { useInView } from "@/hooks/useInView";
 import { 
   Search,
   MapPin,
@@ -16,7 +17,8 @@ import {
   X,
   Shield,
   SlidersHorizontal,
-  Anchor
+  Anchor,
+  Compass
 } from "lucide-react";
 
 interface Project {
@@ -77,6 +79,10 @@ const PortoDeIdeiasPage = () => {
   const [selectedStage, setSelectedStage] = useState("all");
   const [selectedIncentiveLaw, setSelectedIncentiveLaw] = useState("all");
   const [sortBy, setSortBy] = useState("recent");
+
+  // Intersection observers for animations
+  const { ref: headerRef, isInView: headerInView } = useInView<HTMLElement>();
+  const { ref: projectsRef, isInView: projectsInView } = useInView<HTMLElement>();
 
   useEffect(() => {
     fetchProjects();
@@ -319,11 +325,26 @@ const PortoDeIdeiasPage = () => {
       <Navbar currentPage="porto-de-ideias" />
 
       {/* Header */}
-      <section className="bg-gradient-to-br from-primary/10 via-accent/5 to-background py-12 md:py-16">
-        <div className="container mx-auto px-6">
-          <div className="text-center">
-            <h1 className="text-2xl md:text-4xl font-serif font-bold text-foreground mb-3 md:mb-4">Conheça os Projetos da Porto de Ideias</h1>
-            <p className="text-base md:text-xl text-muted-foreground max-w-3xl mx-auto">
+      <section ref={headerRef} className="relative py-16 md:py-24 overflow-hidden z-10">
+        {/* Semi-transparent background matching homepage hero */}
+        <div className="absolute inset-0 bg-background/60" />
+        <div className="absolute top-10 left-10 w-64 h-64 bg-primary/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-10 right-10 w-80 h-80 bg-accent/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+        
+        <div className="container mx-auto px-6 relative z-10">
+          <div className={`max-w-4xl mx-auto text-center transition-all duration-1000 ${headerInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+            {/* Icon */}
+            <div className="relative inline-block mb-6">
+              <div className="absolute inset-0 w-20 h-20 rounded-full bg-primary/20 blur-xl animate-pulse" />
+              <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-primary/40 to-primary/20 flex items-center justify-center backdrop-blur-sm border border-primary/30 shadow-2xl mx-auto">
+                <Compass className="w-8 h-8 text-primary" />
+              </div>
+            </div>
+            
+            <h1 className="text-3xl md:text-5xl font-serif font-bold text-foreground mb-4 md:mb-6">
+              Conheça os Projetos da Porto de Ideias
+            </h1>
+            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
               Selecionamos projetos com potencial de impacto. Conheça as ideias que já fazem parte da nossa rede.
             </p>
           </div>
@@ -331,14 +352,14 @@ const PortoDeIdeiasPage = () => {
       </section>
 
       {/* Filters - Desktop */}
-      <section className="hidden lg:block py-6 bg-card border-b border-border sticky top-20 z-40">
+      <section className="hidden lg:block py-6 bg-card/95 backdrop-blur-md border-b border-border sticky top-20 z-40">
         <div className="container mx-auto px-6">
           <FilterControls />
         </div>
       </section>
 
       {/* Filters - Mobile */}
-      <section className="lg:hidden py-4 bg-card border-b border-border sticky top-20 z-40">
+      <section className="lg:hidden py-4 bg-card/95 backdrop-blur-md border-b border-border sticky top-20 z-40">
         <div className="container mx-auto px-6">
           <div className="flex items-center gap-3">
             {/* Search on mobile */}
@@ -384,13 +405,13 @@ const PortoDeIdeiasPage = () => {
       </section>
 
       {/* Projects List */}
-      <section className="py-6 md:py-8">
+      <section ref={projectsRef} className="py-8 md:py-12">
         <div className="container mx-auto px-6">
           {/* Loading State */}
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {[1, 2, 3, 4, 5, 6].map((i) => (
-                <div key={i} className="animate-pulse bg-card backdrop-blur-sm rounded-2xl overflow-hidden border border-border/50">
+                <div key={i} className="animate-pulse bg-card rounded-2xl overflow-hidden border border-border/50 shadow-lg">
                   <div className="h-48 bg-muted" />
                   <div className="p-5 space-y-3">
                     <div className="h-4 bg-muted rounded w-1/3" />
@@ -401,7 +422,7 @@ const PortoDeIdeiasPage = () => {
               ))}
             </div>
           ) : sortedProjects.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+            <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 transition-all duration-1000 ${projectsInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
               {sortedProjects.map((project, index) => {
                 const budgetInfo = getBudgetRange(project.valor_sugerido);
                 const stageInfo = getStageInfo(project.stage);
@@ -410,10 +431,14 @@ const PortoDeIdeiasPage = () => {
                   <Link 
                     key={project.id}
                     to={`/project/${project.id}`}
-                    className="block group animate-fade-in"
-                    style={{ animationDelay: `${index * 50}ms` }}
+                    className="block group"
+                    style={{ 
+                      opacity: projectsInView ? 1 : 0,
+                      transform: projectsInView ? 'translateY(0)' : 'translateY(20px)',
+                      transition: `all 0.6s ease-out ${index * 100}ms`
+                    }}
                   >
-                    <div className="card-3d bg-card backdrop-blur-sm border border-border/50 rounded-2xl overflow-hidden">
+                    <div className="card-3d bg-card border border-border/50 rounded-2xl overflow-hidden shadow-lg">
                       {/* Image */}
                       <div className="relative overflow-hidden h-48">
                         {project.image_url ? (
@@ -515,14 +540,18 @@ const PortoDeIdeiasPage = () => {
             </div>
           ) : (
             /* Placeholder Cards - Incentive Messages */
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+            <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 transition-all duration-1000 ${projectsInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
               {/* Card 1 - Add Your Project */}
               <Link 
                 to="/submit"
-                className="block group animate-fade-in"
-                style={{ animationDelay: '0ms' }}
+                className="block group"
+                style={{ 
+                  opacity: projectsInView ? 1 : 0,
+                  transform: projectsInView ? 'translateY(0)' : 'translateY(20px)',
+                  transition: 'all 0.6s ease-out 0ms'
+                }}
               >
-                <div className="card-3d bg-card backdrop-blur-sm border-2 border-dashed border-primary/30 rounded-2xl overflow-hidden h-full">
+                <div className="card-3d bg-card border-2 border-dashed border-primary/30 rounded-2xl overflow-hidden h-full shadow-lg">
                   <div className="relative h-48 bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
                     <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center animate-pulse">
                       <span className="text-4xl">✨</span>
@@ -552,10 +581,14 @@ const PortoDeIdeiasPage = () => {
               {/* Card 2 - Inspire Others */}
               <Link 
                 to="/exemplo/cultura-legado"
-                className="block group animate-fade-in"
-                style={{ animationDelay: '100ms' }}
+                className="block group"
+                style={{ 
+                  opacity: projectsInView ? 1 : 0,
+                  transform: projectsInView ? 'translateY(0)' : 'translateY(20px)',
+                  transition: 'all 0.6s ease-out 100ms'
+                }}
               >
-                <div className="card-3d bg-card backdrop-blur-sm border border-border/50 rounded-2xl overflow-hidden h-full">
+                <div className="card-3d bg-card border border-border/50 rounded-2xl overflow-hidden h-full shadow-lg">
                   <div className="relative h-48 bg-gradient-to-br from-accent/20 to-primary/20 flex items-center justify-center">
                     <div className="w-20 h-20 rounded-full bg-accent/20 flex items-center justify-center">
                       <span className="text-4xl animate-bounce">🎭</span>
@@ -595,10 +628,14 @@ const PortoDeIdeiasPage = () => {
               {/* Card 3 - Connect */}
               <Link 
                 to="/exemplo/investidores-aguardam"
-                className="block group animate-fade-in"
-                style={{ animationDelay: '200ms' }}
+                className="block group"
+                style={{ 
+                  opacity: projectsInView ? 1 : 0,
+                  transform: projectsInView ? 'translateY(0)' : 'translateY(20px)',
+                  transition: 'all 0.6s ease-out 200ms'
+                }}
               >
-                <div className="card-3d bg-card backdrop-blur-sm border border-border/50 rounded-2xl overflow-hidden h-full">
+                <div className="card-3d bg-card border border-border/50 rounded-2xl overflow-hidden h-full shadow-lg">
                   <div className="relative h-48 bg-gradient-to-br from-primary/15 to-accent/25 flex items-center justify-center">
                     <div className="relative">
                       <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center">
@@ -636,10 +673,14 @@ const PortoDeIdeiasPage = () => {
               {/* Card 4 - Success Stories */}
               <Link 
                 to="/exemplo/historias-sucesso"
-                className="block group animate-fade-in"
-                style={{ animationDelay: '300ms' }}
+                className="block group"
+                style={{ 
+                  opacity: projectsInView ? 1 : 0,
+                  transform: projectsInView ? 'translateY(0)' : 'translateY(20px)',
+                  transition: 'all 0.6s ease-out 300ms'
+                }}
               >
-                <div className="card-3d bg-card backdrop-blur-sm border border-amber-500/30 rounded-2xl overflow-hidden h-full">
+                <div className="card-3d bg-card border border-amber-500/30 rounded-2xl overflow-hidden h-full shadow-lg">
                   <div className="relative h-48 bg-gradient-to-br from-amber-100 dark:from-amber-900/40 to-orange-100 dark:to-orange-900/40 flex items-center justify-center">
                     <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg">
                       <span className="text-4xl">🏆</span>
@@ -671,10 +712,14 @@ const PortoDeIdeiasPage = () => {
               {/* Card 5 - Funding */}
               <Link 
                 to="/exemplo/recursos-disponiveis"
-                className="block group animate-fade-in"
-                style={{ animationDelay: '400ms' }}
+                className="block group"
+                style={{ 
+                  opacity: projectsInView ? 1 : 0,
+                  transform: projectsInView ? 'translateY(0)' : 'translateY(20px)',
+                  transition: 'all 0.6s ease-out 400ms'
+                }}
               >
-                <div className="card-3d bg-card backdrop-blur-sm border border-emerald-500/30 rounded-2xl overflow-hidden h-full">
+                <div className="card-3d bg-card border border-emerald-500/30 rounded-2xl overflow-hidden h-full shadow-lg">
                   <div className="relative h-48 bg-gradient-to-br from-emerald-100 dark:from-emerald-900/40 to-teal-100 dark:to-teal-900/40 flex items-center justify-center">
                     <div className="w-20 h-20 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-lg">
                       <span className="text-4xl animate-bounce">💰</span>
@@ -707,10 +752,14 @@ const PortoDeIdeiasPage = () => {
               {/* Card 6 - CTA */}
               <Link 
                 to="/submit"
-                className="block group animate-fade-in"
-                style={{ animationDelay: '500ms' }}
+                className="block group"
+                style={{ 
+                  opacity: projectsInView ? 1 : 0,
+                  transform: projectsInView ? 'translateY(0)' : 'translateY(20px)',
+                  transition: 'all 0.6s ease-out 500ms'
+                }}
               >
-                <div className="card-3d bg-gradient-to-br from-primary via-primary/95 to-accent border border-primary/50 rounded-2xl overflow-hidden h-full">
+                <div className="card-3d bg-gradient-to-br from-primary via-primary/95 to-accent border border-primary/50 rounded-2xl overflow-hidden h-full shadow-lg">
                   <div className="relative h-48 flex items-center justify-center">
                     <div className="text-center text-primary-foreground">
                       <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
