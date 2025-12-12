@@ -74,13 +74,13 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
         {/* Desktop Navigation - Section Links */}
         {showNav && currentPage === "home" && (
           <nav className="hidden md:flex items-center gap-1">
-            {/* Porto de Ideias Link with Lightbulb */}
+            {/* Porto de Ideias Link with Lightbulb - Destacado */}
             <Link
               to="/porto-de-ideias"
-              className="group flex items-center gap-2 px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors duration-200 rounded-lg hover:bg-accent/10"
+              className="group flex items-center gap-2.5 px-5 py-2.5 text-base font-semibold text-foreground hover:text-primary transition-all duration-300 rounded-xl hover:bg-primary/10 hover:shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] border border-transparent hover:border-primary/30"
             >
-              <Lightbulb className="w-4 h-4 text-muted-foreground group-hover:text-yellow-400 group-hover:fill-yellow-400/50 group-hover:drop-shadow-[0_0_8px_rgba(250,204,21,0.6)] transition-all duration-300" />
-              Porto de Ideias
+              <Lightbulb className="w-5 h-5 text-yellow-400 group-hover:fill-yellow-400 group-hover:drop-shadow-[0_0_12px_rgba(250,204,21,0.8)] transition-all duration-300 group-hover:scale-110" />
+              <span className="group-hover:tracking-wide transition-all duration-300">Porto de Ideias</span>
             </Link>
             
             {/* Section Links */}
@@ -155,13 +155,13 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
                   {/* Section Links for Mobile */}
                   {currentPage === "home" && (
                     <div className="flex flex-col gap-2 mt-4 border-t border-border pt-4">
-                      {/* Porto de Ideias Link with Lightbulb */}
+                      {/* Porto de Ideias Link with Lightbulb - Destacado Mobile */}
                       <Link
                         to="/porto-de-ideias"
                         onClick={handleNavClick}
-                        className="group flex items-center gap-2 px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent/10 rounded-lg transition-colors"
+                        className="group flex items-center gap-2.5 px-4 py-3 text-base font-semibold text-foreground hover:text-primary hover:bg-primary/10 rounded-xl transition-all duration-300 border border-transparent hover:border-primary/30"
                       >
-                        <Lightbulb className="w-4 h-4 text-muted-foreground group-hover:text-yellow-400 group-hover:fill-yellow-400/50 transition-all duration-300" />
+                        <Lightbulb className="w-5 h-5 text-yellow-400 group-hover:fill-yellow-400 group-hover:drop-shadow-[0_0_12px_rgba(250,204,21,0.8)] transition-all duration-300" />
                         Porto de Ideias
                       </Link>
                       
