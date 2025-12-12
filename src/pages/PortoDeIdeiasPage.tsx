@@ -513,7 +513,7 @@ const PortoDeIdeiasPage = () => {
       </section>
 
       {/* Projects List */}
-      <section ref={projectsRef} className="py-8 md:py-12">
+      <section ref={projectsRef} className="py-8 md:py-12 relative z-20 bg-background">
         <div className="container mx-auto px-6">
           {/* Loading State */}
           {loading ? (
