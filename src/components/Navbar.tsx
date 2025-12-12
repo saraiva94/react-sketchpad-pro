@@ -77,10 +77,10 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
             {/* Porto de Ideias Link with Lightbulb - Destacado */}
             <Link
               to="/porto-de-ideias"
-              className="group flex items-center gap-2.5 px-5 py-2.5 text-base font-semibold text-foreground hover:text-primary transition-all duration-300 rounded-xl hover:bg-primary/10 hover:shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] border border-transparent hover:border-primary/30"
+              className="group flex items-center gap-2.5 px-5 py-2.5 text-base font-semibold text-foreground transition-all duration-300 rounded-xl hover:bg-yellow-400/15 hover:shadow-[0_0_25px_rgba(250,204,21,0.4)] border border-yellow-400/20 hover:border-yellow-400/50"
             >
-              <Lightbulb className="w-5 h-5 text-yellow-400 group-hover:fill-yellow-400 group-hover:drop-shadow-[0_0_12px_rgba(250,204,21,0.8)] transition-all duration-300 group-hover:scale-110" />
-              <span className="group-hover:tracking-wide transition-all duration-300">Porto de Ideias</span>
+              <Lightbulb className="w-5 h-5 text-yellow-400 animate-[pulse_2s_ease-in-out_infinite] group-hover:fill-yellow-400 group-hover:drop-shadow-[0_0_16px_rgba(250,204,21,1)] group-hover:animate-none group-hover:scale-125 transition-all duration-300" />
+              <span className="text-yellow-100 group-hover:text-yellow-300 group-hover:tracking-wide transition-all duration-300">Porto de Ideias</span>
             </Link>
             
             {/* Section Links */}
@@ -159,9 +159,9 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
                       <Link
                         to="/porto-de-ideias"
                         onClick={handleNavClick}
-                        className="group flex items-center gap-2.5 px-4 py-3 text-base font-semibold text-foreground hover:text-primary hover:bg-primary/10 rounded-xl transition-all duration-300 border border-transparent hover:border-primary/30"
+                        className="group flex items-center gap-2.5 px-4 py-3 text-base font-semibold text-yellow-100 hover:text-yellow-300 hover:bg-yellow-400/15 rounded-xl transition-all duration-300 border border-yellow-400/20 hover:border-yellow-400/50"
                       >
-                        <Lightbulb className="w-5 h-5 text-yellow-400 group-hover:fill-yellow-400 group-hover:drop-shadow-[0_0_12px_rgba(250,204,21,0.8)] transition-all duration-300" />
+                        <Lightbulb className="w-5 h-5 text-yellow-400 animate-[pulse_2s_ease-in-out_infinite] group-hover:fill-yellow-400 group-hover:drop-shadow-[0_0_16px_rgba(250,204,21,1)] group-hover:animate-none transition-all duration-300" />
                         Porto de Ideias
                       </Link>
                       
