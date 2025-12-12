@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -13,12 +13,39 @@ interface NavbarProps {
 
 const sections = [
   { id: "sobre", label: "Quem Somos" },
-  { id: "servicos", label: "Serviços" },
   { id: "porto-de-ideias", label: "Ecossistema" },
+  { id: "servicos", label: "Serviços" },
 ];
 
 export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState<string>("");
+
+  useEffect(() => {
+    if (currentPage !== "home") return;
+
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY + 150; // Offset for navbar height
+      
+      // Check each section
+      for (const section of [...sections].reverse()) {
+        const element = document.getElementById(section.id);
+        if (element) {
+          const offsetTop = element.offsetTop;
+          if (scrollPosition >= offsetTop) {
+            setActiveSection(section.id);
+            return;
+          }
+        }
+      }
+      setActiveSection("");
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    handleScroll(); // Initial check
+    
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [currentPage]);
 
   const handleNavClick = () => {
     setIsOpen(false);
@@ -61,9 +88,17 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
               <button
                 key={section.id}
                 onClick={() => scrollToSection(section.id)}
-                className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors duration-200 rounded-lg hover:bg-accent/10"
+                className={`relative px-4 py-2 text-sm font-medium transition-all duration-200 rounded-lg ${
+                  activeSection === section.id
+                    ? "text-foreground bg-accent/15"
+                    : "text-muted-foreground hover:text-foreground hover:bg-accent/10"
+                }`}
               >
                 {section.label}
+                {/* Active indicator */}
+                {activeSection === section.id && (
+                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-primary rounded-full" />
+                )}
               </button>
             ))}
           </nav>
@@ -134,7 +169,11 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
                         <button
                           key={section.id}
                           onClick={() => scrollToSection(section.id)}
-                          className="text-left px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent/10 rounded-lg transition-colors"
+                          className={`text-left px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                            activeSection === section.id
+                              ? "text-foreground bg-accent/15"
+                              : "text-muted-foreground hover:text-foreground hover:bg-accent/10"
+                          }`}
                         >
                           {section.label}
                         </button>

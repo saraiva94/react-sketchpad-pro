@@ -367,52 +367,9 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Nossos Serviços Section */}
-      <section ref={servicosRef} id="servicos" className="py-20 lg:py-28 relative z-10">
-        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent" />
-        
-        <div className="container mx-auto px-4 relative z-10">
-          <div className={`text-center mb-16 transition-all duration-700 ${servicosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-            <ShinyText className="inline-block" delay={200}>
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif font-semibold text-foreground mb-4 decorative-line">
-                Nossos Serviços
-              </h2>
-            </ShinyText>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
-            {services.map((service, index) => (
-              <Card 
-                key={index} 
-                className={`group relative overflow-hidden card-solid bg-card border-border transition-all duration-500 hover:-translate-y-1 ${servicosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
-                style={{ 
-                  transitionDelay: servicosInView ? `${(index + 1) * 100}ms` : '0ms',
-                }}
-              >
-                {/* Hover glow effect */}
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10" />
-                  <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 via-accent/10 to-primary/20 blur-xl" />
-                </div>
-                
-                <div className="relative p-6 flex flex-col items-center text-center gap-4">
-                  <div className="relative">
-                    <div className={`relative w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 border border-border shadow-lg`}>
-                      <service.icon className={`w-8 h-8 text-primary ${service.hoverColor} transition-colors duration-300`} />
-                    </div>
-                  </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed group-hover:text-foreground/80 transition-colors duration-300 font-medium">
-                    {service.text}
-                  </p>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Porto de Ideias Section - Ecossistema de Conexões */}
       <section ref={portoIdeiasRef} id="porto-de-ideias" className="py-20 lg:py-28 relative overflow-hidden z-10">
+        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent" />
         
         <div className="container mx-auto px-4 relative">
           {/* Header */}
@@ -545,6 +502,50 @@ const HomePage = () => {
                 ))}
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Nossos Serviços Section */}
+      <section ref={servicosRef} id="servicos" className="py-20 lg:py-28 relative z-10">
+        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <div className={`text-center mb-16 transition-all duration-700 ${servicosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+            <ShinyText className="inline-block" delay={200}>
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif font-semibold text-foreground mb-4 decorative-line">
+                Nossos Serviços
+              </h2>
+            </ShinyText>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+            {services.map((service, index) => (
+              <Card 
+                key={index} 
+                className={`group relative overflow-hidden card-solid bg-card border-border transition-all duration-500 hover:-translate-y-1 ${servicosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+                style={{ 
+                  transitionDelay: servicosInView ? `${(index + 1) * 100}ms` : '0ms',
+                }}
+              >
+                {/* Hover glow effect */}
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10" />
+                  <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 via-accent/10 to-primary/20 blur-xl" />
+                </div>
+                
+                <div className="relative p-6 flex flex-col items-center text-center gap-4">
+                  <div className="relative">
+                    <div className={`relative w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 border border-border shadow-lg`}>
+                      <service.icon className={`w-8 h-8 text-primary ${service.hoverColor} transition-colors duration-300`} />
+                    </div>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed group-hover:text-foreground/80 transition-colors duration-300 font-medium">
+                    {service.text}
+                  </p>
+                </div>
+              </Card>
+            ))}
           </div>
         </div>
       </section>
