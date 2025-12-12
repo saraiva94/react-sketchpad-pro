@@ -11,10 +11,25 @@ interface NavbarProps {
   rightContent?: React.ReactNode;
 }
 
+const sections = [
+  { id: "inicio", label: "Início" },
+  { id: "sobre", label: "Quem Somos" },
+  { id: "servicos", label: "Serviços" },
+  { id: "porto-de-ideias", label: "Porto de Ideias" },
+];
+
 export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleNavClick = () => {
+    setIsOpen(false);
+  };
+
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
     setIsOpen(false);
   };
 
@@ -29,6 +44,21 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
             className="h-44 md:h-52 w-auto group-hover:scale-105 transition-transform duration-300"
           />
         </Link>
+
+        {/* Desktop Navigation - Section Links */}
+        {showNav && currentPage === "home" && (
+          <nav className="hidden md:flex items-center gap-1">
+            {sections.map((section) => (
+              <button
+                key={section.id}
+                onClick={() => scrollToSection(section.id)}
+                className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors duration-200 rounded-lg hover:bg-accent/10"
+              >
+                {section.label}
+              </button>
+            ))}
+          </nav>
+        )}
         
         {/* Right Content (for pages without nav) */}
         {!showNav && rightContent && (
@@ -65,7 +95,7 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
                 className="w-[280px] bg-card border-border"
               >
                 <nav className="flex flex-col gap-4 mt-8">
-                  {/* Homepage */}
+                  {/* Homepage Logo */}
                   <Link 
                     to="/"
                     onClick={handleNavClick}
@@ -77,6 +107,21 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
                       className="h-24 w-auto group-hover:scale-105 transition-transform duration-300"
                     />
                   </Link>
+                  
+                  {/* Section Links for Mobile */}
+                  {currentPage === "home" && (
+                    <div className="flex flex-col gap-2 mt-4 border-t border-border pt-4">
+                      {sections.map((section) => (
+                        <button
+                          key={section.id}
+                          onClick={() => scrollToSection(section.id)}
+                          className="text-left px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent/10 rounded-lg transition-colors"
+                        >
+                          {section.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </nav>
               </SheetContent>
             </Sheet>
