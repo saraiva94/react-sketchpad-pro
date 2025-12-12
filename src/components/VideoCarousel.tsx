@@ -71,7 +71,7 @@ export function VideoCarousel({ videos, loading = false }: VideoCarouselProps) {
       translateZ = -160;
     }
     
-    const opacity = position === 0 ? 1 : absPosition === 1 ? 0.85 : 0.65;
+    const opacity = 1; // All cards fully opaque
     const zIndex = 10 - absPosition;
 
     return {
