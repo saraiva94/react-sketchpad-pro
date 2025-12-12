@@ -93,6 +93,12 @@ const AdminDashboard = () => {
   const [loadingSettings, setLoadingSettings] = useState(true);
   const [institutionalVideoUrl, setInstitutionalVideoUrl] = useState("");
   const [uploadingVideo, setUploadingVideo] = useState(false);
+  
+  // Mídias da seção Ecossistema
+  const [ecossistemaProducerMedia, setEcossistemaProducerMedia] = useState<{ url: string; type: 'image' | 'video' }>({ url: "", type: "image" });
+  const [ecossistemaInvestorMedia, setEcossistemaInvestorMedia] = useState<{ url: string; type: 'image' | 'video' }>({ url: "", type: "image" });
+  const [uploadingProducerMedia, setUploadingProducerMedia] = useState(false);
+  const [uploadingInvestorMedia, setUploadingInvestorMedia] = useState(false);
 
   // Edit form state
   const [editImageUrl, setEditImageUrl] = useState("");
@@ -130,6 +136,30 @@ const AdminDashboard = () => {
     
     if (videoData) {
       setInstitutionalVideoUrl((videoData.value as { url: string }).url || "");
+    }
+
+    // Fetch ecossistema producer media
+    const { data: producerData } = await supabase
+      .from("settings")
+      .select("value")
+      .eq("key", "ecossistema_producer_media")
+      .single();
+    
+    if (producerData) {
+      const mediaValue = producerData.value as { url: string; type: 'image' | 'video' };
+      setEcossistemaProducerMedia({ url: mediaValue.url || "", type: mediaValue.type || "image" });
+    }
+
+    // Fetch ecossistema investor media
+    const { data: investorData } = await supabase
+      .from("settings")
+      .select("value")
+      .eq("key", "ecossistema_investor_media")
+      .single();
+    
+    if (investorData) {
+      const mediaValue = investorData.value as { url: string; type: 'image' | 'video' };
+      setEcossistemaInvestorMedia({ url: mediaValue.url || "", type: mediaValue.type || "image" });
     }
     
     setLoadingSettings(false);
@@ -658,6 +688,345 @@ const AdminDashboard = () => {
                         controls
                         className="w-full max-h-64 object-contain bg-black"
                       />
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Mídias da Seção Ecossistema */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="w-5 h-5" />
+                  Mídias da Seção "Ecossistema de Conexões"
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <p className="text-sm text-muted-foreground">
+                  Configure as imagens ou vídeos que serão exibidos na seção "Um Ecossistema de Conexões" da homepage.
+                </p>
+                
+                {/* Para Produtores Culturais */}
+                <div className="p-4 border rounded-lg space-y-4">
+                  <h4 className="font-semibold">Para Produtores Culturais</h4>
+                  
+                  <div className="flex gap-4 items-center">
+                    <Label className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="producer-type"
+                        checked={ecossistemaProducerMedia.type === "image"}
+                        onChange={() => setEcossistemaProducerMedia(prev => ({ ...prev, type: "image" }))}
+                      />
+                      Imagem
+                    </Label>
+                    <Label className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="producer-type"
+                        checked={ecossistemaProducerMedia.type === "video"}
+                        onChange={() => setEcossistemaProducerMedia(prev => ({ ...prev, type: "video" }))}
+                      />
+                      Vídeo
+                    </Label>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>URL da Mídia</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder={ecossistemaProducerMedia.type === "image" ? "https://exemplo.com/imagem.jpg" : "https://exemplo.com/video.mp4"}
+                        value={ecossistemaProducerMedia.url}
+                        onChange={(e) => setEcossistemaProducerMedia(prev => ({ ...prev, url: e.target.value }))}
+                        className="flex-1"
+                      />
+                      {ecossistemaProducerMedia.url && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setEcossistemaProducerMedia({ url: "", type: "image" })}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <Button 
+                      onClick={async () => {
+                        setUploadingProducerMedia(true);
+                        const { data: existing } = await supabase
+                          .from("settings")
+                          .select("id")
+                          .eq("key", "ecossistema_producer_media")
+                          .single();
+                        
+                        if (existing) {
+                          await supabase
+                            .from("settings")
+                            .update({ value: ecossistemaProducerMedia })
+                            .eq("key", "ecossistema_producer_media");
+                        } else {
+                          await supabase
+                            .from("settings")
+                            .insert({ key: "ecossistema_producer_media", value: ecossistemaProducerMedia });
+                        }
+                        
+                        setUploadingProducerMedia(false);
+                        toast({
+                          title: "Salvo!",
+                          description: "Mídia de produtores atualizada com sucesso.",
+                        });
+                      }}
+                      disabled={uploadingProducerMedia}
+                    >
+                      {uploadingProducerMedia ? "Salvando..." : "Salvar"}
+                    </Button>
+
+                    <Label
+                      htmlFor="producer-media-upload"
+                      className="cursor-pointer inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
+                    >
+                      <Upload className="w-4 h-4" />
+                      Upload
+                    </Label>
+                    <input
+                      id="producer-media-upload"
+                      type="file"
+                      accept={ecossistemaProducerMedia.type === "image" ? "image/*" : "video/*"}
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        
+                        setUploadingProducerMedia(true);
+                        const fileName = `ecossistema-producer-${Date.now()}.${file.name.split('.').pop()}`;
+                        
+                        const { data, error } = await supabase.storage
+                          .from("project-media")
+                          .upload(fileName, file);
+                        
+                        if (error) {
+                          toast({
+                            title: "Erro no upload",
+                            description: error.message,
+                            variant: "destructive",
+                          });
+                        } else {
+                          const { data: urlData } = supabase.storage
+                            .from("project-media")
+                            .getPublicUrl(fileName);
+                          
+                          const newMedia = { url: urlData.publicUrl, type: ecossistemaProducerMedia.type };
+                          setEcossistemaProducerMedia(newMedia);
+                          
+                          const { data: existing } = await supabase
+                            .from("settings")
+                            .select("id")
+                            .eq("key", "ecossistema_producer_media")
+                            .single();
+                          
+                          if (existing) {
+                            await supabase
+                              .from("settings")
+                              .update({ value: newMedia })
+                              .eq("key", "ecossistema_producer_media");
+                          } else {
+                            await supabase
+                              .from("settings")
+                              .insert({ key: "ecossistema_producer_media", value: newMedia });
+                          }
+                          
+                          toast({
+                            title: "Upload concluído!",
+                            description: "Mídia enviada e salva com sucesso.",
+                          });
+                        }
+                        
+                        setUploadingProducerMedia(false);
+                      }}
+                    />
+                  </div>
+
+                  {ecossistemaProducerMedia.url && (
+                    <div className="mt-4 rounded-lg overflow-hidden border max-w-sm">
+                      {ecossistemaProducerMedia.type === "video" ? (
+                        <video
+                          src={ecossistemaProducerMedia.url}
+                          controls
+                          className="w-full max-h-48 object-contain bg-black"
+                        />
+                      ) : (
+                        <img
+                          src={ecossistemaProducerMedia.url}
+                          alt="Preview"
+                          className="w-full max-h-48 object-cover"
+                        />
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Para Empreendedores e Investidores */}
+                <div className="p-4 border rounded-lg space-y-4">
+                  <h4 className="font-semibold">Para Empreendedores e Investidores</h4>
+                  
+                  <div className="flex gap-4 items-center">
+                    <Label className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="investor-type"
+                        checked={ecossistemaInvestorMedia.type === "image"}
+                        onChange={() => setEcossistemaInvestorMedia(prev => ({ ...prev, type: "image" }))}
+                      />
+                      Imagem
+                    </Label>
+                    <Label className="flex items-center gap-2">
+                      <input
+                        type="radio"
+                        name="investor-type"
+                        checked={ecossistemaInvestorMedia.type === "video"}
+                        onChange={() => setEcossistemaInvestorMedia(prev => ({ ...prev, type: "video" }))}
+                      />
+                      Vídeo
+                    </Label>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>URL da Mídia</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder={ecossistemaInvestorMedia.type === "image" ? "https://exemplo.com/imagem.jpg" : "https://exemplo.com/video.mp4"}
+                        value={ecossistemaInvestorMedia.url}
+                        onChange={(e) => setEcossistemaInvestorMedia(prev => ({ ...prev, url: e.target.value }))}
+                        className="flex-1"
+                      />
+                      {ecossistemaInvestorMedia.url && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setEcossistemaInvestorMedia({ url: "", type: "image" })}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <Button 
+                      onClick={async () => {
+                        setUploadingInvestorMedia(true);
+                        const { data: existing } = await supabase
+                          .from("settings")
+                          .select("id")
+                          .eq("key", "ecossistema_investor_media")
+                          .single();
+                        
+                        if (existing) {
+                          await supabase
+                            .from("settings")
+                            .update({ value: ecossistemaInvestorMedia })
+                            .eq("key", "ecossistema_investor_media");
+                        } else {
+                          await supabase
+                            .from("settings")
+                            .insert({ key: "ecossistema_investor_media", value: ecossistemaInvestorMedia });
+                        }
+                        
+                        setUploadingInvestorMedia(false);
+                        toast({
+                          title: "Salvo!",
+                          description: "Mídia de investidores atualizada com sucesso.",
+                        });
+                      }}
+                      disabled={uploadingInvestorMedia}
+                    >
+                      {uploadingInvestorMedia ? "Salvando..." : "Salvar"}
+                    </Button>
+
+                    <Label
+                      htmlFor="investor-media-upload"
+                      className="cursor-pointer inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
+                    >
+                      <Upload className="w-4 h-4" />
+                      Upload
+                    </Label>
+                    <input
+                      id="investor-media-upload"
+                      type="file"
+                      accept={ecossistemaInvestorMedia.type === "image" ? "image/*" : "video/*"}
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        
+                        setUploadingInvestorMedia(true);
+                        const fileName = `ecossistema-investor-${Date.now()}.${file.name.split('.').pop()}`;
+                        
+                        const { data, error } = await supabase.storage
+                          .from("project-media")
+                          .upload(fileName, file);
+                        
+                        if (error) {
+                          toast({
+                            title: "Erro no upload",
+                            description: error.message,
+                            variant: "destructive",
+                          });
+                        } else {
+                          const { data: urlData } = supabase.storage
+                            .from("project-media")
+                            .getPublicUrl(fileName);
+                          
+                          const newMedia = { url: urlData.publicUrl, type: ecossistemaInvestorMedia.type };
+                          setEcossistemaInvestorMedia(newMedia);
+                          
+                          const { data: existing } = await supabase
+                            .from("settings")
+                            .select("id")
+                            .eq("key", "ecossistema_investor_media")
+                            .single();
+                          
+                          if (existing) {
+                            await supabase
+                              .from("settings")
+                              .update({ value: newMedia })
+                              .eq("key", "ecossistema_investor_media");
+                          } else {
+                            await supabase
+                              .from("settings")
+                              .insert({ key: "ecossistema_investor_media", value: newMedia });
+                          }
+                          
+                          toast({
+                            title: "Upload concluído!",
+                            description: "Mídia enviada e salva com sucesso.",
+                          });
+                        }
+                        
+                        setUploadingInvestorMedia(false);
+                      }}
+                    />
+                  </div>
+
+                  {ecossistemaInvestorMedia.url && (
+                    <div className="mt-4 rounded-lg overflow-hidden border max-w-sm">
+                      {ecossistemaInvestorMedia.type === "video" ? (
+                        <video
+                          src={ecossistemaInvestorMedia.url}
+                          controls
+                          className="w-full max-h-48 object-contain bg-black"
+                        />
+                      ) : (
+                        <img
+                          src={ecossistemaInvestorMedia.url}
+                          alt="Preview"
+                          className="w-full max-h-48 object-cover"
+                        />
+                      )}
                     </div>
                   )}
                 </div>
