@@ -368,7 +368,7 @@ const HomePage = () => {
       </section>
 
       {/* Nossos Serviços Section */}
-      <section ref={servicosRef} className="py-20 lg:py-28 relative z-10">
+      <section ref={servicosRef} id="servicos" className="py-20 lg:py-28 relative z-10">
         <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent" />
         
         <div className="container mx-auto px-4 relative z-10">
