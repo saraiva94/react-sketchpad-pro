@@ -99,6 +99,9 @@ const AdminDashboard = () => {
   const [ecossistemaInvestorMedia, setEcossistemaInvestorMedia] = useState<{ url: string; type: 'image' | 'video' }>({ url: "", type: "image" });
   const [uploadingProducerMedia, setUploadingProducerMedia] = useState(false);
   const [uploadingInvestorMedia, setUploadingInvestorMedia] = useState(false);
+  
+  // Porto de Ideias slots control
+  const [portoIdeiasSlots, setPortoIdeiasSlots] = useState(5);
 
   // Edit form state
   const [editImageUrl, setEditImageUrl] = useState("");
@@ -122,7 +125,7 @@ const AdminDashboard = () => {
       .from("settings")
       .select("value")
       .eq("key", "stats_visible")
-      .single();
+      .maybeSingle();
     
     if (statsData) {
       setStatsVisible((statsData.value as { enabled: boolean }).enabled);
@@ -132,7 +135,7 @@ const AdminDashboard = () => {
       .from("settings")
       .select("value")
       .eq("key", "institutional_video")
-      .single();
+      .maybeSingle();
     
     if (videoData) {
       setInstitutionalVideoUrl((videoData.value as { url: string }).url || "");
@@ -143,7 +146,7 @@ const AdminDashboard = () => {
       .from("settings")
       .select("value")
       .eq("key", "ecossistema_producer_media")
-      .single();
+      .maybeSingle();
     
     if (producerData) {
       const mediaValue = producerData.value as { url: string; type: 'image' | 'video' };
@@ -155,11 +158,22 @@ const AdminDashboard = () => {
       .from("settings")
       .select("value")
       .eq("key", "ecossistema_investor_media")
-      .single();
+      .maybeSingle();
     
     if (investorData) {
       const mediaValue = investorData.value as { url: string; type: 'image' | 'video' };
       setEcossistemaInvestorMedia({ url: mediaValue.url || "", type: mediaValue.type || "image" });
+    }
+
+    // Fetch Porto de Ideias slots
+    const { data: slotsData } = await supabase
+      .from("settings")
+      .select("value")
+      .eq("key", "porto_ideias_slots")
+      .maybeSingle();
+    
+    if (slotsData) {
+      setPortoIdeiasSlots((slotsData.value as { count: number }).count || 5);
     }
     
     setLoadingSettings(false);
@@ -186,6 +200,43 @@ const AdminDashboard = () => {
         description: newValue 
           ? "O painel de números está visível na homepage." 
           : "O painel de números foi ocultado da homepage.",
+      });
+    }
+  };
+
+  const updatePortoIdeiasSlots = async (newCount: number) => {
+    // First try to update, if no rows affected, insert
+    const { data: existingData } = await supabase
+      .from("settings")
+      .select("id")
+      .eq("key", "porto_ideias_slots")
+      .maybeSingle();
+
+    let error;
+    if (existingData) {
+      const result = await supabase
+        .from("settings")
+        .update({ value: { count: newCount } })
+        .eq("key", "porto_ideias_slots");
+      error = result.error;
+    } else {
+      const result = await supabase
+        .from("settings")
+        .insert({ key: "porto_ideias_slots", value: { count: newCount } });
+      error = result.error;
+    }
+
+    if (error) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível atualizar a quantidade de slots.",
+        variant: "destructive",
+      });
+    } else {
+      setPortoIdeiasSlots(newCount);
+      toast({
+        title: "Slots atualizados",
+        description: `Agora serão exibidos ${newCount} projetos na Porto de Ideias.`,
       });
     }
   };
@@ -1226,49 +1277,148 @@ const AdminDashboard = () => {
 
         {/* Featured Projects Section */}
         {activeSection === "featured" && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Projetos em Destaque na Homepage</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {featuredProjects.length > 0 ? (
-                <div className="space-y-2">
-                  {featuredProjects.map((project, index) => (
-                    <div key={project.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors group">
-                      <div className="flex items-center gap-4">
-                        <span className="text-sm text-muted-foreground w-6">{index + 1}.</span>
-                        {project.image_url && (
-                          <img 
-                            src={project.image_url} 
-                            alt={project.title}
-                            className="w-12 h-12 rounded object-cover"
-                          />
-                        )}
-                        <div>
-                          <h4 className="font-medium">{project.title}</h4>
-                          <p className="text-sm text-muted-foreground">
-                            {project.project_type} • {project.location || "Sem localização"}
-                          </p>
-                        </div>
+          <div className="space-y-6">
+            {/* Slots Control Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="w-5 h-5" />
+                  Controle de Exibição - Porto de Ideias
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                  <div className="flex-1">
+                    <p className="text-sm text-muted-foreground mb-2">
+                      Quantidade de slots de projetos na página Porto de Ideias. 
+                      Projetos reais substituem cards de exemplo automaticamente.
+                    </p>
+                    <div className="flex items-center gap-3">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => portoIdeiasSlots > 1 && updatePortoIdeiasSlots(portoIdeiasSlots - 1)}
+                        disabled={portoIdeiasSlots <= 1}
+                      >
+                        <span className="text-lg">−</span>
+                      </Button>
+                      <div className="w-16 text-center">
+                        <span className="text-2xl font-bold">{portoIdeiasSlots}</span>
+                        <p className="text-xs text-muted-foreground">slots</p>
                       </div>
                       <Button
-                        variant="ghost"
+                        variant="outline"
                         size="icon"
-                        onClick={() => toggleFeatured(project.id, true)}
-                        className="text-destructive hover:text-destructive hover:bg-destructive/10 opacity-60 group-hover:opacity-100 transition-opacity"
+                        onClick={() => updatePortoIdeiasSlots(portoIdeiasSlots + 1)}
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Plus className="w-4 h-4" />
                       </Button>
                     </div>
-                  ))}
+                  </div>
+                  <div className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
+                    <p><strong>Projetos aprovados:</strong> {projects.filter(p => p.status === "approved").length}</p>
+                    <p><strong>Em destaque:</strong> {featuredProjects.length}</p>
+                    <p><strong>Cards de exemplo:</strong> {Math.max(0, portoIdeiasSlots - projects.filter(p => p.status === "approved").length)}</p>
+                  </div>
                 </div>
-              ) : (
-                <p className="text-center text-muted-foreground py-8">
-                  Nenhum projeto em destaque. Aprove projetos e marque-os como destaque.
-                </p>
-              )}
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+
+            {/* Featured Projects List */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Projetos em Destaque na Homepage</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {featuredProjects.length > 0 ? (
+                  <div className="space-y-2">
+                    {featuredProjects.map((project, index) => (
+                      <div key={project.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors group">
+                        <div className="flex items-center gap-4">
+                          <span className="text-sm text-muted-foreground w-6">{index + 1}.</span>
+                          {project.image_url && (
+                            <img 
+                              src={project.image_url} 
+                              alt={project.title}
+                              className="w-12 h-12 rounded object-cover"
+                            />
+                          )}
+                          <div>
+                            <h4 className="font-medium">{project.title}</h4>
+                            <p className="text-sm text-muted-foreground">
+                              {project.project_type} • {project.location || "Sem localização"}
+                            </p>
+                          </div>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => toggleFeatured(project.id, true)}
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10 opacity-60 group-hover:opacity-100 transition-opacity"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-center text-muted-foreground py-8">
+                    Nenhum projeto em destaque. Aprove projetos e marque-os como destaque.
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Available Projects to Feature */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Plus className="w-5 h-5" />
+                  Adicionar Projeto em Destaque
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {projects.filter(p => p.status === "approved" && !p.featured_on_homepage).length > 0 ? (
+                  <div className="space-y-2">
+                    {projects
+                      .filter(p => p.status === "approved" && !p.featured_on_homepage)
+                      .map((project) => (
+                        <div key={project.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors group">
+                          <div className="flex items-center gap-4">
+                            {project.image_url && (
+                              <img 
+                                src={project.image_url} 
+                                alt={project.title}
+                                className="w-12 h-12 rounded object-cover"
+                              />
+                            )}
+                            <div>
+                              <h4 className="font-medium">{project.title}</h4>
+                              <p className="text-sm text-muted-foreground">
+                                {project.project_type} • {project.location || "Sem localização"}
+                              </p>
+                            </div>
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => toggleFeatured(project.id, false)}
+                            className="opacity-60 group-hover:opacity-100 transition-opacity"
+                          >
+                            <Plus className="w-4 h-4 mr-1" />
+                            Destacar
+                          </Button>
+                        </div>
+                      ))}
+                  </div>
+                ) : (
+                  <p className="text-center text-muted-foreground py-8">
+                    Nenhum projeto aprovado disponível para destacar.
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         )}
 
         {/* Projects Section */}

@@ -65,10 +65,99 @@ const sortOptions = [
   { value: "budget-desc", label: "Maior Orçamento" }
 ];
 
+// Example project data for placeholder cards
+const exampleProjects = [
+  {
+    id: "exemplo-cultura-legado",
+    title: "Sua Cultura, Seu Legado",
+    synopsis: "Cada projeto cultural conta uma história única. Seja parte dessa rede de criadores que estão transformando o cenário cultural brasileiro.",
+    emoji: "🎭",
+    badge: "Inspire",
+    badgeVariant: "secondary" as const,
+    link: "/exemplo/cultura-legado",
+    footerContent: (
+      <div className="flex -space-x-2">
+        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-rose-400 to-rose-600 flex items-center justify-center border-2 border-card">
+          <span className="text-xs text-white">🎨</span>
+        </div>
+        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center border-2 border-card">
+          <span className="text-xs text-white">🎵</span>
+        </div>
+        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center border-2 border-card">
+          <span className="text-xs text-white">📽️</span>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: "exemplo-investidores-aguardam",
+    title: "Investidores Aguardam",
+    synopsis: "Uma rede de investidores e patrocinadores interessados em apoiar projetos culturais está esperando por você. Faça a conexão acontecer!",
+    emoji: "🤝",
+    badge: "Conecte-se",
+    badgeVariant: "outline" as const,
+    link: "/exemplo/investidores-aguardam",
+    footerContent: (
+      <div className="flex items-center gap-1">
+        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+        <span className="text-sm text-emerald-600 dark:text-emerald-400">Online agora</span>
+      </div>
+    ),
+  },
+  {
+    id: "exemplo-historias-sucesso",
+    title: "Histórias de Sucesso",
+    synopsis: "Projetos que começaram aqui já impactaram milhares de pessoas. O próximo sucesso pode ser o seu!",
+    emoji: "🏆",
+    badge: "Sucesso",
+    badgeVariant: "default" as const,
+    badgeClass: "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 hover:bg-amber-200",
+    link: "/exemplo/historias-sucesso",
+    borderClass: "border-amber-500/30",
+    gradientClass: "from-amber-100 dark:from-amber-900/40 to-orange-100 dark:to-orange-900/40",
+    emojiBgClass: "bg-gradient-to-br from-amber-400 to-orange-500 shadow-lg",
+    footerContent: <span className="text-amber-500">★★★★★</span>,
+  },
+  {
+    id: "exemplo-recursos-disponiveis",
+    title: "Recursos Disponíveis",
+    synopsis: "Conectamos projetos a recursos via Lei Rouanet, PROAC, e investimento direto. Encontre o modelo ideal para você.",
+    emoji: "💰",
+    badge: "Financiamento",
+    badgeVariant: "default" as const,
+    badgeClass: "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-200",
+    link: "/exemplo/recursos-disponiveis",
+    borderClass: "border-emerald-500/30",
+    gradientClass: "from-emerald-100 dark:from-emerald-900/40 to-teal-100 dark:to-teal-900/40",
+    emojiBgClass: "bg-gradient-to-br from-emerald-400 to-teal-500 shadow-lg",
+    emojiAnimate: true,
+    footerContent: (
+      <div className="flex gap-2">
+        <Badge variant="outline" className="text-xs">Rouanet</Badge>
+        <Badge variant="outline" className="text-xs">PROAC</Badge>
+      </div>
+    ),
+  },
+  {
+    id: "exemplo-novo-projeto",
+    title: "Adicione seu Projeto",
+    synopsis: "Sua ideia cultural merece ganhar vida! Submeta seu projeto e conecte-se com investidores interessados em transformar cultura em realidade.",
+    emoji: "✨",
+    badge: "Novo Projeto",
+    badgeVariant: "default" as const,
+    badgeClass: "bg-primary/20 text-primary hover:bg-primary/30",
+    link: "/submit",
+    borderClass: "border-dashed border-primary/30 border-2",
+    emojiAnimate: true,
+    footerContent: <span className="text-sm text-muted-foreground">Comece agora</span>,
+    footerAction: "Submeter",
+  },
+];
+
 const PortoDeIdeiasPage = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
-  // viewMode removed - using grid as default
+  const [displaySlots, setDisplaySlots] = useState(5); // Default 5 project slots
   const [filtersOpen, setFiltersOpen] = useState(false);
   
   // Filters
@@ -86,6 +175,7 @@ const PortoDeIdeiasPage = () => {
 
   useEffect(() => {
     fetchProjects();
+    fetchDisplaySlots();
   }, []);
 
   const fetchProjects = async () => {
@@ -97,6 +187,18 @@ const PortoDeIdeiasPage = () => {
     
     setProjects(data || []);
     setLoading(false);
+  };
+
+  const fetchDisplaySlots = async () => {
+    const { data } = await supabase
+      .from("settings")
+      .select("value")
+      .eq("key", "porto_ideias_slots")
+      .maybeSingle();
+    
+    if (data) {
+      setDisplaySlots((data.value as { count: number }).count || 5);
+    }
   };
 
   const formatBudget = (value: number | null): string => {
@@ -421,9 +523,10 @@ const PortoDeIdeiasPage = () => {
                 </div>
               ))}
             </div>
-          ) : sortedProjects.length > 0 ? (
+          ) : (
             <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 transition-all duration-1000 ${projectsInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-              {sortedProjects.map((project, index) => {
+              {/* Real Projects - up to displaySlots */}
+              {sortedProjects.slice(0, displaySlots).map((project, index) => {
                 const budgetInfo = getBudgetRange(project.valor_sugerido);
                 const stageInfo = getStageInfo(project.stage);
                 
@@ -438,7 +541,7 @@ const PortoDeIdeiasPage = () => {
                       transition: `all 0.6s ease-out ${index * 100}ms`
                     }}
                   >
-                    <div className="card-3d bg-card border border-border/50 rounded-2xl overflow-hidden shadow-lg">
+                    <div className="card-3d bg-card border border-border/50 rounded-2xl overflow-hidden shadow-lg h-full">
                       {/* Image */}
                       <div className="relative overflow-hidden h-48">
                         {project.image_url ? (
@@ -537,226 +640,62 @@ const PortoDeIdeiasPage = () => {
                   </Link>
                 );
               })}
-            </div>
-          ) : (
-            /* Placeholder Cards - Incentive Messages */
-            <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 transition-all duration-1000 ${projectsInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-              {/* Card 1 - Add Your Project */}
+
+              {/* Example Cards - fill remaining slots (up to displaySlots - realProjects) */}
+              {sortedProjects.length < displaySlots && exampleProjects.slice(0, displaySlots - sortedProjects.length).map((example, index) => {
+                const cardIndex = sortedProjects.length + index;
+                
+                return (
+                  <Link 
+                    key={example.id}
+                    to={example.link}
+                    className="block group"
+                    style={{ 
+                      opacity: projectsInView ? 1 : 0,
+                      transform: projectsInView ? 'translateY(0)' : 'translateY(20px)',
+                      transition: `all 0.6s ease-out ${cardIndex * 100}ms`
+                    }}
+                  >
+                    <div className={`card-3d bg-card ${example.borderClass || 'border border-border/50'} rounded-2xl overflow-hidden h-full shadow-lg`}>
+                      <div className={`relative h-48 bg-gradient-to-br ${example.gradientClass || 'from-accent/20 to-primary/20'} flex items-center justify-center`}>
+                        <div className={`w-20 h-20 rounded-full ${example.emojiBgClass || 'bg-accent/20'} flex items-center justify-center`}>
+                          <span className={`text-4xl ${example.emojiAnimate ? 'animate-pulse' : ''}`}>{example.emoji}</span>
+                        </div>
+                      </div>
+                      <div className="p-5">
+                        <Badge 
+                          variant={example.badgeVariant} 
+                          className={`mb-3 rounded-full ${example.badgeClass || ''}`}
+                        >
+                          {example.badge}
+                        </Badge>
+                        <h3 className="text-lg font-serif font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
+                          {example.title}
+                        </h3>
+                        <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
+                          {example.synopsis}
+                        </p>
+                        <div className="flex items-center justify-between pt-3 border-t border-border">
+                          {example.footerContent}
+                          <span className="text-sm font-medium text-primary flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            {example.footerAction || "Ver Exemplo"}
+                            <ArrowRight className="w-4 h-4" />
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+
+              {/* CTA Card - Always last */}
               <Link 
                 to="/submit"
                 className="block group"
                 style={{ 
                   opacity: projectsInView ? 1 : 0,
                   transform: projectsInView ? 'translateY(0)' : 'translateY(20px)',
-                  transition: 'all 0.6s ease-out 0ms'
-                }}
-              >
-                <div className="card-3d bg-card border-2 border-dashed border-primary/30 rounded-2xl overflow-hidden h-full shadow-lg">
-                  <div className="relative h-48 bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-                    <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center animate-pulse">
-                      <span className="text-4xl">✨</span>
-                    </div>
-                  </div>
-                  <div className="p-5">
-                    <Badge className="mb-3 rounded-full bg-primary/20 text-primary hover:bg-primary/30">
-                      Novo Projeto
-                    </Badge>
-                    <h3 className="text-lg font-serif font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
-                      Adicione seu Projeto
-                    </h3>
-                    <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
-                      Sua ideia cultural merece ganhar vida! Submeta seu projeto e conecte-se com investidores interessados em transformar cultura em realidade.
-                    </p>
-                    <div className="flex items-center justify-between pt-3 border-t border-border">
-                      <span className="text-sm text-muted-foreground">Comece agora</span>
-                      <span className="text-sm font-medium text-primary flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-                        Submeter
-                        <ArrowRight className="w-4 h-4" />
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </Link>
-
-              {/* Card 2 - Inspire Others */}
-              <Link 
-                to="/exemplo/cultura-legado"
-                className="block group"
-                style={{ 
-                  opacity: projectsInView ? 1 : 0,
-                  transform: projectsInView ? 'translateY(0)' : 'translateY(20px)',
-                  transition: 'all 0.6s ease-out 100ms'
-                }}
-              >
-                <div className="card-3d bg-card border border-border/50 rounded-2xl overflow-hidden h-full shadow-lg">
-                  <div className="relative h-48 bg-gradient-to-br from-accent/20 to-primary/20 flex items-center justify-center">
-                    <div className="w-20 h-20 rounded-full bg-accent/20 flex items-center justify-center">
-                      <span className="text-4xl animate-bounce">🎭</span>
-                    </div>
-                  </div>
-                  <div className="p-5">
-                    <Badge variant="secondary" className="mb-3 rounded-full">
-                      Inspire
-                    </Badge>
-                    <h3 className="text-lg font-serif font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
-                      Sua Cultura, Seu Legado
-                    </h3>
-                    <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
-                      Cada projeto cultural conta uma história única. Seja parte dessa rede de criadores que estão transformando o cenário cultural brasileiro.
-                    </p>
-                    <div className="flex items-center justify-between pt-3 border-t border-border">
-                      <div className="flex -space-x-2">
-                        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-rose-400 to-rose-600 flex items-center justify-center border-2 border-card">
-                          <span className="text-xs text-white">🎨</span>
-                        </div>
-                        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center border-2 border-card">
-                          <span className="text-xs text-white">🎵</span>
-                        </div>
-                        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center border-2 border-card">
-                          <span className="text-xs text-white">📽️</span>
-                        </div>
-                      </div>
-                      <span className="text-sm font-medium text-primary flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        Ver Exemplo
-                        <ArrowRight className="w-4 h-4" />
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </Link>
-
-              {/* Card 3 - Connect */}
-              <Link 
-                to="/exemplo/investidores-aguardam"
-                className="block group"
-                style={{ 
-                  opacity: projectsInView ? 1 : 0,
-                  transform: projectsInView ? 'translateY(0)' : 'translateY(20px)',
-                  transition: 'all 0.6s ease-out 200ms'
-                }}
-              >
-                <div className="card-3d bg-card border border-border/50 rounded-2xl overflow-hidden h-full shadow-lg">
-                  <div className="relative h-48 bg-gradient-to-br from-primary/15 to-accent/25 flex items-center justify-center">
-                    <div className="relative">
-                      <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center">
-                        <span className="text-4xl">🤝</span>
-                      </div>
-                      <div className="absolute -top-2 -right-2 w-8 h-8 bg-accent rounded-full flex items-center justify-center animate-ping opacity-75">
-                        <span className="text-sm">💡</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="p-5">
-                    <Badge variant="outline" className="mb-3 rounded-full border-accent text-accent">
-                      Conecte-se
-                    </Badge>
-                    <h3 className="text-lg font-serif font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
-                      Investidores Aguardam
-                    </h3>
-                    <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
-                      Uma rede de investidores e patrocinadores interessados em apoiar projetos culturais está esperando por você. Faça a conexão acontecer!
-                    </p>
-                    <div className="flex items-center justify-between pt-3 border-t border-border">
-                      <div className="flex items-center gap-1">
-                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                        <span className="text-sm text-emerald-600 dark:text-emerald-400">Online agora</span>
-                      </div>
-                      <span className="text-sm font-medium text-primary flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        Ver Exemplo
-                        <ArrowRight className="w-4 h-4" />
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </Link>
-
-              {/* Card 4 - Success Stories */}
-              <Link 
-                to="/exemplo/historias-sucesso"
-                className="block group"
-                style={{ 
-                  opacity: projectsInView ? 1 : 0,
-                  transform: projectsInView ? 'translateY(0)' : 'translateY(20px)',
-                  transition: 'all 0.6s ease-out 300ms'
-                }}
-              >
-                <div className="card-3d bg-card border border-amber-500/30 rounded-2xl overflow-hidden h-full shadow-lg">
-                  <div className="relative h-48 bg-gradient-to-br from-amber-100 dark:from-amber-900/40 to-orange-100 dark:to-orange-900/40 flex items-center justify-center">
-                    <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg">
-                      <span className="text-4xl">🏆</span>
-                    </div>
-                  </div>
-                  <div className="p-5">
-                    <Badge className="mb-3 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 hover:bg-amber-200">
-                      Sucesso
-                    </Badge>
-                    <h3 className="text-lg font-serif font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
-                      Histórias de Sucesso
-                    </h3>
-                    <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
-                      Projetos que começaram aqui já impactaram milhares de pessoas. O próximo sucesso pode ser o seu!
-                    </p>
-                    <div className="flex items-center justify-between pt-3 border-t border-border">
-                      <div className="flex items-center gap-1">
-                        <span className="text-amber-500">★★★★★</span>
-                      </div>
-                      <span className="text-sm font-medium text-primary flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        Ver Exemplo
-                        <ArrowRight className="w-4 h-4" />
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </Link>
-
-              {/* Card 5 - Funding */}
-              <Link 
-                to="/exemplo/recursos-disponiveis"
-                className="block group"
-                style={{ 
-                  opacity: projectsInView ? 1 : 0,
-                  transform: projectsInView ? 'translateY(0)' : 'translateY(20px)',
-                  transition: 'all 0.6s ease-out 400ms'
-                }}
-              >
-                <div className="card-3d bg-card border border-emerald-500/30 rounded-2xl overflow-hidden h-full shadow-lg">
-                  <div className="relative h-48 bg-gradient-to-br from-emerald-100 dark:from-emerald-900/40 to-teal-100 dark:to-teal-900/40 flex items-center justify-center">
-                    <div className="w-20 h-20 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-lg">
-                      <span className="text-4xl animate-bounce">💰</span>
-                    </div>
-                  </div>
-                  <div className="p-5">
-                    <Badge className="mb-3 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-200">
-                      Financiamento
-                    </Badge>
-                    <h3 className="text-lg font-serif font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
-                      Recursos Disponíveis
-                    </h3>
-                    <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
-                      Conectamos projetos a recursos via Lei Rouanet, PROAC, e investimento direto. Encontre o modelo ideal para você.
-                    </p>
-                    <div className="flex items-center justify-between pt-3 border-t border-border">
-                      <div className="flex gap-2">
-                        <Badge variant="outline" className="text-xs">Rouanet</Badge>
-                        <Badge variant="outline" className="text-xs">PROAC</Badge>
-                      </div>
-                      <span className="text-sm font-medium text-primary flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        Ver Exemplo
-                        <ArrowRight className="w-4 h-4" />
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </Link>
-
-              {/* Card 6 - CTA */}
-              <Link 
-                to="/submit"
-                className="block group"
-                style={{ 
-                  opacity: projectsInView ? 1 : 0,
-                  transform: projectsInView ? 'translateY(0)' : 'translateY(20px)',
-                  transition: 'all 0.6s ease-out 500ms'
+                  transition: `all 0.6s ease-out ${Math.min(sortedProjects.length, displaySlots) * 100 + (displaySlots - Math.min(sortedProjects.length, displaySlots)) * 100}ms`
                 }}
               >
                 <div className="card-3d bg-gradient-to-br from-primary via-primary/95 to-accent border border-primary/50 rounded-2xl overflow-hidden h-full shadow-lg">
