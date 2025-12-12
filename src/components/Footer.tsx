@@ -31,11 +31,12 @@ export function Footer() {
       <div className="container mx-auto px-4 relative z-10">
         <div className="grid md:grid-cols-4 gap-6 mb-6">
           <div>
-            <Link to="/" className="block mb-3">
+            <Link to="/" className="inline-block mb-3">
               <img 
                 src={portobelloLogo} 
                 alt="Porto Bello Filmes" 
-                className="h-20 w-auto object-contain"
+                className="h-12 w-auto object-contain object-left"
+                style={{ margin: 0, padding: 0, display: 'block' }}
               />
             </Link>
             <p className="text-xs text-gray-400 leading-relaxed">
