@@ -273,7 +273,7 @@ export function ArtisticBackground() {
     <canvas
       ref={canvasRef}
       className="fixed inset-0 pointer-events-none"
-      style={{ opacity: 1, zIndex: 1 }}
+      style={{ opacity: 1, zIndex: 0 }}
     />
   );
 }
