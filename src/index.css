@@ -170,6 +170,41 @@
 }
 
 @layer components {
+  /* Solid card - no transparency */
+  .card-solid {
+    @apply relative;
+    background-color: hsl(var(--card)) !important;
+    isolation: isolate;
+  }
+
+  .card-solid::before {
+    content: '';
+    @apply absolute inset-0 rounded-2xl -z-10;
+    background-color: hsl(var(--card));
+  }
+
+  /* Glowing border on hover */
+  .card-glow {
+    @apply relative overflow-visible transition-all duration-500;
+  }
+
+  .card-glow::after {
+    content: '';
+    @apply absolute -inset-[1px] rounded-2xl opacity-0 transition-all duration-500 pointer-events-none -z-10;
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)), hsl(var(--primary)));
+    filter: blur(8px);
+  }
+
+  .card-glow:hover::after {
+    @apply opacity-60;
+  }
+
+  .card-glow:hover {
+    box-shadow: 
+      0 0 20px hsl(var(--accent) / 0.3),
+      0 0 40px hsl(var(--primary) / 0.2);
+  }
+
   /* Elegant glass card effect */
   .glass-card {
     @apply bg-white/70 backdrop-blur-md border border-white/50 shadow-lg;

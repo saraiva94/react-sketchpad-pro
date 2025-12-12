@@ -513,7 +513,7 @@ const PortoDeIdeiasPage = () => {
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {[1, 2, 3, 4, 5, 6].map((i) => (
-                <div key={i} className="animate-pulse bg-card rounded-2xl overflow-hidden border border-border shadow-2xl">
+                <div key={i} className="animate-pulse bg-card card-solid rounded-2xl overflow-hidden border border-border shadow-2xl">
                   <div className="h-48 bg-muted" />
                   <div className="p-5 space-y-3">
                     <div className="h-4 bg-muted rounded w-1/3" />
@@ -541,7 +541,7 @@ const PortoDeIdeiasPage = () => {
                       transition: `all 0.6s ease-out ${index * 100}ms`
                     }}
                   >
-                    <div className="card-3d bg-card border border-border rounded-2xl overflow-hidden shadow-2xl h-full">
+                    <div className="card-3d card-solid card-glow bg-card border border-border rounded-2xl overflow-visible shadow-2xl h-full">
                       {/* Image */}
                       <div className="relative overflow-hidden h-48">
                         {project.image_url ? (
@@ -656,7 +656,7 @@ const PortoDeIdeiasPage = () => {
                       transition: `all 0.6s ease-out ${cardIndex * 100}ms`
                     }}
                   >
-                    <div className={`card-3d bg-card ${example.borderClass || 'border border-border'} rounded-2xl overflow-hidden h-full shadow-2xl`}>
+                    <div className={`card-3d card-solid card-glow bg-card ${example.borderClass || 'border border-border'} rounded-2xl overflow-visible h-full shadow-2xl`}>
                       <div className={`relative h-48 bg-gradient-to-br ${example.gradientClass || 'from-accent/20 to-primary/20'} flex items-center justify-center`}>
                         <div className={`w-20 h-20 rounded-full ${example.emojiBgClass || 'bg-accent/20'} flex items-center justify-center`}>
                           <span className={`text-4xl ${example.emojiAnimate ? 'animate-pulse' : ''}`}>{example.emoji}</span>
@@ -698,7 +698,7 @@ const PortoDeIdeiasPage = () => {
                   transition: `all 0.6s ease-out ${Math.min(sortedProjects.length, displaySlots) * 100 + (displaySlots - Math.min(sortedProjects.length, displaySlots)) * 100}ms`
                 }}
               >
-                <div className="card-3d bg-gradient-to-br from-primary via-primary/95 to-accent border border-primary rounded-2xl overflow-hidden h-full shadow-2xl">
+                <div className="card-3d card-solid card-glow bg-gradient-to-br from-primary via-primary/95 to-accent border border-primary rounded-2xl overflow-visible h-full shadow-2xl">
                   <div className="relative h-48 flex items-center justify-center">
                     <div className="text-center text-primary-foreground">
                       <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
