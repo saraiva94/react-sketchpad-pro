@@ -67,12 +67,17 @@ const HomePage = () => {
   const [statsVisible, setStatsVisible] = useState(true);
   const [institutionalVideoUrl, setInstitutionalVideoUrl] = useState<string | null>(null);
   const [loadingVideo, setLoadingVideo] = useState(true);
+  
+  // Mídias da seção Ecossistema
+  const [ecossistemaProducerMedia, setEcossistemaProducerMedia] = useState<{ url: string; type: 'image' | 'video' } | null>(null);
+  const [ecossistemaInvestorMedia, setEcossistemaInvestorMedia] = useState<{ url: string; type: 'image' | 'video' } | null>(null);
 
   useEffect(() => {
     fetchFeaturedProjects();
     fetchStats();
     fetchStatsVisibility();
     fetchInstitutionalVideo();
+    fetchEcossistemaMedia();
 
     // Subscribe to settings changes for real-time sync
     const channel = supabase
@@ -90,6 +95,10 @@ const HomePage = () => {
             setStatsVisible(record.value.enabled);
           } else if (record.key === 'institutional_video') {
             setInstitutionalVideoUrl(record.value.url);
+          } else if (record.key === 'ecossistema_producer_media') {
+            setEcossistemaProducerMedia(record.value);
+          } else if (record.key === 'ecossistema_investor_media') {
+            setEcossistemaInvestorMedia(record.value);
           }
         }
       )
@@ -123,6 +132,28 @@ const HomePage = () => {
       setInstitutionalVideoUrl((data.value as { url: string }).url || null);
     }
     setLoadingVideo(false);
+  };
+
+  const fetchEcossistemaMedia = async () => {
+    const { data: producerData } = await supabase
+      .from("settings")
+      .select("value")
+      .eq("key", "ecossistema_producer_media")
+      .single();
+    
+    if (producerData) {
+      setEcossistemaProducerMedia(producerData.value as { url: string; type: 'image' | 'video' });
+    }
+
+    const { data: investorData } = await supabase
+      .from("settings")
+      .select("value")
+      .eq("key", "ecossistema_investor_media")
+      .single();
+    
+    if (investorData) {
+      setEcossistemaInvestorMedia(investorData.value as { url: string; type: 'image' | 'video' });
+    }
   };
 
   const fetchStats = async () => {
@@ -431,11 +462,29 @@ const HomePage = () => {
             </div>
             
             <div className={`relative transition-all duration-700 ${portoIdeiasInView ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`} style={{ transitionDelay: '500ms' }}>
-              <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl border border-border/30 bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center">
-                <div className="text-center p-8">
-                  <Film className="w-16 h-16 text-primary/40 mx-auto mb-4" />
-                  <p className="text-muted-foreground">Imagem ilustrativa</p>
-                </div>
+              <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl border border-border/30 bg-gradient-to-br from-primary/10 to-accent/10">
+                {ecossistemaProducerMedia?.url ? (
+                  ecossistemaProducerMedia.type === 'video' ? (
+                    <video
+                      src={ecossistemaProducerMedia.url}
+                      controls
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <img
+                      src={ecossistemaProducerMedia.url}
+                      alt="Para Produtores Culturais"
+                      className="w-full h-full object-cover"
+                    />
+                  )
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <div className="text-center p-8">
+                      <Film className="w-16 h-16 text-primary/40 mx-auto mb-4" />
+                      <p className="text-muted-foreground">Imagem ilustrativa</p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -443,11 +492,29 @@ const HomePage = () => {
           {/* Para Empreendedores e Investidores */}
           <div className={`grid lg:grid-cols-2 gap-12 items-center transition-all duration-700 ${portoIdeiasInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`} style={{ transitionDelay: '600ms' }}>
             <div className={`relative order-2 lg:order-1 transition-all duration-700 ${portoIdeiasInView ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`} style={{ transitionDelay: '700ms' }}>
-              <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl border border-border/30 bg-gradient-to-br from-emerald-500/10 to-primary/10 flex items-center justify-center">
-                <div className="text-center p-8">
-                  <Users className="w-16 h-16 text-emerald-500/40 mx-auto mb-4" />
-                  <p className="text-muted-foreground">Imagem ilustrativa</p>
-                </div>
+              <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl border border-border/30 bg-gradient-to-br from-emerald-500/10 to-primary/10">
+                {ecossistemaInvestorMedia?.url ? (
+                  ecossistemaInvestorMedia.type === 'video' ? (
+                    <video
+                      src={ecossistemaInvestorMedia.url}
+                      controls
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <img
+                      src={ecossistemaInvestorMedia.url}
+                      alt="Para Empreendedores e Investidores"
+                      className="w-full h-full object-cover"
+                    />
+                  )
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <div className="text-center p-8">
+                      <Users className="w-16 h-16 text-emerald-500/40 mx-auto mb-4" />
+                      <p className="text-muted-foreground">Imagem ilustrativa</p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
             
