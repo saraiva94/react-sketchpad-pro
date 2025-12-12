@@ -289,6 +289,7 @@
   .rainbow-card-glow {
     position: relative;
     overflow: visible;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
   }
 
   .rainbow-card-glow::before {
@@ -310,7 +311,7 @@
     animation: rainbow-shift 8s ease infinite;
     opacity: 0;
     z-index: -1;
-    transition: opacity 0.5s ease;
+    transition: opacity 0.3s ease;
   }
 
   .rainbow-card-glow:hover::before {
@@ -326,7 +327,7 @@
 
   /* Rainbow icon glow on hover */
   .rainbow-icon-glow {
-    transition: all 0.5s ease;
+    transition: filter 0.3s ease, transform 0.3s ease, color 0.3s ease;
   }
 
   .group:hover .rainbow-icon-glow {
@@ -339,7 +340,7 @@
 
   /* Rainbow text glow on card hover */
   .rainbow-text-glow {
-    transition: all 0.5s ease;
+    transition: text-shadow 0.3s ease, color 0.3s ease;
   }
 
   .group:hover .rainbow-text-glow {
