@@ -39,8 +39,8 @@ export function Footer() {
                 style={{ margin: 0, padding: 0, display: 'block' }}
               />
             </Link>
-            <p className="text-xs text-gray-400 leading-relaxed max-w-[120px]">
-              Uma plataforma criada para aproximar cultura e investimento.
+            <p className="text-xs text-gray-400 leading-relaxed">
+              Uma plataforma criada para<br />aproximar cultura e investimento.
             </p>
           </div>
           
