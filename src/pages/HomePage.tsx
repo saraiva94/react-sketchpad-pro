@@ -232,6 +232,40 @@ const HomePage = () => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
 
+  // Projetos de exemplo para exibir quando não há projetos reais em destaque
+  const exampleProjects = [
+    {
+      id: "exemplo-cultura-legado",
+      title: "Cultura como Legado",
+      synopsis: "Cada projeto cultural conta uma história única. Seja parte dessa rede de criadores que estão transformando o cenário cultural brasileiro.",
+      project_type: "Audiovisual",
+      image_url: null,
+      location: "Rio de Janeiro",
+      responsavel_nome: "Maria Silva",
+      valor_sugerido: 250000,
+      has_incentive_law: true,
+      incentive_law_details: "Lei Rouanet",
+      stage: "development" as const,
+      impacto_cultural: "Preservação e difusão da cultura brasileira através de narrativas audiovisuais.",
+      link: "/exemplo/cultura-legado",
+    },
+    {
+      id: "exemplo-historias-sucesso",
+      title: "Histórias de Sucesso",
+      synopsis: "Projetos que começaram aqui já impactaram milhares de pessoas. O próximo sucesso pode ser o seu!",
+      project_type: "Teatro",
+      image_url: null,
+      location: "São Paulo",
+      responsavel_nome: "João Santos",
+      valor_sugerido: 180000,
+      has_incentive_law: true,
+      incentive_law_details: "PROAC",
+      stage: "production" as const,
+      impacto_cultural: "Conexão entre arte e comunidade através de experiências teatrais transformadoras.",
+      link: "/exemplo/historias-sucesso",
+    },
+  ];
+
   const services = [
     { icon: Film, text: "Desenvolvimento de projetos culturais e audiovisuais", hoverColor: "group-hover:text-rose-500" },
     { icon: Settings, text: "Produção executiva e gestão de equipe", hoverColor: "group-hover:text-amber-500" },
@@ -382,16 +416,18 @@ const HomePage = () => {
                 </div>
               ))}
             </div>
-          ) : featuredProjects.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {featuredProjects.map((project, index) => {
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+              {/* Show real featured projects if available, otherwise show example projects */}
+              {(featuredProjects.length > 0 ? featuredProjects : exampleProjects).slice(0, 2).map((project, index) => {
                 const budgetInfo = getBudgetRange(project.valor_sugerido);
                 const stageInfo = getStageInfo(project.stage);
+                const isExample = !('categorias_tags' in project);
                 
                 return (
                   <Link 
                     key={project.id}
-                    to={`/project/${project.id}`}
+                    to={isExample ? (project as typeof exampleProjects[0]).link : `/project/${project.id}`}
                     className={`block group transition-all duration-700 ${portoIdeiasInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
                     style={{ transitionDelay: portoIdeiasInView ? `${(index + 1) * 150}ms` : '0ms' }}
                   >
@@ -407,6 +443,11 @@ const HomePage = () => {
                         ) : (
                           <div className="w-full h-full bg-gradient-to-br from-primary to-accent flex items-center justify-center min-h-[192px]">
                             <span className="text-4xl font-handwritten text-primary-foreground">{project.title.charAt(0)}</span>
+                          </div>
+                        )}
+                        {isExample && (
+                          <div className="absolute top-3 right-3">
+                            <Badge className="bg-amber-500 text-white text-xs">Exemplo</Badge>
                           </div>
                         )}
                       </div>
@@ -462,9 +503,9 @@ const HomePage = () => {
                         )}
 
                         {/* Impact Info */}
-                        {(project.impacto_cultural || project.impacto_social) && (
+                        {project.impacto_cultural && (
                           <div className="mb-3 text-xs text-muted-foreground line-clamp-2">
-                            {project.impacto_cultural || project.impacto_social}
+                            {project.impacto_cultural}
                           </div>
                         )}
 
@@ -481,7 +522,7 @@ const HomePage = () => {
                             </span>
                           </div>
                           <span className="text-sm font-medium text-primary flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            Ver Detalhes
+                            {isExample ? "Ver Exemplo" : "Ver Detalhes"}
                             <ArrowRight className="w-4 h-4" />
                           </span>
                         </div>
@@ -490,19 +531,6 @@ const HomePage = () => {
                   </Link>
                 );
               })}
-            </div>
-          ) : (
-            <div className={`text-center py-16 transition-all duration-700 ${portoIdeiasInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-              <Film className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-xl font-serif text-foreground mb-2">Projetos em Destaque</h3>
-              <p className="text-muted-foreground mb-6">
-                Em breve, projetos culturais selecionados estarão disponíveis aqui.
-              </p>
-              <Link to="/porto-de-ideias">
-                <Badge variant="outline" className="text-base px-6 py-2 cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors">
-                  Explorar Porto de Ideias
-                </Badge>
-              </Link>
             </div>
           )}
         </div>
