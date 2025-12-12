@@ -33,7 +33,14 @@ import {
   MessageSquare,
   Upload,
   Video,
-  X
+  X,
+  Facebook,
+  Instagram,
+  Linkedin,
+  Youtube,
+  Globe,
+  Settings2,
+  Save
 } from "lucide-react";
 
 interface Project {
@@ -103,7 +110,27 @@ const AdminDashboard = () => {
   // Porto de Ideias slots control
   const [portoIdeiasSlots, setPortoIdeiasSlots] = useState(5);
 
-  // Edit form state
+  // Social links control
+  interface SocialLink {
+    enabled: boolean;
+    url: string;
+  }
+  interface SocialLinksConfig {
+    facebook: SocialLink;
+    instagram: SocialLink;
+    linkedin: SocialLink;
+    youtube: SocialLink;
+    website: SocialLink;
+  }
+  const [socialLinks, setSocialLinks] = useState<SocialLinksConfig>({
+    facebook: { enabled: false, url: "" },
+    instagram: { enabled: true, url: "https://www.instagram.com/portobellofilmes/" },
+    linkedin: { enabled: false, url: "" },
+    youtube: { enabled: false, url: "" },
+    website: { enabled: false, url: "" }
+  });
+  const [savingSocialLinks, setSavingSocialLinks] = useState(false);
+
   const [editImageUrl, setEditImageUrl] = useState("");
   const [editBudget, setEditBudget] = useState("");
   const [editLocation, setEditLocation] = useState("");
@@ -175,8 +202,60 @@ const AdminDashboard = () => {
     if (slotsData) {
       setPortoIdeiasSlots((slotsData.value as { count: number }).count || 5);
     }
+
+    // Fetch social links
+    const { data: socialData } = await supabase
+      .from("settings")
+      .select("value")
+      .eq("key", "social_links")
+      .maybeSingle();
+    
+    if (socialData) {
+      setSocialLinks(socialData.value as unknown as SocialLinksConfig);
+    }
     
     setLoadingSettings(false);
+  };
+
+  const saveSocialLinks = async () => {
+    setSavingSocialLinks(true);
+    
+    const { data: existing } = await supabase
+      .from("settings")
+      .select("id")
+      .eq("key", "social_links")
+      .maybeSingle();
+    
+    const jsonValue = JSON.parse(JSON.stringify(socialLinks));
+    
+    let error;
+    if (existing) {
+      const result = await supabase
+        .from("settings")
+        .update({ value: jsonValue })
+        .eq("key", "social_links");
+      error = result.error;
+    } else {
+      const result = await supabase
+        .from("settings")
+        .insert([{ key: "social_links", value: jsonValue }]);
+      error = result.error;
+    }
+
+    if (error) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível salvar os links sociais.",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Salvo!",
+        description: "Links sociais atualizados com sucesso.",
+      });
+    }
+    
+    setSavingSocialLinks(false);
   };
 
   const toggleStatsVisibility = async () => {
@@ -1081,6 +1160,161 @@ const AdminDashboard = () => {
                     </div>
                   )}
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Controle e Edição - Links Sociais */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Settings2 className="w-5 h-5" />
+                  Controle e Edição - Links do Footer
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Gerencie os links das redes sociais exibidos no footer do site. Ative ou desative cada rede e configure o URL de redirecionamento.
+                </p>
+
+                {/* Instagram */}
+                <div className="p-4 border rounded-lg space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#833AB4] via-[#FD1D1D] to-[#F77737] flex items-center justify-center">
+                        <Instagram className="w-4 h-4 text-white" />
+                      </div>
+                      <span className="font-medium">Instagram</span>
+                    </div>
+                    <Switch
+                      checked={socialLinks.instagram.enabled}
+                      onCheckedChange={(checked) => 
+                        setSocialLinks(prev => ({ ...prev, instagram: { ...prev.instagram, enabled: checked } }))
+                      }
+                    />
+                  </div>
+                  {socialLinks.instagram.enabled && (
+                    <Input
+                      placeholder="https://www.instagram.com/seuusuario/"
+                      value={socialLinks.instagram.url}
+                      onChange={(e) => 
+                        setSocialLinks(prev => ({ ...prev, instagram: { ...prev.instagram, url: e.target.value } }))
+                      }
+                    />
+                  )}
+                </div>
+
+                {/* Facebook */}
+                <div className="p-4 border rounded-lg space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-[#1877F2] flex items-center justify-center">
+                        <Facebook className="w-4 h-4 text-white" />
+                      </div>
+                      <span className="font-medium">Facebook</span>
+                    </div>
+                    <Switch
+                      checked={socialLinks.facebook.enabled}
+                      onCheckedChange={(checked) => 
+                        setSocialLinks(prev => ({ ...prev, facebook: { ...prev.facebook, enabled: checked } }))
+                      }
+                    />
+                  </div>
+                  {socialLinks.facebook.enabled && (
+                    <Input
+                      placeholder="https://www.facebook.com/suapagina/"
+                      value={socialLinks.facebook.url}
+                      onChange={(e) => 
+                        setSocialLinks(prev => ({ ...prev, facebook: { ...prev.facebook, url: e.target.value } }))
+                      }
+                    />
+                  )}
+                </div>
+
+                {/* LinkedIn */}
+                <div className="p-4 border rounded-lg space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-[#0A66C2] flex items-center justify-center">
+                        <Linkedin className="w-4 h-4 text-white" />
+                      </div>
+                      <span className="font-medium">LinkedIn</span>
+                    </div>
+                    <Switch
+                      checked={socialLinks.linkedin.enabled}
+                      onCheckedChange={(checked) => 
+                        setSocialLinks(prev => ({ ...prev, linkedin: { ...prev.linkedin, enabled: checked } }))
+                      }
+                    />
+                  </div>
+                  {socialLinks.linkedin.enabled && (
+                    <Input
+                      placeholder="https://www.linkedin.com/company/suaempresa/"
+                      value={socialLinks.linkedin.url}
+                      onChange={(e) => 
+                        setSocialLinks(prev => ({ ...prev, linkedin: { ...prev.linkedin, url: e.target.value } }))
+                      }
+                    />
+                  )}
+                </div>
+
+                {/* YouTube */}
+                <div className="p-4 border rounded-lg space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-[#FF0000] flex items-center justify-center">
+                        <Youtube className="w-4 h-4 text-white" />
+                      </div>
+                      <span className="font-medium">YouTube</span>
+                    </div>
+                    <Switch
+                      checked={socialLinks.youtube.enabled}
+                      onCheckedChange={(checked) => 
+                        setSocialLinks(prev => ({ ...prev, youtube: { ...prev.youtube, enabled: checked } }))
+                      }
+                    />
+                  </div>
+                  {socialLinks.youtube.enabled && (
+                    <Input
+                      placeholder="https://www.youtube.com/@seucanal/"
+                      value={socialLinks.youtube.url}
+                      onChange={(e) => 
+                        setSocialLinks(prev => ({ ...prev, youtube: { ...prev.youtube, url: e.target.value } }))
+                      }
+                    />
+                  )}
+                </div>
+
+                {/* Site Pessoal */}
+                <div className="p-4 border rounded-lg space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center">
+                        <Globe className="w-4 h-4 text-white" />
+                      </div>
+                      <span className="font-medium">Site Pessoal</span>
+                    </div>
+                    <Switch
+                      checked={socialLinks.website.enabled}
+                      onCheckedChange={(checked) => 
+                        setSocialLinks(prev => ({ ...prev, website: { ...prev.website, enabled: checked } }))
+                      }
+                    />
+                  </div>
+                  {socialLinks.website.enabled && (
+                    <Input
+                      placeholder="https://www.seusite.com/"
+                      value={socialLinks.website.url}
+                      onChange={(e) => 
+                        setSocialLinks(prev => ({ ...prev, website: { ...prev.website, url: e.target.value } }))
+                      }
+                    />
+                  )}
+                </div>
+
+                <Button onClick={saveSocialLinks} disabled={savingSocialLinks} className="w-full">
+                  <Save className="w-4 h-4 mr-2" />
+                  {savingSocialLinks ? "Salvando..." : "Salvar Alterações"}
+                </Button>
               </CardContent>
             </Card>
 

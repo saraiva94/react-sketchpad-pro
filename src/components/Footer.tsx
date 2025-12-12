@@ -5,16 +5,32 @@ import {
   Facebook, 
   Instagram, 
   Linkedin,
-  Youtube
+  Youtube,
+  Globe
 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import portobelloLogo from "@/assets/portobello-footer-logo.png";
 
-// Social media links - configure your real links here
-const SOCIAL_LINKS = {
-  facebook: "https://facebook.com/portobellofilmes",
-  instagram: "https://instagram.com/portobellofilmes",
-  linkedin: "https://linkedin.com/company/portobellofilmes",
-  youtube: "https://youtube.com/@portobellofilmes"
+interface SocialLink {
+  enabled: boolean;
+  url: string;
+}
+
+interface SocialLinksConfig {
+  facebook: SocialLink;
+  instagram: SocialLink;
+  linkedin: SocialLink;
+  youtube: SocialLink;
+  website: SocialLink;
+}
+
+const DEFAULT_SOCIAL_LINKS: SocialLinksConfig = {
+  facebook: { enabled: false, url: "" },
+  instagram: { enabled: true, url: "https://www.instagram.com/portobellofilmes/" },
+  linkedin: { enabled: false, url: "" },
+  youtube: { enabled: false, url: "" },
+  website: { enabled: false, url: "" }
 };
 
 const CONTACT_INFO = {
@@ -23,6 +39,24 @@ const CONTACT_INFO = {
 };
 
 export function Footer() {
+  const [socialLinks, setSocialLinks] = useState<SocialLinksConfig>(DEFAULT_SOCIAL_LINKS);
+
+  useEffect(() => {
+    const fetchSocialLinks = async () => {
+      const { data } = await supabase
+        .from("settings")
+        .select("value")
+        .eq("key", "social_links")
+        .maybeSingle();
+      
+      if (data) {
+        setSocialLinks(data.value as unknown as SocialLinksConfig);
+      }
+    };
+    
+    fetchSocialLinks();
+  }, []);
+
   return (
     <footer className="py-8 relative overflow-hidden z-10 mt-8 bg-black">
       <div className="absolute inset-0 bg-black" />
@@ -74,42 +108,61 @@ export function Footer() {
               </li>
             </ul>
             <div className="flex gap-2 mt-3">
-              <a 
-                href={SOCIAL_LINKS.facebook} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="w-7 h-7 rounded-full bg-[#1877F2] flex items-center justify-center hover:opacity-80 transition-opacity"
-                aria-label="Facebook"
-              >
-                <Facebook className="w-3 h-3 text-white" />
-              </a>
-              <a 
-                href={SOCIAL_LINKS.instagram} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="w-7 h-7 rounded-full bg-gradient-to-br from-[#833AB4] via-[#FD1D1D] to-[#F77737] flex items-center justify-center hover:opacity-80 transition-opacity"
-                aria-label="Instagram"
-              >
-                <Instagram className="w-3 h-3 text-white" />
-              </a>
-              <a 
-                href={SOCIAL_LINKS.linkedin} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="w-7 h-7 rounded-full bg-[#0A66C2] flex items-center justify-center hover:opacity-80 transition-opacity"
-                aria-label="LinkedIn"
-              >
-                <Linkedin className="w-3 h-3 text-white" />
-              </a>
-              <a 
-                href={SOCIAL_LINKS.youtube} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="w-7 h-7 rounded-full bg-[#FF0000] flex items-center justify-center hover:opacity-80 transition-opacity"
-                aria-label="YouTube"
-              >
-                <Youtube className="w-3 h-3 text-white" />
-              </a>
+              {socialLinks.facebook.enabled && socialLinks.facebook.url && (
+                <a 
+                  href={socialLinks.facebook.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="w-7 h-7 rounded-full bg-[#1877F2] flex items-center justify-center hover:opacity-80 transition-opacity"
+                  aria-label="Facebook"
+                >
+                  <Facebook className="w-3 h-3 text-white" />
+                </a>
+              )}
+              {socialLinks.instagram.enabled && socialLinks.instagram.url && (
+                <a 
+                  href={socialLinks.instagram.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="w-7 h-7 rounded-full bg-gradient-to-br from-[#833AB4] via-[#FD1D1D] to-[#F77737] flex items-center justify-center hover:opacity-80 transition-opacity"
+                  aria-label="Instagram"
+                >
+                  <Instagram className="w-3 h-3 text-white" />
+                </a>
+              )}
+              {socialLinks.linkedin.enabled && socialLinks.linkedin.url && (
+                <a 
+                  href={socialLinks.linkedin.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="w-7 h-7 rounded-full bg-[#0A66C2] flex items-center justify-center hover:opacity-80 transition-opacity"
+                  aria-label="LinkedIn"
+                >
+                  <Linkedin className="w-3 h-3 text-white" />
+                </a>
+              )}
+              {socialLinks.youtube.enabled && socialLinks.youtube.url && (
+                <a 
+                  href={socialLinks.youtube.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="w-7 h-7 rounded-full bg-[#FF0000] flex items-center justify-center hover:opacity-80 transition-opacity"
+                  aria-label="YouTube"
+                >
+                  <Youtube className="w-3 h-3 text-white" />
+                </a>
+              )}
+              {socialLinks.website.enabled && socialLinks.website.url && (
+                <a 
+                  href={socialLinks.website.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="w-7 h-7 rounded-full bg-gray-600 flex items-center justify-center hover:opacity-80 transition-opacity"
+                  aria-label="Website"
+                >
+                  <Globe className="w-3 h-3 text-white" />
+                </a>
+              )}
             </div>
           </div>
         </div>
@@ -124,46 +177,87 @@ export function Footer() {
 
 // Social links component for forms
 export function SocialLinksDisplay() {
+  const [socialLinks, setSocialLinks] = useState<SocialLinksConfig>(DEFAULT_SOCIAL_LINKS);
+
+  useEffect(() => {
+    const fetchSocialLinks = async () => {
+      const { data } = await supabase
+        .from("settings")
+        .select("value")
+        .eq("key", "social_links")
+        .maybeSingle();
+      
+      if (data) {
+        setSocialLinks(data.value as unknown as SocialLinksConfig);
+      }
+    };
+    
+    fetchSocialLinks();
+  }, []);
+
+  const activeSocialLinks = Object.entries(socialLinks).filter(([_, link]) => link.enabled && link.url);
+
+  if (activeSocialLinks.length === 0) return null;
+
   return (
     <div className="flex gap-3 justify-center">
-      <a 
-        href={SOCIAL_LINKS.facebook} 
-        target="_blank" 
-        rel="noopener noreferrer"
-        className="w-10 h-10 rounded-full bg-[#1877F2] flex items-center justify-center hover:scale-110 transition-transform"
-        aria-label="Facebook"
-      >
-        <Facebook className="w-5 h-5 text-white" />
-      </a>
-      <a 
-        href={SOCIAL_LINKS.instagram} 
-        target="_blank" 
-        rel="noopener noreferrer"
-        className="w-10 h-10 rounded-full bg-gradient-to-br from-[#833AB4] via-[#FD1D1D] to-[#F77737] flex items-center justify-center hover:scale-110 transition-transform"
-        aria-label="Instagram"
-      >
-        <Instagram className="w-5 h-5 text-white" />
-      </a>
-      <a 
-        href={SOCIAL_LINKS.linkedin} 
-        target="_blank" 
-        rel="noopener noreferrer"
-        className="w-10 h-10 rounded-full bg-[#0A66C2] flex items-center justify-center hover:scale-110 transition-transform"
-        aria-label="LinkedIn"
-      >
-        <Linkedin className="w-5 h-5 text-white" />
-      </a>
-      <a 
-        href={SOCIAL_LINKS.youtube} 
-        target="_blank" 
-        rel="noopener noreferrer"
-        className="w-10 h-10 rounded-full bg-[#FF0000] flex items-center justify-center hover:scale-110 transition-transform"
-        aria-label="YouTube"
-      >
-        <Youtube className="w-5 h-5 text-white" />
-      </a>
+      {socialLinks.facebook.enabled && socialLinks.facebook.url && (
+        <a 
+          href={socialLinks.facebook.url} 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="w-10 h-10 rounded-full bg-[#1877F2] flex items-center justify-center hover:scale-110 transition-transform"
+          aria-label="Facebook"
+        >
+          <Facebook className="w-5 h-5 text-white" />
+        </a>
+      )}
+      {socialLinks.instagram.enabled && socialLinks.instagram.url && (
+        <a 
+          href={socialLinks.instagram.url} 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="w-10 h-10 rounded-full bg-gradient-to-br from-[#833AB4] via-[#FD1D1D] to-[#F77737] flex items-center justify-center hover:scale-110 transition-transform"
+          aria-label="Instagram"
+        >
+          <Instagram className="w-5 h-5 text-white" />
+        </a>
+      )}
+      {socialLinks.linkedin.enabled && socialLinks.linkedin.url && (
+        <a 
+          href={socialLinks.linkedin.url} 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="w-10 h-10 rounded-full bg-[#0A66C2] flex items-center justify-center hover:scale-110 transition-transform"
+          aria-label="LinkedIn"
+        >
+          <Linkedin className="w-5 h-5 text-white" />
+        </a>
+      )}
+      {socialLinks.youtube.enabled && socialLinks.youtube.url && (
+        <a 
+          href={socialLinks.youtube.url} 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="w-10 h-10 rounded-full bg-[#FF0000] flex items-center justify-center hover:scale-110 transition-transform"
+          aria-label="YouTube"
+        >
+          <Youtube className="w-5 h-5 text-white" />
+        </a>
+      )}
+      {socialLinks.website.enabled && socialLinks.website.url && (
+        <a 
+          href={socialLinks.website.url} 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center hover:scale-110 transition-transform"
+          aria-label="Website"
+        >
+          <Globe className="w-5 h-5 text-white" />
+        </a>
+      )}
     </div>
   );
 }
 
-export { SOCIAL_LINKS, CONTACT_INFO };
+export { CONTACT_INFO };
