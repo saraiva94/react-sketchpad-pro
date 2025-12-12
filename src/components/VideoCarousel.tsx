@@ -65,9 +65,9 @@ export function VideoCarousel({ videos, loading = false }: VideoCarouselProps) {
       translateX = position * 38;
       translateZ = -80;
     } else {
-      // Second level cards - smallest, overlapping with first level (same overlap rule)
+      // Second level cards - smallest, overlapping more with first level
       scale = 0.50;
-      translateX = position * 42; // Closer to overlap with level 1 cards
+      translateX = position * 35; // More inward to overlap ~1/3 with level 1 cards
       translateZ = -160;
     }
     
