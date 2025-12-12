@@ -8,6 +8,7 @@ import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
 import { AnimatedStats } from "@/components/AnimatedStats";
 import { ArtisticBackground } from "@/components/ArtisticBackground";
+import { FloatingOrbs } from "@/components/FloatingOrbs";
 import { ShinyText } from "@/components/ShinyText";
 import { useInView } from "@/hooks/useInView";
 import { 
@@ -224,14 +225,14 @@ const HomePage = () => {
       {/* Artistic Background Animation */}
       <ArtisticBackground />
       
+      {/* Floating Orbs */}
+      <FloatingOrbs />
+      
       {/* Navbar */}
       <Navbar currentPage="home" />
 
       {/* Hero Section - Institutional Video */}
       <section ref={heroRef} id="inicio" className="relative py-20 lg:py-32 overflow-hidden z-10">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-primary rounded-full blur-3xl opacity-10 animate-pulse" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent rounded-full blur-3xl opacity-10 animate-pulse" style={{ animationDelay: '1s' }} />
-        
         <div className="container mx-auto px-4 relative z-10">
           <div className={`max-w-5xl mx-auto transition-all duration-1000 ${heroInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
             {/* Video Container */}
@@ -383,9 +384,16 @@ const HomePage = () => {
             {services.map((service, index) => (
               <Card 
                 key={index} 
-                className={`group relative overflow-hidden card-solid bg-card border-border transition-all duration-500 hover:shadow-xl hover:-translate-y-1 ${servicosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
-                style={{ transitionDelay: servicosInView ? `${(index + 1) * 100}ms` : '0ms' }}
+                className={`group relative overflow-hidden card-solid bg-card border-border transition-all duration-500 hover:-translate-y-1 ${servicosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+                style={{ 
+                  transitionDelay: servicosInView ? `${(index + 1) * 100}ms` : '0ms',
+                }}
               >
+                {/* Hover glow effect */}
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10" />
+                  <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 via-accent/10 to-primary/20 blur-xl" />
+                </div>
                 
                 <div className="relative p-6 flex flex-col items-center text-center gap-4">
                   <div className="relative">
