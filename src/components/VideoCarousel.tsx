@@ -44,17 +44,35 @@ export function VideoCarousel({ videos, loading = false }: VideoCarouselProps) {
     if (absPosition > 2) {
       return {
         opacity: 0,
-        transform: `translateX(${position * 100}%) scale(0.5)`,
+        transform: `translateX(${position * 100}%) scale(0.4)`,
         zIndex: 0,
         visibility: 'hidden' as const,
       };
     }
 
-    // Scale and position based on distance from center
-    const scale = position === 0 ? 1 : 0.65 - absPosition * 0.08;
-    const translateX = position * 42; // Percentage offset
-    const translateZ = -absPosition * 150; // Depth effect
-    const opacity = position === 0 ? 1 : 0.6 - absPosition * 0.15;
+    // Scale hierarchy: center=1, first level=0.75, second level=0.55
+    let scale: number;
+    let translateX: number;
+    let translateZ: number;
+    
+    if (position === 0) {
+      scale = 1;
+      translateX = 0;
+      translateZ = 0;
+    } else if (absPosition === 1) {
+      // First level cards - medium size, more overlap with center
+      scale = 0.75;
+      // Position so that half of visible edge is outside center card
+      translateX = position * 55;
+      translateZ = -100;
+    } else {
+      // Second level cards - smallest
+      scale = 0.55;
+      translateX = position * 85;
+      translateZ = -200;
+    }
+    
+    const opacity = position === 0 ? 1 : absPosition === 1 ? 0.7 : 0.5;
     const zIndex = 10 - absPosition;
 
     return {
@@ -157,24 +175,24 @@ export function VideoCarousel({ videos, loading = false }: VideoCarouselProps) {
         })}
       </div>
 
-      {/* Navigation arrows */}
+      {/* Navigation arrows - positioned outside the main card */}
       <Button
         variant="outline"
         size="icon"
         onClick={goToPrevious}
-        className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-30 w-12 h-12 rounded-full bg-background/90 backdrop-blur-sm border-border hover:bg-background hover:scale-110 transition-all duration-300 shadow-lg"
+        className="absolute -left-6 md:-left-16 top-1/2 -translate-y-1/2 z-30 w-10 h-10 md:w-12 md:h-12 rounded-full bg-background/90 backdrop-blur-sm border-border hover:bg-background hover:scale-110 transition-all duration-300 shadow-lg"
         aria-label="Vídeo anterior"
       >
-        <ChevronLeft className="w-6 h-6" />
+        <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
       </Button>
       <Button
         variant="outline"
         size="icon"
         onClick={goToNext}
-        className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-30 w-12 h-12 rounded-full bg-background/90 backdrop-blur-sm border-border hover:bg-background hover:scale-110 transition-all duration-300 shadow-lg"
+        className="absolute -right-6 md:-right-16 top-1/2 -translate-y-1/2 z-30 w-10 h-10 md:w-12 md:h-12 rounded-full bg-background/90 backdrop-blur-sm border-border hover:bg-background hover:scale-110 transition-all duration-300 shadow-lg"
         aria-label="Próximo vídeo"
       >
-        <ChevronRight className="w-6 h-6" />
+        <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
       </Button>
 
       {/* Dot indicators */}
