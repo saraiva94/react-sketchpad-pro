@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Lightbulb } from "lucide-react";
 import portobelloLogo from "@/assets/portobello-logo.png";
 
 interface NavbarProps {
@@ -12,10 +12,9 @@ interface NavbarProps {
 }
 
 const sections = [
-  { id: "inicio", label: "Início" },
   { id: "sobre", label: "Quem Somos" },
   { id: "servicos", label: "Serviços" },
-  { id: "porto-de-ideias", label: "Porto de Ideias" },
+  { id: "porto-de-ideias", label: "Ecossistema" },
 ];
 
 export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProps) {
@@ -48,6 +47,16 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
         {/* Desktop Navigation - Section Links */}
         {showNav && currentPage === "home" && (
           <nav className="hidden md:flex items-center gap-1">
+            {/* Porto de Ideias Link with Lightbulb */}
+            <Link
+              to="/porto-de-ideias"
+              className="group flex items-center gap-2 px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors duration-200 rounded-lg hover:bg-accent/10"
+            >
+              <Lightbulb className="w-4 h-4 text-muted-foreground group-hover:text-yellow-400 group-hover:fill-yellow-400/50 group-hover:drop-shadow-[0_0_8px_rgba(250,204,21,0.6)] transition-all duration-300" />
+              Porto de Ideias
+            </Link>
+            
+            {/* Section Links */}
             {sections.map((section) => (
               <button
                 key={section.id}
@@ -111,6 +120,16 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
                   {/* Section Links for Mobile */}
                   {currentPage === "home" && (
                     <div className="flex flex-col gap-2 mt-4 border-t border-border pt-4">
+                      {/* Porto de Ideias Link with Lightbulb */}
+                      <Link
+                        to="/porto-de-ideias"
+                        onClick={handleNavClick}
+                        className="group flex items-center gap-2 px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent/10 rounded-lg transition-colors"
+                      >
+                        <Lightbulb className="w-4 h-4 text-muted-foreground group-hover:text-yellow-400 group-hover:fill-yellow-400/50 transition-all duration-300" />
+                        Porto de Ideias
+                      </Link>
+                      
                       {sections.map((section) => (
                         <button
                           key={section.id}
