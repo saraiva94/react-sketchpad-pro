@@ -10,6 +10,7 @@ import { AnimatedStats } from "@/components/AnimatedStats";
 import { ArtisticBackground } from "@/components/ArtisticBackground";
 import { FloatingOrbs } from "@/components/FloatingOrbs";
 import { ShinyText } from "@/components/ShinyText";
+import { VideoCarousel } from "@/components/VideoCarousel";
 import { useInView } from "@/hooks/useInView";
 import { 
   Users, 
@@ -56,6 +57,11 @@ interface ProjectStats {
   successRate: number;
 }
 
+interface VideoItem {
+  url: string;
+  title?: string;
+}
+
 const HomePage = () => {
   const [featuredProjects, setFeaturedProjects] = useState<Project[]>([]);
   const [loadingProjects, setLoadingProjects] = useState(true);
@@ -66,7 +72,7 @@ const HomePage = () => {
     successRate: 0
   });
   const [statsVisible, setStatsVisible] = useState(true);
-  const [institutionalVideoUrl, setInstitutionalVideoUrl] = useState<string | null>(null);
+  const [institutionalVideos, setInstitutionalVideos] = useState<VideoItem[]>([]);
   const [loadingVideo, setLoadingVideo] = useState(true);
   
   // Mídias da seção Ecossistema
@@ -94,8 +100,8 @@ const HomePage = () => {
           const record = payload.new as { key: string; value: any };
           if (record.key === 'stats_visible') {
             setStatsVisible(record.value.enabled);
-          } else if (record.key === 'institutional_video') {
-            setInstitutionalVideoUrl(record.value.url);
+          } else if (record.key === 'institutional_videos') {
+            setInstitutionalVideos(record.value.videos || []);
           } else if (record.key === 'ecossistema_producer_media') {
             setEcossistemaProducerMedia(record.value);
           } else if (record.key === 'ecossistema_investor_media') {
@@ -126,11 +132,12 @@ const HomePage = () => {
     const { data } = await supabase
       .from("settings")
       .select("value")
-      .eq("key", "institutional_video")
-      .single();
+      .eq("key", "institutional_videos")
+      .maybeSingle();
     
     if (data) {
-      setInstitutionalVideoUrl((data.value as { url: string }).url || null);
+      const videos = (data.value as unknown as { videos: VideoItem[] }).videos || [];
+      setInstitutionalVideos(videos);
     }
     setLoadingVideo(false);
   };
@@ -231,56 +238,11 @@ const HomePage = () => {
       {/* Navbar */}
       <Navbar currentPage="home" />
 
-      {/* Hero Section - Institutional Video */}
+      {/* Hero Section - Institutional Video Carousel */}
       <section ref={heroRef} id="inicio" className="relative py-20 lg:py-32 overflow-hidden z-10">
         <div className="container mx-auto px-4 relative z-10">
           <div className={`max-w-5xl mx-auto transition-all duration-1000 ${heroInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-            {/* Video Container */}
-            <div className="relative aspect-video rounded-3xl overflow-hidden shadow-2xl border border-border bg-card card-solid">
-              {loadingVideo ? (
-                <>
-                  <Skeleton className="absolute inset-0 w-full h-full" />
-                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 bg-card">
-                    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center border border-border shadow-lg animate-pulse">
-                      <Play className="w-12 h-12 text-primary-foreground ml-1" />
-                    </div>
-                    <div className="text-center">
-                      <p className="text-muted-foreground text-sm">Carregando...</p>
-                    </div>
-                  </div>
-                </>
-              ) : institutionalVideoUrl ? (
-                <video
-                  src={institutionalVideoUrl}
-                  controls
-                  className="w-full h-full object-cover"
-                  poster=""
-                >
-                  Seu navegador não suporta vídeos.
-                </video>
-              ) : (
-                <>
-                  <div className="absolute inset-0 bg-card" />
-                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-6">
-                    <div className="relative">
-                      <div className="absolute inset-0 w-28 h-28 rounded-full bg-primary blur-xl opacity-20 animate-pulse" />
-                      <div className="relative w-24 h-24 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center border border-border shadow-2xl group hover:scale-105 transition-transform duration-300">
-                        <Play className="w-12 h-12 text-primary-foreground ml-1 group-hover:scale-110 transition-transform" />
-                      </div>
-                    </div>
-                    <div className="text-center space-y-2">
-                      <p className="text-foreground font-medium text-lg">Vídeo Institucional</p>
-                      <p className="text-muted-foreground text-sm">Em breve</p>
-                    </div>
-                  </div>
-                  {/* Decorative corners */}
-                  <div className="absolute top-4 left-4 w-12 h-12 border-l-2 border-t-2 border-primary rounded-tl-lg" />
-                  <div className="absolute top-4 right-4 w-12 h-12 border-r-2 border-t-2 border-primary rounded-tr-lg" />
-                  <div className="absolute bottom-4 left-4 w-12 h-12 border-l-2 border-b-2 border-primary rounded-bl-lg" />
-                  <div className="absolute bottom-4 right-4 w-12 h-12 border-r-2 border-b-2 border-primary rounded-br-lg" />
-                </>
-              )}
-            </div>
+            <VideoCarousel videos={institutionalVideos} loading={loadingVideo} />
           </div>
         </div>
       </section>
