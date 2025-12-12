@@ -46,37 +46,35 @@ export function VideoCarousel({ videos, loading = false }: VideoCarouselProps) {
         opacity: 0,
         transform: `translateX(${position * 100}%) scale(0.5)`,
         zIndex: 0,
-        display: 'none' as const,
+        visibility: 'hidden' as const,
       };
     }
 
     // Scale and position based on distance from center
-    const scale = 1 - absPosition * 0.15;
-    const translateX = position * 28; // Percentage offset
-    const translateZ = -absPosition * 100; // Depth effect
-    const opacity = 1 - absPosition * 0.3;
+    const scale = position === 0 ? 1 : 0.65 - absPosition * 0.08;
+    const translateX = position * 42; // Percentage offset
+    const translateZ = -absPosition * 150; // Depth effect
+    const opacity = position === 0 ? 1 : 0.6 - absPosition * 0.15;
     const zIndex = 10 - absPosition;
 
     return {
       opacity,
       transform: `translateX(${translateX}%) translateZ(${translateZ}px) scale(${scale})`,
       zIndex,
-      display: 'block' as const,
+      visibility: 'visible' as const,
     };
   };
 
   if (loading) {
     return (
-      <div className="relative w-full py-8">
-        <div className="relative h-[400px] flex items-center justify-center" style={{ perspective: '1000px' }}>
-          <div className="w-full max-w-2xl aspect-video rounded-2xl overflow-hidden shadow-2xl border border-border bg-card">
-            <Skeleton className="absolute inset-0 w-full h-full" />
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-card">
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center animate-pulse">
-                <Play className="w-10 h-10 text-primary-foreground ml-1" />
-              </div>
-              <p className="text-muted-foreground text-sm">Carregando...</p>
-            </div>
+      <div className="relative aspect-video rounded-3xl overflow-hidden shadow-2xl border border-border bg-card card-solid">
+        <Skeleton className="absolute inset-0 w-full h-full" />
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 bg-card">
+          <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center border border-border shadow-lg animate-pulse">
+            <Play className="w-12 h-12 text-primary-foreground ml-1" />
+          </div>
+          <div className="text-center">
+            <p className="text-muted-foreground text-sm">Carregando...</p>
           </div>
         </div>
       </div>
@@ -84,11 +82,11 @@ export function VideoCarousel({ videos, loading = false }: VideoCarouselProps) {
   }
 
   return (
-    <div className="relative w-full py-8">
+    <div className="relative w-full">
       {/* Carousel Container with 3D perspective */}
       <div 
-        className="relative h-[350px] md:h-[400px] lg:h-[450px] flex items-center justify-center overflow-visible"
-        style={{ perspective: '1200px', perspectiveOrigin: '50% 50%' }}
+        className="relative aspect-video flex items-center justify-center overflow-visible"
+        style={{ perspective: '1500px', perspectiveOrigin: '50% 50%' }}
       >
         {/* Cards */}
         {Array.from({ length: totalSlots }).map((_, index) => {
@@ -96,23 +94,23 @@ export function VideoCarousel({ videos, loading = false }: VideoCarouselProps) {
           const styles = getCardStyles(position);
           const video = videos[index];
           const hasVideo = video && video.url;
+          const isCenter = position === 0;
 
           return (
             <div
               key={index}
-              className="absolute left-1/2 top-1/2 w-[280px] md:w-[400px] lg:w-[500px] aspect-video transition-all duration-500 ease-out cursor-pointer"
+              className="absolute inset-0 transition-all duration-500 ease-out"
               style={{
                 ...styles,
-                marginLeft: '-140px',
-                marginTop: '-78.75px',
                 transformStyle: 'preserve-3d',
+                cursor: isCenter ? 'default' : 'pointer',
               }}
-              onClick={() => setCurrentIndex(index)}
+              onClick={() => !isCenter && setCurrentIndex(index)}
             >
-              <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-2xl border border-border bg-card">
+              <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-2xl border border-border bg-card card-solid">
                 {hasVideo ? (
                   <>
-                    {position === 0 ? (
+                    {isCenter ? (
                       <video
                         src={video.url}
                         controls
@@ -127,46 +125,30 @@ export function VideoCarousel({ videos, loading = false }: VideoCarouselProps) {
                           className="w-full h-full object-cover"
                           muted
                         />
-                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                          <div className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30">
-                            <Play className="w-7 h-7 text-white ml-0.5" />
+                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary/80 to-accent/80 flex items-center justify-center border border-border shadow-xl backdrop-blur-sm">
+                            <Play className="w-10 h-10 text-primary-foreground ml-1" />
                           </div>
                         </div>
                       </>
                     )}
-                    {/* Video title bar (placeholder style) */}
-                    <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent">
-                      <div className="h-2 bg-white/30 rounded w-1/3 mb-2" />
-                      <div className="h-2 bg-white/20 rounded w-2/3 mb-1" />
-                      <div className="h-2 bg-white/20 rounded w-1/2" />
-                    </div>
                   </>
                 ) : (
                   <>
                     <div className="absolute inset-0 bg-card" />
-                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
                       <div className="relative">
-                        <div className="absolute inset-0 w-20 h-20 rounded-full bg-primary/20 blur-xl animate-pulse" />
-                        <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-primary/80 to-accent/80 flex items-center justify-center border border-border shadow-xl">
-                          <Play className="w-8 h-8 text-primary-foreground ml-0.5" />
+                        <div className="absolute inset-0 w-28 h-28 rounded-full bg-primary blur-xl opacity-20 animate-pulse" />
+                        <div className="relative w-24 h-24 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center border border-border shadow-2xl group hover:scale-105 transition-transform duration-300">
+                          <Play className="w-12 h-12 text-primary-foreground ml-1" />
                         </div>
-                      </div>
-                      <div className="text-center space-y-1">
-                        <p className="text-foreground font-medium text-sm">Vídeo {index + 1}</p>
-                        <p className="text-muted-foreground text-xs">Em breve</p>
                       </div>
                     </div>
                     {/* Decorative corners */}
-                    <div className="absolute top-3 left-3 w-8 h-8 border-l-2 border-t-2 border-primary/50 rounded-tl-lg" />
-                    <div className="absolute top-3 right-3 w-8 h-8 border-r-2 border-t-2 border-primary/50 rounded-tr-lg" />
-                    <div className="absolute bottom-3 left-3 w-8 h-8 border-l-2 border-b-2 border-primary/50 rounded-bl-lg" />
-                    <div className="absolute bottom-3 right-3 w-8 h-8 border-r-2 border-b-2 border-primary/50 rounded-br-lg" />
-                    {/* Placeholder title bars */}
-                    <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/60 to-transparent">
-                      <div className="h-2 bg-white/20 rounded w-1/3 mb-2" />
-                      <div className="h-2 bg-white/15 rounded w-2/3 mb-1" />
-                      <div className="h-2 bg-white/15 rounded w-1/2" />
-                    </div>
+                    <div className="absolute top-4 left-4 w-12 h-12 border-l-2 border-t-2 border-primary rounded-tl-lg" />
+                    <div className="absolute top-4 right-4 w-12 h-12 border-r-2 border-t-2 border-primary rounded-tr-lg" />
+                    <div className="absolute bottom-4 left-4 w-12 h-12 border-l-2 border-b-2 border-primary rounded-bl-lg" />
+                    <div className="absolute bottom-4 right-4 w-12 h-12 border-r-2 border-b-2 border-primary rounded-br-lg" />
                   </>
                 )}
               </div>
@@ -196,7 +178,7 @@ export function VideoCarousel({ videos, loading = false }: VideoCarouselProps) {
       </Button>
 
       {/* Dot indicators */}
-      <div className="flex justify-center gap-2 mt-6">
+      <div className="flex justify-center gap-2 mt-8">
         {Array.from({ length: totalSlots }).map((_, index) => (
           <button
             key={index}
