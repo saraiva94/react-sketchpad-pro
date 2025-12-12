@@ -479,11 +479,17 @@ const HomePage = () => {
                 return (
                   <div 
                     key={project.id}
-                    className={`grid lg:grid-cols-2 gap-12 items-center transition-all duration-700 ${portoIdeiasInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
-                    style={{ transitionDelay: portoIdeiasInView ? `${(index + 1) * 200}ms` : '0ms' }}
+                    className="grid lg:grid-cols-2 gap-12 items-center"
                   >
-                    {/* Texto */}
-                    <div className={`space-y-8 ${isEven ? 'lg:order-2' : ''}`}>
+                    {/* Texto - entra do lado oposto à imagem */}
+                    <div 
+                      className={`space-y-8 ${isEven ? 'lg:order-2' : ''} transition-all duration-1000 ease-out ${
+                        portoIdeiasInView 
+                          ? 'opacity-100 translate-x-0' 
+                          : `opacity-0 ${isEven ? 'translate-x-20' : '-translate-x-20'}`
+                      }`}
+                      style={{ transitionDelay: portoIdeiasInView ? `${(index + 1) * 250}ms` : '0ms' }}
+                    >
                       <div>
                         <ShinyText delay={400 + index * 100}>
                           <h3 className="text-2xl md:text-3xl font-serif font-semibold text-foreground mb-2">
@@ -499,8 +505,12 @@ const HomePage = () => {
                         {projectHighlights.map((item, itemIndex) => (
                           <div 
                             key={item.title} 
-                            className={`flex gap-4 items-start transition-all duration-500 ${portoIdeiasInView ? 'opacity-100 translate-x-0' : `opacity-0 ${isEven ? 'translate-x-10' : '-translate-x-10'}`}`}
-                            style={{ transitionDelay: portoIdeiasInView ? `${(index * 3 + itemIndex + 3) * 100}ms` : '0ms' }}
+                            className={`flex gap-4 items-start transition-all duration-700 ease-out ${
+                              portoIdeiasInView 
+                                ? 'opacity-100 translate-x-0' 
+                                : `opacity-0 ${isEven ? 'translate-x-16' : '-translate-x-16'}`
+                            }`}
+                            style={{ transitionDelay: portoIdeiasInView ? `${(index * 250) + (itemIndex * 150) + 400}ms` : '0ms' }}
                           >
                             <div className={`${item.color} w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg`}>
                               <item.icon className="w-6 h-6 text-primary-foreground" />
@@ -516,19 +526,27 @@ const HomePage = () => {
                       {/* Link para ver mais */}
                       <Link 
                         to={isExample ? (project as typeof exampleProjects[0]).link : `/project/${project.id}`}
-                        className="inline-flex items-center gap-2 text-primary font-medium hover:gap-3 transition-all group"
+                        className={`inline-flex items-center gap-2 text-primary font-medium hover:gap-3 transition-all group duration-700 ${
+                          portoIdeiasInView ? 'opacity-100 translate-x-0' : `opacity-0 ${isEven ? 'translate-x-12' : '-translate-x-12'}`
+                        }`}
+                        style={{ transitionDelay: portoIdeiasInView ? `${(index * 250) + 850}ms` : '0ms' }}
                       >
                         {isExample ? "Ver Exemplo Completo" : "Ver Projeto Completo"}
                         <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                       </Link>
                     </div>
                     
-                    {/* Thumbnail */}
+                    {/* Thumbnail - entra do lado oposto ao texto */}
                     <Link 
                       to={isExample ? (project as typeof exampleProjects[0]).link : `/project/${project.id}`}
-                      className={`relative group ${isEven ? 'lg:order-1' : ''}`}
+                      className={`relative group ${isEven ? 'lg:order-1' : ''} transition-all duration-1000 ease-out ${
+                        portoIdeiasInView 
+                          ? 'opacity-100 translate-x-0' 
+                          : `opacity-0 ${isEven ? '-translate-x-20' : 'translate-x-20'}`
+                      }`}
+                      style={{ transitionDelay: portoIdeiasInView ? `${(index + 1) * 250}ms` : '0ms' }}
                     >
-                      <div className={`relative transition-all duration-700 ${portoIdeiasInView ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`} style={{ transitionDelay: `${(index + 2) * 200}ms` }}>
+                      <div className="relative">
                         <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl border border-border card-solid bg-card group-hover:shadow-3xl transition-shadow duration-300">
                           {project.image_url ? (
                             <img
