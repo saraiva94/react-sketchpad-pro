@@ -75,6 +75,7 @@ const HomePage = () => {
   const [statsVisible, setStatsVisible] = useState(true);
   const [institutionalVideos, setInstitutionalVideos] = useState<VideoItem[]>([]);
   const [loadingVideo, setLoadingVideo] = useState(true);
+  const [carouselDisplayCount, setCarouselDisplayCount] = useState<1 | 3 | 5>(5);
 
   useEffect(() => {
     fetchFeaturedProjects();
@@ -98,6 +99,11 @@ const HomePage = () => {
             setStatsVisible(record.value.enabled);
           } else if (record.key === 'institutional_videos') {
             setInstitutionalVideos(record.value.videos || []);
+          } else if (record.key === 'carousel_display_count') {
+            const count = record.value.count;
+            if (count === 1 || count === 3 || count === 5) {
+              setCarouselDisplayCount(count);
+            }
           }
         }
       )
@@ -148,6 +154,21 @@ const HomePage = () => {
       const videos = (data.value as unknown as { videos: VideoItem[] }).videos || [];
       setInstitutionalVideos(videos);
     }
+    
+    // Fetch carousel display count
+    const { data: carouselData } = await supabase
+      .from("settings")
+      .select("value")
+      .eq("key", "carousel_display_count")
+      .maybeSingle();
+    
+    if (carouselData) {
+      const count = (carouselData.value as { count: number }).count;
+      if (count === 1 || count === 3 || count === 5) {
+        setCarouselDisplayCount(count);
+      }
+    }
+    
     setLoadingVideo(false);
   };
 
@@ -319,7 +340,7 @@ const HomePage = () => {
       <section ref={heroRef} id="inicio" className="relative py-20 lg:py-32 overflow-hidden z-10">
         <div className="container mx-auto px-4 relative z-10">
           <div className={`max-w-5xl mx-auto transition-all duration-1000 ${heroInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-            <VideoCarousel videos={institutionalVideos} loading={loadingVideo} />
+            <VideoCarousel videos={institutionalVideos} loading={loadingVideo} displayCount={carouselDisplayCount} />
           </div>
         </div>
       </section>

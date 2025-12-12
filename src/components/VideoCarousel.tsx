@@ -11,13 +11,14 @@ interface VideoItem {
 interface VideoCarouselProps {
   videos: VideoItem[];
   loading?: boolean;
+  displayCount?: 1 | 3 | 5;
 }
 
-export function VideoCarousel({ videos, loading = false }: VideoCarouselProps) {
+export function VideoCarousel({ videos, loading = false, displayCount = 5 }: VideoCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Always show 5 slots for the carousel effect
-  const totalSlots = 5;
+  // Use displayCount for how many cards to show
+  const totalSlots = displayCount;
   
   const goToPrevious = () => {
     setCurrentIndex((prev) => (prev === 0 ? totalSlots - 1 : prev - 1));
@@ -36,10 +37,58 @@ export function VideoCarousel({ videos, loading = false }: VideoCarouselProps) {
     return diff;
   };
 
-  // Get styles based on position
+  // Get styles based on position and displayCount
   const getCardStyles = (position: number) => {
     const absPosition = Math.abs(position);
     
+    // For single video mode, hide all but center
+    if (displayCount === 1) {
+      if (position !== 0) {
+        return {
+          opacity: 0,
+          transform: `translateX(${position * 100}%) scale(0.4)`,
+          zIndex: 0,
+          visibility: 'hidden' as const,
+        };
+      }
+      return {
+        opacity: 1,
+        transform: `translateX(0) translateZ(0) scale(1)`,
+        zIndex: 10,
+        visibility: 'visible' as const,
+      };
+    }
+    
+    // For 3 video mode, only show center and immediate neighbors
+    if (displayCount === 3) {
+      if (absPosition > 1) {
+        return {
+          opacity: 0,
+          transform: `translateX(${position * 100}%) scale(0.4)`,
+          zIndex: 0,
+          visibility: 'hidden' as const,
+        };
+      }
+      
+      if (position === 0) {
+        return {
+          opacity: 1,
+          transform: `translateX(0) translateZ(0) scale(1)`,
+          zIndex: 10,
+          visibility: 'visible' as const,
+        };
+      }
+      
+      // First level cards for 3-video mode
+      return {
+        opacity: 1,
+        transform: `translateX(${position * 45}%) translateZ(-80px) scale(0.75)`,
+        zIndex: 9,
+        visibility: 'visible' as const,
+      };
+    }
+    
+    // Full 5 video mode (default)
     // Only show cards within 2 positions of center
     if (absPosition > 2) {
       return {
@@ -67,11 +116,11 @@ export function VideoCarousel({ videos, loading = false }: VideoCarouselProps) {
     } else {
       // Second level cards - smallest, overlapping more with first level
       scale = 0.50;
-      translateX = position * 35; // More inward to overlap ~1/3 with level 1 cards
+      translateX = position * 35;
       translateZ = -160;
     }
     
-    const opacity = 1; // All cards fully opaque
+    const opacity = 1;
     const zIndex = 10 - absPosition;
 
     return {
@@ -81,7 +130,6 @@ export function VideoCarousel({ videos, loading = false }: VideoCarouselProps) {
       visibility: 'visible' as const,
     };
   };
-
   if (loading) {
     return (
       <div className="relative aspect-video rounded-3xl overflow-hidden shadow-2xl border border-border bg-card card-solid">
@@ -174,41 +222,47 @@ export function VideoCarousel({ videos, loading = false }: VideoCarouselProps) {
         })}
       </div>
 
-      {/* Navigation arrows - positioned outside the main card */}
-      <Button
-        variant="outline"
-        size="icon"
-        onClick={goToPrevious}
-        className="absolute -left-6 md:-left-16 top-1/2 -translate-y-1/2 z-30 w-10 h-10 md:w-12 md:h-12 rounded-full bg-background/90 backdrop-blur-sm border-border hover:bg-background hover:scale-110 transition-all duration-300 shadow-lg"
-        aria-label="Vídeo anterior"
-      >
-        <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
-      </Button>
-      <Button
-        variant="outline"
-        size="icon"
-        onClick={goToNext}
-        className="absolute -right-6 md:-right-16 top-1/2 -translate-y-1/2 z-30 w-10 h-10 md:w-12 md:h-12 rounded-full bg-background/90 backdrop-blur-sm border-border hover:bg-background hover:scale-110 transition-all duration-300 shadow-lg"
-        aria-label="Próximo vídeo"
-      >
-        <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
-      </Button>
+      {/* Navigation arrows - only show if more than 1 video */}
+      {displayCount > 1 && (
+        <>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={goToPrevious}
+            className="absolute -left-6 md:-left-16 top-1/2 -translate-y-1/2 z-30 w-10 h-10 md:w-12 md:h-12 rounded-full bg-background/90 backdrop-blur-sm border-border hover:bg-background hover:scale-110 transition-all duration-300 shadow-lg"
+            aria-label="Vídeo anterior"
+          >
+            <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={goToNext}
+            className="absolute -right-6 md:-right-16 top-1/2 -translate-y-1/2 z-30 w-10 h-10 md:w-12 md:h-12 rounded-full bg-background/90 backdrop-blur-sm border-border hover:bg-background hover:scale-110 transition-all duration-300 shadow-lg"
+            aria-label="Próximo vídeo"
+          >
+            <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
+          </Button>
+        </>
+      )}
 
-      {/* Dot indicators */}
-      <div className="flex justify-center gap-2 mt-8">
-        {Array.from({ length: totalSlots }).map((_, index) => (
-          <button
-            key={index}
-            onClick={() => setCurrentIndex(index)}
-            className={`h-2 rounded-full transition-all duration-300 ${
-              index === currentIndex
-                ? "w-6 bg-primary"
-                : "w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50"
-            }`}
-            aria-label={`Ir para vídeo ${index + 1}`}
-          />
-        ))}
-      </div>
+      {/* Dot indicators - only show if more than 1 video */}
+      {displayCount > 1 && (
+        <div className="flex justify-center gap-2 mt-8">
+          {Array.from({ length: totalSlots }).map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentIndex(index)}
+              className={`h-2 rounded-full transition-all duration-300 ${
+                index === currentIndex
+                  ? "w-6 bg-primary"
+                  : "w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50"
+              }`}
+              aria-label={`Ir para vídeo ${index + 1}`}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
