@@ -30,16 +30,15 @@ export function Footer() {
       
       <div className="container mx-auto px-4 relative z-10">
         <div className="grid md:grid-cols-4 gap-6 mb-6">
-          <div>
-            <Link to="/" className="inline-block mb-2">
+          <div className="flex flex-col items-start">
+            <Link to="/" className="mb-2">
               <img 
                 src={portobelloLogo} 
                 alt="Porto Bello Filmes" 
-                className="h-10 w-auto object-contain object-left"
-                style={{ margin: 0, padding: 0, display: 'block' }}
+                className="h-10 w-auto object-contain"
               />
             </Link>
-            <p className="text-xs text-gray-400 leading-relaxed">
+            <p className="text-xs text-gray-400 leading-relaxed text-left">
               Uma plataforma criada para<br />aproximar cultura e investimento.
             </p>
           </div>
