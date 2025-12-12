@@ -50,7 +50,7 @@ export function VideoCarousel({ videos, loading = false }: VideoCarouselProps) {
       };
     }
 
-    // Scale hierarchy: center=1, first level=0.75, second level=0.55
+    // Scale hierarchy: center=1, first level=0.70, second level=0.50
     let scale: number;
     let translateX: number;
     let translateZ: number;
@@ -60,19 +60,18 @@ export function VideoCarousel({ videos, loading = false }: VideoCarouselProps) {
       translateX = 0;
       translateZ = 0;
     } else if (absPosition === 1) {
-      // First level cards - medium size, more overlap with center
-      scale = 0.75;
-      // Position so that half of visible edge is outside center card
-      translateX = position * 55;
-      translateZ = -100;
+      // First level cards - medium size, overlapping with center and outer cards
+      scale = 0.70;
+      translateX = position * 38; // Closer to center for overlap effect
+      translateZ = -80;
     } else {
-      // Second level cards - smallest
-      scale = 0.55;
-      translateX = position * 85;
-      translateZ = -200;
+      // Second level cards (outer) - smallest, positioned at edges
+      scale = 0.50;
+      translateX = position * 58; // Further out to be fully visible
+      translateZ = -160;
     }
     
-    const opacity = position === 0 ? 1 : absPosition === 1 ? 0.7 : 0.5;
+    const opacity = position === 0 ? 1 : absPosition === 1 ? 0.85 : 0.65;
     const zIndex = 10 - absPosition;
 
     return {
