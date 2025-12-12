@@ -61,26 +61,26 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
 
   return (
     <header className="border-b border-border/50 bg-card/80 backdrop-blur-md sticky top-0 z-50 shadow-soft">
-      <div className="container mx-auto px-4 h-20 flex items-center justify-between">
+      <div className="container mx-auto px-2 sm:px-4 h-20 flex items-center justify-between">
         {/* Logo - Homepage */}
-        <Link to="/" className="flex items-center group -ml-12">
+        <Link to="/" className="flex items-center group -ml-6 sm:-ml-12">
           <img 
             src={portobelloLogo} 
             alt="Porto Bello" 
-            className="h-44 md:h-52 w-auto group-hover:scale-105 transition-transform duration-300"
+            className="h-32 sm:h-44 md:h-52 w-auto group-hover:scale-105 transition-transform duration-300"
           />
         </Link>
 
         {/* Desktop Navigation - Section Links */}
         {showNav && currentPage === "home" && (
           <nav className="hidden md:flex items-center gap-1">
-            {/* Porto de Ideias Link with Lightbulb - Destacado */}
+            {/* Porto de Ideias Link with Lightbulb - Destacado com Rainbow */}
             <Link
               to="/porto-de-ideias"
-              className="group flex items-center gap-2.5 px-5 py-2.5 text-base font-semibold text-foreground transition-all duration-300 rounded-xl hover:bg-yellow-400/15 hover:shadow-[0_0_25px_rgba(250,204,21,0.4)] border border-yellow-400/20 hover:border-yellow-400/50"
+              className="group flex items-center gap-2 px-4 py-2 text-base font-semibold transition-all duration-300 rounded-xl rainbow-border-glow rainbow-text-hover"
             >
               <Lightbulb className="w-5 h-5 text-yellow-400 group-hover:fill-yellow-400 group-hover:drop-shadow-[0_0_16px_rgba(250,204,21,1)] group-hover:scale-125 transition-all duration-300" />
-              <span className="text-yellow-100 group-hover:text-yellow-300 group-hover:tracking-wide transition-all duration-300">Porto de Ideias</span>
+              <span className="text-foreground">Porto de Ideias</span>
             </Link>
             
             {/* Section Links */}
@@ -155,14 +155,14 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
                   {/* Section Links for Mobile */}
                   {currentPage === "home" && (
                     <div className="flex flex-col gap-2 mt-4 border-t border-border pt-4">
-                      {/* Porto de Ideias Link with Lightbulb - Destacado Mobile */}
+                      {/* Porto de Ideias Link with Lightbulb - Rainbow Mobile */}
                       <Link
                         to="/porto-de-ideias"
                         onClick={handleNavClick}
-                        className="group flex items-center gap-2.5 px-4 py-3 text-base font-semibold text-yellow-100 hover:text-yellow-300 hover:bg-yellow-400/15 rounded-xl transition-all duration-300 border border-yellow-400/20 hover:border-yellow-400/50"
+                        className="group flex items-center gap-2 px-4 py-3 text-base font-semibold transition-all duration-300 rounded-xl rainbow-border-glow rainbow-text-hover"
                       >
                         <Lightbulb className="w-5 h-5 text-yellow-400 group-hover:fill-yellow-400 group-hover:drop-shadow-[0_0_16px_rgba(250,204,21,1)] transition-all duration-300" />
-                        Porto de Ideias
+                        <span className="text-foreground">Porto de Ideias</span>
                       </Link>
                       
                       {sections.map((section) => (
