@@ -203,14 +203,14 @@ const HomePage = () => {
   };
 
   const services = [
-    { icon: Film, text: "Desenvolvimento de projetos culturais e audiovisuais", hoverColor: "group-hover:text-rose-500", glowColor: "group-hover:bg-rose-500/20", borderColor: "group-hover:border-rose-500/30" },
-    { icon: Settings, text: "Produção executiva e gestão de equipe", hoverColor: "group-hover:text-amber-500", glowColor: "group-hover:bg-amber-500/20", borderColor: "group-hover:border-amber-500/30" },
-    { icon: FileText, text: "Estruturação para leis de incentivo", hoverColor: "group-hover:text-emerald-500", glowColor: "group-hover:bg-emerald-500/20", borderColor: "group-hover:border-emerald-500/30" },
-    { icon: DollarSign, text: "Captação de recursos públicos e privados", hoverColor: "group-hover:text-cyan-500", glowColor: "group-hover:bg-cyan-500/20", borderColor: "group-hover:border-cyan-500/30" },
-    { icon: Calendar, text: "Produção de obras audiovisuais e eventos culturais", hoverColor: "group-hover:text-violet-500", glowColor: "group-hover:bg-violet-500/20", borderColor: "group-hover:border-violet-500/30" },
-    { icon: Megaphone, text: "Distribuição, comunicação e lançamento de projetos", hoverColor: "group-hover:text-pink-500", glowColor: "group-hover:bg-pink-500/20", borderColor: "group-hover:border-pink-500/30" },
-    { icon: Mic, text: "Criação e roteirização de videocasts e podcasts", hoverColor: "group-hover:text-orange-500", glowColor: "group-hover:bg-orange-500/20", borderColor: "group-hover:border-orange-500/30" },
-    { icon: HelpCircle, text: "Consultoria para formatação de projetos", hoverColor: "group-hover:text-sky-500", glowColor: "group-hover:bg-sky-500/20", borderColor: "group-hover:border-sky-500/30" },
+    { icon: Film, text: "Desenvolvimento de projetos culturais e audiovisuais", hoverColor: "group-hover:text-rose-500" },
+    { icon: Settings, text: "Produção executiva e gestão de equipe", hoverColor: "group-hover:text-amber-500" },
+    { icon: FileText, text: "Estruturação para leis de incentivo", hoverColor: "group-hover:text-emerald-500" },
+    { icon: DollarSign, text: "Captação de recursos públicos e privados", hoverColor: "group-hover:text-cyan-500" },
+    { icon: Calendar, text: "Produção de obras audiovisuais e eventos culturais", hoverColor: "group-hover:text-violet-500" },
+    { icon: Megaphone, text: "Distribuição, comunicação e lançamento de projetos", hoverColor: "group-hover:text-pink-500" },
+    { icon: Mic, text: "Criação e roteirização de videocasts e podcasts", hoverColor: "group-hover:text-orange-500" },
+    { icon: HelpCircle, text: "Consultoria para formatação de projetos", hoverColor: "group-hover:text-sky-500" },
   ];
 
   // Intersection observers for animations
@@ -229,22 +229,21 @@ const HomePage = () => {
 
       {/* Hero Section - Institutional Video */}
       <section ref={heroRef} id="inicio" className="relative py-20 lg:py-32 overflow-hidden z-10">
-        {/* Semi-transparent background to let particles show through */}
-        <div className="absolute inset-0 bg-background/60" />
-        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+        {/* Solid background */}
+        <div className="absolute inset-0 bg-background" />
+        <div className="absolute top-20 left-10 w-72 h-72 bg-primary rounded-full blur-3xl opacity-10 animate-pulse" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent rounded-full blur-3xl opacity-10 animate-pulse" style={{ animationDelay: '1s' }} />
         
         <div className="container mx-auto px-4 relative z-10">
           <div className={`max-w-5xl mx-auto transition-all duration-1000 ${heroInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
             {/* Video Container */}
-            <div className="relative aspect-video rounded-3xl overflow-hidden shadow-2xl border border-border/30 bg-gradient-to-br from-card via-card/95 to-card/90">
+            <div className="relative aspect-video rounded-3xl overflow-hidden shadow-2xl border border-border bg-card card-solid">
               {loadingVideo ? (
                 <>
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
                   <Skeleton className="absolute inset-0 w-full h-full" />
-                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-6">
-                    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center backdrop-blur-sm border border-primary/20 shadow-lg animate-pulse">
-                      <Play className="w-12 h-12 text-primary ml-1" />
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 bg-card">
+                    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center border border-border shadow-lg animate-pulse">
+                      <Play className="w-12 h-12 text-primary-foreground ml-1" />
                     </div>
                     <div className="text-center">
                       <p className="text-muted-foreground text-sm">Carregando...</p>
@@ -262,24 +261,24 @@ const HomePage = () => {
                 </video>
               ) : (
                 <>
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
+                  <div className="absolute inset-0 bg-card" />
                   <div className="absolute inset-0 flex flex-col items-center justify-center gap-6">
                     <div className="relative">
-                      <div className="absolute inset-0 w-28 h-28 rounded-full bg-primary/20 blur-xl animate-pulse" />
-                      <div className="relative w-24 h-24 rounded-full bg-gradient-to-br from-primary/40 to-primary/20 flex items-center justify-center backdrop-blur-sm border border-primary/30 shadow-2xl group hover:scale-105 transition-transform duration-300">
-                        <Play className="w-12 h-12 text-primary ml-1 group-hover:scale-110 transition-transform" />
+                      <div className="absolute inset-0 w-28 h-28 rounded-full bg-primary blur-xl opacity-20 animate-pulse" />
+                      <div className="relative w-24 h-24 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center border border-border shadow-2xl group hover:scale-105 transition-transform duration-300">
+                        <Play className="w-12 h-12 text-primary-foreground ml-1 group-hover:scale-110 transition-transform" />
                       </div>
                     </div>
                     <div className="text-center space-y-2">
-                      <p className="text-foreground/80 font-medium text-lg">Vídeo Institucional</p>
+                      <p className="text-foreground font-medium text-lg">Vídeo Institucional</p>
                       <p className="text-muted-foreground text-sm">Em breve</p>
                     </div>
                   </div>
                   {/* Decorative corners */}
-                  <div className="absolute top-4 left-4 w-12 h-12 border-l-2 border-t-2 border-primary/30 rounded-tl-lg" />
-                  <div className="absolute top-4 right-4 w-12 h-12 border-r-2 border-t-2 border-primary/30 rounded-tr-lg" />
-                  <div className="absolute bottom-4 left-4 w-12 h-12 border-l-2 border-b-2 border-primary/30 rounded-bl-lg" />
-                  <div className="absolute bottom-4 right-4 w-12 h-12 border-r-2 border-b-2 border-primary/30 rounded-br-lg" />
+                  <div className="absolute top-4 left-4 w-12 h-12 border-l-2 border-t-2 border-primary rounded-tl-lg" />
+                  <div className="absolute top-4 right-4 w-12 h-12 border-r-2 border-t-2 border-primary rounded-tr-lg" />
+                  <div className="absolute bottom-4 left-4 w-12 h-12 border-l-2 border-b-2 border-primary rounded-bl-lg" />
+                  <div className="absolute bottom-4 right-4 w-12 h-12 border-r-2 border-b-2 border-primary rounded-br-lg" />
                 </>
               )}
             </div>
@@ -320,7 +319,7 @@ const HomePage = () => {
 
       {/* Quem Somos Section */}
       <section ref={quemSomosRef} id="sobre" className="py-20 lg:py-28 relative z-10">
-        <div className="absolute inset-0 bg-background/80 backdrop-blur-[1px]" />
+        <div className="absolute inset-0 bg-background" />
         <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent" />
         
         <div className="container mx-auto px-4 relative z-10">
@@ -348,7 +347,7 @@ const HomePage = () => {
 
           <div className="grid md:grid-cols-3 gap-8">
             {[
-              { icon: Lightbulb, title: "Para Criadores", description: "Histórias potentes merecem estrutura sólida. Atuamos no desenvolvimento, organização e produção para tirar ideias do papel e transformá-las em obras realizadas.", color: "from-primary to-primary/80", textColor: "text-primary-foreground" },
+              { icon: Lightbulb, title: "Para Criadores", description: "Histórias potentes merecem estrutura sólida. Atuamos no desenvolvimento, organização e produção para tirar ideias do papel e transformá-las em obras realizadas.", color: "from-primary to-accent", textColor: "text-primary-foreground" },
               { icon: Target, title: "Para Investidores", description: "Projetos prontos para investimento, com identidade, força de execução e potencial de retorno institucional.", color: "from-emerald-500 to-emerald-600", textColor: "text-white" },
               { icon: Heart, title: "Para a Sociedade", description: "Criamos experiências que atravessam. Conectamos narrativas a quem importa: as pessoas.", color: "from-violet-500 to-violet-600", textColor: "text-white" },
             ].map((card, index) => (
@@ -372,7 +371,7 @@ const HomePage = () => {
 
       {/* Nossos Serviços Section */}
       <section ref={servicosRef} className="py-20 lg:py-28 relative z-10">
-        <div className="absolute inset-0 bg-background/80 backdrop-blur-[1px]" />
+        <div className="absolute inset-0 bg-background" />
         <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent" />
         
         <div className="container mx-auto px-4 relative z-10">
@@ -388,17 +387,13 @@ const HomePage = () => {
             {services.map((service, index) => (
               <Card 
                 key={index} 
-                className={`group relative overflow-hidden card-solid bg-card border-border ${service.borderColor} transition-all duration-500 hover:shadow-xl hover:-translate-y-1 ${servicosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+                className={`group relative overflow-hidden card-solid bg-card border-border transition-all duration-500 hover:shadow-xl hover:-translate-y-1 ${servicosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
                 style={{ transitionDelay: servicosInView ? `${(index + 1) * 100}ms` : '0ms' }}
               >
-                {/* Hover gradient overlay */}
-                <div className={`absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-transparent ${service.glowColor} opacity-0 group-hover:opacity-30 transition-opacity duration-500`} />
                 
                 <div className="relative p-6 flex flex-col items-center text-center gap-4">
                   <div className="relative">
-                    {/* Glow effect */}
-                    <div className={`absolute inset-0 w-16 h-16 bg-primary/20 ${service.glowColor} rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
-                    <div className={`relative w-16 h-16 bg-gradient-to-br from-primary/20 via-primary/15 to-primary/10 rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 border border-primary/10 ${service.borderColor} shadow-lg`}>
+                    <div className={`relative w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 border border-border shadow-lg`}>
                       <service.icon className={`w-8 h-8 text-primary ${service.hoverColor} transition-colors duration-300`} />
                     </div>
                   </div>
@@ -414,7 +409,7 @@ const HomePage = () => {
 
       {/* Porto de Ideias Section - Ecossistema de Conexões */}
       <section ref={portoIdeiasRef} id="porto-de-ideias" className="py-20 lg:py-28 relative overflow-hidden z-10">
-        <div className="absolute inset-0 bg-background/80 backdrop-blur-[1px]" />
+        <div className="absolute inset-0 bg-background" />
         
         <div className="container mx-auto px-4 relative">
           {/* Header */}
@@ -478,10 +473,10 @@ const HomePage = () => {
                     />
                   )
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center">
+                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary to-accent">
                     <div className="text-center p-8">
-                      <Film className="w-16 h-16 text-primary/40 mx-auto mb-4" />
-                      <p className="text-muted-foreground">Imagem ilustrativa</p>
+                      <Film className="w-16 h-16 text-primary-foreground mx-auto mb-4" />
+                      <p className="text-primary-foreground">Imagem ilustrativa</p>
                     </div>
                   </div>
                 )}
@@ -508,10 +503,10 @@ const HomePage = () => {
                     />
                   )
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center">
+                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-emerald-500 to-teal-500">
                     <div className="text-center p-8">
-                      <Users className="w-16 h-16 text-emerald-500/40 mx-auto mb-4" />
-                      <p className="text-muted-foreground">Imagem ilustrativa</p>
+                      <Users className="w-16 h-16 text-white mx-auto mb-4" />
+                      <p className="text-white">Imagem ilustrativa</p>
                     </div>
                   </div>
                 )}
