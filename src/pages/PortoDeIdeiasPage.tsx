@@ -704,27 +704,27 @@ const PortoDeIdeiasPage = () => {
                   transition: `all 0.6s ease-out ${Math.min(sortedProjects.length, displaySlots) * 100 + (displaySlots - Math.min(sortedProjects.length, displaySlots)) * 100}ms`
                 }}
               >
-                <div className="card-solid bg-gradient-to-br from-primary via-primary to-accent border border-primary rounded-2xl overflow-hidden h-full shadow-2xl hover:-translate-y-2 transition-transform duration-300">
+                <div className="card-rainbow border-0 rounded-2xl overflow-hidden h-full shadow-2xl">
                   <div className="relative h-48 flex items-center justify-center">
-                    <div className="text-center text-primary-foreground">
-                      <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
-                        <Anchor className="w-8 h-8" />
+                    <div className="text-center text-white">
+                      <div className="w-20 h-20 rounded-full bg-white/30 backdrop-blur-sm flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:rotate-12 transition-all duration-500 shadow-lg">
+                        <Anchor className="w-10 h-10 drop-shadow-lg" />
                       </div>
-                      <div className="text-lg font-medium">Quer enviar seu projeto?</div>
+                      <div className="text-xl font-semibold drop-shadow-lg">Quer enviar seu projeto?</div>
                     </div>
                   </div>
-                  <div className="p-5 text-primary-foreground">
-                    <h3 className="text-lg font-serif font-bold mb-2">
+                  <div className="p-6 bg-black/20 backdrop-blur-sm">
+                    <h3 className="text-xl font-serif font-bold mb-3 text-white drop-shadow">
                       Faça Parte da Nossa Rede
                     </h3>
-                    <p className="text-sm text-primary-foreground/80 line-clamp-3 mb-4">
+                    <p className="text-sm text-white/90 line-clamp-3 mb-4">
                       Se você tem uma ideia potente e bem estruturada, envie para nossa curadoria.
                     </p>
-                    <div className="flex items-center justify-between pt-3 border-t border-white/20">
-                      <span className="text-sm text-primary-foreground/70">Gratuito</span>
-                      <span className="text-sm font-medium flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                    <div className="flex items-center justify-between pt-4 border-t border-white/30">
+                      <span className="text-sm text-white/80 font-medium">✨ Gratuito</span>
+                      <span className="text-sm font-bold flex items-center gap-2 group-hover:translate-x-2 transition-transform text-white">
                         Enviar projeto
-                        <ArrowRight className="w-4 h-4" />
+                        <ArrowRight className="w-5 h-5" />
                       </span>
                     </div>
                   </div>
