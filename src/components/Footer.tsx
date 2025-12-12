@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import { 
-  Anchor, 
   Mail, 
   Phone, 
   Facebook, 
@@ -8,6 +7,7 @@ import {
   Linkedin,
   Youtube
 } from "lucide-react";
+import portobelloLogo from "@/assets/portobello-logo.png";
 
 // Social media links - configure your real links here
 const SOCIAL_LINKS = {
@@ -31,12 +31,13 @@ export function Footer() {
       <div className="container mx-auto px-4 relative z-10">
         <div className="grid md:grid-cols-4 gap-6 mb-6">
           <div>
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                <Anchor className="w-4 h-4 text-primary-foreground" />
-              </div>
-              <h3 className="font-handwritten text-xl font-bold text-white">Porto Bello</h3>
-            </div>
+            <Link to="/" className="block mb-3">
+              <img 
+                src={portobelloLogo} 
+                alt="Porto Bello Filmes" 
+                className="h-20 w-auto object-contain"
+              />
+            </Link>
             <p className="text-xs text-gray-400 leading-relaxed">
               Uma plataforma criada para aproximar cultura e investimento.
             </p>
