@@ -546,16 +546,6 @@ const HomePage = () => {
               </div>
             </div>
           </div>
-
-          {/* CTA Button */}
-          <div className={`text-center mt-16 transition-all duration-700 ${portoIdeiasInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`} style={{ transitionDelay: '900ms' }}>
-            <Link 
-              to="/porto-de-ideias" 
-              className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 text-lg font-medium"
-            >
-              Explorar Porto de Ideias
-            </Link>
-          </div>
         </div>
       </section>
 
