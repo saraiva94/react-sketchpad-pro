@@ -537,7 +537,7 @@ const HomePage = () => {
                 <div className="relative p-6 flex flex-col items-center text-center gap-4">
                   <div className="relative">
                     <div className={`relative w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 border border-border shadow-lg`}>
-                      <service.icon className={`w-8 h-8 text-primary ${service.hoverColor} transition-colors duration-300`} />
+                      <service.icon className={`w-8 h-8 text-black ${service.hoverColor} transition-colors duration-300`} />
                     </div>
                   </div>
                   <p className="text-sm text-muted-foreground leading-relaxed group-hover:text-foreground/80 transition-colors duration-300 font-medium">
