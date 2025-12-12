@@ -229,8 +229,6 @@ const HomePage = () => {
 
       {/* Hero Section - Institutional Video */}
       <section ref={heroRef} id="inicio" className="relative py-20 lg:py-32 overflow-hidden z-10">
-        {/* Solid background */}
-        <div className="absolute inset-0 bg-background" />
         <div className="absolute top-20 left-10 w-72 h-72 bg-primary rounded-full blur-3xl opacity-10 animate-pulse" />
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent rounded-full blur-3xl opacity-10 animate-pulse" style={{ animationDelay: '1s' }} />
         
@@ -319,7 +317,6 @@ const HomePage = () => {
 
       {/* Quem Somos Section */}
       <section ref={quemSomosRef} id="sobre" className="py-20 lg:py-28 relative z-10">
-        <div className="absolute inset-0 bg-background" />
         <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent" />
         
         <div className="container mx-auto px-4 relative z-10">
@@ -371,7 +368,6 @@ const HomePage = () => {
 
       {/* Nossos Serviços Section */}
       <section ref={servicosRef} className="py-20 lg:py-28 relative z-10">
-        <div className="absolute inset-0 bg-background" />
         <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent" />
         
         <div className="container mx-auto px-4 relative z-10">
@@ -409,7 +405,6 @@ const HomePage = () => {
 
       {/* Porto de Ideias Section - Ecossistema de Conexões */}
       <section ref={portoIdeiasRef} id="porto-de-ideias" className="py-20 lg:py-28 relative overflow-hidden z-10">
-        <div className="absolute inset-0 bg-background" />
         
         <div className="container mx-auto px-4 relative">
           {/* Header */}
