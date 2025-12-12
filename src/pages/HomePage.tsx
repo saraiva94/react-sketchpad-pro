@@ -638,24 +638,18 @@ const HomePage = () => {
             {services.map((service, index) => (
               <Card 
                 key={index} 
-                className={`group relative overflow-hidden card-solid bg-card border-border transition-all duration-500 hover:-translate-y-1 ${servicosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+                className={`group relative overflow-visible card-solid bg-card border-border transition-all duration-500 hover:-translate-y-1 rainbow-card-glow ${servicosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
                 style={{ 
                   transitionDelay: servicosInView ? `${(index + 1) * 100}ms` : '0ms',
                 }}
               >
-                {/* Hover glow effect */}
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10" />
-                  <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 via-accent/10 to-primary/20 blur-xl" />
-                </div>
-                
                 <div className="relative p-6 flex flex-col items-center text-center gap-4">
                   <div className="relative">
                     <div className={`relative w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 border border-border shadow-lg`}>
-                      <service.icon className={`w-8 h-8 text-black ${service.hoverColor} transition-colors duration-300`} />
+                      <service.icon className={`w-8 h-8 text-black rainbow-icon-glow ${service.hoverColor} transition-colors duration-300`} />
                     </div>
                   </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed group-hover:text-foreground/80 transition-colors duration-300 font-medium">
+                  <p className="text-sm text-muted-foreground leading-relaxed group-hover:text-foreground/80 transition-colors duration-300 font-medium rainbow-text-glow">
                     {service.text}
                   </p>
                 </div>

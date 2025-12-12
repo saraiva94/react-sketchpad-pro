@@ -285,6 +285,71 @@
     background-clip: text;
   }
 
+  /* Rainbow card glow effect for service cards */
+  .rainbow-card-glow {
+    position: relative;
+    overflow: visible;
+  }
+
+  .rainbow-card-glow::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    background: linear-gradient(
+      90deg,
+      hsl(0 85% 60% / 0.3),
+      hsl(45 85% 60% / 0.3),
+      hsl(120 70% 50% / 0.3),
+      hsl(200 80% 55% / 0.3),
+      hsl(280 70% 50% / 0.3),
+      hsl(330 85% 60% / 0.3),
+      hsl(0 85% 60% / 0.3)
+    );
+    background-size: 400% 400%;
+    animation: rainbow-shift 8s ease infinite;
+    opacity: 0;
+    z-index: -1;
+    transition: opacity 0.5s ease;
+  }
+
+  .rainbow-card-glow:hover::before {
+    opacity: 1;
+  }
+
+  .rainbow-card-glow:hover {
+    box-shadow: 
+      0 0 20px hsl(280 70% 50% / 0.2),
+      0 0 40px hsl(200 80% 55% / 0.15),
+      0 0 60px hsl(45 85% 60% / 0.1);
+  }
+
+  /* Rainbow icon glow on hover */
+  .rainbow-icon-glow {
+    transition: all 0.5s ease;
+  }
+
+  .group:hover .rainbow-icon-glow {
+    filter: 
+      drop-shadow(0 0 8px hsl(0 85% 60% / 0.5))
+      drop-shadow(0 0 16px hsl(45 85% 60% / 0.4))
+      drop-shadow(0 0 24px hsl(200 80% 55% / 0.3))
+      drop-shadow(0 0 32px hsl(280 70% 50% / 0.2));
+  }
+
+  /* Rainbow text glow on card hover */
+  .rainbow-text-glow {
+    transition: all 0.5s ease;
+  }
+
+  .group:hover .rainbow-text-glow {
+    text-shadow: 
+      0 0 10px hsl(0 85% 60% / 0.4),
+      0 0 20px hsl(45 85% 60% / 0.3),
+      0 0 30px hsl(200 80% 55% / 0.2),
+      0 0 40px hsl(280 70% 50% / 0.15);
+  }
+
   /* Elegant glass card effect */
   .glass-card {
     @apply bg-white/70 backdrop-blur-md border border-white/50 shadow-lg;
