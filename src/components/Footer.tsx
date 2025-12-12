@@ -35,7 +35,7 @@ export function Footer() {
               <img 
                 src={portobelloLogo} 
                 alt="Porto Bello Filmes" 
-                className="h-16 w-auto object-contain object-left"
+                className="h-48 w-auto object-contain object-left"
                 style={{ margin: 0, padding: 0, display: 'block' }}
               />
             </Link>
