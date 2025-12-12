@@ -388,7 +388,7 @@ const HomePage = () => {
             {services.map((service, index) => (
               <Card 
                 key={index} 
-                className={`group relative overflow-visible bg-card card-solid card-glow border-border ${service.borderColor} transition-all duration-500 hover:shadow-xl ${servicosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+                className={`group relative overflow-hidden bg-card card-solid card-glow border-border ${service.borderColor} transition-all duration-500 hover:shadow-xl ${servicosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
                 style={{ transitionDelay: servicosInView ? `${(index + 1) * 100}ms` : '0ms' }}
               >
                 {/* Hover gradient overlay */}
