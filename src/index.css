@@ -173,8 +173,17 @@
   /* Solid card - completely opaque, no transparency */
   .card-solid {
     @apply relative;
-    background-color: hsl(var(--card)) !important;
+    isolation: isolate;
     z-index: 10;
+  }
+  
+  .card-solid::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-color: hsl(var(--card));
+    border-radius: inherit;
+    z-index: -1;
   }
 
   /* Elegant glass card effect */
