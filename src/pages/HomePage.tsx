@@ -354,7 +354,7 @@ const HomePage = () => {
             ].map((card, index) => (
               <Card 
                 key={card.title}
-                className={`text-center p-8 bg-card/80 backdrop-blur-sm border-border/50 card-hover group transition-all duration-700 ${quemSomosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+                className={`text-center p-8 bg-card border-border card-hover group transition-all duration-700 ${quemSomosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
                 style={{ transitionDelay: quemSomosInView ? `${(index + 1) * 150}ms` : '0ms' }}
               >
                 <div className={`w-20 h-20 bg-gradient-to-br ${card.color} rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-elegant group-hover:scale-110 transition-transform duration-300`}>
@@ -388,7 +388,7 @@ const HomePage = () => {
             {services.map((service, index) => (
               <Card 
                 key={index} 
-                className={`group relative overflow-hidden bg-gradient-to-br from-card via-card to-card/80 backdrop-blur-sm border-border/50 ${service.borderColor} transition-all duration-500 hover:shadow-xl ${servicosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+                className={`group relative overflow-hidden bg-card border-border ${service.borderColor} transition-all duration-500 hover:shadow-xl ${servicosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
                 style={{ transitionDelay: servicosInView ? `${(index + 1) * 100}ms` : '0ms' }}
               >
                 {/* Hover gradient overlay */}
@@ -462,7 +462,7 @@ const HomePage = () => {
             </div>
             
             <div className={`relative transition-all duration-700 ${portoIdeiasInView ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`} style={{ transitionDelay: '500ms' }}>
-              <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl border border-border/30 bg-gradient-to-br from-primary/10 to-accent/10">
+              <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl border border-border bg-gradient-to-br from-primary/10 to-accent/10">
                 {ecossistemaProducerMedia?.url ? (
                   ecossistemaProducerMedia.type === 'video' ? (
                     <video
@@ -492,7 +492,7 @@ const HomePage = () => {
           {/* Para Empreendedores e Investidores */}
           <div className={`grid lg:grid-cols-2 gap-12 items-center transition-all duration-700 ${portoIdeiasInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`} style={{ transitionDelay: '600ms' }}>
             <div className={`relative order-2 lg:order-1 transition-all duration-700 ${portoIdeiasInView ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`} style={{ transitionDelay: '700ms' }}>
-              <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl border border-border/30 bg-gradient-to-br from-emerald-500/10 to-primary/10">
+              <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl border border-border bg-gradient-to-br from-emerald-500/10 to-primary/10">
                 {ecossistemaInvestorMedia?.url ? (
                   ecossistemaInvestorMedia.type === 'video' ? (
                     <video
