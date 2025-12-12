@@ -114,6 +114,8 @@ const AdminDashboard = () => {
   const [uploadingVideoIndex, setUploadingVideoIndex] = useState<number | null>(null);
   const [savingVideos, setSavingVideos] = useState(false);
   
+  // Carousel display count (1, 3, or 5)
+  const [carouselDisplayCount, setCarouselDisplayCount] = useState<1 | 3 | 5>(5);
   
   // Porto de Ideias slots control
   const [portoIdeiasSlots, setPortoIdeiasSlots] = useState(5);
@@ -192,6 +194,20 @@ const AdminDashboard = () => {
     
     if (slotsData) {
       setPortoIdeiasSlots((slotsData.value as { count: number }).count || 5);
+    }
+
+    // Fetch carousel display count
+    const { data: carouselData } = await supabase
+      .from("settings")
+      .select("value")
+      .eq("key", "carousel_display_count")
+      .maybeSingle();
+    
+    if (carouselData) {
+      const count = (carouselData.value as { count: number }).count;
+      if (count === 1 || count === 3 || count === 5) {
+        setCarouselDisplayCount(count);
+      }
     }
 
     // Fetch social links
@@ -307,6 +323,42 @@ const AdminDashboard = () => {
       toast({
         title: "Slots atualizados",
         description: `Agora serão exibidos ${newCount} projetos na Porto de Ideias.`,
+      });
+    }
+  };
+
+  const updateCarouselDisplayCount = async (count: 1 | 3 | 5) => {
+    const { data: existingData } = await supabase
+      .from("settings")
+      .select("id")
+      .eq("key", "carousel_display_count")
+      .maybeSingle();
+
+    let error;
+    if (existingData) {
+      const result = await supabase
+        .from("settings")
+        .update({ value: { count } })
+        .eq("key", "carousel_display_count");
+      error = result.error;
+    } else {
+      const result = await supabase
+        .from("settings")
+        .insert({ key: "carousel_display_count", value: { count } });
+      error = result.error;
+    }
+
+    if (error) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível atualizar a exibição do carrossel.",
+        variant: "destructive",
+      });
+    } else {
+      setCarouselDisplayCount(count);
+      toast({
+        title: "Carrossel atualizado",
+        description: count === 1 ? "Exibindo apenas o vídeo central." : `Exibindo ${count} vídeos no carrossel.`,
       });
     }
   };
@@ -676,6 +728,27 @@ const AdminDashboard = () => {
                 <p className="text-sm text-muted-foreground">
                   Configure até 5 vídeos para o carrossel na seção principal da homepage. Apenas vídeos com URL preenchida serão exibidos. Usuários navegam usando as setas.
                 </p>
+
+                {/* Carousel Display Count Selector */}
+                <div className="p-4 border rounded-lg bg-muted/30">
+                  <Label className="text-base font-medium mb-3 block">Quantidade de vídeos visíveis</Label>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Defina quantos vídeos serão exibidos simultaneamente no carrossel.
+                  </p>
+                  <div className="flex gap-3">
+                    {([1, 3, 5] as const).map((count) => (
+                      <Button
+                        key={count}
+                        variant={carouselDisplayCount === count ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => updateCarouselDisplayCount(count)}
+                        className="flex-1"
+                      >
+                        {count === 1 ? "1 (Central)" : count === 3 ? "3 (Principal + 2)" : "5 (Completo)"}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
                 
                 {institutionalVideos.map((video, index) => (
                   <div key={index} className="p-4 border rounded-lg space-y-3">
