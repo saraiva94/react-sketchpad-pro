@@ -17,6 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Footer, SocialLinksDisplay } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
+import { ArtisticBackground } from "@/components/ArtisticBackground";
 
 interface TeamMember {
   nome: string;
@@ -201,11 +202,14 @@ const SubmitProjectPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative">
+      {/* Animated Background */}
+      <ArtisticBackground />
+      
       {/* Navbar */}
       <Navbar currentPage="submit" />
 
-      <div className="py-8 px-4">
+      <div className="py-8 px-4 relative z-10">
         <div className="container mx-auto max-w-3xl">
           <button 
             onClick={() => navigate(-1)} 
