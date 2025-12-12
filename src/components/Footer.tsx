@@ -31,15 +31,15 @@ export function Footer() {
       <div className="container mx-auto px-4 relative z-10">
         <div className="grid md:grid-cols-4 gap-6 mb-6">
           <div>
-            <Link to="/" className="inline-block mb-3">
+            <Link to="/" className="inline-block mb-2">
               <img 
                 src={portobelloLogo} 
                 alt="Porto Bello Filmes" 
-                className="h-48 w-auto object-contain object-left"
+                className="h-8 w-auto object-contain object-left"
                 style={{ margin: 0, padding: 0, display: 'block' }}
               />
             </Link>
-            <p className="text-xs text-gray-400 leading-relaxed">
+            <p className="text-xs text-gray-400 leading-relaxed max-w-[120px]">
               Uma plataforma criada para aproximar cultura e investimento.
             </p>
           </div>
