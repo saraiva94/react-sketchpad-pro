@@ -322,9 +322,9 @@ const PortoDeIdeiasPage = () => {
       <section className="bg-gradient-to-br from-primary/10 via-accent/5 to-background py-12 md:py-16">
         <div className="container mx-auto px-6">
           <div className="text-center">
-            <h1 className="text-2xl md:text-4xl font-serif font-bold text-foreground mb-3 md:mb-4">Explore Projetos Culturais</h1>
+            <h1 className="text-2xl md:text-4xl font-serif font-bold text-foreground mb-3 md:mb-4">Conheça os Projetos da Porto de Ideias</h1>
             <p className="text-base md:text-xl text-muted-foreground max-w-3xl mx-auto">
-              Descubra iniciativas culturais inovadoras em busca de investimento e parceria estratégica.
+              Selecionamos projetos com potencial de impacto. Conheça as ideias que já fazem parte da nossa rede.
             </p>
           </div>
         </div>
@@ -390,7 +390,7 @@ const PortoDeIdeiasPage = () => {
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {[1, 2, 3, 4, 5, 6].map((i) => (
-                <div key={i} className="animate-pulse bg-card/95 backdrop-blur-sm rounded-2xl overflow-hidden border border-border/50">
+                <div key={i} className="animate-pulse bg-card backdrop-blur-sm rounded-2xl overflow-hidden border border-border/50">
                   <div className="h-48 bg-muted" />
                   <div className="p-5 space-y-3">
                     <div className="h-4 bg-muted rounded w-1/3" />
@@ -413,7 +413,7 @@ const PortoDeIdeiasPage = () => {
                     className="block group animate-fade-in"
                     style={{ animationDelay: `${index * 50}ms` }}
                   >
-                    <div className="card-3d bg-card/95 backdrop-blur-sm border border-border/50 rounded-2xl overflow-hidden">
+                    <div className="card-3d bg-card backdrop-blur-sm border border-border/50 rounded-2xl overflow-hidden">
                       {/* Image */}
                       <div className="relative overflow-hidden h-48">
                         {project.image_url ? (
@@ -522,7 +522,7 @@ const PortoDeIdeiasPage = () => {
                 className="block group animate-fade-in"
                 style={{ animationDelay: '0ms' }}
               >
-                <div className="card-3d bg-card/95 backdrop-blur-sm border-2 border-dashed border-primary/30 rounded-2xl overflow-hidden h-full">
+                <div className="card-3d bg-card backdrop-blur-sm border-2 border-dashed border-primary/30 rounded-2xl overflow-hidden h-full">
                   <div className="relative h-48 bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
                     <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center animate-pulse">
                       <span className="text-4xl">✨</span>
@@ -555,7 +555,7 @@ const PortoDeIdeiasPage = () => {
                 className="block group animate-fade-in"
                 style={{ animationDelay: '100ms' }}
               >
-                <div className="card-3d bg-card/95 backdrop-blur-sm border border-border/50 rounded-2xl overflow-hidden h-full">
+                <div className="card-3d bg-card backdrop-blur-sm border border-border/50 rounded-2xl overflow-hidden h-full">
                   <div className="relative h-48 bg-gradient-to-br from-accent/20 to-primary/20 flex items-center justify-center">
                     <div className="w-20 h-20 rounded-full bg-accent/20 flex items-center justify-center">
                       <span className="text-4xl animate-bounce">🎭</span>
@@ -598,7 +598,7 @@ const PortoDeIdeiasPage = () => {
                 className="block group animate-fade-in"
                 style={{ animationDelay: '200ms' }}
               >
-                <div className="card-3d bg-card/95 backdrop-blur-sm border border-border/50 rounded-2xl overflow-hidden h-full">
+                <div className="card-3d bg-card backdrop-blur-sm border border-border/50 rounded-2xl overflow-hidden h-full">
                   <div className="relative h-48 bg-gradient-to-br from-primary/15 to-accent/25 flex items-center justify-center">
                     <div className="relative">
                       <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center">
@@ -639,7 +639,7 @@ const PortoDeIdeiasPage = () => {
                 className="block group animate-fade-in"
                 style={{ animationDelay: '300ms' }}
               >
-                <div className="card-3d bg-card/95 backdrop-blur-sm border border-amber-500/30 rounded-2xl overflow-hidden h-full">
+                <div className="card-3d bg-card backdrop-blur-sm border border-amber-500/30 rounded-2xl overflow-hidden h-full">
                   <div className="relative h-48 bg-gradient-to-br from-amber-100 dark:from-amber-900/40 to-orange-100 dark:to-orange-900/40 flex items-center justify-center">
                     <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg">
                       <span className="text-4xl">🏆</span>
@@ -674,7 +674,7 @@ const PortoDeIdeiasPage = () => {
                 className="block group animate-fade-in"
                 style={{ animationDelay: '400ms' }}
               >
-                <div className="card-3d bg-card/95 backdrop-blur-sm border border-emerald-500/30 rounded-2xl overflow-hidden h-full">
+                <div className="card-3d bg-card backdrop-blur-sm border border-emerald-500/30 rounded-2xl overflow-hidden h-full">
                   <div className="relative h-48 bg-gradient-to-br from-emerald-100 dark:from-emerald-900/40 to-teal-100 dark:to-teal-900/40 flex items-center justify-center">
                     <div className="w-20 h-20 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-lg">
                       <span className="text-4xl animate-bounce">💰</span>
@@ -716,20 +716,20 @@ const PortoDeIdeiasPage = () => {
                       <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
                         <Anchor className="w-8 h-8" />
                       </div>
-                      <div className="text-lg font-medium">Pronto para começar?</div>
+                      <div className="text-lg font-medium">Quer enviar seu projeto?</div>
                     </div>
                   </div>
                   <div className="p-5 text-primary-foreground">
                     <h3 className="text-lg font-serif font-bold mb-2">
-                      Embarque Nessa Jornada
+                      Faça Parte da Nossa Rede
                     </h3>
                     <p className="text-sm text-primary-foreground/80 line-clamp-3 mb-4">
-                      Submeta seu projeto cultural agora e faça parte da maior plataforma de conexão entre cultura e investimento do Brasil.
+                      Se você tem uma ideia potente e bem estruturada, envie para nossa curadoria.
                     </p>
                     <div className="flex items-center justify-between pt-3 border-t border-white/20">
                       <span className="text-sm text-primary-foreground/70">Gratuito</span>
                       <span className="text-sm font-medium flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-                        Começar Agora
+                        Enviar projeto
                         <ArrowRight className="w-4 h-4" />
                       </span>
                     </div>
