@@ -7,7 +7,7 @@ import {
   Linkedin,
   Youtube
 } from "lucide-react";
-import portobelloLogo from "@/assets/portobello-logo.png";
+import portobelloLogo from "@/assets/portobello-footer-logo.png";
 
 // Social media links - configure your real links here
 const SOCIAL_LINKS = {
