@@ -75,6 +75,8 @@ const exampleProjects = [
     badge: "Inspire",
     badgeVariant: "secondary" as const,
     link: "/exemplo/cultura-legado",
+    gradientClass: "from-accent to-primary",
+    emojiBgClass: "bg-accent",
     footerContent: (
       <div className="flex -space-x-2">
         <div className="w-7 h-7 rounded-full bg-gradient-to-br from-rose-400 to-rose-600 flex items-center justify-center border-2 border-card">
@@ -97,6 +99,8 @@ const exampleProjects = [
     badge: "Conecte-se",
     badgeVariant: "outline" as const,
     link: "/exemplo/investidores-aguardam",
+    gradientClass: "from-primary to-accent",
+    emojiBgClass: "bg-primary",
     footerContent: (
       <div className="flex items-center gap-1">
         <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -111,10 +115,10 @@ const exampleProjects = [
     emoji: "🏆",
     badge: "Sucesso",
     badgeVariant: "default" as const,
-    badgeClass: "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 hover:bg-amber-200",
+    badgeClass: "bg-amber-500 text-white hover:bg-amber-600",
     link: "/exemplo/historias-sucesso",
-    borderClass: "border-amber-500/30",
-    gradientClass: "from-amber-100 dark:from-amber-900/40 to-orange-100 dark:to-orange-900/40",
+    borderClass: "border-amber-500",
+    gradientClass: "from-amber-400 to-orange-500",
     emojiBgClass: "bg-gradient-to-br from-amber-400 to-orange-500 shadow-lg",
     footerContent: <span className="text-amber-500">★★★★★</span>,
   },
@@ -125,10 +129,10 @@ const exampleProjects = [
     emoji: "💰",
     badge: "Financiamento",
     badgeVariant: "default" as const,
-    badgeClass: "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-200",
+    badgeClass: "bg-emerald-500 text-white hover:bg-emerald-600",
     link: "/exemplo/recursos-disponiveis",
-    borderClass: "border-emerald-500/30",
-    gradientClass: "from-emerald-100 dark:from-emerald-900/40 to-teal-100 dark:to-teal-900/40",
+    borderClass: "border-emerald-500",
+    gradientClass: "from-emerald-400 to-teal-500",
     emojiBgClass: "bg-gradient-to-br from-emerald-400 to-teal-500 shadow-lg",
     emojiAnimate: true,
     footerContent: (
@@ -145,9 +149,11 @@ const exampleProjects = [
     emoji: "✨",
     badge: "Novo Projeto",
     badgeVariant: "default" as const,
-    badgeClass: "bg-primary/20 text-primary hover:bg-primary/30",
+    badgeClass: "bg-primary text-primary-foreground hover:bg-primary/90",
     link: "/submit",
-    borderClass: "border-dashed border-primary/30 border-2",
+    borderClass: "border-dashed border-primary border-2",
+    gradientClass: "from-primary to-accent",
+    emojiBgClass: "bg-primary",
     emojiAnimate: true,
     footerContent: <span className="text-sm text-muted-foreground">Comece agora</span>,
     footerAction: "Submeter",
@@ -428,18 +434,18 @@ const PortoDeIdeiasPage = () => {
 
       {/* Header */}
       <section ref={headerRef} className="relative py-16 md:py-24 overflow-hidden z-10">
-        {/* Semi-transparent background matching homepage hero */}
-        <div className="absolute inset-0 bg-background/60" />
-        <div className="absolute top-10 left-10 w-64 h-64 bg-primary/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-10 right-10 w-80 h-80 bg-accent/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+        {/* Solid background */}
+        <div className="absolute inset-0 bg-background" />
+        <div className="absolute top-10 left-10 w-64 h-64 bg-primary rounded-full blur-3xl opacity-10 animate-pulse" />
+        <div className="absolute bottom-10 right-10 w-80 h-80 bg-accent rounded-full blur-3xl opacity-10 animate-pulse" style={{ animationDelay: '1s' }} />
         
         <div className="container mx-auto px-6 relative z-10">
           <div className={`max-w-4xl mx-auto text-center transition-all duration-1000 ${headerInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
             {/* Icon */}
             <div className="relative inline-block mb-6">
-              <div className="absolute inset-0 w-20 h-20 rounded-full bg-primary/20 blur-xl animate-pulse" />
-              <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-primary/40 to-primary/20 flex items-center justify-center backdrop-blur-sm border border-primary/30 shadow-2xl mx-auto">
-                <Compass className="w-8 h-8 text-primary" />
+              <div className="absolute inset-0 w-20 h-20 rounded-full bg-primary blur-xl opacity-20 animate-pulse" />
+              <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center border border-primary shadow-2xl mx-auto">
+                <Compass className="w-8 h-8 text-primary-foreground" />
               </div>
             </div>
             
@@ -454,14 +460,14 @@ const PortoDeIdeiasPage = () => {
       </section>
 
       {/* Filters - Desktop */}
-      <section className="hidden lg:block py-6 bg-card/95 backdrop-blur-md border-b border-border sticky top-20 z-40">
+      <section className="hidden lg:block py-6 bg-card border-b border-border sticky top-20 z-40">
         <div className="container mx-auto px-6">
           <FilterControls />
         </div>
       </section>
 
       {/* Filters - Mobile */}
-      <section className="lg:hidden py-4 bg-card/95 backdrop-blur-md border-b border-border sticky top-20 z-40">
+      <section className="lg:hidden py-4 bg-card border-b border-border sticky top-20 z-40">
         <div className="container mx-auto px-6">
           <div className="flex items-center gap-3">
             {/* Search on mobile */}
@@ -551,8 +557,8 @@ const PortoDeIdeiasPage = () => {
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           />
                         ) : (
-                          <div className="w-full h-full bg-gradient-to-br from-primary/20 via-accent/10 to-primary/20 flex items-center justify-center min-h-[192px]">
-                            <span className="text-4xl font-handwritten text-primary/40">{project.title.charAt(0)}</span>
+                          <div className="w-full h-full bg-gradient-to-br from-primary to-accent flex items-center justify-center min-h-[192px]">
+                            <span className="text-4xl font-handwritten text-primary-foreground">{project.title.charAt(0)}</span>
                           </div>
                         )}
                       </div>
