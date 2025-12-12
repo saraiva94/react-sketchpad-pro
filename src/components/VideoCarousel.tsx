@@ -60,14 +60,14 @@ export function VideoCarousel({ videos, loading = false }: VideoCarouselProps) {
       translateX = 0;
       translateZ = 0;
     } else if (absPosition === 1) {
-      // First level cards - medium size, overlapping with center and outer cards
+      // First level cards - medium size, overlapping with center
       scale = 0.70;
-      translateX = position * 38; // Closer to center for overlap effect
+      translateX = position * 38;
       translateZ = -80;
     } else {
-      // Second level cards (outer) - smallest, positioned at edges
+      // Second level cards - smallest, overlapping with first level (same overlap rule)
       scale = 0.50;
-      translateX = position * 58; // Further out to be fully visible
+      translateX = position * 42; // Closer to overlap with level 1 cards
       translateZ = -160;
     }
     
