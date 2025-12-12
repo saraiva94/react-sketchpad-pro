@@ -25,11 +25,22 @@ export function ArtisticBackground() {
 
     const resizeCanvas = () => {
       canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      // Use document height to cover entire scrollable page
+      canvas.height = Math.max(
+        document.body.scrollHeight,
+        document.documentElement.scrollHeight,
+        window.innerHeight
+      );
     };
 
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
+    
+    // Observe body size changes to resize canvas when content changes
+    const resizeObserver = new ResizeObserver(() => {
+      resizeCanvas();
+    });
+    resizeObserver.observe(document.body);
 
     // Initialize particles - increased count and visibility
     const particleCount = 100;
@@ -263,6 +274,7 @@ export function ArtisticBackground() {
     return () => {
       window.removeEventListener("resize", resizeCanvas);
       window.removeEventListener("mousemove", handleMouseMove);
+      resizeObserver.disconnect();
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
@@ -272,8 +284,8 @@ export function ArtisticBackground() {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 pointer-events-none"
-      style={{ opacity: 1, zIndex: 0 }}
+      className="absolute inset-0 pointer-events-none w-full"
+      style={{ opacity: 1, zIndex: 0, top: 0, left: 0 }}
     />
   );
 }
