@@ -62,19 +62,15 @@ export function SortableProjectCard({
 
   const cardContent = (
     <div 
-      className={`card-solid bg-card border border-border rounded-2xl overflow-hidden shadow-2xl h-full hover:-translate-y-2 transition-transform duration-300 ${
-        isDragging ? "ring-2 ring-primary shadow-xl" : ""
-      }`}
+      {...(isAdmin ? { ...attributes, ...listeners } : {})}
+      className={`card-solid bg-card border border-border rounded-2xl overflow-hidden shadow-2xl h-full transition-all duration-300 ${
+        isDragging ? "ring-2 ring-primary shadow-xl scale-105 rotate-1" : "hover:-translate-y-2"
+      } ${isAdmin ? "cursor-grab active:cursor-grabbing touch-none" : ""}`}
     >
-      {/* Admin Drag Handle */}
+      {/* Admin Drag Indicator */}
       {isAdmin && (
-        <div 
-          {...attributes}
-          {...listeners}
-          className="absolute top-2 right-2 z-20 cursor-grab active:cursor-grabbing touch-none p-2 bg-card/90 backdrop-blur-sm rounded-lg border border-border shadow-md hover:bg-muted transition-colors"
-          onClick={(e) => e.preventDefault()}
-        >
-          <GripVertical className="w-5 h-5 text-primary" />
+        <div className="absolute top-2 right-2 z-20 p-2 bg-primary/90 backdrop-blur-sm rounded-lg border border-primary shadow-md">
+          <GripVertical className="w-5 h-5 text-primary-foreground" />
         </div>
       )}
 
@@ -188,10 +184,21 @@ export function SortableProjectCard({
       className="block group relative"
     >
       {isAdmin ? (
-        // Admin view - card is not a link when dragging
-        <div className="cursor-pointer" onClick={() => !isDragging && window.location.assign(`/project/${project.id}`)}>
+        // Admin view - entire card for drag, click navigates
+        <>
           {cardContent}
-        </div>
+          {/* Overlay for navigation when not dragging */}
+          {!isDragging && (
+            <Link 
+              to={`/project/${project.id}`}
+              className="absolute inset-0 z-10"
+              onClick={(e) => {
+                // Only navigate if it was a quick click, not a drag attempt
+                if (isDragging) e.preventDefault();
+              }}
+            />
+          )}
+        </>
       ) : (
         // Regular user view - normal link
         <Link to={`/project/${project.id}`} className="block">
