@@ -196,6 +196,7 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5, onAni
   };
 
   if (loading) {
+    console.log('Rendering SKELETON carousel, currentIndex:', currentIndex, 'displayCount:', displayCount);
     return (
       <div className="relative w-full">
         <div 
@@ -205,6 +206,7 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5, onAni
           {Array.from({ length: displayCount }).map((_, index) => {
             const position = getSkeletonPosition(index);
             const styles = getSkeletonCardStyles(position);
+            console.log('Skeleton card', index, 'position:', position, 'transform:', styles.transform);
             
             return (
               <div
@@ -280,6 +282,8 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5, onAni
     );
   }
 
+  console.log('Rendering REAL carousel, currentIndex:', currentIndex, 'enableTransition:', enableTransition, 'totalSlots:', totalSlots);
+  
   return (
     <div className="relative w-full">
       {/* Carousel Container with 3D perspective */}
@@ -294,6 +298,7 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5, onAni
           const video = videos[index];
           const hasVideo = video && video.url;
           const isCenter = position === 0;
+          console.log('Real card', index, 'position:', position, 'transform:', styles.transform);
 
           return (
             <div
