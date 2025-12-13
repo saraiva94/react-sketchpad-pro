@@ -20,15 +20,15 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5 }: Vid
 
   // Trigger entrance animation sequence after mount
   useEffect(() => {
-    // Start expanding animation after a brief moment
+    // Small delay before starting expansion
     const expandTimer = setTimeout(() => {
       setAnimationPhase('expanding');
-    }, 150);
+    }, 100);
     
-    // Complete animation
+    // Complete animation after expansion finishes
     const completeTimer = setTimeout(() => {
       setAnimationPhase('complete');
-    }, 1150);
+    }, 1300);
     
     return () => {
       clearTimeout(expandTimer);
@@ -56,55 +56,55 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5 }: Vid
     return diff;
   };
 
+  // Get final transform values for each position
+  const getFinalTransform = (position: number, absPosition: number) => {
+    if (displayCount === 1) {
+      return { translateX: 0, translateZ: 0, scale: position === 0 ? 1 : 0 };
+    }
+    
+    if (displayCount === 3) {
+      if (absPosition === 0) return { translateX: 0, translateZ: 0, scale: 1 };
+      if (absPosition === 1) return { translateX: position * 45, translateZ: -80, scale: 0.75 };
+      return { translateX: position * 100, translateZ: -160, scale: 0 };
+    }
+    
+    // 5 video mode
+    if (absPosition === 0) return { translateX: 0, translateZ: 0, scale: 1 };
+    if (absPosition === 1) return { translateX: position * 38, translateZ: -80, scale: 0.70 };
+    if (absPosition === 2) return { translateX: position * 35, translateZ: -160, scale: 0.50 };
+    return { translateX: position * 100, translateZ: -240, scale: 0 };
+  };
+
   // Get styles based on position, displayCount, and animation state
   const getCardStyles = (position: number) => {
     const absPosition = Math.abs(position);
-    
-    // Calculate final positions for reference
-    const getFinalTransform = () => {
-      if (displayCount === 1) {
-        return { translateX: 0, translateZ: 0, scale: position === 0 ? 1 : 0 };
-      }
-      
-      if (displayCount === 3) {
-        if (absPosition === 0) return { translateX: 0, translateZ: 0, scale: 1 };
-        if (absPosition === 1) return { translateX: position * 45, translateZ: -80, scale: 0.75 };
-        return { translateX: position * 100, translateZ: -160, scale: 0 };
-      }
-      
-      // 5 video mode
-      if (absPosition === 0) return { translateX: 0, translateZ: 0, scale: 1 };
-      if (absPosition === 1) return { translateX: position * 38, translateZ: -80, scale: 0.70 };
-      if (absPosition === 2) return { translateX: position * 35, translateZ: -160, scale: 0.50 };
-      return { translateX: position * 100, translateZ: -240, scale: 0 };
-    };
-    
-    const final = getFinalTransform();
+    const final = getFinalTransform(position, absPosition);
     const maxVisible = displayCount === 1 ? 0 : displayCount === 3 ? 1 : 2;
     const isVisible = absPosition <= maxVisible;
     
-    // Calculate staggered delay based on layer (further cards animate slightly later)
-    const staggerDelay = absPosition * 100;
+    // Staggered delay: center first, then secondary, then tertiary
+    const staggerDelay = absPosition * 120;
     
-    // Initial state - all cards stacked at center, ready to expand
+    // INITIAL STATE: All cards stacked at center (translateX: 0) with their final scales
     if (animationPhase === 'initial') {
       return {
-        opacity: 0.3,
-        transform: `translateX(0%) translateZ(${final.translateZ}px) scale(${final.scale * 0.85})`,
+        opacity: isVisible ? 0.5 : 0,
+        // KEY: translateX is 0 (center), but keep the Z and scale for depth layering
+        transform: `translateX(0%) translateZ(${final.translateZ}px) scale(${final.scale})`,
         zIndex: 10 - absPosition,
         visibility: (isVisible ? 'visible' : 'hidden') as 'visible' | 'hidden',
         transitionDelay: '0ms',
-        boxShadow: '0 0 60px 20px hsla(var(--primary), 0.4)',
-        filter: 'brightness(1.3)',
+        boxShadow: '0 0 80px 30px hsla(var(--primary), 0.5)',
+        filter: 'brightness(1.4)',
       };
     }
     
-    // Expanding phase - cards sliding out with glow
+    // EXPANDING PHASE: Cards slide horizontally from center to their final X positions
     if (animationPhase === 'expanding') {
       if (!isVisible) {
         return {
           opacity: 0,
-          transform: `translateX(${position * 100}%) scale(0.4)`,
+          transform: `translateX(${position * 100}%) scale(0.3)`,
           zIndex: 0,
           visibility: 'hidden' as const,
           transitionDelay: '0ms',
@@ -115,22 +115,23 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5 }: Vid
       
       return {
         opacity: 1,
+        // Animate to final translateX position
         transform: `translateX(${final.translateX}%) translateZ(${final.translateZ}px) scale(${final.scale})`,
         zIndex: 10 - absPosition,
         visibility: 'visible' as const,
         transitionDelay: `${staggerDelay}ms`,
         boxShadow: absPosition === 0 
-          ? '0 0 80px 30px hsla(var(--primary), 0.5), 0 25px 50px -12px hsla(0, 0%, 0%, 0.5)' 
-          : '0 0 40px 15px hsla(var(--primary), 0.3), 0 20px 40px -10px hsla(0, 0%, 0%, 0.4)',
-        filter: 'brightness(1.15)',
+          ? '0 0 60px 20px hsla(var(--primary), 0.4), 0 25px 50px -12px hsla(0, 0%, 0%, 0.5)' 
+          : '0 0 30px 10px hsla(var(--primary), 0.25), 0 20px 40px -10px hsla(0, 0%, 0%, 0.4)',
+        filter: 'brightness(1.1)',
       };
     }
     
-    // Complete - final resting state
+    // COMPLETE STATE: Normal resting state
     if (!isVisible) {
       return {
         opacity: 0,
-        transform: `translateX(${position * 100}%) scale(0.4)`,
+        transform: `translateX(${position * 100}%) scale(0.3)`,
         zIndex: 0,
         visibility: 'hidden' as const,
         transitionDelay: '0ms',
