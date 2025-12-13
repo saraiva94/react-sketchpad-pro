@@ -583,14 +583,24 @@
     }
   }
 
-  /* Prevent body scroll-lock shifting from Radix Select */
+  /* Prevent body scroll-lock shifting from Radix Select - CRITICAL */
   html {
     overflow-y: scroll;
     scrollbar-gutter: stable;
   }
   
+  /* Override Radix scroll-lock body styles completely */
   body[data-scroll-locked] {
     padding-right: 0 !important;
     margin-right: 0 !important;
+    overflow: visible !important;
+    position: static !important;
+    --removed-body-scroll-bar-size: 0px !important;
+  }
+  
+  /* Ensure all children don't shift */
+  body[data-scroll-locked] > * {
+    margin-right: 0 !important;
+    padding-right: 0 !important;
   }
 }
