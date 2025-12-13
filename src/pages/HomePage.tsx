@@ -322,7 +322,7 @@ const HomePage = () => {
   const exampleProjects = [
     {
       id: "exemplo-cultura-legado",
-      title: "Cultura como Legado",
+      title: "Sua Cultura, Seu Legado",
       synopsis: "Cada projeto cultural conta uma história única. Seja parte dessa rede de criadores que estão transformando o cenário cultural brasileiro.",
       project_type: "Audiovisual",
       image_url: "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=800&h=600&fit=crop",
@@ -334,6 +334,21 @@ const HomePage = () => {
       stage: "development" as const,
       impacto_cultural: "Preservação e difusão da cultura brasileira através de narrativas audiovisuais.",
       link: "/exemplo/cultura-legado",
+    },
+    {
+      id: "exemplo-investidores-aguardam",
+      title: "Investidores Aguardam",
+      synopsis: "Investidores buscam projetos culturais de impacto. Apresente sua proposta para quem está pronto para apoiar a cultura.",
+      project_type: "Produção Cultural",
+      image_url: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=800&h=600&fit=crop",
+      location: "São Paulo",
+      responsavel_nome: "Carlos Mendes",
+      valor_sugerido: 450000,
+      has_incentive_law: true,
+      incentive_law_details: "Lei Rouanet",
+      stage: "development" as const,
+      impacto_cultural: "Ponte entre investidores e projetos culturais de alto impacto.",
+      link: "/exemplo/investidores-aguardam",
     },
     {
       id: "exemplo-historias-sucesso",
