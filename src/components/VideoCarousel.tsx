@@ -19,6 +19,12 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5, onAni
   const [currentIndex, setCurrentIndex] = useState(0);
   const [hasEntered, setHasEntered] = useState(false);
   const hasCalledComplete = useRef(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  
+  // Touch/swipe state
+  const touchStartX = useRef<number>(0);
+  const touchEndX = useRef<number>(0);
+  const isDragging = useRef(false);
 
   // Entrance animation - single expansion from center to final positions
   useEffect(() => {
@@ -52,6 +58,74 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5, onAni
 
   const goToNext = () => {
     setCurrentIndex((prev) => (prev === totalSlots - 1 ? 0 : prev + 1));
+  };
+
+  // Touch handlers for swipe gestures
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (!hasEntered || displayCount === 1) return;
+    touchStartX.current = e.touches[0].clientX;
+    isDragging.current = true;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging.current) return;
+    touchEndX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = () => {
+    if (!isDragging.current || !hasEntered || displayCount === 1) return;
+    isDragging.current = false;
+    
+    const swipeDistance = touchStartX.current - touchEndX.current;
+    const minSwipeDistance = 50;
+    
+    if (Math.abs(swipeDistance) > minSwipeDistance) {
+      if (swipeDistance > 0) {
+        goToNext();
+      } else {
+        goToPrevious();
+      }
+    }
+    
+    touchStartX.current = 0;
+    touchEndX.current = 0;
+  };
+
+  // Mouse handlers for drag gestures (tablet/desktop with touch)
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!hasEntered || displayCount === 1) return;
+    touchStartX.current = e.clientX;
+    isDragging.current = true;
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging.current) return;
+    touchEndX.current = e.clientX;
+  };
+
+  const handleMouseUp = () => {
+    if (!isDragging.current || !hasEntered || displayCount === 1) return;
+    isDragging.current = false;
+    
+    const swipeDistance = touchStartX.current - touchEndX.current;
+    const minSwipeDistance = 50;
+    
+    if (Math.abs(swipeDistance) > minSwipeDistance) {
+      if (swipeDistance > 0) {
+        goToNext();
+      } else {
+        goToPrevious();
+      }
+    }
+    
+    touchStartX.current = 0;
+    touchEndX.current = 0;
+  };
+
+  const handleMouseLeave = () => {
+    if (isDragging.current) {
+      handleMouseUp();
+    }
   };
 
   // Get position relative to center (0 = center, negative = left, positive = right)
@@ -308,8 +382,16 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5, onAni
     <div className="relative w-full">
       {/* Carousel Container with 3D perspective */}
       <div 
-        className="relative aspect-video flex items-center justify-center overflow-visible"
+        ref={containerRef}
+        className="relative aspect-video flex items-center justify-center overflow-visible cursor-grab active:cursor-grabbing touch-pan-y"
         style={{ perspective: '1500px', perspectiveOrigin: '50% 50%' }}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseLeave}
       >
         {/* Cards */}
         {Array.from({ length: totalSlots }).map((_, index) => {
