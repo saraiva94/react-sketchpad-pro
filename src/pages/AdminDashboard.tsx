@@ -816,6 +816,20 @@ const AdminDashboard = () => {
         <div className="flex flex-wrap gap-2 mb-8 p-2 bg-muted rounded-lg justify-center items-center">
           <Button 
             type="button"
+            variant={activeSection === "homepage" ? "default" : "ghost"}
+            size="sm"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setActiveSection("homepage");
+            }}
+            className="rounded-md"
+          >
+            <Home className="w-4 h-4 mr-2" />
+            Homepage
+          </Button>
+          <Button 
+            type="button"
             variant={activeSection === "projects" ? "default" : "ghost"}
             size="sm"
             onClick={(e) => {
@@ -861,20 +875,6 @@ const AdminDashboard = () => {
           >
             <Users className="w-4 h-4 mr-2" />
             Cadastros
-          </Button>
-          <Button 
-            type="button"
-            variant={activeSection === "homepage" ? "default" : "ghost"}
-            size="sm"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              setActiveSection("homepage");
-            }}
-            className="rounded-md"
-          >
-            <Home className="w-4 h-4 mr-2" />
-            Homepage
           </Button>
         </div>
 
