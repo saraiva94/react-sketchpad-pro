@@ -585,13 +585,15 @@
 
 }
 
-/* Prevent layout shift when Radix Select opens */
+/* Prevent layout shift when Radix Select opens - using more specific selectors */
 html {
   overflow-y: scroll;
-  scrollbar-gutter: stable;
 }
 
-body[data-scroll-locked] {
-  padding-right: 0 !important;
-  margin-right: 0 !important;
+html body[data-scroll-locked] {
+  margin-right: 0px !important;
+  margin-left: 0px !important;
+  padding-right: 0px !important;
+  padding-left: 0px !important;
+  overflow: visible !important;
 }
