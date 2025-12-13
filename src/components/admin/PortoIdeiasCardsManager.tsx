@@ -33,7 +33,6 @@ interface CardVisibility {
 export function PortoIdeiasCardsManager({ projects }: PortoIdeiasCardsManagerProps) {
   const { toast } = useToast();
   const [cardVisibility, setCardVisibility] = useState<CardVisibility>({});
-  const [displaySlots, setDisplaySlots] = useState(6);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -60,17 +59,6 @@ export function PortoIdeiasCardsManager({ projects }: PortoIdeiasCardsManagerPro
       setCardVisibility(defaultVisibility);
     }
 
-    // Fetch display slots
-    const { data: slotsData } = await supabase
-      .from("settings")
-      .select("value")
-      .eq("key", "porto_ideias_slots")
-      .maybeSingle();
-    
-    if (slotsData) {
-      setDisplaySlots((slotsData.value as { count: number }).count || 6);
-    }
-
     setLoading(false);
   };
 
@@ -79,33 +67,6 @@ export function PortoIdeiasCardsManager({ projects }: PortoIdeiasCardsManagerPro
       ...prev,
       [cardId]: !prev[cardId]
     }));
-  };
-
-  const updateDisplaySlots = async (delta: number) => {
-    const newCount = Math.max(3, Math.min(12, displaySlots + delta));
-    
-    const { data: existing } = await supabase
-      .from("settings")
-      .select("id")
-      .eq("key", "porto_ideias_slots")
-      .maybeSingle();
-
-    if (existing) {
-      await supabase
-        .from("settings")
-        .update({ value: { count: newCount } })
-        .eq("key", "porto_ideias_slots");
-    } else {
-      await supabase
-        .from("settings")
-        .insert({ key: "porto_ideias_slots", value: { count: newCount } });
-    }
-
-    setDisplaySlots(newCount);
-    toast({
-      title: "Slots atualizados",
-      description: `Exibindo ${newCount} cards na grade (${Math.ceil(newCount / 3)} linha(s) de 3).`,
-    });
   };
 
   const saveVisibility = async () => {
@@ -175,39 +136,8 @@ export function PortoIdeiasCardsManager({ projects }: PortoIdeiasCardsManagerPro
       </CardHeader>
       <CardContent className="space-y-6">
         <p className="text-sm text-muted-foreground">
-          Gerencie a exibição e visibilidade dos cards na página Porto de Ideias. Os cards são exibidos em grade de 3 em 3.
+          Gerencie a visibilidade dos cards na página Porto de Ideias. A grade se ajusta automaticamente em linhas de 3 cards.
         </p>
-
-        {/* Display Slots Control */}
-        <div className="p-4 border rounded-lg bg-muted/30 space-y-3">
-          <div className="flex items-center justify-between">
-            <div>
-              <h4 className="font-medium">Quantidade de Slots na Grade</h4>
-              <p className="text-sm text-muted-foreground">
-                Controla quantos cards aparecem na página ({Math.ceil(displaySlots / 3)} linha(s) de 3)
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => updateDisplaySlots(-3)}
-                disabled={displaySlots <= 3}
-              >
-                -3
-              </Button>
-              <span className="w-12 text-center font-bold text-lg">{displaySlots}</span>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => updateDisplaySlots(3)}
-                disabled={displaySlots >= 12}
-              >
-                +3
-              </Button>
-            </div>
-          </div>
-        </div>
 
         {/* Real Projects (always visible if approved) */}
         {approvedProjects.length > 0 && (
