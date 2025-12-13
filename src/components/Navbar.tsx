@@ -69,14 +69,14 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
   };
 
   return (
-    <header className="border-b border-border/50 bg-card/80 backdrop-blur-md sticky top-0 z-50 shadow-soft">
+    <header className="border-b border-border/50 bg-card/80 backdrop-blur-md sticky top-0 z-50 shadow-soft overflow-hidden">
       <div className="container mx-auto px-2 sm:px-4 h-20 flex items-center justify-between">
-        {/* Logo - Homepage */}
-        <Link to="/" className="flex items-center group -ml-6 sm:-ml-12">
+        {/* Logo - Homepage - clipped to navbar bounds */}
+        <Link to="/" className="flex items-center group -ml-6 sm:-ml-12 h-20 overflow-hidden">
           <img 
             src={portobelloLogo} 
             alt="Porto Bello" 
-            className="h-32 sm:h-44 md:h-52 w-auto group-hover:scale-105 transition-transform duration-300"
+            className="h-32 sm:h-44 md:h-52 w-auto group-hover:scale-105 transition-transform duration-300 object-contain object-left pointer-events-none"
           />
         </Link>
 
