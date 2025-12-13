@@ -17,14 +17,33 @@ interface VideoCarouselProps {
 
 export function VideoCarousel({ videos, loading = false, displayCount = 5, onAnimationComplete }: VideoCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [enableTransition, setEnableTransition] = useState(true); // Always enable transitions
+  const [entrancePhase, setEntrancePhase] = useState<'initial' | 'expanding' | 'complete'>('initial');
   const hasCalledComplete = useRef(false);
 
-  // Notify parent when loading completes
+  // Entrance animation sequence
   useEffect(() => {
-    if (!loading && !hasCalledComplete.current) {
-      onAnimationComplete?.();
-      hasCalledComplete.current = true;
+    if (!loading) {
+      // Start with all cards stacked at center
+      setEntrancePhase('initial');
+      
+      // After a brief moment, start expanding to final positions
+      const expandTimer = setTimeout(() => {
+        setEntrancePhase('expanding');
+      }, 100);
+      
+      // Mark animation complete after expansion
+      const completeTimer = setTimeout(() => {
+        setEntrancePhase('complete');
+        if (!hasCalledComplete.current) {
+          onAnimationComplete?.();
+          hasCalledComplete.current = true;
+        }
+      }, 900);
+      
+      return () => {
+        clearTimeout(expandTimer);
+        clearTimeout(completeTimer);
+      };
     }
   }, [loading, onAnimationComplete]);
 
@@ -46,6 +65,25 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5, onAni
     if (diff > totalSlots / 2) return diff - totalSlots;
     if (diff < -totalSlots / 2) return diff + totalSlots;
     return diff;
+  };
+
+  // Get entrance animation styles - cards start from center and expand outward
+  const getEntranceStyles = (position: number) => {
+    const absPosition = Math.abs(position);
+    
+    if (entrancePhase === 'initial') {
+      // All cards start stacked at center with slight scale variation
+      const initialScale = 1 - (absPosition * 0.15);
+      return {
+        opacity: absPosition <= 2 ? 0.3 + (0.7 / (absPosition + 1)) : 0,
+        transform: `translateX(0) translateZ(${-absPosition * 20}px) scale(${Math.max(0.6, initialScale)})`,
+        zIndex: 10 - absPosition,
+        visibility: absPosition <= 2 ? 'visible' as const : 'hidden' as const,
+      };
+    }
+    
+    // Return final positions for 'expanding' and 'complete' phases
+    return getCardStyles(position);
   };
 
   // Get styles based on position and displayCount
@@ -141,6 +179,7 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5, onAni
       visibility: 'visible' as const,
     };
   };
+
   // Get skeleton card styles based on position
   const getSkeletonCardStyles = (position: number) => {
     const absPosition = Math.abs(position);
@@ -201,7 +240,7 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5, onAni
             return (
               <div
                 key={index}
-                className="absolute inset-0 transition-all duration-500 ease-out"
+                className="absolute inset-0 transition-all duration-700 ease-out"
                 style={{
                   ...styles,
                   transformStyle: 'preserve-3d',
@@ -221,6 +260,11 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5, onAni
                       </div>
                     )}
                   </div>
+                  {/* Decorative corners */}
+                  <div className="absolute top-4 left-4 w-12 h-12 border-l-2 border-t-2 border-primary/50 rounded-tl-lg" />
+                  <div className="absolute top-4 right-4 w-12 h-12 border-r-2 border-t-2 border-primary/50 rounded-tr-lg" />
+                  <div className="absolute bottom-4 left-4 w-12 h-12 border-l-2 border-b-2 border-primary/50 rounded-bl-lg" />
+                  <div className="absolute bottom-4 right-4 w-12 h-12 border-r-2 border-b-2 border-primary/50 rounded-br-lg" />
                 </div>
               </div>
             );
@@ -282,21 +326,27 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5, onAni
         {/* Cards */}
         {Array.from({ length: totalSlots }).map((_, index) => {
           const position = getPosition(index);
-          const styles = getCardStyles(position);
+          const styles = entrancePhase === 'complete' ? getCardStyles(position) : getEntranceStyles(position);
           const video = videos[index];
           const hasVideo = video && video.url;
           const isCenter = position === 0;
 
+          // Calculate staggered delay for entrance animation
+          const staggerDelay = entrancePhase === 'expanding' ? Math.abs(position) * 100 : 0;
+
           return (
             <div
               key={index}
-              className={`absolute inset-0 ${enableTransition ? 'transition-all duration-500 ease-out' : ''}`}
+              className="absolute inset-0 transition-all ease-out"
               style={{
                 ...styles,
                 transformStyle: 'preserve-3d',
                 cursor: isCenter ? 'default' : 'pointer',
+                transitionDuration: entrancePhase === 'expanding' ? '800ms' : '500ms',
+                transitionTimingFunction: entrancePhase === 'expanding' ? 'cubic-bezier(0.34, 1.56, 0.64, 1)' : 'ease-out',
+                transitionDelay: `${staggerDelay}ms`,
               }}
-              onClick={() => !isCenter && setCurrentIndex(index)}
+              onClick={() => entrancePhase === 'complete' && !isCenter && setCurrentIndex(index)}
             >
               <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-2xl border border-border bg-card card-solid">
                 {hasVideo ? (
@@ -348,14 +398,14 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5, onAni
         })}
       </div>
 
-      {/* Navigation arrows - only show if more than 1 video */}
-      {displayCount > 1 && (
+      {/* Navigation arrows - only show if more than 1 video and animation complete */}
+      {displayCount > 1 && entrancePhase === 'complete' && (
         <>
           <Button
             variant="outline"
             size="icon"
             onClick={goToPrevious}
-            className="absolute -left-6 md:-left-16 top-1/2 -translate-y-1/2 z-30 w-10 h-10 md:w-12 md:h-12 rounded-full bg-background/90 backdrop-blur-sm border-border hover:bg-background hover:scale-110 transition-all duration-300 shadow-lg"
+            className="absolute -left-6 md:-left-16 top-1/2 -translate-y-1/2 z-30 w-10 h-10 md:w-12 md:h-12 rounded-full bg-background/90 backdrop-blur-sm border-border hover:bg-background hover:scale-110 transition-all duration-300 shadow-lg animate-fade-in"
             aria-label="Vídeo anterior"
           >
             <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
@@ -364,7 +414,7 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5, onAni
             variant="outline"
             size="icon"
             onClick={goToNext}
-            className="absolute -right-6 md:-right-16 top-1/2 -translate-y-1/2 z-30 w-10 h-10 md:w-12 md:h-12 rounded-full bg-background/90 backdrop-blur-sm border-border hover:bg-background hover:scale-110 transition-all duration-300 shadow-lg"
+            className="absolute -right-6 md:-right-16 top-1/2 -translate-y-1/2 z-30 w-10 h-10 md:w-12 md:h-12 rounded-full bg-background/90 backdrop-blur-sm border-border hover:bg-background hover:scale-110 transition-all duration-300 shadow-lg animate-fade-in"
             aria-label="Próximo vídeo"
           >
             <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
@@ -372,9 +422,9 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5, onAni
         </>
       )}
 
-      {/* Dot indicators - only show if more than 1 video */}
-      {displayCount > 1 && (
-        <div className="flex justify-center gap-2 mt-8">
+      {/* Dot indicators - only show if more than 1 video and animation complete */}
+      {displayCount > 1 && entrancePhase === 'complete' && (
+        <div className="flex justify-center gap-2 mt-8 animate-fade-in">
           {Array.from({ length: totalSlots }).map((_, index) => (
             <button
               key={index}
