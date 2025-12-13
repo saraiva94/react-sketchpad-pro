@@ -12,9 +12,10 @@ interface VideoCarouselProps {
   videos: VideoItem[];
   loading?: boolean;
   displayCount?: 1 | 3 | 5;
+  onAnimationComplete?: () => void;
 }
 
-export function VideoCarousel({ videos, loading = false, displayCount = 5 }: VideoCarouselProps) {
+export function VideoCarousel({ videos, loading = false, displayCount = 5, onAnimationComplete }: VideoCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [enableTransition, setEnableTransition] = useState(false);
   const wasLoading = useRef(true);
@@ -25,11 +26,13 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5 }: Vid
       // Wait a frame before enabling transitions
       const timer = setTimeout(() => {
         setEnableTransition(true);
+        // Notify parent that animation is complete
+        onAnimationComplete?.();
       }, 50);
       wasLoading.current = false;
       return () => clearTimeout(timer);
     }
-  }, [loading]);
+  }, [loading, onAnimationComplete]);
 
   // Use displayCount for how many cards to show
   const totalSlots = displayCount;
