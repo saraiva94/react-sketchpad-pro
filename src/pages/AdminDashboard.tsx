@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
 import { FeaturedProjectsManager } from "@/components/admin/FeaturedProjectsManager";
+import { PortoIdeiasCardsManager } from "@/components/admin/PortoIdeiasCardsManager";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
@@ -911,6 +912,11 @@ const AdminDashboard = () => {
             <FeaturedProjectsManager 
               projects={projects} 
               onProjectUpdate={fetchProjects}
+            />
+
+            {/* Controle e Edição - Cards Porto de Ideias */}
+            <PortoIdeiasCardsManager 
+              projects={projects.filter(p => p.status === "approved")}
             />
 
             {/* Vídeos Institucionais (até 5) */}
