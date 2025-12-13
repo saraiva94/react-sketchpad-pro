@@ -297,17 +297,18 @@
     position: absolute;
     inset: -2px;
     border-radius: inherit;
-    background: conic-gradient(
-      from 0deg,
-      hsl(0 85% 60% / 0.4),
-      hsl(45 85% 60% / 0.4),
-      hsl(120 70% 50% / 0.4),
-      hsl(200 80% 55% / 0.4),
-      hsl(280 70% 50% / 0.4),
-      hsl(330 85% 60% / 0.4),
-      hsl(0 85% 60% / 0.4)
+    background: linear-gradient(
+      90deg,
+      hsl(0 85% 60% / 0.3),
+      hsl(45 85% 60% / 0.3),
+      hsl(120 70% 50% / 0.3),
+      hsl(200 80% 55% / 0.3),
+      hsl(280 70% 50% / 0.3),
+      hsl(330 85% 60% / 0.3),
+      hsl(0 85% 60% / 0.3)
     );
-    animation: rainbow-rotate 4s linear infinite;
+    background-size: 400% 400%;
+    animation: rainbow-shift 8s ease infinite;
     opacity: 0;
     z-index: -1;
     transition: opacity 0.3s ease;
@@ -322,11 +323,6 @@
       0 0 20px hsl(280 70% 50% / 0.2),
       0 0 40px hsl(200 80% 55% / 0.15),
       0 0 60px hsl(45 85% 60% / 0.1);
-  }
-
-  @keyframes rainbow-rotate {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
   }
 
   /* Rainbow icon glow on hover */
