@@ -339,7 +339,7 @@ const HomePage = () => {
       {/* Hero Section - Institutional Video Carousel */}
       <section ref={heroRef} id="inicio" className="relative py-20 lg:py-32 overflow-hidden z-10">
         <div className="container mx-auto px-4 relative z-10">
-          <div className={`max-w-5xl mx-auto transition-all duration-1000 ${heroInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+          <div className="max-w-5xl mx-auto">
             <VideoCarousel videos={institutionalVideos} loading={loadingVideo} displayCount={carouselDisplayCount} />
           </div>
         </div>
