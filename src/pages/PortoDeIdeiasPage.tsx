@@ -8,6 +8,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
 import { ArtisticBackground } from "@/components/ArtisticBackground";
+import { DraggableProjectGrid } from "@/components/porto-ideias/DraggableProjectGrid";
 import { supabase } from "@/integrations/supabase/client";
 import { useInView } from "@/hooks/useInView";
 import { 
@@ -165,6 +166,7 @@ const PortoDeIdeiasPage = () => {
   const [loading, setLoading] = useState(true);
   const [displaySlots, setDisplaySlots] = useState(5); // Default 5 project slots
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   
   // Filters
   const [searchTerm, setSearchTerm] = useState("");
@@ -182,6 +184,9 @@ const PortoDeIdeiasPage = () => {
   useEffect(() => {
     fetchProjects();
     fetchDisplaySlots();
+    // Check if admin is logged in
+    const adminLoggedIn = localStorage.getItem("isAdminLoggedIn") === "true";
+    setIsAdmin(adminLoggedIn);
   }, []);
 
   const fetchProjects = async () => {
@@ -533,210 +538,21 @@ const PortoDeIdeiasPage = () => {
               ))}
             </div>
           ) : (
-            <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 transition-all duration-1000 ${projectsInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-              {/* Real Projects - up to displaySlots */}
-              {sortedProjects.slice(0, displaySlots).map((project, index) => {
-                const budgetInfo = getBudgetRange(project.valor_sugerido);
-                const stageInfo = getStageInfo(project.stage);
-                
-                return (
-                  <Link 
-                    key={project.id}
-                    to={`/project/${project.id}`}
-                    className="block group"
-                    style={{ 
-                      opacity: projectsInView ? 1 : 0,
-                      transform: projectsInView ? 'translateY(0)' : 'translateY(20px)',
-                      transition: `all 0.6s ease-out ${index * 100}ms`
-                    }}
-                  >
-                    <div className="card-solid bg-card border border-border rounded-2xl overflow-hidden shadow-2xl h-full hover:-translate-y-2 transition-transform duration-300">
-                      {/* Image */}
-                      <div className="relative overflow-hidden h-48">
-                        {project.image_url ? (
-                          <img
-                            src={project.image_url}
-                            alt={project.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                          />
-                        ) : (
-                          <div className="w-full h-full bg-gradient-to-br from-primary to-accent flex items-center justify-center min-h-[192px]">
-                            <span className="text-4xl font-handwritten text-primary-foreground">{project.title.charAt(0)}</span>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Content */}
-                      <div className="p-4 md:p-5 flex-1">
-                        {/* Category, Budget Range, Location */}
-                        <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <Badge variant="secondary" className="rounded-full text-xs">
-                              {project.project_type}
-                            </Badge>
-                            <Badge className={`rounded-full text-xs ${budgetInfo.color}`}>
-                              {budgetInfo.label}
-                            </Badge>
-                          </div>
-                          {project.location && (
-                            <span className="flex items-center text-xs text-muted-foreground">
-                              <MapPin className="w-3 h-3 mr-1" />
-                              {project.location}
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Title */}
-                        <h3 className="font-bold text-lg text-foreground mb-2 line-clamp-1 group-hover:text-primary transition-colors">
-                          {project.title}
-                        </h3>
-
-                        {/* Synopsis */}
-                        <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                          {project.synopsis}
-                        </p>
-
-                        {/* Budget & Stage */}
-                        <div className="flex items-center justify-between mb-3">
-                          <span className="font-bold text-foreground">
-                            {formatBudget(project.valor_sugerido)}
-                          </span>
-                          <Badge className={`rounded-full text-xs ${stageInfo.color}`}>
-                            {stageInfo.label}
-                          </Badge>
-                        </div>
-
-                        {/* Incentive Law */}
-                        {project.has_incentive_law && (
-                          <div className="mb-3">
-                            <Badge variant="outline" className="rounded-full text-xs border-primary/30 text-primary">
-                              <Shield className="w-3 h-3 mr-1" />
-                              {project.incentive_law_details || "Lei de Incentivo"}
-                            </Badge>
-                          </div>
-                        )}
-
-                        {/* Tags */}
-                        {project.categorias_tags && project.categorias_tags.length > 0 && (
-                          <div className="flex flex-wrap gap-1 mb-4">
-                            {project.categorias_tags.slice(0, 3).map((tag, i) => (
-                              <Badge key={i} variant="outline" className="rounded-full text-xs bg-muted/50">
-                                {tag}
-                              </Badge>
-                            ))}
-                          </div>
-                        )}
-
-                        {/* Creator & Link */}
-                        <div className="flex items-center justify-between pt-3 border-t border-border">
-                          <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                              <span className="text-xs text-primary-foreground font-semibold">
-                                {getInitials(project.responsavel_nome)}
-                              </span>
-                            </div>
-                            <span className="text-sm text-muted-foreground truncate max-w-[120px]">
-                              {project.responsavel_nome || "Produtor Cultural"}
-                            </span>
-                          </div>
-                          <span className="text-sm font-medium text-primary flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            Ver Detalhes
-                            <ArrowRight className="w-4 h-4" />
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                );
-              })}
-
-              {/* Example Cards - fill remaining slots (up to displaySlots - realProjects) */}
-              {sortedProjects.length < displaySlots && exampleProjects.slice(0, displaySlots - sortedProjects.length).map((example, index) => {
-                const cardIndex = sortedProjects.length + index;
-                
-                return (
-                  <Link 
-                    key={example.id}
-                    to={example.link}
-                    className="block group"
-                    style={{ 
-                      opacity: projectsInView ? 1 : 0,
-                      transform: projectsInView ? 'translateY(0)' : 'translateY(20px)',
-                      transition: `all 0.6s ease-out ${cardIndex * 100}ms`
-                    }}
-                  >
-                    <div className={`card-solid bg-card ${example.borderClass || 'border border-border'} rounded-2xl overflow-hidden h-full shadow-2xl hover:-translate-y-2 transition-transform duration-300`}>
-                      <div className={`relative h-48 bg-gradient-to-br ${example.gradientClass || 'from-accent/20 to-primary/20'} flex items-center justify-center`}>
-                        <div className={`w-20 h-20 rounded-full ${example.emojiBgClass || 'bg-accent/20'} flex items-center justify-center`}>
-                          <span className={`text-4xl ${example.emojiAnimate ? 'animate-pulse' : ''}`}>{example.emoji}</span>
-                        </div>
-                      </div>
-                      <div className="p-5">
-                        <Badge 
-                          variant={example.badgeVariant} 
-                          className={`mb-3 rounded-full ${example.badgeClass || ''}`}
-                        >
-                          {example.badge}
-                        </Badge>
-                        <h3 className="text-lg font-serif font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
-                          {example.title}
-                        </h3>
-                        <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
-                          {example.synopsis}
-                        </p>
-                        <div className="flex items-center justify-between pt-3 border-t border-border">
-                          {example.footerContent}
-                          <span className="text-sm font-medium text-primary flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            {example.footerAction || "Ver Exemplo"}
-                            <ArrowRight className="w-4 h-4" />
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                );
-              })}
-
-              {/* CTA Card - Always last */}
-              <Link 
-                to="/submit"
-                className="block group"
-                style={{ 
-                  opacity: projectsInView ? 1 : 0,
-                  transform: projectsInView ? 'translateY(0)' : 'translateY(20px)',
-                  transition: `all 0.6s ease-out ${Math.min(sortedProjects.length, displaySlots) * 100 + (displaySlots - Math.min(sortedProjects.length, displaySlots)) * 100}ms`
-                }}
-              >
-                <div className="card-rainbow border-0 rounded-2xl overflow-hidden h-full shadow-2xl">
-                  <div className="relative h-48 flex items-center justify-center">
-                    <div className="text-center text-white">
-                      <div className="w-20 h-20 rounded-full bg-white/30 backdrop-blur-sm flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:rotate-12 transition-all duration-500 shadow-lg">
-                        <Anchor className="w-10 h-10 drop-shadow-lg" />
-                      </div>
-                      <div className="text-xl font-semibold drop-shadow-lg">Quer enviar seu projeto?</div>
-                    </div>
-                  </div>
-                  <div className="p-6 bg-black/20 backdrop-blur-sm">
-                    <h3 className="text-xl font-serif font-bold mb-3 text-white drop-shadow">
-                      Faça Parte da Nossa Rede
-                    </h3>
-                    <p className="text-sm text-white/90 line-clamp-3 mb-4">
-                      Se você tem uma ideia potente e bem estruturada, envie para nossa curadoria.
-                    </p>
-                    <div className="flex items-center justify-between pt-4 border-t border-white/30">
-                      <span className="text-sm text-white/80 font-medium">✨ Gratuito</span>
-                      <span className="text-sm font-bold flex items-center gap-2 group-hover:translate-x-2 transition-transform text-white">
-                        Enviar projeto
-                        <ArrowRight className="w-5 h-5" />
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            </div>
+            <DraggableProjectGrid
+              projects={sortedProjects}
+              exampleProjects={exampleProjects}
+              displaySlots={displaySlots}
+              isInView={projectsInView}
+              isAdmin={isAdmin}
+              formatBudget={formatBudget}
+              getBudgetRange={getBudgetRange}
+              getStageInfo={getStageInfo}
+              getInitials={getInitials}
+            />
           )}
         </div>
       </section>
+
 
       <Footer />
     </div>
