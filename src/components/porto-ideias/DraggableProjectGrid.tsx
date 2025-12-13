@@ -15,13 +15,14 @@ import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
+  useSortable,
   rectSortingStrategy,
 } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { SortableProjectCard } from "./SortableProjectCard";
-import { ArrowRight, Anchor, GripVertical, Shield } from "lucide-react";
+import { ArrowRight, Anchor, GripVertical, Shield, MapPin } from "lucide-react";
 
 interface Project {
   id: string;
@@ -56,6 +57,266 @@ interface ExampleProject {
   footerAction?: string;
 }
 
+// Unified item for sorting
+interface SortableItem {
+  id: string;
+  type: "real" | "example";
+  data: Project | ExampleProject;
+}
+
+interface SortableCardProps {
+  item: SortableItem;
+  index: number;
+  isInView: boolean;
+  isAdmin: boolean;
+  formatBudget: (value: number | null) => string;
+  getBudgetRange: (value: number | null) => { label: string; color: string };
+  getStageInfo: (stage: string | null) => { label: string; color: string };
+  getInitials: (name: string | null) => string;
+}
+
+function SortableCard({
+  item,
+  index,
+  isInView,
+  isAdmin,
+  formatBudget,
+  getBudgetRange,
+  getStageInfo,
+  getInitials,
+}: SortableCardProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: item.id, disabled: !isAdmin });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : isInView ? 1 : 0,
+    zIndex: isDragging ? 1000 : 1,
+  };
+
+  if (item.type === "real") {
+    const project = item.data as Project;
+    const budgetInfo = getBudgetRange(project.valor_sugerido);
+    const stageInfo = getStageInfo(project.stage);
+
+    return (
+      <div
+        ref={setNodeRef}
+        style={{
+          ...style,
+          transform: isDragging 
+            ? CSS.Transform.toString(transform)
+            : isInView ? 'translateY(0)' : 'translateY(20px)',
+          transition: isDragging ? transition : `all 0.6s ease-out ${index * 100}ms`,
+        }}
+        className="block group relative"
+        {...(isAdmin ? { ...attributes, ...listeners } : {})}
+      >
+        {isAdmin ? (
+          <div 
+            className="cursor-grab active:cursor-grabbing"
+            onDoubleClick={() => window.location.assign(`/project/${project.id}`)}
+          >
+            <div 
+              className={`card-solid bg-card border border-border rounded-2xl overflow-hidden shadow-2xl h-full transition-all duration-300 ${
+                isDragging ? "ring-2 ring-primary shadow-xl scale-105 rotate-1" : "hover:-translate-y-2"
+              }`}
+            >
+              {/* Admin Drag Indicator */}
+              <div className="absolute top-2 right-2 z-20 p-2 bg-primary/90 backdrop-blur-sm rounded-lg border border-primary shadow-md">
+                <GripVertical className="w-5 h-5 text-primary-foreground" />
+              </div>
+
+              {/* Image */}
+              <div className="relative overflow-hidden h-48">
+                {project.image_url ? (
+                  <img src={project.image_url} alt={project.title} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                    <span className="text-4xl font-handwritten text-primary-foreground">{project.title.charAt(0)}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Content */}
+              <div className="p-4 md:p-5">
+                <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Badge variant="secondary" className="rounded-full text-xs">{project.project_type}</Badge>
+                    <Badge className={`rounded-full text-xs ${budgetInfo.color}`}>{budgetInfo.label}</Badge>
+                  </div>
+                  {project.location && (
+                    <span className="flex items-center text-xs text-muted-foreground">
+                      <MapPin className="w-3 h-3 mr-1" />{project.location}
+                    </span>
+                  )}
+                </div>
+                <h3 className="font-bold text-lg text-foreground mb-2 line-clamp-1">{project.title}</h3>
+                <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{project.synopsis}</p>
+                <div className="flex items-center justify-between mb-3">
+                  <span className="font-bold text-foreground">{formatBudget(project.valor_sugerido)}</span>
+                  <Badge className={`rounded-full text-xs ${stageInfo.color}`}>{stageInfo.label}</Badge>
+                </div>
+                {project.has_incentive_law && (
+                  <div className="mb-3">
+                    <Badge variant="outline" className="rounded-full text-xs border-primary/30 text-primary">
+                      <Shield className="w-3 h-3 mr-1" />{project.incentive_law_details || "Lei de Incentivo"}
+                    </Badge>
+                  </div>
+                )}
+                <div className="flex items-center justify-between pt-3 border-t border-border">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                      <span className="text-xs text-primary-foreground font-semibold">{getInitials(project.responsavel_nome)}</span>
+                    </div>
+                    <span className="text-sm text-muted-foreground truncate max-w-[120px]">{project.responsavel_nome || "Produtor Cultural"}</span>
+                  </div>
+                  <span className="text-xs text-primary">Duplo clique para abrir</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <Link to={`/project/${project.id}`} className="block">
+            <div className="card-solid bg-card border border-border rounded-2xl overflow-hidden shadow-2xl h-full hover:-translate-y-2 transition-transform duration-300">
+              {/* Same content without admin indicator */}
+              <div className="relative overflow-hidden h-48">
+                {project.image_url ? (
+                  <img src={project.image_url} alt={project.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                    <span className="text-4xl font-handwritten text-primary-foreground">{project.title.charAt(0)}</span>
+                  </div>
+                )}
+              </div>
+              <div className="p-4 md:p-5">
+                <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Badge variant="secondary" className="rounded-full text-xs">{project.project_type}</Badge>
+                    <Badge className={`rounded-full text-xs ${budgetInfo.color}`}>{budgetInfo.label}</Badge>
+                  </div>
+                  {project.location && (
+                    <span className="flex items-center text-xs text-muted-foreground">
+                      <MapPin className="w-3 h-3 mr-1" />{project.location}
+                    </span>
+                  )}
+                </div>
+                <h3 className="font-bold text-lg text-foreground mb-2 line-clamp-1 group-hover:text-primary transition-colors">{project.title}</h3>
+                <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{project.synopsis}</p>
+                <div className="flex items-center justify-between mb-3">
+                  <span className="font-bold text-foreground">{formatBudget(project.valor_sugerido)}</span>
+                  <Badge className={`rounded-full text-xs ${stageInfo.color}`}>{stageInfo.label}</Badge>
+                </div>
+                {project.has_incentive_law && (
+                  <div className="mb-3">
+                    <Badge variant="outline" className="rounded-full text-xs border-primary/30 text-primary">
+                      <Shield className="w-3 h-3 mr-1" />{project.incentive_law_details || "Lei de Incentivo"}
+                    </Badge>
+                  </div>
+                )}
+                <div className="flex items-center justify-between pt-3 border-t border-border">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                      <span className="text-xs text-primary-foreground font-semibold">{getInitials(project.responsavel_nome)}</span>
+                    </div>
+                    <span className="text-sm text-muted-foreground truncate max-w-[120px]">{project.responsavel_nome || "Produtor Cultural"}</span>
+                  </div>
+                  <span className="text-sm font-medium text-primary flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    Ver Detalhes <ArrowRight className="w-4 h-4" />
+                  </span>
+                </div>
+              </div>
+            </div>
+          </Link>
+        )}
+      </div>
+    );
+  }
+
+  // Example card
+  const example = item.data as ExampleProject;
+  
+  return (
+    <div
+      ref={setNodeRef}
+      style={{
+        ...style,
+        transform: isDragging 
+          ? CSS.Transform.toString(transform)
+          : isInView ? 'translateY(0)' : 'translateY(20px)',
+        transition: isDragging ? transition : `all 0.6s ease-out ${index * 100}ms`,
+      }}
+      className="block group relative"
+      {...(isAdmin ? { ...attributes, ...listeners } : {})}
+    >
+      {isAdmin ? (
+        <div 
+          className="cursor-grab active:cursor-grabbing"
+          onDoubleClick={() => window.location.assign(example.link)}
+        >
+          <div className={`card-solid bg-card ${example.borderClass || 'border border-border'} rounded-2xl overflow-hidden h-full shadow-2xl transition-all duration-300 ${
+            isDragging ? "ring-2 ring-primary shadow-xl scale-105 rotate-1" : "hover:-translate-y-2"
+          }`}>
+            {/* Admin Drag Indicator */}
+            <div className="absolute top-2 right-2 z-20 p-2 bg-primary/90 backdrop-blur-sm rounded-lg border border-primary shadow-md">
+              <GripVertical className="w-5 h-5 text-primary-foreground" />
+            </div>
+            
+            <div className={`relative h-48 bg-gradient-to-br ${example.gradientClass || 'from-accent/20 to-primary/20'} flex items-center justify-center`}>
+              <div className={`w-20 h-20 rounded-full ${example.emojiBgClass || 'bg-accent/20'} flex items-center justify-center`}>
+                <span className={`text-4xl ${example.emojiAnimate ? 'animate-pulse' : ''}`}>{example.emoji}</span>
+              </div>
+            </div>
+            <div className="p-5">
+              <Badge variant={example.badgeVariant} className={`mb-3 rounded-full ${example.badgeClass || ''}`}>
+                {example.badge}
+              </Badge>
+              <h3 className="text-lg font-serif font-bold text-foreground mb-2">{example.title}</h3>
+              <p className="text-sm text-muted-foreground line-clamp-3 mb-4">{example.synopsis}</p>
+              <div className="flex items-center justify-between pt-3 border-t border-border">
+                {example.footerContent}
+                <span className="text-xs text-primary">Duplo clique para abrir</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <Link to={example.link} className="block">
+          <div className={`card-solid bg-card ${example.borderClass || 'border border-border'} rounded-2xl overflow-hidden h-full shadow-2xl hover:-translate-y-2 transition-transform duration-300`}>
+            <div className={`relative h-48 bg-gradient-to-br ${example.gradientClass || 'from-accent/20 to-primary/20'} flex items-center justify-center`}>
+              <div className={`w-20 h-20 rounded-full ${example.emojiBgClass || 'bg-accent/20'} flex items-center justify-center`}>
+                <span className={`text-4xl ${example.emojiAnimate ? 'animate-pulse' : ''}`}>{example.emoji}</span>
+              </div>
+            </div>
+            <div className="p-5">
+              <Badge variant={example.badgeVariant} className={`mb-3 rounded-full ${example.badgeClass || ''}`}>
+                {example.badge}
+              </Badge>
+              <h3 className="text-lg font-serif font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
+                {example.title}
+              </h3>
+              <p className="text-sm text-muted-foreground line-clamp-3 mb-4">{example.synopsis}</p>
+              <div className="flex items-center justify-between pt-3 border-t border-border">
+                {example.footerContent}
+                <span className="text-sm font-medium text-primary flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  {example.footerAction || "Ver Exemplo"} <ArrowRight className="w-4 h-4" />
+                </span>
+              </div>
+            </div>
+          </div>
+        </Link>
+      )}
+    </div>
+  );
+}
+
 interface DraggableProjectGridProps {
   projects: Project[];
   exampleProjects: ExampleProject[];
@@ -80,19 +341,19 @@ export function DraggableProjectGrid({
   getInitials,
 }: DraggableProjectGridProps) {
   const { toast } = useToast();
-  const [orderedProjects, setOrderedProjects] = useState<Project[]>(projects);
+  const [sortableItems, setSortableItems] = useState<SortableItem[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 8,
+        distance: 5,
       },
     }),
     useSensor(TouchSensor, {
       activationConstraint: {
-        delay: 200,
-        tolerance: 5,
+        delay: 150,
+        tolerance: 8,
       },
     }),
     useSensor(KeyboardSensor, {
@@ -100,19 +361,36 @@ export function DraggableProjectGrid({
     })
   );
 
-  // Load saved order and apply to projects
+  // Build sortable items from projects and examples
   useEffect(() => {
     const loadOrder = async () => {
       try {
         const { data } = await supabase
           .from("settings")
           .select("value")
-          .eq("key", "porto_ideias_order")
+          .eq("key", "porto_ideias_unified_order")
           .single();
 
-        if (data?.value && Array.isArray(data.value)) {
-          const savedOrder = data.value as string[];
-          const sorted = [...projects].sort((a, b) => {
+        const savedOrder = (data?.value as string[]) || [];
+        
+        // Create unified items
+        const realItems: SortableItem[] = projects.map(p => ({
+          id: `real-${p.id}`,
+          type: "real" as const,
+          data: p,
+        }));
+
+        const exampleItems: SortableItem[] = exampleProjects.map(e => ({
+          id: `example-${e.id}`,
+          type: "example" as const,
+          data: e,
+        }));
+
+        let allItems = [...realItems, ...exampleItems];
+
+        // Sort by saved order
+        if (savedOrder.length > 0) {
+          allItems.sort((a, b) => {
             const indexA = savedOrder.indexOf(a.id);
             const indexB = savedOrder.indexOf(b.id);
             if (indexA === -1 && indexB === -1) return 0;
@@ -120,32 +398,44 @@ export function DraggableProjectGrid({
             if (indexB === -1) return -1;
             return indexA - indexB;
           });
-          setOrderedProjects(sorted);
-        } else {
-          setOrderedProjects(projects);
         }
+
+        setSortableItems(allItems);
       } catch {
-        setOrderedProjects(projects);
+        // Fallback: real first, then examples
+        const realItems: SortableItem[] = projects.map(p => ({
+          id: `real-${p.id}`,
+          type: "real" as const,
+          data: p,
+        }));
+
+        const exampleItems: SortableItem[] = exampleProjects.map(e => ({
+          id: `example-${e.id}`,
+          type: "example" as const,
+          data: e,
+        }));
+
+        setSortableItems([...realItems, ...exampleItems]);
       }
     };
 
     loadOrder();
-  }, [projects]);
+  }, [projects, exampleProjects]);
 
-  const saveOrder = async (newProjects: Project[]) => {
+  const saveOrder = async (items: SortableItem[]) => {
     try {
-      const order = newProjects.map(p => p.id);
+      const order = items.map(item => item.id);
       await supabase
         .from("settings")
         .upsert({ 
-          key: "porto_ideias_order", 
+          key: "porto_ideias_unified_order", 
           value: order,
           updated_at: new Date().toISOString()
         }, { onConflict: "key" });
 
       toast({
         title: "Ordem salva",
-        description: "A ordem dos projetos foi atualizada.",
+        description: "A ordem dos cards foi atualizada.",
       });
     } catch (error) {
       console.error("Error saving order:", error);
@@ -162,7 +452,7 @@ export function DraggableProjectGrid({
     setActiveId(null);
 
     if (over && active.id !== over.id) {
-      setOrderedProjects((items) => {
+      setSortableItems((items) => {
         const oldIndex = items.findIndex((item) => item.id === active.id);
         const newIndex = items.findIndex((item) => item.id === over.id);
         const newItems = arrayMove(items, oldIndex, newIndex);
@@ -172,9 +462,8 @@ export function DraggableProjectGrid({
     }
   };
 
-  const activeProject = orderedProjects.find((p) => p.id === activeId);
-  const displayedProjects = orderedProjects.slice(0, displaySlots);
-  const remainingSlots = displaySlots - displayedProjects.length;
+  const activeItem = sortableItems.find((item) => item.id === activeId);
+  const displayedItems = sortableItems.slice(0, displaySlots);
 
   return (
     <DndContext
@@ -188,16 +477,16 @@ export function DraggableProjectGrid({
         <div className="mb-4 p-3 bg-primary/10 border border-primary/30 rounded-lg flex items-center gap-2 text-sm">
           <GripVertical className="w-4 h-4 text-primary" />
           <span className="text-primary font-medium">Modo Admin:</span>
-          <span className="text-muted-foreground">Arraste os cards para reordenar os projetos</span>
+          <span className="text-muted-foreground">Arraste os cards para reordenar • Duplo clique para abrir</span>
         </div>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-        <SortableContext items={displayedProjects.map(p => p.id)} strategy={rectSortingStrategy}>
-          {displayedProjects.map((project, index) => (
-            <SortableProjectCard
-              key={project.id}
-              project={project}
+        <SortableContext items={displayedItems.map(i => i.id)} strategy={rectSortingStrategy}>
+          {displayedItems.map((item, index) => (
+            <SortableCard
+              key={item.id}
+              item={item}
               index={index}
               isInView={isInView}
               isAdmin={isAdmin}
@@ -209,53 +498,6 @@ export function DraggableProjectGrid({
           ))}
         </SortableContext>
 
-        {/* Example Cards - fill remaining slots */}
-        {remainingSlots > 0 && exampleProjects.slice(0, remainingSlots).map((example, index) => {
-          const cardIndex = displayedProjects.length + index;
-          
-          return (
-            <Link 
-              key={example.id}
-              to={example.link}
-              className="block group"
-              style={{ 
-                opacity: isInView ? 1 : 0,
-                transform: isInView ? 'translateY(0)' : 'translateY(20px)',
-                transition: `all 0.6s ease-out ${cardIndex * 100}ms`
-              }}
-            >
-              <div className={`card-solid bg-card ${example.borderClass || 'border border-border'} rounded-2xl overflow-hidden h-full shadow-2xl hover:-translate-y-2 transition-transform duration-300`}>
-                <div className={`relative h-48 bg-gradient-to-br ${example.gradientClass || 'from-accent/20 to-primary/20'} flex items-center justify-center`}>
-                  <div className={`w-20 h-20 rounded-full ${example.emojiBgClass || 'bg-accent/20'} flex items-center justify-center`}>
-                    <span className={`text-4xl ${example.emojiAnimate ? 'animate-pulse' : ''}`}>{example.emoji}</span>
-                  </div>
-                </div>
-                <div className="p-5">
-                  <Badge 
-                    variant={example.badgeVariant} 
-                    className={`mb-3 rounded-full ${example.badgeClass || ''}`}
-                  >
-                    {example.badge}
-                  </Badge>
-                  <h3 className="text-lg font-serif font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
-                    {example.title}
-                  </h3>
-                  <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
-                    {example.synopsis}
-                  </p>
-                  <div className="flex items-center justify-between pt-3 border-t border-border">
-                    {example.footerContent}
-                    <span className="text-sm font-medium text-primary flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      {example.footerAction || "Ver Exemplo"}
-                      <ArrowRight className="w-4 h-4" />
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </Link>
-          );
-        })}
-
         {/* CTA Card - Always last */}
         <Link 
           to="/submit"
@@ -263,7 +505,7 @@ export function DraggableProjectGrid({
           style={{ 
             opacity: isInView ? 1 : 0,
             transform: isInView ? 'translateY(0)' : 'translateY(20px)',
-            transition: `all 0.6s ease-out ${(displayedProjects.length + Math.min(remainingSlots, exampleProjects.length)) * 100}ms`
+            transition: `all 0.6s ease-out ${displayedItems.length * 100}ms`
           }}
         >
           <div className="card-rainbow border-0 rounded-2xl overflow-hidden h-full shadow-2xl">
@@ -296,24 +538,21 @@ export function DraggableProjectGrid({
 
       {/* Drag Overlay */}
       <DragOverlay>
-        {activeProject ? (
+        {activeItem ? (
           <div className="card-solid bg-card border-2 border-primary rounded-2xl overflow-hidden shadow-2xl ring-4 ring-primary/30 rotate-2 scale-105">
-            <div className="relative overflow-hidden h-48">
-              {activeProject.image_url ? (
-                <img
-                  src={activeProject.image_url}
-                  alt={activeProject.title}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                  <span className="text-4xl font-handwritten text-primary-foreground">{activeProject.title.charAt(0)}</span>
-                </div>
-              )}
+            <div className="h-48 bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+              <span className="text-4xl text-primary-foreground">
+                {activeItem.type === "real" 
+                  ? (activeItem.data as Project).title.charAt(0) 
+                  : (activeItem.data as ExampleProject).emoji}
+              </span>
             </div>
             <div className="p-4">
-              <h3 className="font-bold text-lg text-foreground">{activeProject.title}</h3>
-              <p className="text-sm text-muted-foreground">{activeProject.project_type}</p>
+              <h3 className="font-bold text-lg text-foreground">
+                {activeItem.type === "real" 
+                  ? (activeItem.data as Project).title 
+                  : (activeItem.data as ExampleProject).title}
+              </h3>
             </div>
           </div>
         ) : null}
