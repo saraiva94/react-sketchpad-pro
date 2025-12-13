@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -16,6 +16,15 @@ interface VideoCarouselProps {
 
 export function VideoCarousel({ videos, loading = false, displayCount = 5 }: VideoCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [hasAnimated, setHasAnimated] = useState(false);
+
+  // Trigger entrance animation after mount
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setHasAnimated(true);
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Use displayCount for how many cards to show
   const totalSlots = displayCount;
@@ -37,9 +46,53 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5 }: Vid
     return diff;
   };
 
-  // Get styles based on position and displayCount
+  // Get styles based on position, displayCount, and animation state
   const getCardStyles = (position: number) => {
     const absPosition = Math.abs(position);
+    
+    // Initial state before animation - all cards centered and stacked
+    if (!hasAnimated) {
+      // All cards start at center with scales based on their layer
+      let initialScale = 1;
+      let initialZ = 0;
+      
+      if (displayCount === 1) {
+        initialScale = position === 0 ? 1 : 0;
+      } else if (displayCount === 3) {
+        if (absPosition === 0) {
+          initialScale = 1;
+          initialZ = 0;
+        } else if (absPosition === 1) {
+          initialScale = 0.75;
+          initialZ = -80;
+        } else {
+          initialScale = 0;
+          initialZ = -160;
+        }
+      } else {
+        // 5 video mode
+        if (absPosition === 0) {
+          initialScale = 1;
+          initialZ = 0;
+        } else if (absPosition === 1) {
+          initialScale = 0.70;
+          initialZ = -80;
+        } else if (absPosition === 2) {
+          initialScale = 0.50;
+          initialZ = -160;
+        } else {
+          initialScale = 0;
+          initialZ = -240;
+        }
+      }
+      
+      return {
+        opacity: absPosition <= (displayCount === 1 ? 0 : displayCount === 3 ? 1 : 2) ? 1 : 0,
+        transform: `translateX(0%) translateZ(${initialZ}px) scale(${initialScale})`,
+        zIndex: 10 - absPosition,
+        visibility: (absPosition <= (displayCount === 1 ? 0 : displayCount === 3 ? 1 : 2) ? 'visible' : 'hidden') as 'visible' | 'hidden',
+      };
+    }
     
     // For single video mode, hide all but center
     if (displayCount === 1) {
@@ -130,6 +183,7 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5 }: Vid
       visibility: 'visible' as const,
     };
   };
+
   if (loading) {
     return (
       <div className="relative aspect-video rounded-3xl overflow-hidden shadow-2xl border border-border bg-card card-solid">
