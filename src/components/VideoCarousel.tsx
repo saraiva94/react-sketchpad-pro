@@ -84,20 +84,49 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5 }: Vid
     const isVisible = absPosition <= maxVisible;
     
     // Calculate staggered delay based on layer (further cards animate slightly later)
-    const staggerDelay = absPosition * 80;
+    const staggerDelay = absPosition * 100;
     
-    // Initial state - all cards stacked at center, faded out
+    // Initial state - all cards stacked at center, ready to expand
     if (animationPhase === 'initial') {
       return {
-        opacity: 0,
-        transform: `translateX(0%) translateZ(${final.translateZ}px) scale(${final.scale * 0.9})`,
+        opacity: 0.3,
+        transform: `translateX(0%) translateZ(${final.translateZ}px) scale(${final.scale * 0.85})`,
         zIndex: 10 - absPosition,
         visibility: (isVisible ? 'visible' : 'hidden') as 'visible' | 'hidden',
         transitionDelay: '0ms',
+        boxShadow: '0 0 60px 20px hsla(var(--primary), 0.4)',
+        filter: 'brightness(1.3)',
       };
     }
     
-    // After initial phase - cards slide horizontally with fade-in
+    // Expanding phase - cards sliding out with glow
+    if (animationPhase === 'expanding') {
+      if (!isVisible) {
+        return {
+          opacity: 0,
+          transform: `translateX(${position * 100}%) scale(0.4)`,
+          zIndex: 0,
+          visibility: 'hidden' as const,
+          transitionDelay: '0ms',
+          boxShadow: 'none',
+          filter: 'brightness(1)',
+        };
+      }
+      
+      return {
+        opacity: 1,
+        transform: `translateX(${final.translateX}%) translateZ(${final.translateZ}px) scale(${final.scale})`,
+        zIndex: 10 - absPosition,
+        visibility: 'visible' as const,
+        transitionDelay: `${staggerDelay}ms`,
+        boxShadow: absPosition === 0 
+          ? '0 0 80px 30px hsla(var(--primary), 0.5), 0 25px 50px -12px hsla(0, 0%, 0%, 0.5)' 
+          : '0 0 40px 15px hsla(var(--primary), 0.3), 0 20px 40px -10px hsla(0, 0%, 0%, 0.4)',
+        filter: 'brightness(1.15)',
+      };
+    }
+    
+    // Complete - final resting state
     if (!isVisible) {
       return {
         opacity: 0,
@@ -105,6 +134,8 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5 }: Vid
         zIndex: 0,
         visibility: 'hidden' as const,
         transitionDelay: '0ms',
+        boxShadow: 'none',
+        filter: 'brightness(1)',
       };
     }
     
@@ -113,7 +144,11 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5 }: Vid
       transform: `translateX(${final.translateX}%) translateZ(${final.translateZ}px) scale(${final.scale})`,
       zIndex: 10 - absPosition,
       visibility: 'visible' as const,
-      transitionDelay: `${staggerDelay}ms`,
+      transitionDelay: '0ms',
+      boxShadow: absPosition === 0 
+        ? '0 25px 50px -12px hsla(0, 0%, 0%, 0.5)' 
+        : '0 20px 40px -10px hsla(0, 0%, 0%, 0.3)',
+      filter: 'brightness(1)',
     };
   };
 
@@ -153,12 +188,17 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5 }: Vid
               key={index}
               className="absolute inset-0"
               style={{
-                ...styles,
+                opacity: styles.opacity,
+                transform: styles.transform,
+                zIndex: styles.zIndex,
+                visibility: styles.visibility,
                 transformStyle: 'preserve-3d',
                 cursor: isCenter ? 'default' : 'pointer',
                 transition: animationPhase === 'initial' 
                   ? 'none' 
-                  : `opacity 1000ms ease-out ${styles.transitionDelay}, transform 1000ms cubic-bezier(0.25, 0.46, 0.45, 0.94) ${styles.transitionDelay}`,
+                  : `opacity 1000ms ease-out ${styles.transitionDelay}, transform 1000ms cubic-bezier(0.25, 0.46, 0.45, 0.94) ${styles.transitionDelay}, box-shadow 800ms ease-out ${styles.transitionDelay}, filter 800ms ease-out ${styles.transitionDelay}`,
+                boxShadow: styles.boxShadow,
+                filter: styles.filter,
               }}
               onClick={() => !isCenter && setCurrentIndex(index)}
             >
