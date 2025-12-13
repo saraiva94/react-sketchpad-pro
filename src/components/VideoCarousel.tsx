@@ -38,10 +38,12 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5, onAni
   const totalSlots = displayCount;
   
   const goToPrevious = () => {
+    console.log('goToPrevious called, currentIndex:', currentIndex, 'totalSlots:', totalSlots);
     setCurrentIndex((prev) => (prev === 0 ? totalSlots - 1 : prev - 1));
   };
 
   const goToNext = () => {
+    console.log('goToNext called, currentIndex:', currentIndex, 'totalSlots:', totalSlots);
     setCurrentIndex((prev) => (prev === totalSlots - 1 ? 0 : prev + 1));
   };
 
