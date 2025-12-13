@@ -147,64 +147,133 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5, onAni
       visibility: 'visible' as const,
     };
   };
-  if (loading) {
-    // Show skeleton based on displayCount (not always 5)
-    const skeletonCount = displayCount;
+  // Get skeleton card styles based on position
+  const getSkeletonCardStyles = (position: number) => {
+    const absPosition = Math.abs(position);
     
-    const getSkeletonPositions = () => {
-      if (displayCount === 1) {
-        return [{ position: 0, scale: 1, translateX: 0, translateZ: 0, zIndex: 10 }];
+    if (displayCount === 1) {
+      if (position !== 0) {
+        return { opacity: 0, transform: `translateX(${position * 100}%) scale(0.4)`, zIndex: 0, visibility: 'hidden' as const };
       }
-      if (displayCount === 3) {
-        return [
-          { position: 0, scale: 1, translateX: 0, translateZ: 0, zIndex: 10 },
-          { position: -1, scale: 0.75, translateX: -45, translateZ: -80, zIndex: 9 },
-          { position: 1, scale: 0.75, translateX: 45, translateZ: -80, zIndex: 9 },
-        ];
+      return { opacity: 1, transform: `translateX(0) translateZ(0) scale(1)`, zIndex: 10, visibility: 'visible' as const };
+    }
+    
+    if (displayCount === 3) {
+      if (absPosition > 1) {
+        return { opacity: 0, transform: `translateX(${position * 100}%) scale(0.4)`, zIndex: 0, visibility: 'hidden' as const };
       }
-      return [
-        { position: 0, scale: 1, translateX: 0, translateZ: 0, zIndex: 10 },
-        { position: -1, scale: 0.70, translateX: -38, translateZ: -80, zIndex: 9 },
-        { position: 1, scale: 0.70, translateX: 38, translateZ: -80, zIndex: 9 },
-        { position: -2, scale: 0.50, translateX: -70, translateZ: -160, zIndex: 8 },
-        { position: 2, scale: 0.50, translateX: 70, translateZ: -160, zIndex: 8 },
-      ];
-    };
+      if (position === 0) {
+        return { opacity: 1, transform: `translateX(0) translateZ(0) scale(1)`, zIndex: 10, visibility: 'visible' as const };
+      }
+      return { opacity: 1, transform: `translateX(${position * 45}%) translateZ(-80px) scale(0.75)`, zIndex: 9, visibility: 'visible' as const };
+    }
+    
+    // 5 video mode
+    if (absPosition > 2) {
+      return { opacity: 0, transform: `translateX(${position * 100}%) scale(0.4)`, zIndex: 0, visibility: 'hidden' as const };
+    }
 
-    const skeletonPositions = getSkeletonPositions();
+    let scale: number, translateX: number, translateZ: number;
+    if (position === 0) {
+      scale = 1; translateX = 0; translateZ = 0;
+    } else if (absPosition === 1) {
+      scale = 0.70; translateX = position * 38; translateZ = -80;
+    } else {
+      scale = 0.50; translateX = position * 35; translateZ = -160;
+    }
+    
+    return { opacity: 1, transform: `translateX(${translateX}%) translateZ(${translateZ}px) scale(${scale})`, zIndex: 10 - absPosition, visibility: 'visible' as const };
+  };
 
+  // Get position for skeleton carousel
+  const getSkeletonPosition = (index: number): number => {
+    const diff = index - currentIndex;
+    if (diff > displayCount / 2) return diff - displayCount;
+    if (diff < -displayCount / 2) return diff + displayCount;
+    return diff;
+  };
+
+  if (loading) {
     return (
       <div className="relative w-full">
         <div 
           className="relative aspect-video flex items-center justify-center overflow-visible"
           style={{ perspective: '1500px', perspectiveOrigin: '50% 50%' }}
         >
-          {skeletonPositions.map((pos, index) => (
-            <div
-              key={index}
-              className="absolute inset-0"
-              style={{
-                transform: `translateX(${pos.translateX}%) translateZ(${pos.translateZ}px) scale(${pos.scale})`,
-                zIndex: pos.zIndex,
-                transformStyle: 'preserve-3d',
-              }}
-            >
-              <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-2xl border border-border bg-card card-solid">
-                <Skeleton className="absolute inset-0 w-full h-full" />
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 bg-card">
-                  <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center border border-border shadow-lg animate-pulse">
-                    <Play className="w-12 h-12 text-primary-foreground ml-1" />
-                  </div>
-                  {pos.position === 0 && (
-                    <div className="text-center">
-                      <p className="text-muted-foreground text-sm">Carregando...</p>
+          {Array.from({ length: displayCount }).map((_, index) => {
+            const position = getSkeletonPosition(index);
+            const styles = getSkeletonCardStyles(position);
+            
+            return (
+              <div
+                key={index}
+                className="absolute inset-0 transition-all duration-500 ease-out"
+                style={{
+                  ...styles,
+                  transformStyle: 'preserve-3d',
+                  cursor: position === 0 ? 'default' : 'pointer',
+                }}
+                onClick={() => position !== 0 && setCurrentIndex(index)}
+              >
+                <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-2xl border border-border bg-card card-solid">
+                  <Skeleton className="absolute inset-0 w-full h-full" />
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 bg-card">
+                    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center border border-border shadow-lg animate-pulse">
+                      <Play className="w-12 h-12 text-primary-foreground ml-1" />
                     </div>
-                  )}
+                    {position === 0 && (
+                      <div className="text-center">
+                        <p className="text-muted-foreground text-sm">Carregando...</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
+
+        {/* Navigation arrows for skeleton */}
+        {displayCount > 1 && (
+          <>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={goToPrevious}
+              className="absolute -left-6 md:-left-16 top-1/2 -translate-y-1/2 z-30 w-10 h-10 md:w-12 md:h-12 rounded-full bg-background/90 backdrop-blur-sm border-border hover:bg-background hover:scale-110 transition-all duration-300 shadow-lg"
+              aria-label="Vídeo anterior"
+            >
+              <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={goToNext}
+              className="absolute -right-6 md:-right-16 top-1/2 -translate-y-1/2 z-30 w-10 h-10 md:w-12 md:h-12 rounded-full bg-background/90 backdrop-blur-sm border-border hover:bg-background hover:scale-110 transition-all duration-300 shadow-lg"
+              aria-label="Próximo vídeo"
+            >
+              <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
+            </Button>
+          </>
+        )}
+
+        {/* Dot indicators for skeleton */}
+        {displayCount > 1 && (
+          <div className="flex justify-center gap-2 mt-8">
+            {Array.from({ length: displayCount }).map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentIndex(index)}
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  index === currentIndex
+                    ? "w-6 bg-primary"
+                    : "w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50"
+                }`}
+                aria-label={`Ir para vídeo ${index + 1}`}
+              />
+            ))}
+          </div>
+        )}
       </div>
     );
   }
