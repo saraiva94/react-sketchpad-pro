@@ -770,7 +770,7 @@ const HomePage = () => {
               >
                 <div className="relative p-6 flex flex-col items-center text-center gap-4">
                   <div className="relative">
-                    <div className={`relative w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 ease-out border border-border shadow-lg`}>
+                    <div className={`relative w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-transform duration-0 border border-border shadow-lg`}>
                       <service.icon className={`w-8 h-8 text-black rainbow-icon-glow ${service.hoverColor}`} />
                     </div>
                   </div>
