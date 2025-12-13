@@ -138,7 +138,7 @@ function SortableCard({
     holdTimerRef.current = setTimeout(() => {
       setHoldReady(true);
       console.log('[DnD] Visual: Hold ready indicator shown');
-    }, 900); // Slightly before 1000ms to sync with sensor
+    }, 400); // Slightly before 500ms to sync with sensor
   };
 
   const handlePointerUp = () => {
@@ -262,7 +262,7 @@ function SortableCard({
                 <span className="text-sm text-muted-foreground truncate max-w-[120px]">{project.responsavel_nome || "Produtor Cultural"}</span>
               </div>
               {isAdmin ? (
-                <span className="text-xs text-primary">{holdReady ? "Arraste agora!" : "Segure 1s..."}</span>
+                <span className="text-xs text-primary">{holdReady ? "Arraste!" : "Segure..."}</span>
               ) : (
                 <span className="text-sm font-medium text-primary flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                   Ver Detalhes <ArrowRight className="w-4 h-4" />
@@ -324,7 +324,7 @@ function SortableCard({
           <div className="flex items-center justify-between pt-3 border-t border-border">
             {example.footerContent}
             {isAdmin ? (
-              <span className="text-xs text-primary">{holdReady ? "Arraste agora!" : "Segure 1s..."}</span>
+              <span className="text-xs text-primary">{holdReady ? "Arraste!" : "Segure..."}</span>
             ) : (
               <span className="text-sm font-medium text-primary flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 {example.footerAction || "Ver Exemplo"} <ArrowRight className="w-4 h-4" />
@@ -367,13 +367,13 @@ export function DraggableProjectGrid({
   const sensors = useSensors(
     useSensor(MouseSensor, {
       activationConstraint: {
-        delay: 1000,
+        delay: 500,
         tolerance: 50,
       },
     }),
     useSensor(TouchSensor, {
       activationConstraint: {
-        delay: 1000,
+        delay: 500,
         tolerance: 50,
       },
     }),
