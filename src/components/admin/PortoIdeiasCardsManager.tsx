@@ -9,11 +9,11 @@ import { LayoutGrid, Eye, EyeOff, Save, GripVertical, Star } from "lucide-react"
 
 // Example card IDs matching PortoDeIdeiasPage
 const EXAMPLE_CARDS = [
-  { id: "exemplo-cultura-legado", title: "Sua Cultura, Seu Legado", emoji: "🎭", subtitle: "Audiovisual • Rio de Janeiro" },
-  { id: "exemplo-investidores-aguardam", title: "Investidores Aguardam", emoji: "🤝", subtitle: "Produção Cultural • São Paulo" },
-  { id: "exemplo-historias-sucesso", title: "Histórias de Sucesso", emoji: "🏆", subtitle: "Teatro • São Paulo" },
-  { id: "exemplo-recursos-disponiveis", title: "Recursos Disponíveis", emoji: "💰", subtitle: "Música • Belo Horizonte" },
-  { id: "exemplo-novo-projeto", title: "Adicione seu Projeto", emoji: "✨", subtitle: "Seu projeto aqui" },
+  { id: "exemplo-cultura-legado", title: "Sua Cultura, Seu Legado", emoji: "🎭", subtitle: "Audiovisual • Rio de Janeiro", canFeature: true },
+  { id: "exemplo-investidores-aguardam", title: "Investidores Aguardam", emoji: "🤝", subtitle: "Produção Cultural • São Paulo", canFeature: true },
+  { id: "exemplo-historias-sucesso", title: "Histórias de Sucesso", emoji: "🏆", subtitle: "Teatro • São Paulo", canFeature: true },
+  { id: "exemplo-recursos-disponiveis", title: "Recursos Disponíveis", emoji: "💰", subtitle: "Música • Belo Horizonte", canFeature: true },
+  { id: "exemplo-novo-projeto", title: "Adicione seu Projeto", emoji: "✨", subtitle: "Seu projeto aqui", canFeature: false },
 ];
 
 interface Project {
@@ -262,6 +262,7 @@ export function PortoIdeiasCardsManager({ projects, onFeaturedChange }: PortoIde
             {EXAMPLE_CARDS.map((card) => {
               const isVisible = cardVisibility[card.id] !== false;
               const isFeatured = featuredCards[card.id] === true;
+              const canFeature = card.canFeature;
               
               return (
                 <div 
@@ -271,20 +272,30 @@ export function PortoIdeiasCardsManager({ projects, onFeaturedChange }: PortoIde
                   } ${isFeatured ? 'border-yellow-500/50 bg-yellow-500/5' : ''}`}
                 >
                   <div className="flex items-center gap-3">
-                    <GripVertical className="w-4 h-4 text-muted-foreground" />
+                    {canFeature ? (
+                      <GripVertical className="w-4 h-4 text-muted-foreground" />
+                    ) : (
+                      <div className="w-4 h-4" />
+                    )}
                     
-                    {/* Star for Featured */}
-                    <button
-                      onClick={() => toggleFeatured(card.id)}
-                      className={`p-1.5 rounded-full transition-all ${
-                        isFeatured 
-                          ? 'bg-yellow-500/20 text-yellow-500 hover:bg-yellow-500/30' 
-                          : 'bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground'
-                      }`}
-                      title={isFeatured ? "Remover dos destaques" : "Adicionar aos destaques da homepage"}
-                    >
-                      <Star className={`w-5 h-5 ${isFeatured ? 'fill-yellow-500' : ''}`} />
-                    </button>
+                    {/* Star for Featured - only show for featurable cards */}
+                    {canFeature ? (
+                      <button
+                        onClick={() => toggleFeatured(card.id)}
+                        className={`p-1.5 rounded-full transition-all ${
+                          isFeatured 
+                            ? 'bg-yellow-500/20 text-yellow-500 hover:bg-yellow-500/30' 
+                            : 'bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground'
+                        }`}
+                        title={isFeatured ? "Remover dos destaques" : "Adicionar aos destaques da homepage"}
+                      >
+                        <Star className={`w-5 h-5 ${isFeatured ? 'fill-yellow-500' : ''}`} />
+                      </button>
+                    ) : (
+                      <div className="p-1.5 rounded-full bg-muted/30 text-muted-foreground/50" title="Este card não pode ser destacado">
+                        <Star className="w-5 h-5" />
+                      </div>
+                    )}
                     
                     <div className="w-10 h-10 rounded bg-gradient-to-br from-accent to-primary flex items-center justify-center">
                       <span className="text-lg">{card.emoji}</span>
@@ -295,10 +306,15 @@ export function PortoIdeiasCardsManager({ projects, onFeaturedChange }: PortoIde
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    {isFeatured && (
+                    {isFeatured && canFeature && (
                       <Badge variant="default" className="bg-yellow-600">
                         <Star className="w-3 h-3 mr-1 fill-current" />
                         Destaque
+                      </Badge>
+                    )}
+                    {!canFeature && (
+                      <Badge variant="outline" className="text-muted-foreground text-xs">
+                        Fixo no final
                       </Badge>
                     )}
                     {isVisible ? (
