@@ -143,22 +143,6 @@ const exampleProjects = [
       </div>
     ),
   },
-  {
-    id: "exemplo-novo-projeto",
-    title: "Adicione seu Projeto",
-    synopsis: "Sua ideia cultural merece ganhar vida! Submeta seu projeto e conecte-se com investidores interessados em transformar cultura em realidade.",
-    emoji: "✨",
-    badge: "Novo Projeto",
-    badgeVariant: "default" as const,
-    badgeClass: "bg-primary text-primary-foreground hover:bg-primary/90",
-    link: "/submit",
-    borderClass: "border-dashed border-primary border-2",
-    gradientClass: "from-primary to-accent",
-    emojiBgClass: "bg-primary",
-    emojiAnimate: true,
-    footerContent: <span className="text-sm text-muted-foreground">Comece agora</span>,
-    footerAction: "Submeter",
-  },
 ];
 
 const PortoDeIdeiasPage = () => {
