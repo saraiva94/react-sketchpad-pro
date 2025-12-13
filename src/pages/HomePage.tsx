@@ -346,6 +346,9 @@ const HomePage = () => {
       {/* Navbar */}
       <Navbar currentPage="home" />
 
+      {/* Spacer for fixed navbar */}
+      <div className="h-20" />
+
       {/* Hero Section - Institutional Video Carousel */}
       <section ref={heroRef} id="inicio" className="relative py-20 lg:py-32 overflow-hidden z-10">
         <div className="container mx-auto px-4 relative z-10">
