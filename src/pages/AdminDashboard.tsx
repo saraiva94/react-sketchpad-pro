@@ -811,7 +811,7 @@ const AdminDashboard = () => {
         }
       />
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8 pt-24">
         {/* Navigation Tabs */}
         <div className="flex flex-wrap gap-2 mb-8 p-2 bg-muted rounded-lg justify-center items-center">
           <Button 
