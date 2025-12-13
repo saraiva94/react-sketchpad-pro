@@ -145,14 +145,30 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5 }: Vid
     };
   };
   if (loading) {
-    // Show all 5 skeleton cards simultaneously in stacked layout
-    const skeletonPositions = [
-      { position: 0, scale: 1, translateX: 0, translateZ: 0, zIndex: 10 },
-      { position: -1, scale: 0.70, translateX: -38, translateZ: -80, zIndex: 9 },
-      { position: 1, scale: 0.70, translateX: 38, translateZ: -80, zIndex: 9 },
-      { position: -2, scale: 0.50, translateX: -70, translateZ: -160, zIndex: 8 },
-      { position: 2, scale: 0.50, translateX: 70, translateZ: -160, zIndex: 8 },
-    ];
+    // Show skeleton based on displayCount (not always 5)
+    const skeletonCount = displayCount;
+    
+    const getSkeletonPositions = () => {
+      if (displayCount === 1) {
+        return [{ position: 0, scale: 1, translateX: 0, translateZ: 0, zIndex: 10 }];
+      }
+      if (displayCount === 3) {
+        return [
+          { position: 0, scale: 1, translateX: 0, translateZ: 0, zIndex: 10 },
+          { position: -1, scale: 0.75, translateX: -45, translateZ: -80, zIndex: 9 },
+          { position: 1, scale: 0.75, translateX: 45, translateZ: -80, zIndex: 9 },
+        ];
+      }
+      return [
+        { position: 0, scale: 1, translateX: 0, translateZ: 0, zIndex: 10 },
+        { position: -1, scale: 0.70, translateX: -38, translateZ: -80, zIndex: 9 },
+        { position: 1, scale: 0.70, translateX: 38, translateZ: -80, zIndex: 9 },
+        { position: -2, scale: 0.50, translateX: -70, translateZ: -160, zIndex: 8 },
+        { position: 2, scale: 0.50, translateX: 70, translateZ: -160, zIndex: 8 },
+      ];
+    };
+
+    const skeletonPositions = getSkeletonPositions();
 
     return (
       <div className="relative w-full">

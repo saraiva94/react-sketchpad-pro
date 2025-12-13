@@ -143,6 +143,7 @@ export type Database = {
           project_type: string
           publico_alvo: string | null
           responsavel_email: string | null
+          responsavel_genero: string | null
           responsavel_nome: string | null
           responsavel_telefone: string | null
           stage: string | null
@@ -174,6 +175,7 @@ export type Database = {
           project_type: string
           publico_alvo?: string | null
           responsavel_email?: string | null
+          responsavel_genero?: string | null
           responsavel_nome?: string | null
           responsavel_telefone?: string | null
           stage?: string | null
@@ -205,6 +207,7 @@ export type Database = {
           project_type?: string
           publico_alvo?: string | null
           responsavel_email?: string | null
+          responsavel_genero?: string | null
           responsavel_nome?: string | null
           responsavel_telefone?: string | null
           stage?: string | null

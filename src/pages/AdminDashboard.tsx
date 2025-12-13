@@ -63,6 +63,7 @@ interface Project {
   responsavel_nome: string | null;
   responsavel_email: string | null;
   responsavel_telefone: string | null;
+  responsavel_genero: string | null;
   categorias_tags: string[] | null;
   link_video: string | null;
   valor_sugerido: number | null;
@@ -608,13 +609,23 @@ const AdminDashboard = () => {
 
   const downloadContactsCSV = () => {
     // Collect contacts from all projects (pending, approved, rejected)
+    const getGeneroLabelCSV = (genero: string | null): string => {
+      switch (genero) {
+        case 'masculino': return 'Masculino';
+        case 'feminino': return 'Feminino';
+        case 'outro': return 'Outro';
+        case 'prefiro_nao_informar': return 'Prefiro não informar';
+        default: return 'Não informado';
+      }
+    };
+    
     const allContacts = projects
       .filter(p => p.responsavel_nome || p.responsavel_email || p.responsavel_telefone)
       .map(p => ({
         nome: p.responsavel_nome || "",
         telefone: p.responsavel_telefone || "",
         email: p.responsavel_email || "",
-        genero: p.project_type || "",
+        genero: getGeneroLabelCSV(p.responsavel_genero),
         projeto: p.title,
         status: p.status
       }));
@@ -672,10 +683,20 @@ const AdminDashboard = () => {
     nome: p.responsavel_nome,
     telefone: p.responsavel_telefone,
     email: p.responsavel_email,
-    genero: p.project_type,
+    genero: p.responsavel_genero,
     projeto: p.title,
     status: p.status,
   })).filter(c => c.nome || c.email || c.telefone);
+
+  const getGeneroLabel = (genero: string | null): string => {
+    switch (genero) {
+      case 'masculino': return 'Masculino';
+      case 'feminino': return 'Feminino';
+      case 'outro': return 'Outro';
+      case 'prefiro_nao_informar': return 'Prefiro não informar';
+      default: return 'Não informado';
+    }
+  };
 
   const pendingRequests = accessRequests.filter(r => r.status === "pending");
   const pendingProjects = projects.filter(p => p.status === "pending");
@@ -1367,17 +1388,15 @@ const AdminDashboard = () => {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedProject(project);
-                              setShowDetails(true);
-                            }}
-                          >
-                            <Eye className="w-4 h-4 mr-1" />
-                            Ver Projeto
-                          </Button>
+                          <Link to={`/admin/pending/${project.id}`}>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                            >
+                              <Eye className="w-4 h-4 mr-1" />
+                              Ver Projeto
+                            </Button>
+                          </Link>
                           <Button
                             size="sm"
                             onClick={() => updateProjectStatus(project.id, "approved")}
@@ -1441,7 +1460,7 @@ const AdminDashboard = () => {
                           <td className="py-3 px-4">{contact.nome || "-"}</td>
                           <td className="py-3 px-4">{contact.telefone || "-"}</td>
                           <td className="py-3 px-4">{contact.email || "-"}</td>
-                          <td className="py-3 px-4">{contact.genero || "-"}</td>
+                          <td className="py-3 px-4">{getGeneroLabel(contact.genero)}</td>
                           <td className="py-3 px-4">{contact.projeto}</td>
                           <td className="py-3 px-4">
                             <Badge variant={
