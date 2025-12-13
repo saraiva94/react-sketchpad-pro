@@ -17,35 +17,31 @@ interface VideoCarouselProps {
 
 export function VideoCarousel({ videos, loading = false, displayCount = 5, onAnimationComplete }: VideoCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [entrancePhase, setEntrancePhase] = useState<'initial' | 'expanding' | 'complete'>('initial');
+  const [hasEntered, setHasEntered] = useState(false);
   const hasCalledComplete = useRef(false);
 
-  // Entrance animation sequence
+  // Entrance animation - single expansion from center to final positions
   useEffect(() => {
-    if (!loading) {
-      // Start with all cards stacked at center
-      setEntrancePhase('initial');
-      
-      // After a brief moment, start expanding to final positions
+    if (!loading && !hasEntered) {
+      // Small delay then expand to final positions
       const expandTimer = setTimeout(() => {
-        setEntrancePhase('expanding');
-      }, 100);
+        setHasEntered(true);
+      }, 50);
       
-      // Mark animation complete after expansion
+      // Notify parent after animation completes
       const completeTimer = setTimeout(() => {
-        setEntrancePhase('complete');
         if (!hasCalledComplete.current) {
           onAnimationComplete?.();
           hasCalledComplete.current = true;
         }
-      }, 900);
+      }, 850);
       
       return () => {
         clearTimeout(expandTimer);
         clearTimeout(completeTimer);
       };
     }
-  }, [loading, onAnimationComplete]);
+  }, [loading, hasEntered, onAnimationComplete]);
 
   // Use displayCount for how many cards to show
   const totalSlots = displayCount;
@@ -67,28 +63,20 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5, onAni
     return diff;
   };
 
-  // Get entrance animation styles - cards start from center and expand outward
-  const getEntranceStyles = (position: number) => {
+  // Get styles based on position and displayCount
+  const getCardStyles = (position: number, forEntrance: boolean = false) => {
     const absPosition = Math.abs(position);
     
-    if (entrancePhase === 'initial') {
-      // All cards start stacked at center with slight scale variation
-      const initialScale = 1 - (absPosition * 0.15);
+    // Initial state - all cards stacked at center
+    if (!hasEntered && forEntrance) {
+      const initialScale = 1 - (absPosition * 0.1);
       return {
-        opacity: absPosition <= 2 ? 0.3 + (0.7 / (absPosition + 1)) : 0,
-        transform: `translateX(0) translateZ(${-absPosition * 20}px) scale(${Math.max(0.6, initialScale)})`,
+        opacity: absPosition <= 2 ? 0.5 : 0,
+        transform: `translateX(0) translateZ(${-absPosition * 15}px) scale(${Math.max(0.7, initialScale)})`,
         zIndex: 10 - absPosition,
         visibility: absPosition <= 2 ? 'visible' as const : 'hidden' as const,
       };
     }
-    
-    // Return final positions for 'expanding' and 'complete' phases
-    return getCardStyles(position);
-  };
-
-  // Get styles based on position and displayCount
-  const getCardStyles = (position: number) => {
-    const absPosition = Math.abs(position);
     
     // For single video mode, hide all but center
     if (displayCount === 1) {
@@ -326,13 +314,13 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5, onAni
         {/* Cards */}
         {Array.from({ length: totalSlots }).map((_, index) => {
           const position = getPosition(index);
-          const styles = entrancePhase === 'complete' ? getCardStyles(position) : getEntranceStyles(position);
+          const styles = getCardStyles(position, true);
           const video = videos[index];
           const hasVideo = video && video.url;
           const isCenter = position === 0;
 
           // Calculate staggered delay for entrance animation
-          const staggerDelay = entrancePhase === 'expanding' ? Math.abs(position) * 100 : 0;
+          const staggerDelay = !hasEntered ? Math.abs(position) * 80 : 0;
 
           return (
             <div
@@ -342,11 +330,11 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5, onAni
                 ...styles,
                 transformStyle: 'preserve-3d',
                 cursor: isCenter ? 'default' : 'pointer',
-                transitionDuration: entrancePhase === 'expanding' ? '800ms' : '500ms',
-                transitionTimingFunction: entrancePhase === 'expanding' ? 'cubic-bezier(0.34, 1.56, 0.64, 1)' : 'ease-out',
+                transitionDuration: '700ms',
+                transitionTimingFunction: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
                 transitionDelay: `${staggerDelay}ms`,
               }}
-              onClick={() => entrancePhase === 'complete' && !isCenter && setCurrentIndex(index)}
+              onClick={() => hasEntered && !isCenter && setCurrentIndex(index)}
             >
               <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-2xl border border-border bg-card card-solid">
                 {hasVideo ? (
@@ -399,7 +387,7 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5, onAni
       </div>
 
       {/* Navigation arrows - only show if more than 1 video and animation complete */}
-      {displayCount > 1 && entrancePhase === 'complete' && (
+      {displayCount > 1 && hasEntered && (
         <>
           <Button
             variant="outline"
@@ -423,7 +411,7 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5, onAni
       )}
 
       {/* Dot indicators - only show if more than 1 video and animation complete */}
-      {displayCount > 1 && entrancePhase === 'complete' && (
+      {displayCount > 1 && hasEntered && (
         <div className="flex justify-center gap-2 mt-8 animate-fade-in">
           {Array.from({ length: totalSlots }).map((_, index) => (
             <button
