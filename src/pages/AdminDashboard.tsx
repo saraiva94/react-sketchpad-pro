@@ -111,7 +111,7 @@ const AdminDashboard = () => {
   const [showDetails, setShowDetails] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [activeTab, setActiveTab] = useState("pending");
-  const [activeSection, setActiveSection] = useState<"projects" | "requests" | "contacts" | "homepage">("projects");
+  const [activeSection, setActiveSection] = useState<"projects" | "requests" | "contacts" | "homepage">("homepage");
   const [statsVisible, setStatsVisible] = useState(true);
   const [loadingSettings, setLoadingSettings] = useState(true);
   
@@ -841,7 +841,7 @@ const AdminDashboard = () => {
             className="rounded-md"
           >
             <Home className="w-4 h-4 mr-2" />
-            Homepage
+            Editar Páginas
           </Button>
           <Button 
             type="button"
