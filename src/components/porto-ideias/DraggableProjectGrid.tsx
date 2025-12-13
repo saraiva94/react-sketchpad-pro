@@ -4,12 +4,13 @@ import {
   DndContext,
   closestCenter,
   KeyboardSensor,
-  PointerSensor,
+  MouseSensor,
   TouchSensor,
   useSensor,
   useSensors,
   DragEndEvent,
   DragOverlay,
+  DragStartEvent,
 } from "@dnd-kit/core";
 import {
   arrayMove,
@@ -105,25 +106,41 @@ function SortableCard({
     zIndex: isDragging ? 1000 : 1,
   };
 
-  // Track if drag started
+  // Track if drag started - reset on each render cycle
   useEffect(() => {
     if (isDragging) {
       wasDragging.current = true;
+      console.log('[DnD] Drag started for:', item.id);
     }
-  }, [isDragging]);
+  }, [isDragging, item.id]);
 
-  const handlePointerDown = () => {
+  const handleMouseDown = () => {
     pointerDownTime.current = Date.now();
     wasDragging.current = false;
+    console.log('[DnD] Mouse down at:', pointerDownTime.current, 'isAdmin:', isAdmin);
   };
 
   const handleClick = (e: React.MouseEvent, targetUrl: string) => {
-    // If was dragging or held for more than 1.5s, don't navigate
     const holdDuration = Date.now() - pointerDownTime.current;
-    if (wasDragging.current || (isAdmin && holdDuration > 1500)) {
+    console.log('[DnD] Click handler - wasDragging:', wasDragging.current, 'holdDuration:', holdDuration, 'isAdmin:', isAdmin);
+    
+    // If drag happened or is happening, prevent navigation
+    if (wasDragging.current || isDragging) {
+      console.log('[DnD] Preventing navigation - was dragging');
       e.preventDefault();
+      e.stopPropagation();
       return;
     }
+    
+    // For admin, if held too long (close to drag threshold), don't navigate
+    if (isAdmin && holdDuration > 1800) {
+      console.log('[DnD] Preventing navigation - held too long');
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+    
+    console.log('[DnD] Navigating to:', targetUrl);
     navigate(targetUrl);
   };
 
@@ -145,7 +162,7 @@ function SortableCard({
         }}
         className={`block group relative ${isAdmin ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'}`}
         {...(isAdmin ? { ...attributes, ...listeners } : {})}
-        onPointerDown={handlePointerDown}
+        onMouseDown={handleMouseDown}
         onClick={(e) => handleClick(e, targetUrl)}
       >
         <div 
@@ -234,7 +251,7 @@ function SortableCard({
       }}
       className={`block group relative ${isAdmin ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'}`}
       {...(isAdmin ? { ...attributes, ...listeners } : {})}
-      onPointerDown={handlePointerDown}
+      onMouseDown={handleMouseDown}
       onClick={(e) => handleClick(e, targetUrl)}
     >
       <div className={`card-solid bg-card ${example.borderClass || 'border border-border'} rounded-2xl overflow-hidden h-full shadow-2xl transition-all duration-300 ${
@@ -304,16 +321,16 @@ export function DraggableProjectGrid({
   const [activeId, setActiveId] = useState<string | null>(null);
 
   const sensors = useSensors(
-    useSensor(PointerSensor, {
+    useSensor(MouseSensor, {
       activationConstraint: {
         delay: 2000,
-        tolerance: 5,
+        tolerance: 10,
       },
     }),
     useSensor(TouchSensor, {
       activationConstraint: {
         delay: 2000,
-        tolerance: 5,
+        tolerance: 10,
       },
     }),
     useSensor(KeyboardSensor, {
@@ -429,7 +446,10 @@ export function DraggableProjectGrid({
     <DndContext
       sensors={sensors}
       collisionDetection={closestCenter}
-      onDragStart={(event) => setActiveId(event.active.id as string)}
+      onDragStart={(event: DragStartEvent) => {
+        console.log('[DnD] DragStart event fired!', event.active.id);
+        setActiveId(event.active.id as string);
+      }}
       onDragEnd={handleDragEnd}
     >
       {/* Admin Mode Indicator */}
