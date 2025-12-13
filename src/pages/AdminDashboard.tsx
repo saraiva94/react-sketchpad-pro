@@ -878,6 +878,22 @@ const AdminDashboard = () => {
             <Users className="w-4 h-4 mr-2" />
             Cadastros
           </Button>
+
+          {/* Separator */}
+          <div className="h-6 w-px bg-border mx-2" />
+
+          {/* Porto de Ideias Button - Links to page */}
+          <Link to="/porto-de-ideias">
+            <Button 
+              type="button"
+              variant="outline"
+              size="sm"
+              className="rounded-md rainbow-border-glow"
+            >
+              <ExternalLink className="w-4 h-4 mr-2" />
+              Porto de Ideias
+            </Button>
+          </Link>
         </div>
 
         {/* Homepage Section (formerly Settings + Featured) */}
