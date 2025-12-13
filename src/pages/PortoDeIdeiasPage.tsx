@@ -432,6 +432,9 @@ const PortoDeIdeiasPage = () => {
       {/* Navbar */}
       <Navbar currentPage="porto-de-ideias" />
 
+      {/* Spacer for fixed navbar */}
+      <div className="h-20" />
+
       {/* Header */}
       <section ref={headerRef} className="relative py-16 md:py-24 overflow-hidden z-10">
         {/* Solid background */}
