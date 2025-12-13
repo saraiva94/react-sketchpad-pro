@@ -96,8 +96,10 @@ function SortableCard({
     isDragging,
   } = useSortable({ id: item.id, disabled: !isAdmin });
 
-  const pointerDownTime = useRef<number>(0);
-  const wasDragging = useRef<boolean>(false);
+  const [isHolding, setIsHolding] = useState(false);
+  const [holdReady, setHoldReady] = useState(false);
+  const holdTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const wasHoldingRef = useRef(false);
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -106,43 +108,74 @@ function SortableCard({
     zIndex: isDragging ? 1000 : 1,
   };
 
-  // Track if drag started - reset on each render cycle
+  // Track if drag started
   useEffect(() => {
     if (isDragging) {
-      wasDragging.current = true;
-      console.log('[DnD] Drag started for:', item.id);
+      wasHoldingRef.current = true;
     }
-  }, [isDragging, item.id]);
+  }, [isDragging]);
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (holdTimerRef.current) {
+        clearTimeout(holdTimerRef.current);
+      }
+    };
+  }, []);
 
   const handleMouseDown = () => {
-    pointerDownTime.current = Date.now();
-    wasDragging.current = false;
-    console.log('[DnD] Mouse down at:', pointerDownTime.current, 'isAdmin:', isAdmin);
+    if (!isAdmin) return;
+    
+    setIsHolding(true);
+    wasHoldingRef.current = false;
+    
+    // Start hold timer
+    holdTimerRef.current = setTimeout(() => {
+      setHoldReady(true);
+      console.log('[DnD] Hold ready! You can now drag.');
+    }, 2000);
+  };
+
+  const handleMouseUp = () => {
+    if (holdTimerRef.current) {
+      clearTimeout(holdTimerRef.current);
+      holdTimerRef.current = null;
+    }
+    setIsHolding(false);
+    setHoldReady(false);
+  };
+
+  const handleMouseLeave = () => {
+    if (holdTimerRef.current) {
+      clearTimeout(holdTimerRef.current);
+      holdTimerRef.current = null;
+    }
+    setIsHolding(false);
+    setHoldReady(false);
   };
 
   const handleClick = (e: React.MouseEvent, targetUrl: string) => {
-    const holdDuration = Date.now() - pointerDownTime.current;
-    console.log('[DnD] Click handler - wasDragging:', wasDragging.current, 'holdDuration:', holdDuration, 'isAdmin:', isAdmin);
+    // If drag happened, prevent navigation
+    if (isDragging || wasHoldingRef.current) {
+      e.preventDefault();
+      e.stopPropagation();
+      wasHoldingRef.current = false;
+      return;
+    }
     
-    // If drag happened or is happening, prevent navigation
-    if (wasDragging.current || isDragging) {
-      console.log('[DnD] Preventing navigation - was dragging');
+    // If hold was ready (2s passed), don't navigate - user wanted to drag
+    if (holdReady) {
       e.preventDefault();
       e.stopPropagation();
       return;
     }
     
-    // For admin, if held too long (close to drag threshold), don't navigate
-    if (isAdmin && holdDuration > 1800) {
-      console.log('[DnD] Preventing navigation - held too long');
-      e.preventDefault();
-      e.stopPropagation();
-      return;
-    }
-    
-    console.log('[DnD] Navigating to:', targetUrl);
     navigate(targetUrl);
   };
+
+  // Only apply drag listeners when hold is ready
+  const dragListeners = isAdmin && holdReady ? listeners : {};
 
   if (item.type === "real") {
     const project = item.data as Project;
@@ -160,20 +193,25 @@ function SortableCard({
             : isInView ? 'translateY(0)' : 'translateY(20px)',
           transition: isDragging ? transition : `all 0.6s ease-out ${index * 100}ms`,
         }}
-        className={`block group relative ${isAdmin ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'}`}
-        {...(isAdmin ? { ...attributes, ...listeners } : {})}
+        className={`block group relative ${isAdmin ? (holdReady ? 'cursor-grabbing' : 'cursor-grab') : 'cursor-pointer'}`}
+        {...attributes}
+        {...dragListeners}
         onMouseDown={handleMouseDown}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseLeave}
         onClick={(e) => handleClick(e, targetUrl)}
       >
         <div 
           className={`card-solid bg-card border border-border rounded-2xl overflow-hidden shadow-2xl h-full transition-all duration-300 ${
-            isDragging ? "ring-2 ring-primary shadow-xl scale-105 rotate-1" : "hover:-translate-y-2"
+            isDragging ? "ring-2 ring-primary shadow-xl scale-105 rotate-1" : holdReady ? "ring-2 ring-accent shadow-xl scale-[1.02]" : "hover:-translate-y-2"
           }`}
         >
           {/* Admin Drag Indicator */}
           {isAdmin && (
-            <div className="absolute top-2 right-2 z-20 p-2 bg-primary/90 backdrop-blur-sm rounded-lg border border-primary shadow-md">
-              <GripVertical className="w-5 h-5 text-primary-foreground" />
+            <div className={`absolute top-2 right-2 z-20 p-2 backdrop-blur-sm rounded-lg border shadow-md transition-colors ${
+              holdReady ? 'bg-accent border-accent' : isHolding ? 'bg-yellow-500/90 border-yellow-500' : 'bg-primary/90 border-primary'
+            }`}>
+              <GripVertical className={`w-5 h-5 ${holdReady ? 'text-accent-foreground' : 'text-primary-foreground'}`} />
             </div>
           )}
 
@@ -222,7 +260,7 @@ function SortableCard({
                 <span className="text-sm text-muted-foreground truncate max-w-[120px]">{project.responsavel_nome || "Produtor Cultural"}</span>
               </div>
               {isAdmin ? (
-                <span className="text-xs text-primary">Segure 2s para arrastar</span>
+                <span className="text-xs text-primary">{holdReady ? "Arraste agora!" : "Segure 2s..."}</span>
               ) : (
                 <span className="text-sm font-medium text-primary flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                   Ver Detalhes <ArrowRight className="w-4 h-4" />
@@ -249,18 +287,23 @@ function SortableCard({
           : isInView ? 'translateY(0)' : 'translateY(20px)',
         transition: isDragging ? transition : `all 0.6s ease-out ${index * 100}ms`,
       }}
-      className={`block group relative ${isAdmin ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'}`}
-      {...(isAdmin ? { ...attributes, ...listeners } : {})}
+      className={`block group relative ${isAdmin ? (holdReady ? 'cursor-grabbing' : 'cursor-grab') : 'cursor-pointer'}`}
+      {...attributes}
+      {...dragListeners}
       onMouseDown={handleMouseDown}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseLeave}
       onClick={(e) => handleClick(e, targetUrl)}
     >
       <div className={`card-solid bg-card ${example.borderClass || 'border border-border'} rounded-2xl overflow-hidden h-full shadow-2xl transition-all duration-300 ${
-        isDragging ? "ring-2 ring-primary shadow-xl scale-105 rotate-1" : "hover:-translate-y-2"
+        isDragging ? "ring-2 ring-primary shadow-xl scale-105 rotate-1" : holdReady ? "ring-2 ring-accent shadow-xl scale-[1.02]" : "hover:-translate-y-2"
       }`}>
         {/* Admin Drag Indicator */}
         {isAdmin && (
-          <div className="absolute top-2 right-2 z-20 p-2 bg-primary/90 backdrop-blur-sm rounded-lg border border-primary shadow-md">
-            <GripVertical className="w-5 h-5 text-primary-foreground" />
+          <div className={`absolute top-2 right-2 z-20 p-2 backdrop-blur-sm rounded-lg border shadow-md transition-colors ${
+            holdReady ? 'bg-accent border-accent' : isHolding ? 'bg-yellow-500/90 border-yellow-500' : 'bg-primary/90 border-primary'
+          }`}>
+            <GripVertical className={`w-5 h-5 ${holdReady ? 'text-accent-foreground' : 'text-primary-foreground'}`} />
           </div>
         )}
         
@@ -280,7 +323,7 @@ function SortableCard({
           <div className="flex items-center justify-between pt-3 border-t border-border">
             {example.footerContent}
             {isAdmin ? (
-              <span className="text-xs text-primary">Segure 2s para arrastar</span>
+              <span className="text-xs text-primary">{holdReady ? "Arraste agora!" : "Segure 2s..."}</span>
             ) : (
               <span className="text-sm font-medium text-primary flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 {example.footerAction || "Ver Exemplo"} <ArrowRight className="w-4 h-4" />
@@ -323,14 +366,12 @@ export function DraggableProjectGrid({
   const sensors = useSensors(
     useSensor(MouseSensor, {
       activationConstraint: {
-        delay: 2000,
-        tolerance: 10,
+        distance: 5,
       },
     }),
     useSensor(TouchSensor, {
       activationConstraint: {
-        delay: 2000,
-        tolerance: 10,
+        distance: 5,
       },
     }),
     useSensor(KeyboardSensor, {
