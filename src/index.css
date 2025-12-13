@@ -582,4 +582,14 @@
       background: conic-gradient(from 360deg, hsl(var(--primary)), hsl(var(--accent)), hsl(var(--primary)));
     }
   }
+
+  /* Prevent body scroll-lock shifting from Radix Select */
+  html {
+    overflow-y: scroll;
+  }
+  
+  body[data-scroll-locked] {
+    padding-right: 0 !important;
+    margin-right: 0 !important;
+  }
 }
