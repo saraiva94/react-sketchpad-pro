@@ -356,23 +356,11 @@ const HomePage = () => {
     },
   ];
 
-  // Filtrar exemplos pela visibilidade
-  const visibleExamples = exampleProjects.filter(ex => featuredVisibility[ex.id] !== false);
-  
-  // Ordenar exemplos pela ordem salva
-  if (featuredOrder.length > 0) {
-    visibleExamples.sort((a, b) => {
-      const indexA = featuredOrder.indexOf(a.id);
-      const indexB = featuredOrder.indexOf(b.id);
-      if (indexA === -1 && indexB === -1) return 0;
-      if (indexA === -1) return 1;
-      if (indexB === -1) return -1;
-      return indexA - indexB;
-    });
-  }
-  
   // Construir lista de projetos combinando reais + exemplos respeitando a ordem global
   const buildDisplayProjects = () => {
+    // Filtrar exemplos pela visibilidade
+    const visibleExamples = exampleProjects.filter(ex => featuredVisibility[ex.id] !== false);
+    
     // Criar lista de todos os itens com seu tipo
     type DisplayItem = { type: 'real'; data: Project } | { type: 'example'; data: typeof exampleProjects[0] };
     
