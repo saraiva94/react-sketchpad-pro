@@ -749,7 +749,7 @@ const AdminDashboard = () => {
 
       <main className="container mx-auto px-4 py-8">
         {/* Navigation Tabs */}
-        <div className="flex flex-wrap gap-2 mb-8 p-1 bg-muted rounded-lg">
+        <div className="flex flex-wrap gap-2 mb-8 p-2 bg-muted rounded-lg justify-center items-center">
           <Button 
             type="button"
             variant={activeSection === "projects" ? "default" : "ghost"}
