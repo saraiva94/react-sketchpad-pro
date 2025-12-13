@@ -5,21 +5,24 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { LayoutGrid, Eye, EyeOff, Save, GripVertical, Star } from "lucide-react";
+import { LayoutGrid, Eye, EyeOff, Save, GripVertical, Star, Lock } from "lucide-react";
 
 // Example card IDs matching PortoDeIdeiasPage
 const EXAMPLE_CARDS = [
-  { id: "exemplo-cultura-legado", title: "Sua Cultura, Seu Legado", emoji: "🎭", subtitle: "Audiovisual • Rio de Janeiro", canFeature: true },
-  { id: "exemplo-investidores-aguardam", title: "Investidores Aguardam", emoji: "🤝", subtitle: "Produção Cultural • São Paulo", canFeature: true },
-  { id: "exemplo-historias-sucesso", title: "Histórias de Sucesso", emoji: "🏆", subtitle: "Teatro • São Paulo", canFeature: true },
-  { id: "exemplo-recursos-disponiveis", title: "Recursos Disponíveis", emoji: "💰", subtitle: "Música • Belo Horizonte", canFeature: true },
-  { id: "exemplo-novo-projeto", title: "Adicione seu Projeto", emoji: "✨", subtitle: "Seu projeto aqui", canFeature: false },
+  { id: "exemplo-cultura-legado", title: "Sua Cultura, Seu Legado", emoji: "🎭", subtitle: "Audiovisual • Rio de Janeiro", canFeature: true, isExample: true },
+  { id: "exemplo-investidores-aguardam", title: "Investidores Aguardam", emoji: "🤝", subtitle: "Produção Cultural • São Paulo", canFeature: true, isExample: true },
+  { id: "exemplo-historias-sucesso", title: "Histórias de Sucesso", emoji: "🏆", subtitle: "Teatro • São Paulo", canFeature: true, isExample: true },
+  { id: "exemplo-recursos-disponiveis", title: "Recursos Disponíveis", emoji: "💰", subtitle: "Música • Belo Horizonte", canFeature: true, isExample: true },
+  { id: "exemplo-novo-projeto", title: "Adicione seu Projeto", emoji: "✨", subtitle: "Seu projeto aqui", canFeature: false, isExample: true },
 ];
 
 interface Project {
   id: string;
   title: string;
   image_url: string | null;
+  status?: string;
+  project_type?: string;
+  location?: string;
 }
 
 interface PortoIdeiasCardsManagerProps {
@@ -35,10 +38,15 @@ interface FeaturedCards {
   [key: string]: boolean;
 }
 
+interface CardOrder {
+  [key: string]: number;
+}
+
 export function PortoIdeiasCardsManager({ projects, onFeaturedChange }: PortoIdeiasCardsManagerProps) {
   const { toast } = useToast();
   const [cardVisibility, setCardVisibility] = useState<CardVisibility>({});
   const [featuredCards, setFeaturedCards] = useState<FeaturedCards>({});
+  const [cardOrder, setCardOrder] = useState<CardOrder>({});
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -75,21 +83,64 @@ export function PortoIdeiasCardsManager({ projects, onFeaturedChange }: PortoIde
     if (featuredData) {
       setFeaturedCards(featuredData.value as FeaturedCards);
     } else {
-      // Default: first 3 are featured
+      // Default: first 3 examples are featured
       const defaultFeatured: FeaturedCards = {};
-      EXAMPLE_CARDS.slice(0, 3).forEach(card => {
+      EXAMPLE_CARDS.slice(0, 3).filter(c => c.canFeature).forEach(card => {
         defaultFeatured[card.id] = true;
       });
       setFeaturedCards(defaultFeatured);
     }
 
+    // Fetch card order
+    const { data: orderData } = await supabase
+      .from("settings")
+      .select("value")
+      .eq("key", "porto_ideias_order")
+      .maybeSingle();
+    
+    if (orderData) {
+      setCardOrder(orderData.value as CardOrder);
+    }
+
     setLoading(false);
   };
+
+  // Filter only approved projects
+  const approvedProjects = projects.filter((p) => p.status === "approved" || !p.status);
+
+  // Build combined list of all cards (real projects + examples)
+  const allCards = [
+    ...approvedProjects.map(p => ({
+      id: p.id,
+      title: p.title,
+      subtitle: `${p.project_type || 'Projeto'} • ${p.location || 'Brasil'}`,
+      image_url: p.image_url,
+      canFeature: true,
+      isExample: false,
+      emoji: null as string | null,
+    })),
+    ...EXAMPLE_CARDS.map(c => ({
+      id: c.id,
+      title: c.title,
+      subtitle: c.subtitle,
+      image_url: null as string | null,
+      canFeature: c.canFeature,
+      isExample: true,
+      emoji: c.emoji,
+    }))
+  ];
+
+  // Sort by order if available
+  const sortedCards = [...allCards].sort((a, b) => {
+    const orderA = cardOrder[a.id] ?? 999;
+    const orderB = cardOrder[b.id] ?? 999;
+    return orderA - orderB;
+  });
 
   const toggleCardVisibility = (cardId: string) => {
     setCardVisibility(prev => ({
       ...prev,
-      [cardId]: !prev[cardId]
+      [cardId]: prev[cardId] === false ? true : false
     }));
   };
 
@@ -134,27 +185,11 @@ export function PortoIdeiasCardsManager({ projects, onFeaturedChange }: PortoIde
   const saveVisibility = async () => {
     setSaving(true);
     
-    const { data: existing } = await supabase
-      .from("settings")
-      .select("id")
-      .eq("key", "porto_ideias_card_visibility")
-      .maybeSingle();
-
     const jsonValue = JSON.parse(JSON.stringify(cardVisibility));
 
-    let error;
-    if (existing) {
-      const result = await supabase
-        .from("settings")
-        .update({ value: jsonValue })
-        .eq("key", "porto_ideias_card_visibility");
-      error = result.error;
-    } else {
-      const result = await supabase
-        .from("settings")
-        .insert({ key: "porto_ideias_card_visibility", value: jsonValue });
-      error = result.error;
-    }
+    const { error } = await supabase
+      .from("settings")
+      .upsert({ key: "porto_ideias_card_visibility", value: jsonValue }, { onConflict: "key" });
 
     if (error) {
       toast({
@@ -173,7 +208,6 @@ export function PortoIdeiasCardsManager({ projects, onFeaturedChange }: PortoIde
   };
 
   const featuredCount = Object.values(featuredCards).filter(Boolean).length;
-  const approvedProjects = projects.filter((p: any) => p.status === "approved" || !p.status);
 
   if (loading) {
     return (
@@ -188,6 +222,10 @@ export function PortoIdeiasCardsManager({ projects, onFeaturedChange }: PortoIde
     );
   }
 
+  // Separate real projects and example cards for organized display
+  const realProjectCards = sortedCards.filter(c => !c.isExample);
+  const exampleCards = sortedCards.filter(c => c.isExample);
+
   return (
     <Card>
       <CardHeader>
@@ -198,41 +236,8 @@ export function PortoIdeiasCardsManager({ projects, onFeaturedChange }: PortoIde
       </CardHeader>
       <CardContent className="space-y-6">
         <p className="text-sm text-muted-foreground">
-          Gerencie a visibilidade dos cards na página Porto de Ideias. A grade se ajusta automaticamente em linhas de 3 cards.
+          Gerencie a visibilidade, destaque e ordem dos cards na página Porto de Ideias. Projetos reais aprovados e cards de exemplo podem ser ocultados, destacados na homepage (máx. 3) e reordenados.
         </p>
-
-        {/* Real Projects (always visible if approved) */}
-        {approvedProjects.length > 0 && (
-          <div className="space-y-3">
-            <h4 className="font-medium flex items-center gap-2">
-              Projetos Reais Aprovados
-              <Badge variant="secondary">{approvedProjects.length}</Badge>
-            </h4>
-            <div className="space-y-2">
-              {approvedProjects.map((project) => (
-                <div key={project.id} className="flex items-center justify-between p-3 border rounded-lg bg-card">
-                  <div className="flex items-center gap-3">
-                    <GripVertical className="w-4 h-4 text-muted-foreground" />
-                    {project.image_url ? (
-                      <img src={project.image_url} alt={project.title} className="w-10 h-10 rounded object-cover" />
-                    ) : (
-                      <div className="w-10 h-10 rounded bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                        <span className="text-sm text-primary-foreground font-semibold">
-                          {project.title.charAt(0)}
-                        </span>
-                      </div>
-                    )}
-                    <span className="font-medium">{project.title}</span>
-                  </div>
-                  <Badge variant="default" className="bg-green-600">
-                    <Eye className="w-3 h-3 mr-1" />
-                    Sempre Visível
-                  </Badge>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* Featured Count Indicator */}
         <div className="flex items-center gap-2 p-3 bg-primary/10 rounded-lg border border-primary/20">
@@ -247,19 +252,109 @@ export function PortoIdeiasCardsManager({ projects, onFeaturedChange }: PortoIde
           )}
         </div>
 
+        {/* Real Approved Projects */}
+        {realProjectCards.length > 0 && (
+          <div className="space-y-3">
+            <h4 className="font-medium flex items-center gap-2">
+              Projetos Reais Aprovados
+              <Badge variant="secondary">{realProjectCards.length}</Badge>
+            </h4>
+            <p className="text-sm text-muted-foreground">
+              Clique na estrela para destacar na homepage. Use o toggle para controlar visibilidade no Porto de Ideias.
+            </p>
+            <div className="space-y-2">
+              {realProjectCards.map((card) => {
+                const isVisible = cardVisibility[card.id] !== false;
+                const isFeatured = featuredCards[card.id] === true;
+                
+                return (
+                  <div 
+                    key={card.id} 
+                    className={`flex items-center justify-between p-3 border rounded-lg transition-colors ${
+                      isVisible ? 'bg-card' : 'bg-muted/50 opacity-60'
+                    } ${isFeatured ? 'border-yellow-500/50 bg-yellow-500/5' : ''}`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <GripVertical className="w-4 h-4 text-muted-foreground cursor-grab" />
+                      
+                      {/* Star for Featured */}
+                      <button
+                        onClick={() => toggleFeatured(card.id)}
+                        className={`p-1.5 rounded-full transition-all ${
+                          isFeatured 
+                            ? 'bg-yellow-500/20 text-yellow-500 hover:bg-yellow-500/30' 
+                            : 'bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground'
+                        }`}
+                        title={isFeatured ? "Remover dos destaques" : "Adicionar aos destaques da homepage"}
+                      >
+                        <Star className={`w-5 h-5 ${isFeatured ? 'fill-yellow-500' : ''}`} />
+                      </button>
+                      
+                      {card.image_url ? (
+                        <img src={card.image_url} alt={card.title} className="w-10 h-10 rounded object-cover" />
+                      ) : (
+                        <div className="w-10 h-10 rounded bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                          <span className="text-sm text-primary-foreground font-semibold">
+                            {card.title.charAt(0)}
+                          </span>
+                        </div>
+                      )}
+                      <div>
+                        <span className="font-medium">{card.title}</span>
+                        <p className="text-xs text-muted-foreground">{card.subtitle}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      {isFeatured && (
+                        <Badge variant="default" className="bg-yellow-600">
+                          <Star className="w-3 h-3 mr-1 fill-current" />
+                          Destaque
+                        </Badge>
+                      )}
+                      {isVisible ? (
+                        <Badge variant="secondary" className="text-green-600">
+                          <Eye className="w-3 h-3 mr-1" />
+                          Visível
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-muted-foreground">
+                          <EyeOff className="w-3 h-3 mr-1" />
+                          Oculto
+                        </Badge>
+                      )}
+                      <Switch
+                        checked={isVisible}
+                        onCheckedChange={() => toggleCardVisibility(card.id)}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {realProjectCards.length === 0 && (
+          <div className="p-4 bg-muted/30 rounded-lg border border-dashed border-muted-foreground/30 text-center">
+            <p className="text-sm text-muted-foreground">
+              Nenhum projeto aprovado ainda. Projetos aprovados aparecerão aqui com as mesmas opções de controle.
+            </p>
+          </div>
+        )}
+
         {/* Example Cards Visibility */}
         <div className="space-y-3">
           <h4 className="font-medium flex items-center gap-2">
             Cards de Exemplo (Placeholder)
             <Badge variant="outline">
-              {Object.values(cardVisibility).filter(Boolean).length} visíveis
+              {exampleCards.filter(c => cardVisibility[c.id] !== false).length} visíveis
             </Badge>
           </h4>
           <p className="text-sm text-muted-foreground">
-            Clique na estrela para destacar na homepage (máx. 3). Use o toggle para controlar visibilidade no Porto de Ideias.
+            Cards de demonstração. O card "Adicione seu Projeto" permanece fixo no final da página.
           </p>
           <div className="space-y-2">
-            {EXAMPLE_CARDS.map((card) => {
+            {exampleCards.map((card) => {
               const isVisible = cardVisibility[card.id] !== false;
               const isFeatured = featuredCards[card.id] === true;
               const canFeature = card.canFeature;
@@ -273,9 +368,9 @@ export function PortoIdeiasCardsManager({ projects, onFeaturedChange }: PortoIde
                 >
                   <div className="flex items-center gap-3">
                     {canFeature ? (
-                      <GripVertical className="w-4 h-4 text-muted-foreground" />
+                      <GripVertical className="w-4 h-4 text-muted-foreground cursor-grab" />
                     ) : (
-                      <div className="w-4 h-4" />
+                      <Lock className="w-4 h-4 text-muted-foreground/50" />
                     )}
                     
                     {/* Star for Featured - only show for featurable cards */}
