@@ -30,6 +30,7 @@ import {
   Download,
   FileText,
   Phone,
+  Mail,
   MessageSquare,
   Upload,
   Video,
@@ -120,6 +121,12 @@ const AdminDashboard = () => {
   // Porto de Ideias slots control
   const [portoIdeiasSlots, setPortoIdeiasSlots] = useState(5);
 
+  // Footer content control
+  const [footerTagline, setFooterTagline] = useState("Uma plataforma criada para aproximar cultura e investimento.");
+  const [footerEmails, setFooterEmails] = useState<string[]>(["portobellofilmes@gmail.com"]);
+  const [footerPhones, setFooterPhones] = useState<string[]>(["(21) 96726-4730"]);
+  const [savingFooterContent, setSavingFooterContent] = useState(false);
+
   // Social links control
   interface SocialLink {
     enabled: boolean;
@@ -208,6 +215,20 @@ const AdminDashboard = () => {
       if (count === 1 || count === 3 || count === 5) {
         setCarouselDisplayCount(count);
       }
+    }
+
+    // Fetch footer content
+    const { data: footerData } = await supabase
+      .from("settings")
+      .select("value")
+      .eq("key", "footer_content")
+      .maybeSingle();
+    
+    if (footerData) {
+      const content = footerData.value as { tagline?: string; emails?: string[]; phones?: string[] };
+      if (content.tagline) setFooterTagline(content.tagline);
+      if (content.emails && content.emails.length > 0) setFooterEmails(content.emails);
+      if (content.phones && content.phones.length > 0) setFooterPhones(content.phones);
     }
 
     // Fetch social links
@@ -361,6 +382,53 @@ const AdminDashboard = () => {
         description: count === 1 ? "Exibindo apenas o vídeo central." : `Exibindo ${count} vídeos no carrossel.`,
       });
     }
+  };
+
+  const saveFooterContent = async () => {
+    setSavingFooterContent(true);
+    
+    const contentToSave = {
+      tagline: footerTagline,
+      emails: footerEmails.filter(e => e.trim()),
+      phones: footerPhones.filter(p => p.trim())
+    };
+    
+    const { data: existing } = await supabase
+      .from("settings")
+      .select("id")
+      .eq("key", "footer_content")
+      .maybeSingle();
+    
+    const jsonValue = JSON.parse(JSON.stringify(contentToSave));
+    
+    let error;
+    if (existing) {
+      const result = await supabase
+        .from("settings")
+        .update({ value: jsonValue })
+        .eq("key", "footer_content");
+      error = result.error;
+    } else {
+      const result = await supabase
+        .from("settings")
+        .insert([{ key: "footer_content", value: jsonValue }]);
+      error = result.error;
+    }
+
+    if (error) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível salvar o conteúdo do footer.",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Salvo!",
+        description: "Conteúdo do footer atualizado com sucesso.",
+      });
+    }
+    
+    setSavingFooterContent(false);
   };
 
   const fetchProjects = async () => {
@@ -890,6 +958,122 @@ const AdminDashboard = () => {
               </CardContent>
             </Card>
 
+            {/* Controle e Edição - Conteúdo do Footer */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="w-5 h-5" />
+                  Controle e Edição - Conteúdo do Footer
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <p className="text-sm text-muted-foreground">
+                  Edite o texto e informações de contato exibidos no footer do site.
+                </p>
+
+                {/* Tagline */}
+                <div className="space-y-2">
+                  <Label>Texto do Footer (Tagline)</Label>
+                  <Textarea
+                    placeholder="Uma plataforma criada para aproximar cultura e investimento."
+                    value={footerTagline}
+                    onChange={(e) => setFooterTagline(e.target.value)}
+                    rows={2}
+                  />
+                </div>
+
+                {/* Emails */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label>Emails de Contato</Label>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setFooterEmails([...footerEmails, ""])}
+                    >
+                      <Plus className="w-4 h-4 mr-1" />
+                      Adicionar
+                    </Button>
+                  </div>
+                  {footerEmails.map((email, index) => (
+                    <div key={index} className="flex gap-2">
+                      <div className="flex items-center gap-2 flex-1">
+                        <Mail className="w-4 h-4 text-accent flex-shrink-0" />
+                        <Input
+                          placeholder="email@exemplo.com"
+                          value={email}
+                          onChange={(e) => {
+                            const newEmails = [...footerEmails];
+                            newEmails[index] = e.target.value;
+                            setFooterEmails(newEmails);
+                          }}
+                        />
+                      </div>
+                      {footerEmails.length > 1 && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            const newEmails = footerEmails.filter((_, i) => i !== index);
+                            setFooterEmails(newEmails);
+                          }}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Phones */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label>Telefones de Contato</Label>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setFooterPhones([...footerPhones, ""])}
+                    >
+                      <Plus className="w-4 h-4 mr-1" />
+                      Adicionar
+                    </Button>
+                  </div>
+                  {footerPhones.map((phone, index) => (
+                    <div key={index} className="flex gap-2">
+                      <div className="flex items-center gap-2 flex-1">
+                        <Phone className="w-4 h-4 text-accent flex-shrink-0" />
+                        <Input
+                          placeholder="(00) 00000-0000"
+                          value={phone}
+                          onChange={(e) => {
+                            const newPhones = [...footerPhones];
+                            newPhones[index] = e.target.value;
+                            setFooterPhones(newPhones);
+                          }}
+                        />
+                      </div>
+                      {footerPhones.length > 1 && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            const newPhones = footerPhones.filter((_, i) => i !== index);
+                            setFooterPhones(newPhones);
+                          }}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                <Button onClick={saveFooterContent} disabled={savingFooterContent} className="w-full">
+                  <Save className="w-4 h-4 mr-2" />
+                  {savingFooterContent ? "Salvando..." : "Salvar Conteúdo do Footer"}
+                </Button>
+              </CardContent>
+            </Card>
 
             {/* Controle e Edição - Links Sociais */}
             <Card>
