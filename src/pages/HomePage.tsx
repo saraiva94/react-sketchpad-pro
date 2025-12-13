@@ -763,15 +763,16 @@ const HomePage = () => {
             {services.map((service, index) => (
               <Card 
                 key={index} 
-                className={`group relative overflow-visible card-solid bg-card border-border rainbow-card-glow transition-all duration-700 ${servicosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+                className={`group relative overflow-visible card-solid bg-card border-border rainbow-card-glow ${servicosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
                 style={{ 
-                  transitionDelay: servicosInView ? `${(index + 1) * 100}ms` : '0ms',
+                  transition: 'opacity 300ms ease-out, transform 300ms ease-out',
+                  transitionDelay: servicosInView ? `${(index + 1) * 50}ms` : '0ms',
                 }}
               >
                 <div className="relative p-6 flex flex-col items-center text-center gap-4">
                   <div className="relative">
-                    <div className={`relative w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-transform duration-0 border border-border shadow-lg`}>
-                      <service.icon className={`w-8 h-8 text-black rainbow-icon-glow ${service.hoverColor}`} />
+                    <div className="relative w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 border border-border shadow-lg" style={{ transition: 'transform 0ms' }}>
+                      <service.icon className={`w-8 h-8 text-black rainbow-icon-glow ${service.hoverColor}`} style={{ transition: 'color 0ms' }} />
                     </div>
                   </div>
                   <p className="text-sm text-muted-foreground leading-relaxed font-medium rainbow-text-glow">
