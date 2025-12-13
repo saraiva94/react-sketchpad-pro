@@ -339,7 +339,7 @@ const PortoDeIdeiasPage = () => {
         <SelectTrigger className={`rounded-full ${isMobile ? 'w-full' : 'w-[140px]'}`}>
           <SelectValue placeholder="Categoria" />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent position="popper" sideOffset={4}>
           {categories.map(cat => (
             <SelectItem key={cat} value={cat}>{cat}</SelectItem>
           ))}
@@ -351,7 +351,7 @@ const PortoDeIdeiasPage = () => {
         <SelectTrigger className={`rounded-full ${isMobile ? 'w-full' : 'w-[150px]'}`}>
           <SelectValue placeholder="Porte" />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent position="popper" sideOffset={4}>
           {budgetRanges.map(range => (
             <SelectItem key={range.value} value={range.value}>{range.label}</SelectItem>
           ))}
@@ -363,7 +363,7 @@ const PortoDeIdeiasPage = () => {
         <SelectTrigger className={`rounded-full ${isMobile ? 'w-full' : 'w-[160px]'}`}>
           <SelectValue placeholder="Estágio" />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent position="popper" sideOffset={4}>
           {projectStages.map(stage => (
             <SelectItem key={stage.value} value={stage.value}>{stage.label}</SelectItem>
           ))}
@@ -375,7 +375,7 @@ const PortoDeIdeiasPage = () => {
         <SelectTrigger className={`rounded-full ${isMobile ? 'w-full' : 'w-[140px]'}`}>
           <SelectValue placeholder="Lei" />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent position="popper" sideOffset={4}>
           {incentiveLaws.map(law => (
             <SelectItem key={law.value} value={law.value}>{law.label}</SelectItem>
           ))}
@@ -387,7 +387,7 @@ const PortoDeIdeiasPage = () => {
         <SelectTrigger className={`rounded-full ${isMobile ? 'w-full' : 'w-[130px]'}`}>
           <SelectValue placeholder="Local" />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent position="popper" sideOffset={4}>
           {locations.map(loc => (
             <SelectItem key={loc} value={loc}>{loc}</SelectItem>
           ))}
@@ -399,7 +399,7 @@ const PortoDeIdeiasPage = () => {
         <SelectTrigger className={`rounded-full ${isMobile ? 'w-full' : 'w-[150px]'}`}>
           <SelectValue placeholder="Ordenar" />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent position="popper" sideOffset={4}>
           {sortOptions.map(opt => (
             <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
           ))}
