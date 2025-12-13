@@ -158,6 +158,12 @@
   body {
     @apply bg-background text-foreground font-sans antialiased;
     font-family: var(--font-sans);
+    overflow-x: hidden;
+  }
+  
+  /* Prevent layout shift when dropdowns open */
+  html {
+    overflow-y: scroll;
   }
 
   .font-handwritten {

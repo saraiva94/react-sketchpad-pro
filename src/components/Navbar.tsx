@@ -24,24 +24,33 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
   useEffect(() => {
     if (currentPage !== "home") return;
 
+    let ticking = false;
+    
     const handleScroll = () => {
-      const scrollPosition = window.scrollY + 150; // Offset for navbar height
+      if (ticking) return;
       
-      // Check each section
-      for (const section of [...sections].reverse()) {
-        const element = document.getElementById(section.id);
-        if (element) {
-          const offsetTop = element.offsetTop;
-          if (scrollPosition >= offsetTop) {
-            setActiveSection(section.id);
-            return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const scrollPosition = window.scrollY + 150; // Offset for navbar height
+        
+        // Check each section
+        for (const section of [...sections].reverse()) {
+          const element = document.getElementById(section.id);
+          if (element) {
+            const offsetTop = element.offsetTop;
+            if (scrollPosition >= offsetTop) {
+              setActiveSection(section.id);
+              ticking = false;
+              return;
+            }
           }
         }
-      }
-      setActiveSection("");
+        setActiveSection("");
+        ticking = false;
+      });
     };
 
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll(); // Initial check
     
     return () => window.removeEventListener("scroll", handleScroll);
