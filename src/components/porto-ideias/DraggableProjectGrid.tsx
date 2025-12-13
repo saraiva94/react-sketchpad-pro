@@ -99,19 +99,22 @@ function SortableCard({
   const [isHolding, setIsHolding] = useState(false);
   const [holdReady, setHoldReady] = useState(false);
   const holdTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const wasHoldingRef = useRef(false);
+  const hasDraggedRef = useRef(false);
+  const pointerDownTimeRef = useRef<number>(0);
 
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : isInView ? 1 : 0,
-    zIndex: isDragging ? 1000 : 1,
-  };
-
-  // Track if drag started
+  // Track drag state
   useEffect(() => {
     if (isDragging) {
-      wasHoldingRef.current = true;
+      hasDraggedRef.current = true;
+      setHoldReady(true);
+      console.log('[DnD] Now dragging!');
+    } else {
+      // Reset after drag ends
+      setTimeout(() => {
+        hasDraggedRef.current = false;
+        setHoldReady(false);
+        setIsHolding(false);
+      }, 100);
     }
   }, [isDragging]);
 
@@ -124,58 +127,58 @@ function SortableCard({
     };
   }, []);
 
-  const handleMouseDown = () => {
+  // Visual feedback for hold progress (separate from dnd-kit sensors)
+  const handlePointerDown = () => {
     if (!isAdmin) return;
     
+    pointerDownTimeRef.current = Date.now();
     setIsHolding(true);
-    wasHoldingRef.current = false;
     
-    // Start hold timer
+    // Start visual timer for UI feedback
     holdTimerRef.current = setTimeout(() => {
       setHoldReady(true);
-      console.log('[DnD] Hold ready! You can now drag.');
-    }, 2000);
+      console.log('[DnD] Visual: Hold ready indicator shown');
+    }, 1900); // Slightly before 2000ms to sync with sensor
   };
 
-  const handleMouseUp = () => {
+  const handlePointerUp = () => {
     if (holdTimerRef.current) {
       clearTimeout(holdTimerRef.current);
       holdTimerRef.current = null;
     }
-    setIsHolding(false);
-    setHoldReady(false);
+    
+    // Don't reset if we're dragging
+    if (!isDragging) {
+      setIsHolding(false);
+      setHoldReady(false);
+    }
   };
 
-  const handleMouseLeave = () => {
+  const handlePointerCancel = () => {
     if (holdTimerRef.current) {
       clearTimeout(holdTimerRef.current);
       holdTimerRef.current = null;
     }
-    setIsHolding(false);
-    setHoldReady(false);
+    if (!isDragging) {
+      setIsHolding(false);
+      setHoldReady(false);
+    }
   };
 
   const handleClick = (e: React.MouseEvent, targetUrl: string) => {
-    // If drag happened, prevent navigation
-    if (isDragging || wasHoldingRef.current) {
+    const holdDuration = Date.now() - pointerDownTimeRef.current;
+    
+    // If we dragged or held for more than 1.5s, don't navigate
+    if (hasDraggedRef.current || isDragging || holdDuration > 1500) {
       e.preventDefault();
       e.stopPropagation();
-      wasHoldingRef.current = false;
+      console.log('[DnD] Click prevented - drag or long hold detected');
       return;
     }
     
-    // If hold was ready (2s passed), don't navigate - user wanted to drag
-    if (holdReady) {
-      e.preventDefault();
-      e.stopPropagation();
-      return;
-    }
-    
+    console.log('[DnD] Click navigating to:', targetUrl);
     navigate(targetUrl);
   };
-
-  // Always apply listeners when admin, the sensor handles activation
-  const dragListeners = isAdmin ? listeners : {};
 
   if (item.type === "real") {
     const project = item.data as Project;
@@ -187,18 +190,17 @@ function SortableCard({
       <div
         ref={setNodeRef}
         style={{
-          ...style,
-          transform: isDragging 
-            ? CSS.Transform.toString(transform)
-            : isInView ? 'translateY(0)' : 'translateY(20px)',
+          transform: CSS.Transform.toString(transform),
           transition: isDragging ? transition : `all 0.6s ease-out ${index * 100}ms`,
+          opacity: isDragging ? 0.7 : isInView ? 1 : 0,
+          zIndex: isDragging ? 1000 : 1,
         }}
-        className={`block group relative ${isAdmin ? (holdReady ? 'cursor-grabbing' : 'cursor-grab') : 'cursor-pointer'}`}
+        className={`block group relative touch-none ${isAdmin ? (isDragging ? 'cursor-grabbing' : 'cursor-grab') : 'cursor-pointer'}`}
         {...attributes}
-        {...dragListeners}
-        onMouseDown={handleMouseDown}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseLeave}
+        {...(isAdmin ? listeners : {})}
+        onPointerDown={handlePointerDown}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerCancel}
         onClick={(e) => handleClick(e, targetUrl)}
       >
         <div 
@@ -281,18 +283,17 @@ function SortableCard({
     <div
       ref={setNodeRef}
       style={{
-        ...style,
-        transform: isDragging 
-          ? CSS.Transform.toString(transform)
-          : isInView ? 'translateY(0)' : 'translateY(20px)',
+        transform: CSS.Transform.toString(transform),
         transition: isDragging ? transition : `all 0.6s ease-out ${index * 100}ms`,
+        opacity: isDragging ? 0.7 : isInView ? 1 : 0,
+        zIndex: isDragging ? 1000 : 1,
       }}
-      className={`block group relative ${isAdmin ? (holdReady ? 'cursor-grabbing' : 'cursor-grab') : 'cursor-pointer'}`}
+      className={`block group relative touch-none ${isAdmin ? (isDragging ? 'cursor-grabbing' : 'cursor-grab') : 'cursor-pointer'}`}
       {...attributes}
-      {...dragListeners}
-      onMouseDown={handleMouseDown}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseLeave}
+      {...(isAdmin ? listeners : {})}
+      onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerCancel}
       onClick={(e) => handleClick(e, targetUrl)}
     >
       <div className={`card-solid bg-card ${example.borderClass || 'border border-border'} rounded-2xl overflow-hidden h-full shadow-2xl transition-all duration-300 ${
