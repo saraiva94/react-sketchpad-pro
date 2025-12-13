@@ -350,7 +350,7 @@ const ExampleProjectPage = () => {
   if (!project) {
     return (
       <div className="min-h-screen bg-background">
-        <header className="border-b border-border/50 bg-card/80 backdrop-blur-md sticky top-0 z-50 shadow-soft">
+        <header className="fixed top-0 left-0 right-0 border-b border-border/50 bg-card/80 backdrop-blur-md z-50 shadow-soft">
           <div className="container mx-auto px-4 h-20 flex items-center justify-center">
             <Link to="/" className="flex items-center group">
               <img 
@@ -361,6 +361,7 @@ const ExampleProjectPage = () => {
             </Link>
           </div>
         </header>
+        <div className="h-20" />
         <main className="container mx-auto px-4 py-16 text-center">
           <Sparkles className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
           <h1 className="text-2xl font-serif font-bold mb-2">Projeto de exemplo não encontrado</h1>
@@ -383,7 +384,7 @@ const ExampleProjectPage = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Custom Navbar for Project Page */}
-      <header className="border-b border-border/50 bg-card/80 backdrop-blur-md sticky top-0 z-50 shadow-soft">
+      <header className="fixed top-0 left-0 right-0 border-b border-border/50 bg-card/80 backdrop-blur-md z-50 shadow-soft">
         <div className="container mx-auto px-4 h-20 flex items-center justify-between">
           {/* Back Button - Left */}
           <Link 
@@ -404,6 +405,9 @@ const ExampleProjectPage = () => {
           </Link>
         </div>
       </header>
+
+      {/* Spacer for fixed header */}
+      <div className="h-20" />
 
       {/* Example Banner */}
       <div className="bg-gradient-to-r from-primary/20 via-accent/20 to-primary/20 border-b border-primary/20">
