@@ -119,123 +119,74 @@ function SortableCard({
         className="block group relative"
         {...(isAdmin ? { ...attributes, ...listeners } : {})}
       >
-        {isAdmin ? (
+        <Link to={`/project/${project.id}`} className="block">
           <div 
-            className="cursor-grab active:cursor-grabbing"
-            onDoubleClick={() => window.location.assign(`/project/${project.id}`)}
+            className={`card-solid bg-card border border-border rounded-2xl overflow-hidden shadow-2xl h-full transition-all duration-300 ${
+              isDragging ? "ring-2 ring-primary shadow-xl scale-105 rotate-1" : "hover:-translate-y-2"
+            }`}
           >
-            <div 
-              className={`card-solid bg-card border border-border rounded-2xl overflow-hidden shadow-2xl h-full transition-all duration-300 ${
-                isDragging ? "ring-2 ring-primary shadow-xl scale-105 rotate-1" : "hover:-translate-y-2"
-              }`}
-            >
-              {/* Admin Drag Indicator */}
+            {/* Admin Drag Indicator */}
+            {isAdmin && (
               <div className="absolute top-2 right-2 z-20 p-2 bg-primary/90 backdrop-blur-sm rounded-lg border border-primary shadow-md">
                 <GripVertical className="w-5 h-5 text-primary-foreground" />
               </div>
+            )}
 
-              {/* Image */}
-              <div className="relative overflow-hidden h-48">
-                {project.image_url ? (
-                  <img src={project.image_url} alt={project.title} className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                    <span className="text-4xl font-handwritten text-primary-foreground">{project.title.charAt(0)}</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Content */}
-              <div className="p-4 md:p-5">
-                <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <Badge variant="secondary" className="rounded-full text-xs">{project.project_type}</Badge>
-                    <Badge className={`rounded-full text-xs ${budgetInfo.color}`}>{budgetInfo.label}</Badge>
-                  </div>
-                  {project.location && (
-                    <span className="flex items-center text-xs text-muted-foreground">
-                      <MapPin className="w-3 h-3 mr-1" />{project.location}
-                    </span>
-                  )}
+            {/* Image */}
+            <div className="relative overflow-hidden h-48">
+              {project.image_url ? (
+                <img src={project.image_url} alt={project.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                  <span className="text-4xl font-handwritten text-primary-foreground">{project.title.charAt(0)}</span>
                 </div>
-                <h3 className="font-bold text-lg text-foreground mb-2 line-clamp-1">{project.title}</h3>
-                <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{project.synopsis}</p>
-                <div className="flex items-center justify-between mb-3">
-                  <span className="font-bold text-foreground">{formatBudget(project.valor_sugerido)}</span>
-                  <Badge className={`rounded-full text-xs ${stageInfo.color}`}>{stageInfo.label}</Badge>
-                </div>
-                {project.has_incentive_law && (
-                  <div className="mb-3">
-                    <Badge variant="outline" className="rounded-full text-xs border-primary/30 text-primary">
-                      <Shield className="w-3 h-3 mr-1" />{project.incentive_law_details || "Lei de Incentivo"}
-                    </Badge>
-                  </div>
-                )}
-                <div className="flex items-center justify-between pt-3 border-t border-border">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                      <span className="text-xs text-primary-foreground font-semibold">{getInitials(project.responsavel_nome)}</span>
-                    </div>
-                    <span className="text-sm text-muted-foreground truncate max-w-[120px]">{project.responsavel_nome || "Produtor Cultural"}</span>
-                  </div>
-                  <span className="text-xs text-primary">Duplo clique para abrir</span>
-                </div>
-              </div>
+              )}
             </div>
-          </div>
-        ) : (
-          <Link to={`/project/${project.id}`} className="block">
-            <div className="card-solid bg-card border border-border rounded-2xl overflow-hidden shadow-2xl h-full hover:-translate-y-2 transition-transform duration-300">
-              {/* Same content without admin indicator */}
-              <div className="relative overflow-hidden h-48">
-                {project.image_url ? (
-                  <img src={project.image_url} alt={project.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                    <span className="text-4xl font-handwritten text-primary-foreground">{project.title.charAt(0)}</span>
-                  </div>
+
+            {/* Content */}
+            <div className="p-4 md:p-5">
+              <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Badge variant="secondary" className="rounded-full text-xs">{project.project_type}</Badge>
+                  <Badge className={`rounded-full text-xs ${budgetInfo.color}`}>{budgetInfo.label}</Badge>
+                </div>
+                {project.location && (
+                  <span className="flex items-center text-xs text-muted-foreground">
+                    <MapPin className="w-3 h-3 mr-1" />{project.location}
+                  </span>
                 )}
               </div>
-              <div className="p-4 md:p-5">
-                <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <Badge variant="secondary" className="rounded-full text-xs">{project.project_type}</Badge>
-                    <Badge className={`rounded-full text-xs ${budgetInfo.color}`}>{budgetInfo.label}</Badge>
-                  </div>
-                  {project.location && (
-                    <span className="flex items-center text-xs text-muted-foreground">
-                      <MapPin className="w-3 h-3 mr-1" />{project.location}
-                    </span>
-                  )}
+              <h3 className="font-bold text-lg text-foreground mb-2 line-clamp-1 group-hover:text-primary transition-colors">{project.title}</h3>
+              <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{project.synopsis}</p>
+              <div className="flex items-center justify-between mb-3">
+                <span className="font-bold text-foreground">{formatBudget(project.valor_sugerido)}</span>
+                <Badge className={`rounded-full text-xs ${stageInfo.color}`}>{stageInfo.label}</Badge>
+              </div>
+              {project.has_incentive_law && (
+                <div className="mb-3">
+                  <Badge variant="outline" className="rounded-full text-xs border-primary/30 text-primary">
+                    <Shield className="w-3 h-3 mr-1" />{project.incentive_law_details || "Lei de Incentivo"}
+                  </Badge>
                 </div>
-                <h3 className="font-bold text-lg text-foreground mb-2 line-clamp-1 group-hover:text-primary transition-colors">{project.title}</h3>
-                <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{project.synopsis}</p>
-                <div className="flex items-center justify-between mb-3">
-                  <span className="font-bold text-foreground">{formatBudget(project.valor_sugerido)}</span>
-                  <Badge className={`rounded-full text-xs ${stageInfo.color}`}>{stageInfo.label}</Badge>
+              )}
+              <div className="flex items-center justify-between pt-3 border-t border-border">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                    <span className="text-xs text-primary-foreground font-semibold">{getInitials(project.responsavel_nome)}</span>
+                  </div>
+                  <span className="text-sm text-muted-foreground truncate max-w-[120px]">{project.responsavel_nome || "Produtor Cultural"}</span>
                 </div>
-                {project.has_incentive_law && (
-                  <div className="mb-3">
-                    <Badge variant="outline" className="rounded-full text-xs border-primary/30 text-primary">
-                      <Shield className="w-3 h-3 mr-1" />{project.incentive_law_details || "Lei de Incentivo"}
-                    </Badge>
-                  </div>
-                )}
-                <div className="flex items-center justify-between pt-3 border-t border-border">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                      <span className="text-xs text-primary-foreground font-semibold">{getInitials(project.responsavel_nome)}</span>
-                    </div>
-                    <span className="text-sm text-muted-foreground truncate max-w-[120px]">{project.responsavel_nome || "Produtor Cultural"}</span>
-                  </div>
+                {isAdmin ? (
+                  <span className="text-xs text-primary">Segure 2s para arrastar</span>
+                ) : (
                   <span className="text-sm font-medium text-primary flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     Ver Detalhes <ArrowRight className="w-4 h-4" />
                   </span>
-                </div>
+                )}
               </div>
             </div>
-          </Link>
-        )}
+          </div>
+        </Link>
       </div>
     );
   }
@@ -256,63 +207,43 @@ function SortableCard({
       className="block group relative"
       {...(isAdmin ? { ...attributes, ...listeners } : {})}
     >
-      {isAdmin ? (
-        <div 
-          className="cursor-grab active:cursor-grabbing"
-          onDoubleClick={() => window.location.assign(example.link)}
-        >
-          <div className={`card-solid bg-card ${example.borderClass || 'border border-border'} rounded-2xl overflow-hidden h-full shadow-2xl transition-all duration-300 ${
-            isDragging ? "ring-2 ring-primary shadow-xl scale-105 rotate-1" : "hover:-translate-y-2"
-          }`}>
-            {/* Admin Drag Indicator */}
+      <Link to={example.link} className="block">
+        <div className={`card-solid bg-card ${example.borderClass || 'border border-border'} rounded-2xl overflow-hidden h-full shadow-2xl transition-all duration-300 ${
+          isDragging ? "ring-2 ring-primary shadow-xl scale-105 rotate-1" : "hover:-translate-y-2"
+        }`}>
+          {/* Admin Drag Indicator */}
+          {isAdmin && (
             <div className="absolute top-2 right-2 z-20 p-2 bg-primary/90 backdrop-blur-sm rounded-lg border border-primary shadow-md">
               <GripVertical className="w-5 h-5 text-primary-foreground" />
             </div>
-            
-            <div className={`relative h-48 bg-gradient-to-br ${example.gradientClass || 'from-accent/20 to-primary/20'} flex items-center justify-center`}>
-              <div className={`w-20 h-20 rounded-full ${example.emojiBgClass || 'bg-accent/20'} flex items-center justify-center`}>
-                <span className={`text-4xl ${example.emojiAnimate ? 'animate-pulse' : ''}`}>{example.emoji}</span>
-              </div>
-            </div>
-            <div className="p-5">
-              <Badge variant={example.badgeVariant} className={`mb-3 rounded-full ${example.badgeClass || ''}`}>
-                {example.badge}
-              </Badge>
-              <h3 className="text-lg font-serif font-bold text-foreground mb-2">{example.title}</h3>
-              <p className="text-sm text-muted-foreground line-clamp-3 mb-4">{example.synopsis}</p>
-              <div className="flex items-center justify-between pt-3 border-t border-border">
-                {example.footerContent}
-                <span className="text-xs text-primary">Duplo clique para abrir</span>
-              </div>
+          )}
+          
+          <div className={`relative h-48 bg-gradient-to-br ${example.gradientClass || 'from-accent/20 to-primary/20'} flex items-center justify-center`}>
+            <div className={`w-20 h-20 rounded-full ${example.emojiBgClass || 'bg-accent/20'} flex items-center justify-center`}>
+              <span className={`text-4xl ${example.emojiAnimate ? 'animate-pulse' : ''}`}>{example.emoji}</span>
             </div>
           </div>
-        </div>
-      ) : (
-        <Link to={example.link} className="block">
-          <div className={`card-solid bg-card ${example.borderClass || 'border border-border'} rounded-2xl overflow-hidden h-full shadow-2xl hover:-translate-y-2 transition-transform duration-300`}>
-            <div className={`relative h-48 bg-gradient-to-br ${example.gradientClass || 'from-accent/20 to-primary/20'} flex items-center justify-center`}>
-              <div className={`w-20 h-20 rounded-full ${example.emojiBgClass || 'bg-accent/20'} flex items-center justify-center`}>
-                <span className={`text-4xl ${example.emojiAnimate ? 'animate-pulse' : ''}`}>{example.emoji}</span>
-              </div>
-            </div>
-            <div className="p-5">
-              <Badge variant={example.badgeVariant} className={`mb-3 rounded-full ${example.badgeClass || ''}`}>
-                {example.badge}
-              </Badge>
-              <h3 className="text-lg font-serif font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
-                {example.title}
-              </h3>
-              <p className="text-sm text-muted-foreground line-clamp-3 mb-4">{example.synopsis}</p>
-              <div className="flex items-center justify-between pt-3 border-t border-border">
-                {example.footerContent}
+          <div className="p-5">
+            <Badge variant={example.badgeVariant} className={`mb-3 rounded-full ${example.badgeClass || ''}`}>
+              {example.badge}
+            </Badge>
+            <h3 className="text-lg font-serif font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
+              {example.title}
+            </h3>
+            <p className="text-sm text-muted-foreground line-clamp-3 mb-4">{example.synopsis}</p>
+            <div className="flex items-center justify-between pt-3 border-t border-border">
+              {example.footerContent}
+              {isAdmin ? (
+                <span className="text-xs text-primary">Segure 2s para arrastar</span>
+              ) : (
                 <span className="text-sm font-medium text-primary flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                   {example.footerAction || "Ver Exemplo"} <ArrowRight className="w-4 h-4" />
                 </span>
-              </div>
+              )}
             </div>
           </div>
-        </Link>
-      )}
+        </div>
+      </Link>
     </div>
   );
 }
@@ -347,13 +278,14 @@ export function DraggableProjectGrid({
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 5,
+        delay: 2000,
+        tolerance: 5,
       },
     }),
     useSensor(TouchSensor, {
       activationConstraint: {
-        delay: 150,
-        tolerance: 8,
+        delay: 2000,
+        tolerance: 5,
       },
     }),
     useSensor(KeyboardSensor, {
@@ -477,7 +409,7 @@ export function DraggableProjectGrid({
         <div className="mb-4 p-3 bg-primary/10 border border-primary/30 rounded-lg flex items-center gap-2 text-sm">
           <GripVertical className="w-4 h-4 text-primary" />
           <span className="text-primary font-medium">Modo Admin:</span>
-          <span className="text-muted-foreground">Arraste os cards para reordenar • Duplo clique para abrir</span>
+          <span className="text-muted-foreground">Segure 2s para arrastar • Clique para abrir</span>
         </div>
       )}
 
