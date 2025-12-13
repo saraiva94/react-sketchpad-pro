@@ -755,6 +755,7 @@ const AdminDashboard = () => {
             variant={activeSection === "projects" ? "default" : "ghost"}
             size="sm"
             onClick={(e) => {
+              console.log("Projetos button clicked, setting activeSection to projects");
               e.preventDefault();
               e.stopPropagation();
               setActiveSection("projects");
@@ -772,6 +773,7 @@ const AdminDashboard = () => {
             variant={activeSection === "requests" ? "default" : "ghost"}
             size="sm"
             onClick={(e) => {
+              console.log("Solicitações button clicked, setting activeSection to requests");
               e.preventDefault();
               e.stopPropagation();
               setActiveSection("requests");
