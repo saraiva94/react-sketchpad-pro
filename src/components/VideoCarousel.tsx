@@ -17,20 +17,14 @@ interface VideoCarouselProps {
 
 export function VideoCarousel({ videos, loading = false, displayCount = 5, onAnimationComplete }: VideoCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [enableTransition, setEnableTransition] = useState(false);
-  const wasLoading = useRef(true);
+  const [enableTransition, setEnableTransition] = useState(true); // Always enable transitions
+  const hasCalledComplete = useRef(false);
 
-  // Enable transitions only after first render post-loading
+  // Notify parent when loading completes
   useEffect(() => {
-    if (wasLoading.current && !loading) {
-      // Wait a frame before enabling transitions
-      const timer = setTimeout(() => {
-        setEnableTransition(true);
-      }, 50);
-      // Notify parent that hero is ready immediately when loading completes
+    if (!loading && !hasCalledComplete.current) {
       onAnimationComplete?.();
-      wasLoading.current = false;
-      return () => clearTimeout(timer);
+      hasCalledComplete.current = true;
     }
   }, [loading, onAnimationComplete]);
 
@@ -38,12 +32,10 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5, onAni
   const totalSlots = displayCount;
   
   const goToPrevious = () => {
-    console.log('goToPrevious called, currentIndex:', currentIndex, 'totalSlots:', totalSlots);
     setCurrentIndex((prev) => (prev === 0 ? totalSlots - 1 : prev - 1));
   };
 
   const goToNext = () => {
-    console.log('goToNext called, currentIndex:', currentIndex, 'totalSlots:', totalSlots);
     setCurrentIndex((prev) => (prev === totalSlots - 1 ? 0 : prev + 1));
   };
 
@@ -196,7 +188,6 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5, onAni
   };
 
   if (loading) {
-    console.log('Rendering SKELETON carousel, currentIndex:', currentIndex, 'displayCount:', displayCount);
     return (
       <div className="relative w-full">
         <div 
@@ -206,7 +197,6 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5, onAni
           {Array.from({ length: displayCount }).map((_, index) => {
             const position = getSkeletonPosition(index);
             const styles = getSkeletonCardStyles(position);
-            console.log('Skeleton card', index, 'position:', position, 'transform:', styles.transform);
             
             return (
               <div
@@ -282,8 +272,6 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5, onAni
     );
   }
 
-  console.log('Rendering REAL carousel, currentIndex:', currentIndex, 'enableTransition:', enableTransition, 'totalSlots:', totalSlots);
-  
   return (
     <div className="relative w-full">
       {/* Carousel Container with 3D perspective */}
@@ -298,7 +286,6 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5, onAni
           const video = videos[index];
           const hasVideo = video && video.url;
           const isCenter = position === 0;
-          console.log('Real card', index, 'position:', position, 'transform:', styles.transform);
 
           return (
             <div
