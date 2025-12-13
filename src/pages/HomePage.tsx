@@ -75,7 +75,8 @@ const HomePage = () => {
   const [statsVisible, setStatsVisible] = useState(true);
   const [institutionalVideos, setInstitutionalVideos] = useState<VideoItem[]>([]);
   const [loadingVideo, setLoadingVideo] = useState(true);
-  const [carouselDisplayCount, setCarouselDisplayCount] = useState<1 | 3 | 5>(5);
+  const [carouselDisplayCount, setCarouselDisplayCount] = useState<1 | 3 | 5 | null>(null);
+  const [loadingSettings, setLoadingSettings] = useState(true);
 
   useEffect(() => {
     fetchFeaturedProjects();
@@ -132,15 +133,19 @@ const HomePage = () => {
   }, []);
 
   const fetchStatsVisibility = async () => {
+    setLoadingSettings(true);
     const { data } = await supabase
       .from("settings")
       .select("value")
       .eq("key", "stats_visible")
-      .single();
+      .maybeSingle();
     
     if (data) {
       setStatsVisible((data.value as { enabled: boolean }).enabled);
+    } else {
+      setStatsVisible(false);
     }
+    setLoadingSettings(false);
   };
 
   const fetchInstitutionalVideo = async () => {
@@ -166,7 +171,11 @@ const HomePage = () => {
       const count = (carouselData.value as { count: number }).count;
       if (count === 1 || count === 3 || count === 5) {
         setCarouselDisplayCount(count);
+      } else {
+        setCarouselDisplayCount(5);
       }
+    } else {
+      setCarouselDisplayCount(5);
     }
     
     setLoadingVideo(false);
@@ -340,13 +349,17 @@ const HomePage = () => {
       <section ref={heroRef} id="inicio" className="relative py-20 lg:py-32 overflow-hidden z-10">
         <div className="container mx-auto px-4 relative z-10">
           <div className={`max-w-5xl mx-auto transition-all duration-1000 ease-out ${heroInView ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
-            <VideoCarousel videos={institutionalVideos} loading={loadingVideo} displayCount={carouselDisplayCount} />
+            <VideoCarousel 
+              videos={institutionalVideos} 
+              loading={loadingVideo || carouselDisplayCount === null} 
+              displayCount={carouselDisplayCount || 5} 
+            />
           </div>
         </div>
       </section>
 
-      {/* Animated Stats Section - conditionally rendered */}
-      {statsVisible && (
+      {/* Animated Stats Section - conditionally rendered only after settings loaded */}
+      {!loadingSettings && statsVisible && (
         <AnimatedStats stats={[
           {
             label: "Projetos Cadastrados",
