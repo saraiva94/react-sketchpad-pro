@@ -559,24 +559,35 @@ export function DraggableProjectGrid({
           </div>
         </Link>
 
-        {/* Empty Slot Skeleton - Always last */}
-        <div 
-          className="block"
-          style={{ 
-            opacity: isInView ? 1 : 0,
-            transform: isInView ? 'translateY(0)' : 'translateY(20px)',
-            transition: `all 0.6s ease-out ${(displayedItems.length + 1) * 100}ms`
-          }}
-        >
-          <div className="card-solid bg-card/50 border-2 border-dashed border-border rounded-2xl overflow-hidden h-full flex flex-col items-center justify-center min-h-[320px]">
-            <div className="w-20 h-20 rounded-full bg-muted/50 flex items-center justify-center mb-4">
-              <span className="text-4xl text-muted-foreground/50">+</span>
+        {/* Empty Glass Slots - Fill to complete row of 3 */}
+        {(() => {
+          // Total cards = displayed items + 1 rainbow CTA card
+          const totalCards = displayedItems.length + 1;
+          // Calculate how many slots needed to complete the row (rows of 3)
+          const remainder = totalCards % 3;
+          const emptySlotsNeeded = remainder === 0 ? 0 : 3 - remainder;
+          
+          return Array.from({ length: emptySlotsNeeded }).map((_, slotIndex) => (
+            <div 
+              key={`empty-slot-${slotIndex}`}
+              className="block"
+              style={{ 
+                opacity: isInView ? 1 : 0,
+                transform: isInView ? 'translateY(0)' : 'translateY(20px)',
+                transition: `all 0.6s ease-out ${(displayedItems.length + 1 + slotIndex) * 100}ms`
+              }}
+            >
+              <div className="glass-slot-card rounded-2xl overflow-hidden h-full flex flex-col items-center justify-center min-h-[320px]">
+                <div className="w-20 h-20 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center mb-4 border border-white/20">
+                  <span className="text-4xl text-white/40">+</span>
+                </div>
+                <p className="text-sm text-white/50 text-center px-6">
+                  Slot disponível para novos projetos
+                </p>
+              </div>
             </div>
-            <p className="text-sm text-muted-foreground/60 text-center px-6">
-              Slot disponível para novos projetos
-            </p>
-          </div>
-        </div>
+          ));
+        })()}
       </div>
 
       {/* Drag Overlay */}
