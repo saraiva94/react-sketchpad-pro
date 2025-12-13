@@ -5,15 +5,15 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { LayoutGrid, Eye, EyeOff, Save, GripVertical } from "lucide-react";
+import { LayoutGrid, Eye, EyeOff, Save, GripVertical, Star } from "lucide-react";
 
 // Example card IDs matching PortoDeIdeiasPage
 const EXAMPLE_CARDS = [
-  { id: "exemplo-cultura-legado", title: "Sua Cultura, Seu Legado", emoji: "🎭" },
-  { id: "exemplo-investidores-aguardam", title: "Investidores Aguardam", emoji: "🤝" },
-  { id: "exemplo-historias-sucesso", title: "Histórias de Sucesso", emoji: "🏆" },
-  { id: "exemplo-recursos-disponiveis", title: "Recursos Disponíveis", emoji: "💰" },
-  { id: "exemplo-novo-projeto", title: "Adicione seu Projeto", emoji: "✨" },
+  { id: "exemplo-cultura-legado", title: "Sua Cultura, Seu Legado", emoji: "🎭", subtitle: "Audiovisual • Rio de Janeiro" },
+  { id: "exemplo-investidores-aguardam", title: "Investidores Aguardam", emoji: "🤝", subtitle: "Produção Cultural • São Paulo" },
+  { id: "exemplo-historias-sucesso", title: "Histórias de Sucesso", emoji: "🏆", subtitle: "Teatro • São Paulo" },
+  { id: "exemplo-recursos-disponiveis", title: "Recursos Disponíveis", emoji: "💰", subtitle: "Música • Belo Horizonte" },
+  { id: "exemplo-novo-projeto", title: "Adicione seu Projeto", emoji: "✨", subtitle: "Seu projeto aqui" },
 ];
 
 interface Project {
@@ -24,15 +24,21 @@ interface Project {
 
 interface PortoIdeiasCardsManagerProps {
   projects: Project[];
+  onFeaturedChange?: () => void;
 }
 
 interface CardVisibility {
   [key: string]: boolean;
 }
 
-export function PortoIdeiasCardsManager({ projects }: PortoIdeiasCardsManagerProps) {
+interface FeaturedCards {
+  [key: string]: boolean;
+}
+
+export function PortoIdeiasCardsManager({ projects, onFeaturedChange }: PortoIdeiasCardsManagerProps) {
   const { toast } = useToast();
   const [cardVisibility, setCardVisibility] = useState<CardVisibility>({});
+  const [featuredCards, setFeaturedCards] = useState<FeaturedCards>({});
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -59,6 +65,24 @@ export function PortoIdeiasCardsManager({ projects }: PortoIdeiasCardsManagerPro
       setCardVisibility(defaultVisibility);
     }
 
+    // Fetch featured cards settings
+    const { data: featuredData } = await supabase
+      .from("settings")
+      .select("value")
+      .eq("key", "porto_ideias_featured_cards")
+      .maybeSingle();
+    
+    if (featuredData) {
+      setFeaturedCards(featuredData.value as FeaturedCards);
+    } else {
+      // Default: first 3 are featured
+      const defaultFeatured: FeaturedCards = {};
+      EXAMPLE_CARDS.slice(0, 3).forEach(card => {
+        defaultFeatured[card.id] = true;
+      });
+      setFeaturedCards(defaultFeatured);
+    }
+
     setLoading(false);
   };
 
@@ -67,6 +91,44 @@ export function PortoIdeiasCardsManager({ projects }: PortoIdeiasCardsManagerPro
       ...prev,
       [cardId]: !prev[cardId]
     }));
+  };
+
+  const toggleFeatured = async (cardId: string) => {
+    const currentFeaturedCount = Object.values(featuredCards).filter(Boolean).length;
+    const isCurrentlyFeatured = featuredCards[cardId];
+    
+    // Can't add more than 3 featured
+    if (!isCurrentlyFeatured && currentFeaturedCount >= 3) {
+      toast({
+        title: "Limite atingido",
+        description: "Você pode destacar no máximo 3 projetos. Remova um antes de adicionar outro.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const newFeatured = {
+      ...featuredCards,
+      [cardId]: !isCurrentlyFeatured
+    };
+
+    setFeaturedCards(newFeatured);
+
+    // Save immediately
+    const jsonValue = JSON.parse(JSON.stringify(newFeatured));
+    await supabase
+      .from("settings")
+      .upsert({ key: "porto_ideias_featured_cards", value: jsonValue }, { onConflict: "key" });
+
+    toast({
+      title: isCurrentlyFeatured ? "Removido dos destaques" : "Adicionado aos destaques",
+      description: isCurrentlyFeatured 
+        ? "O projeto foi removido dos destaques da homepage."
+        : "O projeto foi adicionado aos destaques da homepage.",
+    });
+
+    // Notify parent to refresh
+    onFeaturedChange?.();
   };
 
   const saveVisibility = async () => {
@@ -110,7 +172,7 @@ export function PortoIdeiasCardsManager({ projects }: PortoIdeiasCardsManagerPro
     setSaving(false);
   };
 
-  const visibleCount = Object.values(cardVisibility).filter(Boolean).length + projects.length;
+  const featuredCount = Object.values(featuredCards).filter(Boolean).length;
   const approvedProjects = projects.filter((p: any) => p.status === "approved" || !p.status);
 
   if (loading) {
@@ -172,6 +234,19 @@ export function PortoIdeiasCardsManager({ projects }: PortoIdeiasCardsManagerPro
           </div>
         )}
 
+        {/* Featured Count Indicator */}
+        <div className="flex items-center gap-2 p-3 bg-primary/10 rounded-lg border border-primary/20">
+          <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+          <span className="text-sm">
+            <strong>{featuredCount}</strong> de 3 slots de destaque preenchidos
+          </span>
+          {featuredCount < 3 && (
+            <Badge variant="outline" className="ml-2 text-xs text-muted-foreground">
+              {3 - featuredCount} disponíveis
+            </Badge>
+          )}
+        </div>
+
         {/* Example Cards Visibility */}
         <div className="space-y-3">
           <h4 className="font-medium flex items-center gap-2">
@@ -181,42 +256,70 @@ export function PortoIdeiasCardsManager({ projects }: PortoIdeiasCardsManagerPro
             </Badge>
           </h4>
           <p className="text-sm text-muted-foreground">
-            Cards de exemplo são exibidos quando não há projetos reais suficientes para preencher a grade.
+            Clique na estrela para destacar na homepage (máx. 3). Use o toggle para controlar visibilidade no Porto de Ideias.
           </p>
           <div className="space-y-2">
-            {EXAMPLE_CARDS.map((card) => (
-              <div 
-                key={card.id} 
-                className={`flex items-center justify-between p-3 border rounded-lg transition-colors ${
-                  cardVisibility[card.id] !== false ? 'bg-card' : 'bg-muted/50 opacity-60'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <GripVertical className="w-4 h-4 text-muted-foreground" />
-                  <div className="w-10 h-10 rounded bg-gradient-to-br from-accent to-primary flex items-center justify-center">
-                    <span className="text-lg">{card.emoji}</span>
+            {EXAMPLE_CARDS.map((card) => {
+              const isVisible = cardVisibility[card.id] !== false;
+              const isFeatured = featuredCards[card.id] === true;
+              
+              return (
+                <div 
+                  key={card.id} 
+                  className={`flex items-center justify-between p-3 border rounded-lg transition-colors ${
+                    isVisible ? 'bg-card' : 'bg-muted/50 opacity-60'
+                  } ${isFeatured ? 'border-yellow-500/50 bg-yellow-500/5' : ''}`}
+                >
+                  <div className="flex items-center gap-3">
+                    <GripVertical className="w-4 h-4 text-muted-foreground" />
+                    
+                    {/* Star for Featured */}
+                    <button
+                      onClick={() => toggleFeatured(card.id)}
+                      className={`p-1.5 rounded-full transition-all ${
+                        isFeatured 
+                          ? 'bg-yellow-500/20 text-yellow-500 hover:bg-yellow-500/30' 
+                          : 'bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground'
+                      }`}
+                      title={isFeatured ? "Remover dos destaques" : "Adicionar aos destaques da homepage"}
+                    >
+                      <Star className={`w-5 h-5 ${isFeatured ? 'fill-yellow-500' : ''}`} />
+                    </button>
+                    
+                    <div className="w-10 h-10 rounded bg-gradient-to-br from-accent to-primary flex items-center justify-center">
+                      <span className="text-lg">{card.emoji}</span>
+                    </div>
+                    <div>
+                      <span className="font-medium">{card.title}</span>
+                      <p className="text-xs text-muted-foreground">{card.subtitle}</p>
+                    </div>
                   </div>
-                  <span className="font-medium">{card.title}</span>
+                  <div className="flex items-center gap-3">
+                    {isFeatured && (
+                      <Badge variant="default" className="bg-yellow-600">
+                        <Star className="w-3 h-3 mr-1 fill-current" />
+                        Destaque
+                      </Badge>
+                    )}
+                    {isVisible ? (
+                      <Badge variant="secondary" className="text-green-600">
+                        <Eye className="w-3 h-3 mr-1" />
+                        Visível
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-muted-foreground">
+                        <EyeOff className="w-3 h-3 mr-1" />
+                        Oculto
+                      </Badge>
+                    )}
+                    <Switch
+                      checked={isVisible}
+                      onCheckedChange={() => toggleCardVisibility(card.id)}
+                    />
+                  </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  {cardVisibility[card.id] !== false ? (
-                    <Badge variant="secondary" className="text-green-600">
-                      <Eye className="w-3 h-3 mr-1" />
-                      Visível
-                    </Badge>
-                  ) : (
-                    <Badge variant="outline" className="text-muted-foreground">
-                      <EyeOff className="w-3 h-3 mr-1" />
-                      Oculto
-                    </Badge>
-                  )}
-                  <Switch
-                    checked={cardVisibility[card.id] !== false}
-                    onCheckedChange={() => toggleCardVisibility(card.id)}
-                  />
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
