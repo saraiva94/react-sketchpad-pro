@@ -522,7 +522,7 @@ export function DraggableProjectGrid({
           ))}
         </SortableContext>
 
-        {/* CTA Card - Always last */}
+        {/* CTA Card Rainbow - After projects */}
         <Link 
           to="/submit"
           className="block group"
@@ -558,6 +558,25 @@ export function DraggableProjectGrid({
             </div>
           </div>
         </Link>
+
+        {/* Empty Slot Skeleton - Always last */}
+        <div 
+          className="block"
+          style={{ 
+            opacity: isInView ? 1 : 0,
+            transform: isInView ? 'translateY(0)' : 'translateY(20px)',
+            transition: `all 0.6s ease-out ${(displayedItems.length + 1) * 100}ms`
+          }}
+        >
+          <div className="card-solid bg-card/50 border-2 border-dashed border-border rounded-2xl overflow-hidden h-full flex flex-col items-center justify-center min-h-[320px]">
+            <div className="w-20 h-20 rounded-full bg-muted/50 flex items-center justify-center mb-4">
+              <span className="text-4xl text-muted-foreground/50">+</span>
+            </div>
+            <p className="text-sm text-muted-foreground/60 text-center px-6">
+              Slot disponível para novos projetos
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Drag Overlay */}
