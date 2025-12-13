@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
+import { FeaturedProjectsManager } from "@/components/admin/FeaturedProjectsManager";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
@@ -906,162 +907,11 @@ const AdminDashboard = () => {
               </CardContent>
             </Card>
 
-            {/* Projetos em Destaque na Homepage */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Star className="w-5 h-5" />
-                  Projetos em Destaque na Homepage
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  Gerencie os projetos exibidos na seção "Um Ecossistema de Conexões" da homepage. Os 3 primeiros projetos serão exibidos.
-                </p>
-
-                {/* All Featured Items - Real Projects + Examples */}
-                <div className="space-y-4">
-                  {/* Projetos Reais em Destaque */}
-                  {featuredProjects.length > 0 && (
-                    <div className="space-y-2">
-                      <h4 className="font-medium text-sm text-muted-foreground mb-2">
-                        Projetos Reais em Destaque ({featuredProjects.length})
-                      </h4>
-                      {featuredProjects.map((project, index) => (
-                        <div key={project.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors group border-primary/30 bg-primary/5">
-                          <div className="flex items-center gap-4">
-                            <span className="text-sm font-medium text-primary w-6">{index + 1}.</span>
-                            {project.image_url && (
-                              <img 
-                                src={project.image_url} 
-                                alt={project.title}
-                                className="w-12 h-12 rounded object-cover"
-                              />
-                            )}
-                            <div>
-                              <h4 className="font-medium">{project.title}</h4>
-                              <p className="text-sm text-muted-foreground">
-                                {project.project_type} • {project.location || "Sem localização"}
-                              </p>
-                            </div>
-                            <Badge variant="default" className="ml-2">Real</Badge>
-                          </div>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => toggleFeatured(project.id, true)}
-                            className="text-destructive hover:text-destructive hover:bg-destructive/10 opacity-60 group-hover:opacity-100 transition-opacity"
-                            title="Remover dos destaques"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Projetos de Exemplo - Sempre visíveis para gestão */}
-                  <div className="border rounded-lg p-4 bg-primary/5 border-primary/30">
-                    <h4 className="font-medium text-sm mb-3 flex items-center gap-2">
-                      <Star className="w-4 h-4 text-primary" />
-                      Projetos de Exemplo (Preenchem slots vazios)
-                    </h4>
-                    <p className="text-xs text-muted-foreground mb-3">
-                      {featuredProjects.length === 0 
-                        ? "Todos os 3 projetos de exemplo serão exibidos na homepage."
-                        : featuredProjects.length === 1
-                        ? "2 projetos de exemplo serão exibidos para completar os 3 slots."
-                        : featuredProjects.length === 2
-                        ? "1 projeto de exemplo será exibido para completar os 3 slots."
-                        : "Nenhum projeto de exemplo será exibido - todos os slots estão preenchidos com projetos reais."}
-                    </p>
-                    <div className="space-y-2">
-                      <div className={`flex items-center gap-4 p-3 border rounded-lg bg-card transition-opacity ${featuredProjects.length >= 1 ? 'opacity-40' : ''}`}>
-                        <span className="text-sm text-muted-foreground w-6">{featuredProjects.length >= 1 ? '-' : (featuredProjects.length + 1) + '.'}</span>
-                        <div className="w-12 h-12 rounded bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-                          <Star className="w-6 h-6 text-primary/50" />
-                        </div>
-                        <div>
-                          <h4 className="font-medium">Cultura como Legado</h4>
-                          <p className="text-sm text-muted-foreground">Audiovisual • Rio de Janeiro</p>
-                        </div>
-                        <Badge variant="secondary" className="ml-auto">Exemplo</Badge>
-                        {featuredProjects.length >= 1 && (
-                          <Badge variant="outline" className="text-xs">Oculto</Badge>
-                        )}
-                      </div>
-                      <div className={`flex items-center gap-4 p-3 border rounded-lg bg-card transition-opacity ${featuredProjects.length >= 2 ? 'opacity-40' : ''}`}>
-                        <span className="text-sm text-muted-foreground w-6">{featuredProjects.length >= 2 ? '-' : (featuredProjects.length + 2) + '.'}</span>
-                        <div className="w-12 h-12 rounded bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-                          <Star className="w-6 h-6 text-primary/50" />
-                        </div>
-                        <div>
-                          <h4 className="font-medium">Histórias de Sucesso</h4>
-                          <p className="text-sm text-muted-foreground">Teatro • São Paulo</p>
-                        </div>
-                        <Badge variant="secondary" className="ml-auto">Exemplo</Badge>
-                        {featuredProjects.length >= 2 && (
-                          <Badge variant="outline" className="text-xs">Oculto</Badge>
-                        )}
-                      </div>
-                      <div className={`flex items-center gap-4 p-3 border rounded-lg bg-card transition-opacity ${featuredProjects.length >= 3 ? 'opacity-40' : ''}`}>
-                        <span className="text-sm text-muted-foreground w-6">{featuredProjects.length >= 3 ? '-' : '3.'}</span>
-                        <div className="w-12 h-12 rounded bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-                          <Star className="w-6 h-6 text-primary/50" />
-                        </div>
-                        <div>
-                          <h4 className="font-medium">Recursos Disponíveis</h4>
-                          <p className="text-sm text-muted-foreground">Música • Belo Horizonte</p>
-                        </div>
-                        <Badge variant="secondary" className="ml-auto">Exemplo</Badge>
-                        {featuredProjects.length >= 3 && (
-                          <Badge variant="outline" className="text-xs">Oculto</Badge>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Available Projects to Feature */}
-                {projects.filter(p => p.status === "approved" && !p.featured_on_homepage).length > 0 && (
-                  <div className="pt-4 border-t">
-                    <h4 className="font-medium text-sm text-muted-foreground mb-2">Projetos aprovados disponíveis para destacar</h4>
-                    <div className="space-y-2">
-                      {projects
-                        .filter(p => p.status === "approved" && !p.featured_on_homepage)
-                        .map((project) => (
-                          <div key={project.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors group">
-                            <div className="flex items-center gap-4">
-                              {project.image_url && (
-                                <img 
-                                  src={project.image_url} 
-                                  alt={project.title}
-                                  className="w-12 h-12 rounded object-cover"
-                                />
-                              )}
-                              <div>
-                                <h4 className="font-medium">{project.title}</h4>
-                                <p className="text-sm text-muted-foreground">
-                                  {project.project_type} • {project.location || "Sem localização"}
-                                </p>
-                              </div>
-                            </div>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => toggleFeatured(project.id, false)}
-                              className="opacity-60 group-hover:opacity-100 transition-opacity"
-                            >
-                              <Plus className="w-4 h-4 mr-1" />
-                              Adicionar
-                            </Button>
-                          </div>
-                        ))}
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            {/* Projetos em Destaque na Homepage - Now using the new component */}
+            <FeaturedProjectsManager 
+              projects={projects} 
+              onProjectUpdate={fetchProjects}
+            />
 
             {/* Vídeos Institucionais (até 5) */}
             <Card>
