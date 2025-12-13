@@ -16,14 +16,24 @@ interface VideoCarouselProps {
 
 export function VideoCarousel({ videos, loading = false, displayCount = 5 }: VideoCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [hasAnimated, setHasAnimated] = useState(false);
+  const [animationPhase, setAnimationPhase] = useState<'initial' | 'expanding' | 'complete'>('initial');
 
-  // Trigger entrance animation after mount
+  // Trigger entrance animation sequence after mount
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setHasAnimated(true);
-    }, 100);
-    return () => clearTimeout(timer);
+    // Start expanding animation after a brief moment
+    const expandTimer = setTimeout(() => {
+      setAnimationPhase('expanding');
+    }, 300);
+    
+    // Complete animation
+    const completeTimer = setTimeout(() => {
+      setAnimationPhase('complete');
+    }, 1100);
+    
+    return () => {
+      clearTimeout(expandTimer);
+      clearTimeout(completeTimer);
+    };
   }, []);
 
   // Use displayCount for how many cards to show
@@ -50,100 +60,41 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5 }: Vid
   const getCardStyles = (position: number) => {
     const absPosition = Math.abs(position);
     
-    // Initial state before animation - all cards centered and stacked
-    if (!hasAnimated) {
-      // All cards start at center with scales based on their layer
-      let initialScale = 1;
-      let initialZ = 0;
-      
+    // Calculate final positions for reference
+    const getFinalTransform = () => {
       if (displayCount === 1) {
-        initialScale = position === 0 ? 1 : 0;
-      } else if (displayCount === 3) {
-        if (absPosition === 0) {
-          initialScale = 1;
-          initialZ = 0;
-        } else if (absPosition === 1) {
-          initialScale = 0.75;
-          initialZ = -80;
-        } else {
-          initialScale = 0;
-          initialZ = -160;
-        }
-      } else {
-        // 5 video mode
-        if (absPosition === 0) {
-          initialScale = 1;
-          initialZ = 0;
-        } else if (absPosition === 1) {
-          initialScale = 0.70;
-          initialZ = -80;
-        } else if (absPosition === 2) {
-          initialScale = 0.50;
-          initialZ = -160;
-        } else {
-          initialScale = 0;
-          initialZ = -240;
-        }
+        return { translateX: 0, translateZ: 0, scale: position === 0 ? 1 : 0 };
       }
       
+      if (displayCount === 3) {
+        if (absPosition === 0) return { translateX: 0, translateZ: 0, scale: 1 };
+        if (absPosition === 1) return { translateX: position * 45, translateZ: -80, scale: 0.75 };
+        return { translateX: position * 100, translateZ: -160, scale: 0 };
+      }
+      
+      // 5 video mode
+      if (absPosition === 0) return { translateX: 0, translateZ: 0, scale: 1 };
+      if (absPosition === 1) return { translateX: position * 38, translateZ: -80, scale: 0.70 };
+      if (absPosition === 2) return { translateX: position * 35, translateZ: -160, scale: 0.50 };
+      return { translateX: position * 100, translateZ: -240, scale: 0 };
+    };
+    
+    const final = getFinalTransform();
+    const maxVisible = displayCount === 1 ? 0 : displayCount === 3 ? 1 : 2;
+    const isVisible = absPosition <= maxVisible;
+    
+    // Initial state - all cards stacked at center with their layer depths
+    if (animationPhase === 'initial') {
       return {
-        opacity: absPosition <= (displayCount === 1 ? 0 : displayCount === 3 ? 1 : 2) ? 1 : 0,
-        transform: `translateX(0%) translateZ(${initialZ}px) scale(${initialScale})`,
+        opacity: isVisible ? 1 : 0,
+        transform: `translateX(0%) translateZ(${final.translateZ}px) scale(${final.scale})`,
         zIndex: 10 - absPosition,
-        visibility: (absPosition <= (displayCount === 1 ? 0 : displayCount === 3 ? 1 : 2) ? 'visible' : 'hidden') as 'visible' | 'hidden',
+        visibility: (isVisible ? 'visible' : 'hidden') as 'visible' | 'hidden',
       };
     }
     
-    // For single video mode, hide all but center
-    if (displayCount === 1) {
-      if (position !== 0) {
-        return {
-          opacity: 0,
-          transform: `translateX(${position * 100}%) scale(0.4)`,
-          zIndex: 0,
-          visibility: 'hidden' as const,
-        };
-      }
-      return {
-        opacity: 1,
-        transform: `translateX(0) translateZ(0) scale(1)`,
-        zIndex: 10,
-        visibility: 'visible' as const,
-      };
-    }
-    
-    // For 3 video mode, only show center and immediate neighbors
-    if (displayCount === 3) {
-      if (absPosition > 1) {
-        return {
-          opacity: 0,
-          transform: `translateX(${position * 100}%) scale(0.4)`,
-          zIndex: 0,
-          visibility: 'hidden' as const,
-        };
-      }
-      
-      if (position === 0) {
-        return {
-          opacity: 1,
-          transform: `translateX(0) translateZ(0) scale(1)`,
-          zIndex: 10,
-          visibility: 'visible' as const,
-        };
-      }
-      
-      // First level cards for 3-video mode
-      return {
-        opacity: 1,
-        transform: `translateX(${position * 45}%) translateZ(-80px) scale(0.75)`,
-        zIndex: 9,
-        visibility: 'visible' as const,
-      };
-    }
-    
-    // Full 5 video mode (default)
-    // Only show cards within 2 positions of center
-    if (absPosition > 2) {
+    // After initial phase - cards slide horizontally to their positions
+    if (!isVisible) {
       return {
         opacity: 0,
         transform: `translateX(${position * 100}%) scale(0.4)`,
@@ -151,35 +102,11 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5 }: Vid
         visibility: 'hidden' as const,
       };
     }
-
-    // Scale hierarchy: center=1, first level=0.70, second level=0.50
-    let scale: number;
-    let translateX: number;
-    let translateZ: number;
     
-    if (position === 0) {
-      scale = 1;
-      translateX = 0;
-      translateZ = 0;
-    } else if (absPosition === 1) {
-      // First level cards - medium size, overlapping with center
-      scale = 0.70;
-      translateX = position * 38;
-      translateZ = -80;
-    } else {
-      // Second level cards - smallest, overlapping more with first level
-      scale = 0.50;
-      translateX = position * 35;
-      translateZ = -160;
-    }
-    
-    const opacity = 1;
-    const zIndex = 10 - absPosition;
-
     return {
-      opacity,
-      transform: `translateX(${translateX}%) translateZ(${translateZ}px) scale(${scale})`,
-      zIndex,
+      opacity: 1,
+      transform: `translateX(${final.translateX}%) translateZ(${final.translateZ}px) scale(${final.scale})`,
+      zIndex: 10 - absPosition,
       visibility: 'visible' as const,
     };
   };
@@ -218,11 +145,14 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5 }: Vid
           return (
             <div
               key={index}
-              className="absolute inset-0 transition-all duration-500 ease-out"
+              className="absolute inset-0"
               style={{
                 ...styles,
                 transformStyle: 'preserve-3d',
                 cursor: isCenter ? 'default' : 'pointer',
+                transition: animationPhase === 'initial' 
+                  ? 'none' 
+                  : 'all 800ms cubic-bezier(0.34, 1.56, 0.64, 1)',
               }}
               onClick={() => !isCenter && setCurrentIndex(index)}
             >
