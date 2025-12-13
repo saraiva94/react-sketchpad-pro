@@ -164,7 +164,8 @@ const exampleProjects = [
 const PortoDeIdeiasPage = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
-  const [displaySlots, setDisplaySlots] = useState(5); // Default 5 project slots
+  const [displaySlots, setDisplaySlots] = useState(6); // Default 6 project slots (2 rows of 3)
+  const [cardVisibility, setCardVisibility] = useState<{ [key: string]: boolean }>({});
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   
@@ -184,6 +185,7 @@ const PortoDeIdeiasPage = () => {
   useEffect(() => {
     fetchProjects();
     fetchDisplaySlots();
+    fetchCardVisibility();
     // Check if admin is logged in
     const adminLoggedIn = localStorage.getItem("isAdminLoggedIn") === "true";
     setIsAdmin(adminLoggedIn);
@@ -208,7 +210,19 @@ const PortoDeIdeiasPage = () => {
       .maybeSingle();
     
     if (data) {
-      setDisplaySlots((data.value as { count: number }).count || 5);
+      setDisplaySlots((data.value as { count: number }).count || 6);
+    }
+  };
+
+  const fetchCardVisibility = async () => {
+    const { data } = await supabase
+      .from("settings")
+      .select("value")
+      .eq("key", "porto_ideias_card_visibility")
+      .maybeSingle();
+    
+    if (data) {
+      setCardVisibility(data.value as { [key: string]: boolean });
     }
   };
 
@@ -540,7 +554,7 @@ const PortoDeIdeiasPage = () => {
           ) : (
             <DraggableProjectGrid
               projects={sortedProjects}
-              exampleProjects={exampleProjects}
+              exampleProjects={exampleProjects.filter(e => cardVisibility[e.id] !== false)}
               displaySlots={displaySlots}
               isInView={projectsInView}
               isAdmin={isAdmin}
