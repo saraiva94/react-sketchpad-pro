@@ -77,6 +77,7 @@ const HomePage = () => {
   const [loadingVideo, setLoadingVideo] = useState(true);
   const [carouselDisplayCount, setCarouselDisplayCount] = useState<1 | 3 | 5 | null>(null);
   const [loadingSettings, setLoadingSettings] = useState(true);
+  const [heroReady, setHeroReady] = useState(false);
 
   useEffect(() => {
     fetchFeaturedProjects();
@@ -353,7 +354,8 @@ const HomePage = () => {
               <VideoCarousel 
                 videos={institutionalVideos} 
                 loading={loadingVideo} 
-                displayCount={carouselDisplayCount} 
+                displayCount={carouselDisplayCount}
+                onAnimationComplete={() => setHeroReady(true)}
               />
             ) : (
               <div className="h-64 md:h-80" />
@@ -393,12 +395,12 @@ const HomePage = () => {
         ]} />
       )}
 
-      {/* Quem Somos Section */}
-      <section ref={quemSomosRef} id="sobre" className="py-20 lg:py-28 relative z-10">
+      {/* Quem Somos Section - only animates after hero is ready AND in view */}
+      <section ref={quemSomosRef} id="sobre" className={`py-20 lg:py-28 relative z-10 transition-opacity duration-500 ${heroReady ? 'opacity-100' : 'opacity-0'}`}>
         <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent" />
         
         <div className="container mx-auto px-4 relative z-10">
-          <div className={`text-center mb-12 transition-all duration-700 ${quemSomosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+          <div className={`text-center mb-12 transition-all duration-700 ${heroReady && quemSomosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
             <ShinyText className="inline-block" delay={200}>
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif font-semibold text-foreground mb-6 decorative-line">
                 Quem Somos
@@ -406,7 +408,7 @@ const HomePage = () => {
             </ShinyText>
           </div>
           
-          <div className={`max-w-5xl mx-auto mb-20 transition-all duration-700 ${quemSomosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`} style={{ transitionDelay: '150ms' }}>
+          <div className={`max-w-5xl mx-auto mb-20 transition-all duration-700 ${heroReady && quemSomosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`} style={{ transitionDelay: '150ms' }}>
             <div className="text-base md:text-lg text-muted-foreground leading-relaxed space-y-6">
               <p>
                 A Porto Bello Filmes é uma produtora audiovisual que nasce da vontade de realização que pulsa em cada uma de nós. Às vezes as coisas que a gente sonha realmente acontecem, o que a gente precisa é correr atrás na prática cotidiana e acreditar que o nosso movimento também movimenta a vida. A nossa equipe une a capacidade de colocar a mão na massa com a sensibilidade de transformar vivências em narrativas para compartilhar com o mundo.
@@ -428,8 +430,8 @@ const HomePage = () => {
             ].map((card, index) => (
               <Card 
                 key={card.title}
-                className={`text-center p-8 card-solid bg-card border-border card-hover group transition-all duration-700 ${quemSomosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
-                style={{ transitionDelay: quemSomosInView ? `${(index + 2) * 150}ms` : '0ms' }}
+                className={`text-center p-8 card-solid bg-card border-border card-hover group transition-all duration-700 ${heroReady && quemSomosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+                style={{ transitionDelay: heroReady && quemSomosInView ? `${(index + 2) * 150}ms` : '0ms' }}
               >
                 <div className={`w-20 h-20 bg-gradient-to-br ${card.color} rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-elegant group-hover:scale-110 transition-transform duration-300`}>
                   <card.icon className={`w-10 h-10 ${card.textColor}`} />
@@ -445,12 +447,12 @@ const HomePage = () => {
       </section>
 
       {/* Porto de Ideias Section - Ecossistema de Conexões (Projetos em Destaque) */}
-      <section ref={portoIdeiasRef} id="porto-de-ideias" className="py-20 lg:py-28 relative overflow-hidden z-10">
+      <section ref={portoIdeiasRef} id="porto-de-ideias" className={`py-20 lg:py-28 relative overflow-hidden z-10 transition-opacity duration-500 ${heroReady ? 'opacity-100' : 'opacity-0'}`}>
         <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent" />
         
         <div className="container mx-auto px-4 relative">
           {/* Header */}
-          <div className={`text-center mb-16 transition-all duration-700 ${portoIdeiasInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+          <div className={`text-center mb-16 transition-all duration-700 ${heroReady && portoIdeiasInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
             <ShinyText className="inline-block" delay={300}>
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif font-semibold text-foreground mb-4">
                 Um Ecossistema de Conexões
@@ -522,11 +524,11 @@ const HomePage = () => {
                     {/* Texto - entra do lado oposto à imagem */}
                     <div 
                       className={`space-y-8 ${isEven ? 'lg:order-2' : ''} transition-all duration-1000 ease-out ${
-                        portoIdeiasInView 
+                        heroReady && portoIdeiasInView 
                           ? 'opacity-100 translate-x-0' 
                           : `opacity-0 ${isEven ? 'translate-x-20' : '-translate-x-20'}`
                       }`}
-                      style={{ transitionDelay: portoIdeiasInView ? `${(index + 1) * 250}ms` : '0ms' }}
+                      style={{ transitionDelay: heroReady && portoIdeiasInView ? `${(index + 1) * 250}ms` : '0ms' }}
                     >
                       <div>
                         <ShinyText delay={400 + index * 100}>
@@ -544,11 +546,11 @@ const HomePage = () => {
                           <div 
                             key={item.title} 
                             className={`flex gap-4 items-start transition-all duration-700 ease-out ${
-                              portoIdeiasInView 
+                              heroReady && portoIdeiasInView 
                                 ? 'opacity-100 translate-x-0' 
                                 : `opacity-0 ${isEven ? 'translate-x-16' : '-translate-x-16'}`
                             }`}
-                            style={{ transitionDelay: portoIdeiasInView ? `${(index * 250) + (itemIndex * 150) + 400}ms` : '0ms' }}
+                            style={{ transitionDelay: heroReady && portoIdeiasInView ? `${(index * 250) + (itemIndex * 150) + 400}ms` : '0ms' }}
                           >
                             <div className={`${item.color} w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg`}>
                               <item.icon className="w-6 h-6 text-primary-foreground" />
@@ -565,9 +567,9 @@ const HomePage = () => {
                       <Link 
                         to={isExample ? (project as typeof exampleProjects[0]).link : `/project/${project.id}`}
                         className={`inline-flex items-center gap-2 text-primary font-medium hover:gap-3 transition-all group duration-700 ${
-                          portoIdeiasInView ? 'opacity-100 translate-x-0' : `opacity-0 ${isEven ? 'translate-x-12' : '-translate-x-12'}`
+                          heroReady && portoIdeiasInView ? 'opacity-100 translate-x-0' : `opacity-0 ${isEven ? 'translate-x-12' : '-translate-x-12'}`
                         }`}
-                        style={{ transitionDelay: portoIdeiasInView ? `${(index * 250) + 850}ms` : '0ms' }}
+                        style={{ transitionDelay: heroReady && portoIdeiasInView ? `${(index * 250) + 850}ms` : '0ms' }}
                       >
                         {isExample ? "Ver Exemplo Completo" : "Ver Projeto Completo"}
                         <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -578,11 +580,11 @@ const HomePage = () => {
                     <Link 
                       to={isExample ? (project as typeof exampleProjects[0]).link : `/project/${project.id}`}
                       className={`relative group ${isEven ? 'lg:order-1' : ''} transition-all duration-1000 ease-out ${
-                        portoIdeiasInView 
+                        heroReady && portoIdeiasInView 
                           ? 'opacity-100 translate-x-0' 
                           : `opacity-0 ${isEven ? '-translate-x-20' : 'translate-x-20'}`
                       }`}
-                      style={{ transitionDelay: portoIdeiasInView ? `${(index + 1) * 250}ms` : '0ms' }}
+                      style={{ transitionDelay: heroReady && portoIdeiasInView ? `${(index + 1) * 250}ms` : '0ms' }}
                     >
                       <div className="relative">
                         <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl border border-border card-solid bg-card group-hover:shadow-3xl transition-shadow duration-300">
@@ -639,11 +641,11 @@ const HomePage = () => {
       </section>
 
       {/* Nossos Serviços Section */}
-      <section ref={servicosRef} id="servicos" className="py-20 lg:py-28 relative z-10">
+      <section ref={servicosRef} id="servicos" className={`py-20 lg:py-28 relative z-10 transition-opacity duration-500 ${heroReady ? 'opacity-100' : 'opacity-0'}`}>
         <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent" />
         
         <div className="container mx-auto px-4 relative z-10">
-          <div className={`text-center mb-16 transition-all duration-700 ${servicosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+          <div className={`text-center mb-16 transition-all duration-700 ${heroReady && servicosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
             <ShinyText className="inline-block" delay={200}>
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif font-semibold text-foreground mb-4 decorative-line">
                 Nossos Serviços
@@ -655,9 +657,9 @@ const HomePage = () => {
             {services.map((service, index) => (
               <Card 
                 key={index} 
-                className={`group relative overflow-visible card-solid bg-card border-border rainbow-card-glow ${servicosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+                className={`group relative overflow-visible card-solid bg-card border-border rainbow-card-glow ${heroReady && servicosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
                 style={{ 
-                  transitionDelay: servicosInView ? `${(index + 1) * 100}ms` : '0ms',
+                  transitionDelay: heroReady && servicosInView ? `${(index + 1) * 100}ms` : '0ms',
                 }}
               >
                 <div className="relative p-6 flex flex-col items-center text-center gap-4">
