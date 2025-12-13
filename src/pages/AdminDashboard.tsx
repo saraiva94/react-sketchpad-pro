@@ -1547,9 +1547,27 @@ const AdminDashboard = () => {
                 </div>
               </div>
 
-              <p className="text-sm text-muted-foreground mb-4">
-                Exibindo {contacts.length} de {allContacts.length} cadastros
-              </p>
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-sm text-muted-foreground">
+                  Exibindo {contacts.length} de {allContacts.length} cadastros
+                </p>
+                {(contactFilterGender !== "all" || contactFilterStatus !== "all" || contactFilterDateFrom || contactFilterDateTo) && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setContactFilterGender("all");
+                      setContactFilterStatus("all");
+                      setContactFilterDateFrom("");
+                      setContactFilterDateTo("");
+                    }}
+                    className="text-destructive hover:text-destructive"
+                  >
+                    <X className="w-4 h-4 mr-1" />
+                    Limpar Filtros
+                  </Button>
+                )}
+              </div>
 
               {contacts.length > 0 ? (
                 <div className="overflow-x-auto">
