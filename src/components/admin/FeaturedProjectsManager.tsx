@@ -46,11 +46,13 @@ interface FeaturedItem {
   visible: boolean;
 }
 
-// Example projects data - IDs must match HomePage exampleProjects
+// Example projects data - IDs must match PortoIdeiasCardsManager
 const EXAMPLE_PROJECTS = [
-  { id: "exemplo-cultura-legado", title: "Cultura como Legado", subtitle: "Audiovisual • Rio de Janeiro" },
+  { id: "exemplo-cultura-legado", title: "Sua Cultura, Seu Legado", subtitle: "Audiovisual • Rio de Janeiro" },
+  { id: "exemplo-investidores-aguardam", title: "Investidores Aguardam", subtitle: "Produção Cultural • São Paulo" },
   { id: "exemplo-historias-sucesso", title: "Histórias de Sucesso", subtitle: "Teatro • São Paulo" },
   { id: "exemplo-recursos-disponiveis", title: "Recursos Disponíveis", subtitle: "Música • Belo Horizonte" },
+  { id: "exemplo-novo-projeto", title: "Adicione seu Projeto", subtitle: "Seu projeto aqui" },
 ];
 
 interface SortableItemProps {
@@ -226,7 +228,7 @@ export function FeaturedProjectsManager({ projects, onProjectUpdate }: FeaturedP
         .from("settings")
         .select("value")
         .eq("key", "featured_projects_order")
-        .single();
+        .maybeSingle();
 
       const savedOrder: string[] = settingsData?.value as string[] || [];
       const savedVisibility: Record<string, boolean> = {};
@@ -236,11 +238,20 @@ export function FeaturedProjectsManager({ projects, onProjectUpdate }: FeaturedP
         .from("settings")
         .select("value")
         .eq("key", "featured_projects_visibility")
-        .single();
+        .maybeSingle();
       
       if (visibilityData?.value) {
         Object.assign(savedVisibility, visibilityData.value);
       }
+
+      // Get featured cards settings from PortoIdeiasCardsManager
+      const { data: featuredCardsData } = await supabase
+        .from("settings")
+        .select("value")
+        .eq("key", "porto_ideias_featured_cards")
+        .maybeSingle();
+      
+      const featuredCards: Record<string, boolean> = featuredCardsData?.value as Record<string, boolean> || {};
 
       // Create items from real featured projects
       const realProjects = projects.filter(p => p.featured_on_homepage && p.status === "approved");
@@ -254,14 +265,16 @@ export function FeaturedProjectsManager({ projects, onProjectUpdate }: FeaturedP
         visible: savedVisibility[`real-${p.id}`] !== false, // Default to visible
       }));
 
-      // Create items from example projects
-      const exampleItems: FeaturedItem[] = EXAMPLE_PROJECTS.map(ex => ({
-        id: ex.id,
-        type: "example",
-        title: ex.title,
-        subtitle: ex.subtitle,
-        visible: savedVisibility[ex.id] !== false, // Default to visible
-      }));
+      // Create items ONLY from example projects that are featured (starred)
+      const exampleItems: FeaturedItem[] = EXAMPLE_PROJECTS
+        .filter(ex => featuredCards[ex.id] === true)
+        .map(ex => ({
+          id: ex.id,
+          type: "example",
+          title: ex.title,
+          subtitle: ex.subtitle,
+          visible: savedVisibility[ex.id] !== false, // Default to visible
+        }));
 
       // Combine all items
       let allItems = [...realItems, ...exampleItems];
@@ -281,14 +294,8 @@ export function FeaturedProjectsManager({ projects, onProjectUpdate }: FeaturedP
       setItems(allItems);
     } catch (error) {
       console.error("Error loading featured items:", error);
-      // Fallback to example projects only
-      setItems(EXAMPLE_PROJECTS.map(ex => ({
-        id: ex.id,
-        type: "example",
-        title: ex.title,
-        subtitle: ex.subtitle,
-        visible: true,
-      })));
+      // Fallback to empty
+      setItems([]);
     }
   };
 

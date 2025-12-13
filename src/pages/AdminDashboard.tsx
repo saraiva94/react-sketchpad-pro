@@ -114,6 +114,7 @@ const AdminDashboard = () => {
   const [activeSection, setActiveSection] = useState<"projects" | "requests" | "contacts" | "homepage">("homepage");
   const [statsVisible, setStatsVisible] = useState(true);
   const [loadingSettings, setLoadingSettings] = useState(true);
+  const [featuredRefreshKey, setFeaturedRefreshKey] = useState(0);
   
   // Vídeos institucionais (até 5)
   interface VideoItem {
@@ -923,6 +924,7 @@ const AdminDashboard = () => {
 
             {/* Projetos em Destaque na Homepage - Now using the new component */}
             <FeaturedProjectsManager 
+              key={`featured-${featuredRefreshKey}`}
               projects={projects} 
               onProjectUpdate={fetchProjects}
             />
@@ -930,6 +932,7 @@ const AdminDashboard = () => {
             {/* Controle e Edição - Cards Porto de Ideias */}
             <PortoIdeiasCardsManager 
               projects={projects.filter(p => p.status === "approved")}
+              onFeaturedChange={() => setFeaturedRefreshKey(prev => prev + 1)}
             />
 
             {/* Vídeos Institucionais (até 5) */}
