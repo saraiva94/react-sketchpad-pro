@@ -443,14 +443,19 @@ const HomePage = () => {
                 onAnimationComplete={() => setHeroReady(true)}
               />
             ) : (
-              <div className="aspect-video w-full flex items-center justify-center">
+              <div className="aspect-video w-full flex items-center justify-center animate-fade-in">
                 <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-2xl border border-border bg-card card-solid">
                   <div className="absolute inset-0 flex flex-col items-center justify-center gap-6">
                     <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center border border-border shadow-lg animate-pulse">
                       <Play className="w-12 h-12 text-primary-foreground ml-1" />
                     </div>
-                    <p className="text-muted-foreground text-sm">Carregando...</p>
+                    <p className="text-muted-foreground text-sm animate-pulse">Carregando...</p>
                   </div>
+                  {/* Decorative corners */}
+                  <div className="absolute top-4 left-4 w-12 h-12 border-l-2 border-t-2 border-primary/50 rounded-tl-lg" />
+                  <div className="absolute top-4 right-4 w-12 h-12 border-r-2 border-t-2 border-primary/50 rounded-tr-lg" />
+                  <div className="absolute bottom-4 left-4 w-12 h-12 border-l-2 border-b-2 border-primary/50 rounded-bl-lg" />
+                  <div className="absolute bottom-4 right-4 w-12 h-12 border-r-2 border-b-2 border-primary/50 rounded-br-lg" />
                 </div>
               </div>
             )}
