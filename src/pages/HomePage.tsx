@@ -81,6 +81,7 @@ const HomePage = () => {
   const [heroReady, setHeroReady] = useState(false);
   const [featuredVisibility, setFeaturedVisibility] = useState<Record<string, boolean>>({});
   const [featuredOrder, setFeaturedOrder] = useState<string[]>([]);
+  const [featuredExampleCards, setFeaturedExampleCards] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     fetchFeaturedProjects();
@@ -109,8 +110,8 @@ const HomePage = () => {
             if (count === 1 || count === 3 || count === 5) {
               setCarouselDisplayCount(count);
             }
-          } else if (record.key === 'featured_projects_visibility' || record.key === 'featured_projects_order') {
-            // Refetch featured projects when visibility or order changes
+          } else if (record.key === 'featured_projects_visibility' || record.key === 'featured_projects_order' || record.key === 'porto_ideias_featured_cards') {
+            // Refetch featured projects when visibility, order, or featured cards change
             fetchFeaturedProjects();
           }
         }
@@ -247,8 +248,18 @@ const HomePage = () => {
     const savedOrder: string[] = (orderData?.value as string[]) || [];
     const visibility: Record<string, boolean> = (visibilityData?.value as Record<string, boolean>) || {};
     
+    // Fetch featured example cards settings
+    const { data: featuredCardsData } = await supabase
+      .from("settings")
+      .select("value")
+      .eq("key", "porto_ideias_featured_cards")
+      .maybeSingle();
+    
+    const featuredCards: Record<string, boolean> = (featuredCardsData?.value as Record<string, boolean>) || {};
+    
     setFeaturedVisibility(visibility);
     setFeaturedOrder(savedOrder);
+    setFeaturedExampleCards(featuredCards);
     
     // Filter projects based on visibility settings
     let filteredProjects = (projectsData || []).filter(p => {
@@ -362,18 +373,19 @@ const HomePage = () => {
     type DisplayItem = { type: 'real'; data: Project } | { type: 'example'; data: typeof exampleProjects[0] };
     
     const realItems: DisplayItem[] = featuredProjects.map(p => ({ type: 'real', data: p }));
-    const exampleItems: DisplayItem[] = exampleProjects.map(e => ({ type: 'example', data: e }));
+    
+    // Apenas incluir exemplos que estão marcados como destaque (estrela)
+    const exampleItems: DisplayItem[] = exampleProjects
+      .filter(e => featuredExampleCards[e.id] === true)
+      .map(e => ({ type: 'example', data: e }));
     
     let allItems: DisplayItem[] = [...realItems, ...exampleItems];
     
-    // Filtrar por visibilidade - usa o estado se estiver preenchido
-    const hasVisibilitySettings = Object.keys(featuredVisibility).length > 0;
-    if (hasVisibilitySettings) {
-      allItems = allItems.filter(item => {
-        const itemId = item.type === 'real' ? `real-${item.data.id}` : item.data.id;
-        return featuredVisibility[itemId] !== false;
-      });
-    }
+    // Filtrar por visibilidade
+    allItems = allItems.filter(item => {
+      const itemId = item.type === 'real' ? `real-${item.data.id}` : item.data.id;
+      return featuredVisibility[itemId] !== false;
+    });
     
     // Ordenar pela ordem salva
     if (featuredOrder.length > 0) {
