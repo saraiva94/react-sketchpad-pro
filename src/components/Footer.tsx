@@ -33,28 +33,53 @@ const DEFAULT_SOCIAL_LINKS: SocialLinksConfig = {
   website: { enabled: false, url: "" }
 };
 
-const CONTACT_INFO = {
-  email: "portobellofilmes@gmail.com",
-  phone: "(21) 96726-4730"
+interface FooterContent {
+  tagline: string;
+  emails: string[];
+  phones: string[];
+}
+
+const DEFAULT_FOOTER_CONTENT: FooterContent = {
+  tagline: "Uma plataforma criada para aproximar cultura e investimento.",
+  emails: ["portobellofilmes@gmail.com"],
+  phones: ["(21) 96726-4730"]
 };
 
 export function Footer() {
   const [socialLinks, setSocialLinks] = useState<SocialLinksConfig>(DEFAULT_SOCIAL_LINKS);
+  const [footerContent, setFooterContent] = useState<FooterContent>(DEFAULT_FOOTER_CONTENT);
 
   useEffect(() => {
-    const fetchSocialLinks = async () => {
-      const { data } = await supabase
+    const fetchSettings = async () => {
+      // Fetch social links
+      const { data: socialData } = await supabase
         .from("settings")
         .select("value")
         .eq("key", "social_links")
         .maybeSingle();
       
-      if (data) {
-        setSocialLinks(data.value as unknown as SocialLinksConfig);
+      if (socialData) {
+        setSocialLinks(socialData.value as unknown as SocialLinksConfig);
+      }
+
+      // Fetch footer content
+      const { data: footerData } = await supabase
+        .from("settings")
+        .select("value")
+        .eq("key", "footer_content")
+        .maybeSingle();
+      
+      if (footerData) {
+        const content = footerData.value as unknown as FooterContent;
+        setFooterContent({
+          tagline: content.tagline || DEFAULT_FOOTER_CONTENT.tagline,
+          emails: content.emails?.length > 0 ? content.emails : DEFAULT_FOOTER_CONTENT.emails,
+          phones: content.phones?.length > 0 ? content.phones : DEFAULT_FOOTER_CONTENT.phones
+        });
       }
     };
     
-    fetchSocialLinks();
+    fetchSettings();
   }, []);
 
   return (
@@ -72,8 +97,8 @@ export function Footer() {
                 className="h-10 w-auto object-contain"
               />
             </Link>
-            <p className="text-xs text-gray-400 leading-relaxed text-left">
-              Uma plataforma criada para<br />aproximar cultura e investimento.
+            <p className="text-xs text-gray-400 leading-relaxed text-left whitespace-pre-line">
+              {footerContent.tagline}
             </p>
           </div>
           
@@ -96,16 +121,20 @@ export function Footer() {
           <div>
             <h4 className="font-semibold text-white mb-2 text-sm">Contato</h4>
             <ul className="space-y-1 text-xs text-gray-400">
-              <li className="flex items-center gap-2">
-                <Mail className="w-3 h-3 text-accent" />
-                <a href={`mailto:${CONTACT_INFO.email}`} className="hover:text-primary transition-colors">
-                  {CONTACT_INFO.email}
-                </a>
-              </li>
-              <li className="flex items-center gap-2">
-                <Phone className="w-3 h-3 text-accent" />
-                <span>{CONTACT_INFO.phone}</span>
-              </li>
+              {footerContent.emails.map((email, index) => (
+                <li key={`email-${index}`} className="flex items-center gap-2">
+                  <Mail className="w-3 h-3 text-accent" />
+                  <a href={`mailto:${email}`} className="hover:text-primary transition-colors">
+                    {email}
+                  </a>
+                </li>
+              ))}
+              {footerContent.phones.map((phone, index) => (
+                <li key={`phone-${index}`} className="flex items-center gap-2">
+                  <Phone className="w-3 h-3 text-accent" />
+                  <span>{phone}</span>
+                </li>
+              ))}
             </ul>
             <div className="flex gap-2 mt-3">
               {socialLinks.facebook.enabled && socialLinks.facebook.url && (
@@ -259,5 +288,3 @@ export function SocialLinksDisplay() {
     </div>
   );
 }
-
-export { CONTACT_INFO };
