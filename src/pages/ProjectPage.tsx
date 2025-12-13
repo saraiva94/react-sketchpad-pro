@@ -3,7 +3,8 @@ import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
-import { Navbar } from "@/components/Navbar";
+import { Footer } from "@/components/Footer";
+import portobelloLogo from "@/assets/portobello-logo.png";
 import { 
   ArrowLeft, 
   MapPin, 
@@ -26,11 +27,7 @@ import {
   Play,
   Mail,
   Phone,
-  Anchor,
-  Facebook,
-  Twitter,
-  Instagram,
-  Linkedin
+  Anchor
 } from "lucide-react";
 
 interface Project {
@@ -150,17 +147,28 @@ const ProjectPage = () => {
   if (!project) {
     return (
       <div className="min-h-screen bg-background">
-        <Navbar showNav={false} />
+        {/* Simple navbar for not found */}
+        <nav className="bg-card/80 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-border/50">
+          <div className="container mx-auto px-6 py-4">
+            <Link to="/" className="flex items-center group">
+              <img 
+                src={portobelloLogo} 
+                alt="Porto Bello" 
+                className="h-20 w-auto group-hover:scale-105 transition-transform duration-300"
+              />
+            </Link>
+          </div>
+        </nav>
         <main className="container mx-auto px-4 py-16 text-center">
           <Sparkles className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
           <h1 className="text-2xl font-serif font-bold mb-2">Projeto não encontrado</h1>
           <p className="text-muted-foreground mb-6">
             Este projeto pode não existir ou não estar aprovado ainda.
           </p>
-          <Link to="/">
+          <Link to="/porto-de-ideias">
             <Button>
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Voltar ao Início
+              Voltar aos Projetos
             </Button>
           </Link>
         </main>
@@ -185,9 +193,9 @@ const ProjectPage = () => {
             
             <Link to="/" className="flex items-center group -ml-12">
               <img 
-                src="/src/assets/portobello-logo.png" 
+                src={portobelloLogo} 
                 alt="Porto Bello" 
-                className="h-44 md:h-52 w-auto group-hover:scale-105 transition-transform duration-300"
+                className="h-32 md:h-44 w-auto group-hover:scale-105 transition-transform duration-300"
               />
             </Link>
             
@@ -478,73 +486,7 @@ const ProjectPage = () => {
       </div>
 
       {/* Footer */}
-      <footer className="bg-black text-white py-8 mt-8">
-        <div className="container mx-auto px-6">
-          <div className="grid md:grid-cols-4 gap-6">
-            <div className="col-span-2 md:col-span-1">
-              <div className="flex items-center gap-2 mb-3">
-                <Anchor className="w-6 h-6 text-primary" />
-                <span className="text-xl font-handwritten font-bold text-white">
-                  Porto Bello
-                </span>
-              </div>
-              <p className="text-gray-400 mb-3 text-xs">
-                Uma plataforma criada para aproximar cultura e investimento.
-              </p>
-              <div className="flex space-x-2">
-                <div className="w-7 h-7 bg-primary rounded-full flex items-center justify-center cursor-pointer hover:bg-primary/80 transition-colors">
-                  <Facebook className="w-3 h-3 text-primary-foreground" />
-                </div>
-                <div className="w-7 h-7 bg-primary rounded-full flex items-center justify-center cursor-pointer hover:bg-primary/80 transition-colors">
-                  <Twitter className="w-3 h-3 text-primary-foreground" />
-                </div>
-                <div className="w-7 h-7 bg-primary rounded-full flex items-center justify-center cursor-pointer hover:bg-primary/80 transition-colors">
-                  <Instagram className="w-3 h-3 text-primary-foreground" />
-                </div>
-                <div className="w-7 h-7 bg-primary rounded-full flex items-center justify-center cursor-pointer hover:bg-primary/80 transition-colors">
-                  <Linkedin className="w-3 h-3 text-primary-foreground" />
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <h3 className="font-bold text-sm mb-2 text-white">Plataforma</h3>
-              <ul className="space-y-1 text-gray-400 text-xs">
-                <li><Link to="/" className="hover:text-white transition-colors">Como Funciona</Link></li>
-                <li><Link to="/submit" className="hover:text-white transition-colors">Enviar Projeto</Link></li>
-                <li><Link to="/porto-de-ideias" className="hover:text-white transition-colors">Projetos</Link></li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="font-bold text-sm mb-2 text-white">Suporte</h3>
-              <ul className="space-y-1 text-gray-400 text-xs">
-                <li><a href="mailto:portobellofilmes@gmail.com" className="hover:text-white transition-colors">FAQ</a></li>
-                <li><a href="mailto:portobellofilmes@gmail.com" className="hover:text-white transition-colors">Ajuda</a></li>
-                <li><Link to="/" className="hover:text-white transition-colors">Termos</Link></li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="font-bold text-sm mb-2 text-white">Contato</h3>
-              <ul className="space-y-1 text-gray-400 text-xs">
-                <li className="flex items-center space-x-1.5">
-                  <Mail className="w-3 h-3" />
-                  <span>portobellofilmes@gmail.com</span>
-                </li>
-                <li className="flex items-center space-x-1.5">
-                  <Phone className="w-3 h-3" />
-                  <span>+55 (11) 9999-9999</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="border-t border-gray-800 mt-4 pt-4 text-center text-gray-500 text-xs">
-            <p>&copy; {new Date().getFullYear()} Porto Bello. Todos os direitos reservados.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

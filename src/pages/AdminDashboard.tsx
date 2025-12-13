@@ -86,11 +86,21 @@ interface AccessRequest {
   created_at: string;
 }
 
+interface ProjectMember {
+  id: string;
+  nome: string;
+  funcao: string | null;
+  email: string | null;
+  telefone: string | null;
+  project_id: string;
+}
+
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
   const [projects, setProjects] = useState<Project[]>([]);
+  const [projectMembers, setProjectMembers] = useState<ProjectMember[]>([]);
   const [accessRequests, setAccessRequests] = useState<AccessRequest[]>([]);
   const [loadingProjects, setLoadingProjects] = useState(true);
   const [loadingRequests, setLoadingRequests] = useState(true);
@@ -167,6 +177,7 @@ const AdminDashboard = () => {
       navigate("/auth");
     } else {
       fetchProjects();
+      fetchProjectMembers();
       fetchAccessRequests();
       fetchStatsVisibility();
     }
@@ -451,6 +462,16 @@ const AdminDashboard = () => {
     setLoadingProjects(false);
   };
 
+  const fetchProjectMembers = async () => {
+    const { data, error } = await supabase
+      .from("project_members")
+      .select("*");
+
+    if (!error && data) {
+      setProjectMembers(data as ProjectMember[]);
+    }
+  };
+
   const fetchAccessRequests = async () => {
     const { data, error } = await supabase
       .from("access_requests")
@@ -615,7 +636,7 @@ const AdminDashboard = () => {
   };
 
   const downloadContactsCSV = () => {
-    // Export all contacts (not just filtered)
+    // Export all contacts (not just filtered) - including integrantes
     const getGeneroLabelCSV = (genero: string | null): string => {
       switch (genero) {
         case 'masculino': return 'Masculino';
@@ -626,16 +647,38 @@ const AdminDashboard = () => {
       }
     };
     
-    const contactsToExport = projects
+    // Responsáveis
+    const responsavelContacts = projects
       .filter(p => p.responsavel_nome || p.responsavel_email || p.responsavel_telefone)
       .map(p => ({
         nome: p.responsavel_nome || "",
         telefone: p.responsavel_telefone || "",
         email: p.responsavel_email || "",
         genero: getGeneroLabelCSV(p.responsavel_genero),
+        funcao: "Responsável pelo Projeto",
+        tipo: "Responsável",
         projeto: p.title,
         status: p.status
       }));
+
+    // Integrantes
+    const memberContactsCSV = projectMembers
+      .filter(m => m.nome || m.email || m.telefone)
+      .map(m => {
+        const project = projects.find(p => p.id === m.project_id);
+        return {
+          nome: m.nome || "",
+          telefone: m.telefone || "",
+          email: m.email || "",
+          genero: "N/A",
+          funcao: m.funcao || "Integrante",
+          tipo: "Integrante",
+          projeto: project?.title || "Projeto não encontrado",
+          status: project?.status || "pending"
+        };
+      });
+
+    const contactsToExport = [...responsavelContacts, ...memberContactsCSV];
 
     if (contactsToExport.length === 0) {
       toast({
@@ -646,11 +689,11 @@ const AdminDashboard = () => {
       return;
     }
 
-    const headers = ["Nome", "Telefone", "Email", "Gênero", "Projeto", "Status"];
+    const headers = ["Nome", "Telefone", "Email", "Gênero", "Função", "Tipo", "Projeto", "Status"];
     const csvContent = [
       headers.join(";"),
       ...contactsToExport.map(c => 
-        [c.nome, c.telefone, c.email, c.genero, c.projeto, c.status].join(";")
+        [c.nome, c.telefone, c.email, c.genero, c.funcao, c.tipo, c.projeto, c.status].join(";")
       )
     ].join("\n");
 
@@ -664,7 +707,7 @@ const AdminDashboard = () => {
 
     toast({
       title: "CSV exportado!",
-      description: `${contactsToExport.length} cadastros exportados com sucesso.`,
+      description: `${contactsToExport.length} cadastros exportados com sucesso (${responsavelContacts.length} responsáveis + ${memberContactsCSV.length} integrantes).`,
     });
   };
 
@@ -684,9 +727,9 @@ const AdminDashboard = () => {
     .filter(p => p.featured_on_homepage && p.status === "approved")
     .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
 
-  // Collect all contacts from projects (pending, approved, rejected)
-  const allContacts = projects.map(p => ({
-    id: p.id,
+  // Collect all contacts from projects (pending, approved, rejected) + integrantes
+  const responsavelContacts = projects.map(p => ({
+    id: `resp-${p.id}`,
     nome: p.responsavel_nome,
     telefone: p.responsavel_telefone,
     email: p.responsavel_email,
@@ -694,7 +737,28 @@ const AdminDashboard = () => {
     projeto: p.title,
     status: p.status,
     created_at: p.created_at,
+    tipo: 'Responsável' as const,
+    funcao: 'Responsável pelo Projeto',
   })).filter(c => c.nome || c.email || c.telefone);
+
+  // Add project members (integrantes) to contacts
+  const memberContacts = projectMembers.map(m => {
+    const project = projects.find(p => p.id === m.project_id);
+    return {
+      id: `member-${m.id}`,
+      nome: m.nome,
+      telefone: m.telefone,
+      email: m.email,
+      genero: null as string | null,
+      projeto: project?.title || 'Projeto não encontrado',
+      status: project?.status || 'pending',
+      created_at: project?.created_at || new Date().toISOString(),
+      tipo: 'Integrante' as const,
+      funcao: m.funcao || 'Integrante',
+    };
+  }).filter(c => c.nome || c.email || c.telefone);
+
+  const allContacts = [...responsavelContacts, ...memberContacts];
 
   // Filter contacts based on filters
   const contacts = allContacts.filter(c => {
@@ -755,7 +819,6 @@ const AdminDashboard = () => {
             variant={activeSection === "projects" ? "default" : "ghost"}
             size="sm"
             onClick={(e) => {
-              console.log("Projetos button clicked, setting activeSection to projects");
               e.preventDefault();
               e.stopPropagation();
               setActiveSection("projects");
@@ -773,7 +836,6 @@ const AdminDashboard = () => {
             variant={activeSection === "requests" ? "default" : "ghost"}
             size="sm"
             onClick={(e) => {
-              console.log("Solicitações button clicked, setting activeSection to requests");
               e.preventDefault();
               e.stopPropagation();
               setActiveSection("requests");
@@ -1596,7 +1658,9 @@ const AdminDashboard = () => {
                   <table className="w-full">
                     <thead>
                       <tr className="border-b">
+                        <th className="text-left py-3 px-4 font-medium">Tipo</th>
                         <th className="text-left py-3 px-4 font-medium">Nome</th>
+                        <th className="text-left py-3 px-4 font-medium">Função</th>
                         <th className="text-left py-3 px-4 font-medium">Telefone</th>
                         <th className="text-left py-3 px-4 font-medium">Email</th>
                         <th className="text-left py-3 px-4 font-medium">Gênero</th>
@@ -1607,10 +1671,16 @@ const AdminDashboard = () => {
                     <tbody>
                       {contacts.map((contact) => (
                         <tr key={contact.id} className="border-b hover:bg-muted/50">
+                          <td className="py-3 px-4">
+                            <Badge variant={contact.tipo === 'Responsável' ? 'default' : 'secondary'}>
+                              {contact.tipo}
+                            </Badge>
+                          </td>
                           <td className="py-3 px-4">{contact.nome || "-"}</td>
+                          <td className="py-3 px-4 text-sm text-muted-foreground">{contact.funcao}</td>
                           <td className="py-3 px-4">{contact.telefone || "-"}</td>
                           <td className="py-3 px-4">{contact.email || "-"}</td>
-                          <td className="py-3 px-4">{getGeneroLabel(contact.genero)}</td>
+                          <td className="py-3 px-4">{contact.tipo === 'Responsável' ? getGeneroLabel(contact.genero) : 'N/A'}</td>
                           <td className="py-3 px-4">{contact.projeto}</td>
                           <td className="py-3 px-4">
                             <Badge variant={
