@@ -411,6 +411,16 @@ const HomePage = () => {
   const { ref: portoIdeiasRef, isInView: portoIdeiasInView } = useInView<HTMLElement>({ threshold: 0.1, rootMargin: '-50px 0px' });
   const { ref: servicosRef, isInView: servicosInView } = useInView<HTMLElement>({ threshold: 0.1, rootMargin: '-50px 0px' });
 
+  // Fallback para heroReady após 2 segundos caso o carrossel não complete a animação
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (!heroReady) {
+        setHeroReady(true);
+      }
+    }, 2000);
+    return () => clearTimeout(timeout);
+  }, [heroReady]);
+
   return (
     <div className="min-h-screen bg-background relative">
       {/* Artistic Background Animation */}
