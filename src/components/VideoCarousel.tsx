@@ -16,11 +16,17 @@ interface VideoCarouselProps {
 
 export function VideoCarousel({ videos, loading = false, displayCount = 5 }: VideoCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [animationPhase, setAnimationPhase] = useState<'initial' | 'expanding' | 'complete'>('initial');
+  const [animationPhase, setAnimationPhase] = useState<'initial' | 'ready' | 'expanding' | 'complete'>('initial');
 
   // Trigger entrance animation sequence after mount
   useEffect(() => {
-    // Small delay before starting expansion
+    // First: render at center position without transition
+    // Then: enable transitions 
+    const readyTimer = setTimeout(() => {
+      setAnimationPhase('ready');
+    }, 50);
+    
+    // Then: trigger expansion (transitions now active)
     const expandTimer = setTimeout(() => {
       setAnimationPhase('expanding');
     }, 100);
@@ -28,9 +34,10 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5 }: Vid
     // Complete animation after expansion finishes
     const completeTimer = setTimeout(() => {
       setAnimationPhase('complete');
-    }, 1300);
+    }, 1400);
     
     return () => {
+      clearTimeout(readyTimer);
       clearTimeout(expandTimer);
       clearTimeout(completeTimer);
     };
@@ -83,13 +90,13 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5 }: Vid
     const isVisible = absPosition <= maxVisible;
     
     // Staggered delay: center first, then secondary, then tertiary
-    const staggerDelay = absPosition * 120;
+    const staggerDelay = absPosition * 150;
     
-    // INITIAL STATE: All cards stacked at center (translateX: 0) with their final scales
-    if (animationPhase === 'initial') {
+    // INITIAL & READY STATE: All cards stacked at center (translateX: 0)
+    if (animationPhase === 'initial' || animationPhase === 'ready') {
       return {
-        opacity: isVisible ? 0.5 : 0,
-        // KEY: translateX is 0 (center), but keep the Z and scale for depth layering
+        opacity: isVisible ? 0.6 : 0,
+        // KEY: translateX is 0 (center), all cards stacked
         transform: `translateX(0%) translateZ(${final.translateZ}px) scale(${final.scale})`,
         zIndex: 10 - absPosition,
         visibility: (isVisible ? 'visible' : 'hidden') as 'visible' | 'hidden',
@@ -195,9 +202,9 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5 }: Vid
                 visibility: styles.visibility,
                 transformStyle: 'preserve-3d',
                 cursor: isCenter ? 'default' : 'pointer',
-                transition: animationPhase === 'initial' 
+                transition: animationPhase === 'initial' || animationPhase === 'ready'
                   ? 'none' 
-                  : `opacity 1000ms ease-out ${styles.transitionDelay}, transform 1000ms cubic-bezier(0.25, 0.46, 0.45, 0.94) ${styles.transitionDelay}, box-shadow 800ms ease-out ${styles.transitionDelay}, filter 800ms ease-out ${styles.transitionDelay}`,
+                  : `opacity 1200ms ease-out ${styles.transitionDelay}, transform 1200ms cubic-bezier(0.22, 1, 0.36, 1) ${styles.transitionDelay}, box-shadow 1000ms ease-out ${styles.transitionDelay}, filter 1000ms ease-out ${styles.transitionDelay}`,
                 boxShadow: styles.boxShadow,
                 filter: styles.filter,
               }}
