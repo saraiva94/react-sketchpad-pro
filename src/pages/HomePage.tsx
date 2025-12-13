@@ -726,11 +726,11 @@ const HomePage = () => {
       </section>
 
       {/* Nossos Serviços Section */}
-      <section ref={servicosRef} id="servicos" className={`py-20 lg:py-28 relative z-10 transition-opacity duration-500 ${heroReady ? 'opacity-100' : 'opacity-0'}`}>
+      <section ref={servicosRef} id="servicos" className="py-20 lg:py-28 relative z-10">
         <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent" />
         
         <div className="container mx-auto px-4 relative z-10">
-          <div className={`text-center mb-16 transition-all duration-700 ${heroReady && servicosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+          <div className={`text-center mb-16 transition-all duration-700 ${servicosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
             <ShinyText className="inline-block" delay={200}>
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif font-semibold text-foreground mb-4 decorative-line">
                 Nossos Serviços
@@ -742,9 +742,9 @@ const HomePage = () => {
             {services.map((service, index) => (
               <Card 
                 key={index} 
-                className={`group relative overflow-visible card-solid bg-card border-border rainbow-card-glow ${heroReady && servicosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+                className={`group relative overflow-visible card-solid bg-card border-border rainbow-card-glow transition-all duration-700 ${servicosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
                 style={{ 
-                  transitionDelay: heroReady && servicosInView ? `${(index + 1) * 100}ms` : '0ms',
+                  transitionDelay: servicosInView ? `${(index + 1) * 100}ms` : '0ms',
                 }}
               >
                 <div className="relative p-6 flex flex-col items-center text-center gap-4">
