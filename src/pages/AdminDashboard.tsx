@@ -96,7 +96,7 @@ const AdminDashboard = () => {
   const [showDetails, setShowDetails] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [activeTab, setActiveTab] = useState("pending");
-  const [activeSection, setActiveSection] = useState<"projects" | "requests" | "contacts" | "featured" | "settings">("projects");
+  const [activeSection, setActiveSection] = useState<"projects" | "requests" | "contacts" | "homepage">("projects");
   const [statsVisible, setStatsVisible] = useState(true);
   const [loadingSettings, setLoadingSettings] = useState(true);
   
@@ -607,17 +607,19 @@ const AdminDashboard = () => {
   };
 
   const downloadContactsCSV = () => {
-    const csvContacts = projects
+    // Collect contacts from all projects (pending, approved, rejected)
+    const allContacts = projects
       .filter(p => p.responsavel_nome || p.responsavel_email || p.responsavel_telefone)
       .map(p => ({
         nome: p.responsavel_nome || "",
-        email: p.responsavel_email || "",
         telefone: p.responsavel_telefone || "",
+        email: p.responsavel_email || "",
+        genero: p.project_type || "",
         projeto: p.title,
         status: p.status
       }));
 
-    if (csvContacts.length === 0) {
+    if (allContacts.length === 0) {
       toast({
         title: "Nenhum cadastro",
         description: "Não há cadastros para exportar.",
@@ -626,11 +628,11 @@ const AdminDashboard = () => {
       return;
     }
 
-    const headers = ["Nome", "Email", "Telefone", "Projeto", "Status"];
+    const headers = ["Nome", "Telefone", "Email", "Gênero", "Projeto", "Status"];
     const csvContent = [
       headers.join(";"),
-      ...csvContacts.map(c => 
-        [c.nome, c.email, c.telefone, c.projeto, c.status].join(";")
+      ...allContacts.map(c => 
+        [c.nome, c.telefone, c.email, c.genero, c.projeto, c.status].join(";")
       )
     ].join("\n");
 
@@ -644,39 +646,7 @@ const AdminDashboard = () => {
 
     toast({
       title: "CSV exportado!",
-      description: `${csvContacts.length} cadastros exportados com sucesso.`,
-    });
-  };
-
-  const downloadAccessRequestsCSV = () => {
-    if (accessRequests.length === 0) {
-      toast({
-        title: "Nenhuma solicitação",
-        description: "Não há solicitações para exportar.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const headers = ["Nome", "Telefone", "Interesse", "Projeto", "Status", "Data"];
-    const csvContent = [
-      headers.join(";"),
-      ...accessRequests.map(r => 
-        [r.nome, r.telefone, r.interesse, r.project_title || "", r.status, new Date(r.created_at).toLocaleDateString("pt-BR")].join(";")
-      )
-    ].join("\n");
-
-    const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `solicitacoes_acesso_${new Date().toISOString().split('T')[0]}.csv`;
-    link.click();
-    URL.revokeObjectURL(url);
-
-    toast({
-      title: "CSV exportado!",
-      description: `${accessRequests.length} solicitações exportadas com sucesso.`,
+      description: `${allContacts.length} cadastros exportados com sucesso.`,
     });
   };
 
@@ -696,15 +666,19 @@ const AdminDashboard = () => {
     .filter(p => p.featured_on_homepage && p.status === "approved")
     .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
 
+  // Collect all contacts from projects (pending, approved, rejected)
   const contacts = projects.map(p => ({
     id: p.id,
     nome: p.responsavel_nome,
-    email: p.responsavel_email,
     telefone: p.responsavel_telefone,
+    email: p.responsavel_email,
+    genero: p.project_type,
     projeto: p.title,
+    status: p.status,
   })).filter(c => c.nome || c.email || c.telefone);
 
   const pendingRequests = accessRequests.filter(r => r.status === "pending");
+  const pendingProjects = projects.filter(p => p.status === "pending");
 
   return (
     <div className="min-h-screen bg-background">
@@ -719,14 +693,6 @@ const AdminDashboard = () => {
       />
 
       <main className="container mx-auto px-4 py-8">
-        {/* Page Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-handwritten font-bold text-foreground">Painel Administrativo</h1>
-          <p className="text-muted-foreground mt-1">
-            Gerencie projetos, solicitações e configurações da plataforma.
-          </p>
-        </div>
-
         {/* Navigation Tabs */}
         <div className="flex flex-wrap gap-2 mb-8 p-1 bg-muted rounded-lg">
           <Button 
@@ -737,7 +703,9 @@ const AdminDashboard = () => {
           >
             <FileText className="w-4 h-4 mr-2" />
             Projetos
-            <Badge variant="secondary" className="ml-2">{projects.length}</Badge>
+            {pendingProjects.length > 0 && (
+              <Badge variant="destructive" className="ml-2">{pendingProjects.length}</Badge>
+            )}
           </Button>
           <Button 
             variant={activeSection === "requests" ? "default" : "ghost"}
@@ -761,29 +729,155 @@ const AdminDashboard = () => {
             Cadastros
           </Button>
           <Button 
-            variant={activeSection === "featured" ? "default" : "ghost"}
+            variant={activeSection === "homepage" ? "default" : "ghost"}
             size="sm"
-            onClick={() => setActiveSection("featured")}
+            onClick={() => setActiveSection("homepage")}
             className="rounded-md"
           >
             <Home className="w-4 h-4 mr-2" />
-            Destaques
-          </Button>
-          <Button 
-            variant={activeSection === "settings" ? "default" : "ghost"}
-            size="sm"
-            onClick={() => setActiveSection("settings")}
-            className="rounded-md"
-          >
-            <BarChart3 className="w-4 h-4 mr-2" />
-            Configurações
+            Homepage
           </Button>
         </div>
 
-        {/* Settings Section */}
-        {activeSection === "settings" && (
+        {/* Homepage Section (formerly Settings + Featured) */}
+        {activeSection === "homepage" && (
           <div className="space-y-6">
-            {/* Vídeo Institucional */}
+            {/* Configurações da Homepage - FIRST */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Configurações da Homepage</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between p-4 border rounded-lg">
+                  <div>
+                    <h4 className="font-medium">Estatísticas Públicas</h4>
+                    <p className="text-sm text-muted-foreground">Mostrar painel de números na homepage</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Switch 
+                      checked={statsVisible} 
+                      onCheckedChange={toggleStatsVisibility}
+                      disabled={loadingSettings}
+                    />
+                    <Badge variant={statsVisible ? "default" : "secondary"}>
+                      {statsVisible ? "Público" : "Privado"}
+                    </Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Ações Rápidas - SECOND */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Ações Rápidas</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-3">
+                  <Link to="/admin/add-project">
+                    <Button>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Adicionar Projeto
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Projetos em Destaque na Homepage */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Star className="w-5 h-5" />
+                  Projetos em Destaque na Homepage
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Gerencie os projetos exibidos na seção "Um Ecossistema de Conexões" da homepage.
+                </p>
+
+                {/* Featured Projects List */}
+                {featuredProjects.length > 0 ? (
+                  <div className="space-y-2">
+                    <h4 className="font-medium text-sm text-muted-foreground mb-2">Em destaque ({featuredProjects.length})</h4>
+                    {featuredProjects.map((project, index) => (
+                      <div key={project.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors group">
+                        <div className="flex items-center gap-4">
+                          <span className="text-sm text-muted-foreground w-6">{index + 1}.</span>
+                          {project.image_url && (
+                            <img 
+                              src={project.image_url} 
+                              alt={project.title}
+                              className="w-12 h-12 rounded object-cover"
+                            />
+                          )}
+                          <div>
+                            <h4 className="font-medium">{project.title}</h4>
+                            <p className="text-sm text-muted-foreground">
+                              {project.project_type} • {project.location || "Sem localização"}
+                            </p>
+                          </div>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => toggleFeatured(project.id, true)}
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10 opacity-60 group-hover:opacity-100 transition-opacity"
+                          title="Remover dos destaques"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-center text-muted-foreground py-4 border rounded-lg bg-muted/30">
+                    Nenhum projeto em destaque.
+                  </p>
+                )}
+
+                {/* Available Projects to Feature */}
+                {projects.filter(p => p.status === "approved" && !p.featured_on_homepage).length > 0 && (
+                  <div className="pt-4 border-t">
+                    <h4 className="font-medium text-sm text-muted-foreground mb-2">Projetos aprovados disponíveis</h4>
+                    <div className="space-y-2">
+                      {projects
+                        .filter(p => p.status === "approved" && !p.featured_on_homepage)
+                        .map((project) => (
+                          <div key={project.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors group">
+                            <div className="flex items-center gap-4">
+                              {project.image_url && (
+                                <img 
+                                  src={project.image_url} 
+                                  alt={project.title}
+                                  className="w-12 h-12 rounded object-cover"
+                                />
+                              )}
+                              <div>
+                                <h4 className="font-medium">{project.title}</h4>
+                                <p className="text-sm text-muted-foreground">
+                                  {project.project_type} • {project.location || "Sem localização"}
+                                </p>
+                              </div>
+                            </div>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => toggleFeatured(project.id, false)}
+                              className="opacity-60 group-hover:opacity-100 transition-opacity"
+                            >
+                              <Plus className="w-4 h-4 mr-1" />
+                              Adicionar
+                            </Button>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
             {/* Vídeos Institucionais (até 5) */}
             <Card>
               <CardHeader>
@@ -794,7 +888,7 @@ const AdminDashboard = () => {
               </CardHeader>
               <CardContent className="space-y-6">
                 <p className="text-sm text-muted-foreground">
-                  Configure até 5 vídeos para o carrossel na seção principal da homepage. Apenas vídeos com URL preenchida serão exibidos. Usuários navegam usando as setas.
+                  Configure os vídeos para o carrossel na seção principal da homepage.
                 </p>
 
                 {/* Carousel Display Count Selector */}
@@ -969,11 +1063,11 @@ const AdminDashboard = () => {
 
                 {/* Tagline */}
                 <div className="space-y-2">
-                  <Label>Texto do Footer (Tagline)</Label>
+                  <Label>Tagline / Descrição</Label>
                   <Textarea
-                    placeholder="Uma plataforma criada para aproximar cultura e investimento."
                     value={footerTagline}
                     onChange={(e) => setFooterTagline(e.target.value)}
+                    placeholder="Uma plataforma criada para aproximar cultura e investimento."
                     rows={2}
                   />
                 </div>
@@ -996,6 +1090,7 @@ const AdminDashboard = () => {
                       <div className="flex items-center gap-2 flex-1">
                         <Mail className="w-4 h-4 text-accent flex-shrink-0" />
                         <Input
+                          type="email"
                           placeholder="email@exemplo.com"
                           value={email}
                           onChange={(e) => {
@@ -1081,7 +1176,7 @@ const AdminDashboard = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <p className="text-sm text-muted-foreground">
-                  Gerencie os links das redes sociais exibidos no footer do site. Ative ou desative cada rede e configure o URL de redirecionamento.
+                  Gerencie os links das redes sociais exibidos no footer do site.
                 </p>
 
                 {/* Instagram */}
@@ -1225,69 +1320,17 @@ const AdminDashboard = () => {
                 </Button>
               </CardContent>
             </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Configurações da Homepage</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div>
-                    <h4 className="font-medium">Estatísticas Públicas</h4>
-                    <p className="text-sm text-muted-foreground">Mostrar painel de números na homepage</p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Switch 
-                      checked={statsVisible} 
-                      onCheckedChange={toggleStatsVisibility}
-                      disabled={loadingSettings}
-                    />
-                    <Badge variant={statsVisible ? "default" : "secondary"}>
-                      {statsVisible ? "Público" : "Privado"}
-                    </Badge>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Ações Rápidas</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-3">
-                  <Link to="/admin/add-project">
-                    <Button>
-                      <Plus className="w-4 h-4 mr-2" />
-                      Adicionar Projeto
-                    </Button>
-                  </Link>
-                  <Button variant="outline" onClick={downloadContactsCSV}>
-                    <Download className="w-4 h-4 mr-2" />
-                    Exportar Cadastros
-                  </Button>
-                  <Button variant="outline" onClick={downloadAccessRequestsCSV}>
-                    <Download className="w-4 h-4 mr-2" />
-                    Exportar Solicitações
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
           </div>
         )}
 
-        {/* Access Requests Section */}
+        {/* Projects Requests Section (Solicitações de Projetos) */}
         {activeSection === "requests" && (
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>Solicitações de Acesso a Documentos</CardTitle>
-              <Button variant="outline" size="sm" onClick={downloadAccessRequestsCSV} className="bg-green-600 hover:bg-green-700 text-white border-green-600">
-                <Download className="w-4 h-4 mr-2" />
-                Exportar CSV
-              </Button>
+            <CardHeader>
+              <CardTitle>Solicitações de Projetos Pendentes</CardTitle>
             </CardHeader>
             <CardContent>
-              {loadingRequests ? (
+              {loadingProjects ? (
                 <div className="space-y-4">
                   {[1, 2, 3].map((i) => (
                     <div key={i} className="animate-pulse p-4 border rounded-lg">
@@ -1296,69 +1339,60 @@ const AdminDashboard = () => {
                     </div>
                   ))}
                 </div>
-              ) : accessRequests.length > 0 ? (
+              ) : pendingProjects.length > 0 ? (
                 <div className="space-y-4">
-                  {accessRequests.map((request) => (
-                    <div key={request.id} className="p-4 border rounded-lg hover:bg-muted/50 transition-colors">
+                  {pendingProjects.map((project) => (
+                    <div key={project.id} className="p-4 border rounded-lg hover:bg-muted/50 transition-colors">
                       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
-                            <h4 className="font-semibold">{request.nome}</h4>
-                            <Badge variant={
-                              request.status === "approved" ? "default" :
-                              request.status === "rejected" ? "destructive" : "secondary"
-                            }>
-                              {request.status === "approved" ? "Aprovado" :
-                               request.status === "rejected" ? "Rejeitado" : "Pendente"}
-                            </Badge>
+                            <h4 className="font-semibold text-lg">{project.title}</h4>
+                            <Badge variant="secondary">Pendente</Badge>
                           </div>
+                          <p className="text-sm text-muted-foreground line-clamp-2 mb-2">{project.synopsis}</p>
                           <div className="text-sm text-muted-foreground space-y-1">
                             <p className="flex items-center gap-2">
-                              <Phone className="w-3 h-3" />
-                              {request.telefone}
+                              <Users className="w-3 h-3" />
+                              Responsável: {project.responsavel_nome || "Não informado"}
                             </p>
-                            {request.project_title && (
+                            {project.responsavel_telefone && (
                               <p className="flex items-center gap-2">
-                                <FileText className="w-3 h-3" />
-                                Projeto: {request.project_title}
+                                <Phone className="w-3 h-3" />
+                                {project.responsavel_telefone}
                               </p>
                             )}
-                            <p className="mt-2 p-2 bg-muted rounded text-foreground">
-                              <strong>Interesse:</strong> {request.interesse}
-                            </p>
-                            <p className="text-xs">
-                              Enviado em {new Date(request.created_at).toLocaleDateString("pt-BR")} às {new Date(request.created_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                            <p className="text-xs mt-2">
+                              Enviado em {new Date(project.created_at).toLocaleDateString("pt-BR")} às {new Date(project.created_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
                             </p>
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          {request.status === "pending" && (
-                            <>
-                              <Button
-                                size="sm"
-                                onClick={() => updateRequestStatus(request.id, "approved")}
-                                className="bg-green-600 hover:bg-green-700"
-                              >
-                                <CheckCircle className="w-4 h-4 mr-1" />
-                                Aprovar
-                              </Button>
-                              <Button
-                                variant="destructive"
-                                size="sm"
-                                onClick={() => updateRequestStatus(request.id, "rejected")}
-                              >
-                                <XCircle className="w-4 h-4 mr-1" />
-                                Rejeitar
-                              </Button>
-                            </>
-                          )}
                           <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => deleteAccessRequest(request.id)}
-                            className="text-destructive hover:text-destructive"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedProject(project);
+                              setShowDetails(true);
+                            }}
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Eye className="w-4 h-4 mr-1" />
+                            Ver Projeto
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={() => updateProjectStatus(project.id, "approved")}
+                            className="bg-green-600 hover:bg-green-700"
+                          >
+                            <CheckCircle className="w-4 h-4 mr-1" />
+                            Aprovar
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => updateProjectStatus(project.id, "rejected")}
+                          >
+                            <XCircle className="w-4 h-4 mr-1" />
+                            Rejeitar
                           </Button>
                         </div>
                       </div>
@@ -1367,7 +1401,7 @@ const AdminDashboard = () => {
                 </div>
               ) : (
                 <p className="text-center text-muted-foreground py-8">
-                  Nenhuma solicitação de acesso recebida.
+                  Nenhuma solicitação de projeto pendente.
                 </p>
               )}
             </CardContent>
@@ -1378,31 +1412,46 @@ const AdminDashboard = () => {
         {activeSection === "contacts" && (
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>Cadastros - Dados de Contato dos Projetos</CardTitle>
+              <CardTitle>Cadastros - Banco de Dados de Contatos</CardTitle>
               <Button variant="outline" size="sm" onClick={downloadContactsCSV} className="bg-green-600 hover:bg-green-700 text-white border-green-600">
                 <Download className="w-4 h-4 mr-2" />
                 Exportar CSV
               </Button>
             </CardHeader>
             <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                Lista de todas as pessoas que fizeram cadastro ao submeter projetos (pendentes, aprovados ou rejeitados).
+              </p>
               {contacts.length > 0 ? (
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
                       <tr className="border-b">
                         <th className="text-left py-3 px-4 font-medium">Nome</th>
-                        <th className="text-left py-3 px-4 font-medium">Email</th>
                         <th className="text-left py-3 px-4 font-medium">Telefone</th>
+                        <th className="text-left py-3 px-4 font-medium">Email</th>
+                        <th className="text-left py-3 px-4 font-medium">Gênero</th>
                         <th className="text-left py-3 px-4 font-medium">Projeto</th>
+                        <th className="text-left py-3 px-4 font-medium">Status</th>
                       </tr>
                     </thead>
                     <tbody>
                       {contacts.map((contact) => (
                         <tr key={contact.id} className="border-b hover:bg-muted/50">
                           <td className="py-3 px-4">{contact.nome || "-"}</td>
-                          <td className="py-3 px-4">{contact.email || "-"}</td>
                           <td className="py-3 px-4">{contact.telefone || "-"}</td>
+                          <td className="py-3 px-4">{contact.email || "-"}</td>
+                          <td className="py-3 px-4">{contact.genero || "-"}</td>
                           <td className="py-3 px-4">{contact.projeto}</td>
+                          <td className="py-3 px-4">
+                            <Badge variant={
+                              contact.status === "approved" ? "default" :
+                              contact.status === "rejected" ? "destructive" : "secondary"
+                            }>
+                              {contact.status === "approved" ? "Aprovado" :
+                               contact.status === "rejected" ? "Rejeitado" : "Pendente"}
+                            </Badge>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -1415,152 +1464,6 @@ const AdminDashboard = () => {
               )}
             </CardContent>
           </Card>
-        )}
-
-        {/* Featured Projects Section */}
-        {activeSection === "featured" && (
-          <div className="space-y-6">
-            {/* Slots Control Card */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BarChart3 className="w-5 h-5" />
-                  Controle de Exibição - Porto de Ideias
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                  <div className="flex-1">
-                    <p className="text-sm text-muted-foreground mb-2">
-                      Quantidade de slots de projetos na página Porto de Ideias. 
-                      Projetos reais substituem cards de exemplo automaticamente.
-                    </p>
-                    <div className="flex items-center gap-3">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => portoIdeiasSlots > 1 && updatePortoIdeiasSlots(portoIdeiasSlots - 1)}
-                        disabled={portoIdeiasSlots <= 1}
-                      >
-                        <span className="text-lg">−</span>
-                      </Button>
-                      <div className="w-16 text-center">
-                        <span className="text-2xl font-bold">{portoIdeiasSlots}</span>
-                        <p className="text-xs text-muted-foreground">slots</p>
-                      </div>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => updatePortoIdeiasSlots(portoIdeiasSlots + 1)}
-                      >
-                        <Plus className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                  <div className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
-                    <p><strong>Projetos aprovados:</strong> {projects.filter(p => p.status === "approved").length}</p>
-                    <p><strong>Em destaque:</strong> {featuredProjects.length}</p>
-                    <p><strong>Cards de exemplo:</strong> {Math.max(0, portoIdeiasSlots - projects.filter(p => p.status === "approved").length)}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Featured Projects List */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Projetos em Destaque na Homepage</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {featuredProjects.length > 0 ? (
-                  <div className="space-y-2">
-                    {featuredProjects.map((project, index) => (
-                      <div key={project.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors group">
-                        <div className="flex items-center gap-4">
-                          <span className="text-sm text-muted-foreground w-6">{index + 1}.</span>
-                          {project.image_url && (
-                            <img 
-                              src={project.image_url} 
-                              alt={project.title}
-                              className="w-12 h-12 rounded object-cover"
-                            />
-                          )}
-                          <div>
-                            <h4 className="font-medium">{project.title}</h4>
-                            <p className="text-sm text-muted-foreground">
-                              {project.project_type} • {project.location || "Sem localização"}
-                            </p>
-                          </div>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => toggleFeatured(project.id, true)}
-                          className="text-destructive hover:text-destructive hover:bg-destructive/10 opacity-60 group-hover:opacity-100 transition-opacity"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-center text-muted-foreground py-8">
-                    Nenhum projeto em destaque. Aprove projetos e marque-os como destaque.
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Available Projects to Feature */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Plus className="w-5 h-5" />
-                  Adicionar Projeto em Destaque
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {projects.filter(p => p.status === "approved" && !p.featured_on_homepage).length > 0 ? (
-                  <div className="space-y-2">
-                    {projects
-                      .filter(p => p.status === "approved" && !p.featured_on_homepage)
-                      .map((project) => (
-                        <div key={project.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors group">
-                          <div className="flex items-center gap-4">
-                            {project.image_url && (
-                              <img 
-                                src={project.image_url} 
-                                alt={project.title}
-                                className="w-12 h-12 rounded object-cover"
-                              />
-                            )}
-                            <div>
-                              <h4 className="font-medium">{project.title}</h4>
-                              <p className="text-sm text-muted-foreground">
-                                {project.project_type} • {project.location || "Sem localização"}
-                              </p>
-                            </div>
-                          </div>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => toggleFeatured(project.id, false)}
-                            className="opacity-60 group-hover:opacity-100 transition-opacity"
-                          >
-                            <Plus className="w-4 h-4 mr-1" />
-                            Destacar
-                          </Button>
-                        </div>
-                      ))}
-                  </div>
-                ) : (
-                  <p className="text-center text-muted-foreground py-8">
-                    Nenhum projeto aprovado disponível para destacar.
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-          </div>
         )}
 
         {/* Projects Section */}
@@ -1774,6 +1677,28 @@ const AdminDashboard = () => {
           {selectedProject && (
             <>
               <DialogHeader>
+                <div className="flex items-center gap-2 mb-2">
+                  {selectedProject.status === "pending" && (
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        onClick={() => updateProjectStatus(selectedProject.id, "approved")}
+                        className="bg-green-600 hover:bg-green-700"
+                      >
+                        <CheckCircle className="w-4 h-4 mr-1" />
+                        Aprovar
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => updateProjectStatus(selectedProject.id, "rejected")}
+                      >
+                        <XCircle className="w-4 h-4 mr-1" />
+                        Rejeitar
+                      </Button>
+                    </div>
+                  )}
+                </div>
                 <DialogTitle>{selectedProject.title}</DialogTitle>
                 <DialogDescription>
                   {selectedProject.project_type} • Enviado em {new Date(selectedProject.created_at).toLocaleDateString("pt-BR")}
@@ -1891,26 +1816,39 @@ const AdminDashboard = () => {
                     <p className="text-sm text-muted-foreground">{selectedProject.diferenciais}</p>
                   </div>
                 )}
+
+                {selectedProject.has_incentive_law && (
+                  <div>
+                    <h4 className="font-semibold mb-1">Lei de Incentivo</h4>
+                    <Badge className="bg-green-600">Possui Lei de Incentivo</Badge>
+                    {selectedProject.incentive_law_details && (
+                      <p className="text-sm text-muted-foreground mt-2">
+                        {selectedProject.incentive_law_details}
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {selectedProject.admin_notes && (
+                  <div className="p-3 bg-muted rounded-lg">
+                    <h4 className="font-semibold mb-1">Notas do Admin</h4>
+                    <p className="text-sm">{selectedProject.admin_notes}</p>
+                  </div>
+                )}
               </div>
 
-              {selectedProject.status === "pending" && (
-                <DialogFooter className="gap-2">
-                  <Button
-                    variant="destructive"
-                    onClick={() => updateProjectStatus(selectedProject.id, "rejected")}
-                  >
-                    <XCircle className="w-4 h-4 mr-1" />
-                    Rejeitar
-                  </Button>
-                  <Button
-                    onClick={() => updateProjectStatus(selectedProject.id, "approved")}
-                    className="bg-green-600 hover:bg-green-700"
-                  >
-                    <CheckCircle className="w-4 h-4 mr-1" />
-                    Aprovar
-                  </Button>
-                </DialogFooter>
-              )}
+              <DialogFooter className="flex-col sm:flex-row gap-2">
+                <Button variant="outline" onClick={() => setShowDetails(false)}>
+                  Fechar
+                </Button>
+                <Button onClick={() => {
+                  setShowDetails(false);
+                  openEditDialog(selectedProject);
+                }}>
+                  <Edit className="w-4 h-4 mr-2" />
+                  Editar Projeto
+                </Button>
+              </DialogFooter>
             </>
           )}
         </DialogContent>
@@ -1927,43 +1865,43 @@ const AdminDashboard = () => {
           </DialogHeader>
 
           <div className="space-y-4 py-4">
-            <div>
-              <Label htmlFor="editImageUrl">URL da Imagem</Label>
+            <div className="space-y-2">
+              <Label htmlFor="edit-image">URL da Imagem de Capa</Label>
               <Input
-                id="editImageUrl"
+                id="edit-image"
+                placeholder="https://..."
                 value={editImageUrl}
                 onChange={(e) => setEditImageUrl(e.target.value)}
-                placeholder="https://..."
               />
             </div>
 
-            <div>
-              <Label htmlFor="editBudget">Orçamento</Label>
+            <div className="space-y-2">
+              <Label htmlFor="edit-budget">Orçamento</Label>
               <Input
-                id="editBudget"
+                id="edit-budget"
+                placeholder="Ex: R$ 500.000"
                 value={editBudget}
                 onChange={(e) => setEditBudget(e.target.value)}
-                placeholder="R$ 100.000,00"
               />
             </div>
 
-            <div>
-              <Label htmlFor="editLocation">Localização</Label>
+            <div className="space-y-2">
+              <Label htmlFor="edit-location">Localização</Label>
               <Input
-                id="editLocation"
+                id="edit-location"
+                placeholder="Ex: São Paulo, SP"
                 value={editLocation}
                 onChange={(e) => setEditLocation(e.target.value)}
-                placeholder="São Paulo, SP"
               />
             </div>
 
-            <div>
-              <Label htmlFor="editAdminNotes">Notas do Admin</Label>
+            <div className="space-y-2">
+              <Label htmlFor="edit-notes">Notas do Administrador</Label>
               <Textarea
-                id="editAdminNotes"
+                id="edit-notes"
+                placeholder="Adicione observações internas sobre este projeto..."
                 value={editAdminNotes}
                 onChange={(e) => setEditAdminNotes(e.target.value)}
-                placeholder="Anotações internas..."
                 rows={3}
               />
             </div>
@@ -1973,7 +1911,9 @@ const AdminDashboard = () => {
             <Button variant="outline" onClick={() => setShowEditDialog(false)}>
               Cancelar
             </Button>
-            <Button onClick={saveProjectEdit}>Salvar</Button>
+            <Button onClick={saveProjectEdit}>
+              Salvar Alterações
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
