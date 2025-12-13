@@ -585,34 +585,13 @@
 
 }
 
-/* CRITICAL: Prevent Radix scroll-lock shifting - OUTSIDE @layer for highest priority */
+/* Prevent layout shift when Radix Select opens */
 html {
-  overflow-y: scroll !important;
-  scrollbar-gutter: stable !important;
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
 }
 
-/* Override Radix scroll-lock inline styles completely */
-body[data-scroll-locked],
-body[data-scroll-locked="true"],
-body[data-scroll-locked="1"] {
+body[data-scroll-locked] {
   padding-right: 0 !important;
   margin-right: 0 !important;
-  overflow: auto !important;
-  position: static !important;
-  width: 100% !important;
-  --removed-body-scroll-bar-size: 0px !important;
-}
-
-/* Force all elements to maintain position when scroll locked */
-body[data-scroll-locked] *,
-body[data-scroll-locked="true"] *,
-body[data-scroll-locked="1"] * {
-  margin-right: unset;
-  padding-right: unset;
-}
-
-/* Keep fixed elements in place */
-body[data-scroll-locked] [style*="position: fixed"],
-body[data-scroll-locked] .fixed {
-  right: 0 !important;
 }
