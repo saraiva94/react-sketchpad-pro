@@ -131,16 +131,46 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5 }: Vid
     };
   };
   if (loading) {
+    // Show all 5 skeleton cards simultaneously in stacked layout
+    const skeletonPositions = [
+      { position: 0, scale: 1, translateX: 0, translateZ: 0, zIndex: 10 },
+      { position: -1, scale: 0.70, translateX: -38, translateZ: -80, zIndex: 9 },
+      { position: 1, scale: 0.70, translateX: 38, translateZ: -80, zIndex: 9 },
+      { position: -2, scale: 0.50, translateX: -70, translateZ: -160, zIndex: 8 },
+      { position: 2, scale: 0.50, translateX: 70, translateZ: -160, zIndex: 8 },
+    ];
+
     return (
-      <div className="relative aspect-video rounded-3xl overflow-hidden shadow-2xl border border-border bg-card card-solid">
-        <Skeleton className="absolute inset-0 w-full h-full" />
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 bg-card">
-          <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center border border-border shadow-lg animate-pulse">
-            <Play className="w-12 h-12 text-primary-foreground ml-1" />
-          </div>
-          <div className="text-center">
-            <p className="text-muted-foreground text-sm">Carregando...</p>
-          </div>
+      <div className="relative w-full">
+        <div 
+          className="relative aspect-video flex items-center justify-center overflow-visible"
+          style={{ perspective: '1500px', perspectiveOrigin: '50% 50%' }}
+        >
+          {skeletonPositions.map((pos, index) => (
+            <div
+              key={index}
+              className="absolute inset-0"
+              style={{
+                transform: `translateX(${pos.translateX}%) translateZ(${pos.translateZ}px) scale(${pos.scale})`,
+                zIndex: pos.zIndex,
+                transformStyle: 'preserve-3d',
+              }}
+            >
+              <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-2xl border border-border bg-card card-solid">
+                <Skeleton className="absolute inset-0 w-full h-full" />
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 bg-card">
+                  <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center border border-border shadow-lg animate-pulse">
+                    <Play className="w-12 h-12 text-primary-foreground ml-1" />
+                  </div>
+                  {pos.position === 0 && (
+                    <div className="text-center">
+                      <p className="text-muted-foreground text-sm">Carregando...</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     );
