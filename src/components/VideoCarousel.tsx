@@ -26,9 +26,9 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5, onAni
       // Wait a frame before enabling transitions
       const timer = setTimeout(() => {
         setEnableTransition(true);
-        // Notify parent that animation is complete
-        onAnimationComplete?.();
       }, 50);
+      // Notify parent that hero is ready immediately when loading completes
+      onAnimationComplete?.();
       wasLoading.current = false;
       return () => clearTimeout(timer);
     }
