@@ -78,6 +78,8 @@ const HomePage = () => {
   const [carouselDisplayCount, setCarouselDisplayCount] = useState<1 | 3 | 5 | null>(null);
   const [loadingSettings, setLoadingSettings] = useState(true);
   const [heroReady, setHeroReady] = useState(false);
+  const [featuredVisibility, setFeaturedVisibility] = useState<Record<string, boolean>>({});
+  const [featuredOrder, setFeaturedOrder] = useState<string[]>([]);
 
   useEffect(() => {
     fetchFeaturedProjects();
@@ -106,6 +108,9 @@ const HomePage = () => {
             if (count === 1 || count === 3 || count === 5) {
               setCarouselDisplayCount(count);
             }
+          } else if (record.key === 'featured_projects_visibility' || record.key === 'featured_projects_order') {
+            // Refetch featured projects when visibility or order changes
+            fetchFeaturedProjects();
           }
         }
       )
@@ -216,7 +221,8 @@ const HomePage = () => {
   };
 
   const fetchFeaturedProjects = async () => {
-    const { data } = await supabase
+    // Fetch featured projects from database
+    const { data: projectsData } = await supabase
       .from("projects")
       .select("id, title, synopsis, project_type, image_url, location, categorias_tags, responsavel_nome, link_pagamento, valor_sugerido, has_incentive_law, incentive_law_details, stage, impacto_cultural, impacto_social")
       .eq("status", "approved")
@@ -224,7 +230,44 @@ const HomePage = () => {
       .order("created_at", { ascending: true })
       .limit(6);
     
-    setFeaturedProjects(data || []);
+    // Fetch visibility and order settings
+    const { data: orderData } = await supabase
+      .from("settings")
+      .select("value")
+      .eq("key", "featured_projects_order")
+      .maybeSingle();
+    
+    const { data: visibilityData } = await supabase
+      .from("settings")
+      .select("value")
+      .eq("key", "featured_projects_visibility")
+      .maybeSingle();
+    
+    const savedOrder: string[] = (orderData?.value as string[]) || [];
+    const visibility: Record<string, boolean> = (visibilityData?.value as Record<string, boolean>) || {};
+    
+    setFeaturedVisibility(visibility);
+    setFeaturedOrder(savedOrder);
+    
+    // Filter projects based on visibility settings
+    let filteredProjects = (projectsData || []).filter(p => {
+      const key = `real-${p.id}`;
+      return visibility[key] !== false; // Default to visible if not set
+    });
+    
+    // Sort by saved order if available
+    if (savedOrder.length > 0) {
+      filteredProjects.sort((a, b) => {
+        const indexA = savedOrder.indexOf(`real-${a.id}`);
+        const indexB = savedOrder.indexOf(`real-${b.id}`);
+        if (indexA === -1 && indexB === -1) return 0;
+        if (indexA === -1) return 1;
+        if (indexB === -1) return -1;
+        return indexA - indexB;
+      });
+    }
+    
+    setFeaturedProjects(filteredProjects);
     setLoadingProjects(false);
   };
 
@@ -312,11 +355,49 @@ const HomePage = () => {
     },
   ];
 
-  // Mescla projetos reais com exemplos para completar 3 slots
-  const displayProjects = [
-    ...featuredProjects.slice(0, 3),
-    ...exampleProjects.slice(0, Math.max(0, 3 - featuredProjects.length))
-  ].slice(0, 3);
+  // Filtrar exemplos pela visibilidade
+  const visibleExamples = exampleProjects.filter(ex => featuredVisibility[ex.id] !== false);
+  
+  // Ordenar exemplos pela ordem salva
+  if (featuredOrder.length > 0) {
+    visibleExamples.sort((a, b) => {
+      const indexA = featuredOrder.indexOf(a.id);
+      const indexB = featuredOrder.indexOf(b.id);
+      if (indexA === -1 && indexB === -1) return 0;
+      if (indexA === -1) return 1;
+      if (indexB === -1) return -1;
+      return indexA - indexB;
+    });
+  }
+  
+  // Construir lista de projetos combinando reais + exemplos respeitando a ordem global
+  const buildDisplayProjects = () => {
+    // Criar lista de todos os itens com seu tipo
+    type DisplayItem = { type: 'real'; data: Project } | { type: 'example'; data: typeof exampleProjects[0] };
+    
+    const realItems: DisplayItem[] = featuredProjects.map(p => ({ type: 'real', data: p }));
+    const exampleItems: DisplayItem[] = visibleExamples.map(e => ({ type: 'example', data: e }));
+    
+    let allItems: DisplayItem[] = [...realItems, ...exampleItems];
+    
+    // Ordenar pela ordem salva
+    if (featuredOrder.length > 0) {
+      allItems.sort((a, b) => {
+        const idA = a.type === 'real' ? `real-${a.data.id}` : a.data.id;
+        const idB = b.type === 'real' ? `real-${b.data.id}` : b.data.id;
+        const indexA = featuredOrder.indexOf(idA);
+        const indexB = featuredOrder.indexOf(idB);
+        if (indexA === -1 && indexB === -1) return 0;
+        if (indexA === -1) return 1;
+        if (indexB === -1) return -1;
+        return indexA - indexB;
+      });
+    }
+    
+    return allItems.slice(0, 3);
+  };
+  
+  const displayItems = buildDisplayProjects();
 
   const services = [
     { icon: Film, text: "Desenvolvimento de projetos culturais e audiovisuais", hoverColor: "group-hover:text-rose-500" },
@@ -487,10 +568,11 @@ const HomePage = () => {
             </div>
           ) : (
             <div className="space-y-20">
-              {displayProjects.map((project, index) => {
+              {displayItems.map((item, index) => {
+                const project = item.data;
+                const isExample = item.type === 'example';
                 const budgetInfo = getBudgetRange(project.valor_sugerido);
                 const stageInfo = getStageInfo(project.stage);
-                const isExample = !('categorias_tags' in project);
                 const isEven = index % 2 === 1; // Alternar layout
                 
                 // Definir ícones e informações para exibir
@@ -514,6 +596,8 @@ const HomePage = () => {
                     color: "bg-primary"
                   },
                 ];
+                
+                const linkUrl = isExample ? (project as typeof exampleProjects[0]).link : `/project/${project.id}`;
                 
                 return (
                   <div 
@@ -541,9 +625,9 @@ const HomePage = () => {
                       </div>
                       
                       <div className="space-y-6">
-                        {projectHighlights.map((item, itemIndex) => (
+                        {projectHighlights.map((highlightItem, itemIndex) => (
                           <div 
-                            key={item.title} 
+                            key={highlightItem.title} 
                             className={`flex gap-4 items-start transition-all duration-700 ease-out ${
                               heroReady && portoIdeiasInView 
                                 ? 'opacity-100 translate-x-0' 
@@ -551,12 +635,12 @@ const HomePage = () => {
                             }`}
                             style={{ transitionDelay: heroReady && portoIdeiasInView ? `${(index * 250) + (itemIndex * 150) + 400}ms` : '0ms' }}
                           >
-                            <div className={`${item.color} w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg`}>
-                              <item.icon className="w-6 h-6 text-primary-foreground" />
+                            <div className={`${highlightItem.color} w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg`}>
+                              <highlightItem.icon className="w-6 h-6 text-primary-foreground" />
                             </div>
                             <div>
-                              <h4 className="font-semibold text-foreground mb-1">{item.title}</h4>
-                              <p className="text-sm text-muted-foreground leading-relaxed">{item.description}</p>
+                              <h4 className="font-semibold text-foreground mb-1">{highlightItem.title}</h4>
+                              <p className="text-sm text-muted-foreground leading-relaxed">{highlightItem.description}</p>
                             </div>
                           </div>
                         ))}
@@ -564,7 +648,7 @@ const HomePage = () => {
 
                       {/* Link para ver mais */}
                       <Link 
-                        to={isExample ? (project as typeof exampleProjects[0]).link : `/project/${project.id}`}
+                        to={linkUrl}
                         className={`inline-flex items-center gap-2 text-primary font-medium hover:gap-3 transition-all group duration-700 ${
                           heroReady && portoIdeiasInView ? 'opacity-100 translate-x-0' : `opacity-0 ${isEven ? 'translate-x-12' : '-translate-x-12'}`
                         }`}
@@ -577,7 +661,7 @@ const HomePage = () => {
                     
                     {/* Thumbnail - entra do lado oposto ao texto */}
                     <Link 
-                      to={isExample ? (project as typeof exampleProjects[0]).link : `/project/${project.id}`}
+                      to={linkUrl}
                       className={`relative group ${isEven ? 'lg:order-1' : ''} transition-all duration-1000 ease-out ${
                         heroReady && portoIdeiasInView 
                           ? 'opacity-100 translate-x-0' 

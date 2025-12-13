@@ -46,11 +46,11 @@ interface FeaturedItem {
   visible: boolean;
 }
 
-// Example projects data
+// Example projects data - IDs must match HomePage exampleProjects
 const EXAMPLE_PROJECTS = [
-  { id: "example-1", title: "Cultura como Legado", subtitle: "Audiovisual • Rio de Janeiro" },
-  { id: "example-2", title: "Histórias de Sucesso", subtitle: "Teatro • São Paulo" },
-  { id: "example-3", title: "Recursos Disponíveis", subtitle: "Música • Belo Horizonte" },
+  { id: "exemplo-cultura-legado", title: "Cultura como Legado", subtitle: "Audiovisual • Rio de Janeiro" },
+  { id: "exemplo-historias-sucesso", title: "Histórias de Sucesso", subtitle: "Teatro • São Paulo" },
+  { id: "exemplo-recursos-disponiveis", title: "Recursos Disponíveis", subtitle: "Música • Belo Horizonte" },
 ];
 
 interface SortableItemProps {
