@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   CheckCircle, 
   XCircle, 
@@ -153,6 +154,12 @@ const AdminDashboard = () => {
   const [editBudget, setEditBudget] = useState("");
   const [editLocation, setEditLocation] = useState("");
   const [editAdminNotes, setEditAdminNotes] = useState("");
+
+  // Contacts filters
+  const [contactFilterGender, setContactFilterGender] = useState<string>("all");
+  const [contactFilterStatus, setContactFilterStatus] = useState<string>("all");
+  const [contactFilterDateFrom, setContactFilterDateFrom] = useState<string>("");
+  const [contactFilterDateTo, setContactFilterDateTo] = useState<string>("");
 
   useEffect(() => {
     const isLoggedIn = localStorage.getItem("isAdminLoggedIn");
@@ -608,7 +615,7 @@ const AdminDashboard = () => {
   };
 
   const downloadContactsCSV = () => {
-    // Collect contacts from all projects (pending, approved, rejected)
+    // Export all contacts (not just filtered)
     const getGeneroLabelCSV = (genero: string | null): string => {
       switch (genero) {
         case 'masculino': return 'Masculino';
@@ -619,7 +626,7 @@ const AdminDashboard = () => {
       }
     };
     
-    const allContacts = projects
+    const contactsToExport = projects
       .filter(p => p.responsavel_nome || p.responsavel_email || p.responsavel_telefone)
       .map(p => ({
         nome: p.responsavel_nome || "",
@@ -630,7 +637,7 @@ const AdminDashboard = () => {
         status: p.status
       }));
 
-    if (allContacts.length === 0) {
+    if (contactsToExport.length === 0) {
       toast({
         title: "Nenhum cadastro",
         description: "Não há cadastros para exportar.",
@@ -642,7 +649,7 @@ const AdminDashboard = () => {
     const headers = ["Nome", "Telefone", "Email", "Gênero", "Projeto", "Status"];
     const csvContent = [
       headers.join(";"),
-      ...allContacts.map(c => 
+      ...contactsToExport.map(c => 
         [c.nome, c.telefone, c.email, c.genero, c.projeto, c.status].join(";")
       )
     ].join("\n");
@@ -657,7 +664,7 @@ const AdminDashboard = () => {
 
     toast({
       title: "CSV exportado!",
-      description: `${allContacts.length} cadastros exportados com sucesso.`,
+      description: `${contactsToExport.length} cadastros exportados com sucesso.`,
     });
   };
 
@@ -678,7 +685,7 @@ const AdminDashboard = () => {
     .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
 
   // Collect all contacts from projects (pending, approved, rejected)
-  const contacts = projects.map(p => ({
+  const allContacts = projects.map(p => ({
     id: p.id,
     nome: p.responsavel_nome,
     telefone: p.responsavel_telefone,
@@ -686,7 +693,34 @@ const AdminDashboard = () => {
     genero: p.responsavel_genero,
     projeto: p.title,
     status: p.status,
+    created_at: p.created_at,
   })).filter(c => c.nome || c.email || c.telefone);
+
+  // Filter contacts based on filters
+  const contacts = allContacts.filter(c => {
+    // Gender filter
+    if (contactFilterGender !== "all" && c.genero !== contactFilterGender) {
+      return false;
+    }
+    // Status filter
+    if (contactFilterStatus !== "all" && c.status !== contactFilterStatus) {
+      return false;
+    }
+    // Date from filter
+    if (contactFilterDateFrom) {
+      const projectDate = new Date(c.created_at);
+      const filterDate = new Date(contactFilterDateFrom);
+      if (projectDate < filterDate) return false;
+    }
+    // Date to filter
+    if (contactFilterDateTo) {
+      const projectDate = new Date(c.created_at);
+      const filterDate = new Date(contactFilterDateTo);
+      filterDate.setHours(23, 59, 59, 999);
+      if (projectDate > filterDate) return false;
+    }
+    return true;
+  });
 
   const getGeneroLabel = (genero: string | null): string => {
     switch (genero) {
@@ -763,10 +797,10 @@ const AdminDashboard = () => {
         {/* Homepage Section (formerly Settings + Featured) */}
         {activeSection === "homepage" && (
           <div className="space-y-6">
-            {/* Configurações da Homepage - FIRST */}
+            {/* Detalhamento Geral - FIRST */}
             <Card>
               <CardHeader>
-                <CardTitle>Configurações da Homepage</CardTitle>
+                <CardTitle>Detalhamento Geral</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between p-4 border rounded-lg">
@@ -784,23 +818,6 @@ const AdminDashboard = () => {
                       {statsVisible ? "Público" : "Privado"}
                     </Badge>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Ações Rápidas - SECOND */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Ações Rápidas</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-3">
-                  <Link to="/admin/add-project">
-                    <Button>
-                      <Plus className="w-4 h-4 mr-2" />
-                      Adicionar Projeto
-                    </Button>
-                  </Link>
                 </div>
               </CardContent>
             </Card>
@@ -853,9 +870,48 @@ const AdminDashboard = () => {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-center text-muted-foreground py-4 border rounded-lg bg-muted/30">
-                    Nenhum projeto em destaque.
-                  </p>
+                  <div className="space-y-4">
+                    <p className="text-center text-muted-foreground py-4 border rounded-lg bg-muted/30">
+                      Nenhum projeto real em destaque. Projetos de exemplo serão exibidos na homepage.
+                    </p>
+                    
+                    {/* Example Projects Preview */}
+                    <div className="border rounded-lg p-4 bg-amber-500/10 border-amber-500/30">
+                      <h4 className="font-medium text-sm mb-3 flex items-center gap-2">
+                        <Star className="w-4 h-4 text-amber-500" />
+                        Projetos de Exemplo (Exibidos enquanto não há projetos reais)
+                      </h4>
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-4 p-3 border rounded-lg bg-card">
+                          <span className="text-sm text-muted-foreground w-6">1.</span>
+                          <div>
+                            <h4 className="font-medium">Cultura como Legado</h4>
+                            <p className="text-sm text-muted-foreground">Audiovisual • Rio de Janeiro</p>
+                          </div>
+                          <Badge variant="secondary" className="ml-auto">Exemplo</Badge>
+                        </div>
+                        <div className="flex items-center gap-4 p-3 border rounded-lg bg-card">
+                          <span className="text-sm text-muted-foreground w-6">2.</span>
+                          <div>
+                            <h4 className="font-medium">Histórias de Sucesso</h4>
+                            <p className="text-sm text-muted-foreground">Teatro • São Paulo</p>
+                          </div>
+                          <Badge variant="secondary" className="ml-auto">Exemplo</Badge>
+                        </div>
+                        <div className="flex items-center gap-4 p-3 border rounded-lg bg-card">
+                          <span className="text-sm text-muted-foreground w-6">3.</span>
+                          <div>
+                            <h4 className="font-medium">Recursos Disponíveis</h4>
+                            <p className="text-sm text-muted-foreground">Música • Belo Horizonte</p>
+                          </div>
+                          <Badge variant="secondary" className="ml-auto">Exemplo</Badge>
+                        </div>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-3">
+                        Estes projetos de exemplo serão automaticamente substituídos por projetos reais quando você adicioná-los aos destaques.
+                      </p>
+                    </div>
+                  </div>
                 )}
 
                 {/* Available Projects to Feature */}
@@ -1441,6 +1497,60 @@ const AdminDashboard = () => {
               <p className="text-sm text-muted-foreground mb-4">
                 Lista de todas as pessoas que fizeram cadastro ao submeter projetos (pendentes, aprovados ou rejeitados).
               </p>
+
+              {/* Filters */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 p-4 border rounded-lg bg-muted/30">
+                <div className="space-y-2">
+                  <Label className="text-sm">Gênero</Label>
+                  <Select value={contactFilterGender} onValueChange={setContactFilterGender}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Todos" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos</SelectItem>
+                      <SelectItem value="masculino">Masculino</SelectItem>
+                      <SelectItem value="feminino">Feminino</SelectItem>
+                      <SelectItem value="outro">Outro</SelectItem>
+                      <SelectItem value="prefiro_nao_informar">Prefiro não informar</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm">Status do Projeto</Label>
+                  <Select value={contactFilterStatus} onValueChange={setContactFilterStatus}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Todos" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos</SelectItem>
+                      <SelectItem value="pending">Pendente</SelectItem>
+                      <SelectItem value="approved">Aprovado</SelectItem>
+                      <SelectItem value="rejected">Rejeitado</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm">Data de Cadastro (De)</Label>
+                  <Input 
+                    type="date" 
+                    value={contactFilterDateFrom}
+                    onChange={(e) => setContactFilterDateFrom(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm">Data de Cadastro (Até)</Label>
+                  <Input 
+                    type="date" 
+                    value={contactFilterDateTo}
+                    onChange={(e) => setContactFilterDateTo(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <p className="text-sm text-muted-foreground mb-4">
+                Exibindo {contacts.length} de {allContacts.length} cadastros
+              </p>
+
               {contacts.length > 0 ? (
                 <div className="overflow-x-auto">
                   <table className="w-full">
