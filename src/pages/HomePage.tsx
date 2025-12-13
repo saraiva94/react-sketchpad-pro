@@ -30,7 +30,8 @@ import {
   HelpCircle,
   MapPin,
   Shield,
-  ArrowRight
+  ArrowRight,
+  Play
 } from "lucide-react";
 
 interface Project {
@@ -410,11 +411,11 @@ const HomePage = () => {
     { icon: HelpCircle, text: "Consultoria para formatação de projetos", hoverColor: "group-hover:text-sky-500" },
   ];
 
-  // Intersection observers for animations
-  const { ref: heroRef, isInView: heroInView } = useInView<HTMLElement>();
-  const { ref: quemSomosRef, isInView: quemSomosInView } = useInView<HTMLElement>();
-  const { ref: servicosRef, isInView: servicosInView } = useInView<HTMLElement>();
-  const { ref: portoIdeiasRef, isInView: portoIdeiasInView } = useInView<HTMLElement>();
+  // Intersection observers for animations - each section only animates when entering viewport
+  const { ref: heroRef, isInView: heroInView } = useInView<HTMLElement>({ threshold: 0.1 });
+  const { ref: quemSomosRef, isInView: quemSomosInView } = useInView<HTMLElement>({ threshold: 0.1, rootMargin: '-50px 0px' });
+  const { ref: portoIdeiasRef, isInView: portoIdeiasInView } = useInView<HTMLElement>({ threshold: 0.1, rootMargin: '-50px 0px' });
+  const { ref: servicosRef, isInView: servicosInView } = useInView<HTMLElement>({ threshold: 0.1, rootMargin: '-50px 0px' });
 
   return (
     <div className="min-h-screen bg-background relative">
@@ -434,13 +435,24 @@ const HomePage = () => {
       <section ref={heroRef} id="inicio" className="relative py-20 lg:py-32 overflow-hidden z-10">
         <div className="container mx-auto px-4 relative z-10">
           <div className={`max-w-5xl mx-auto transition-all duration-1000 ease-out ${heroInView ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
-            {carouselDisplayCount !== null && (
+            {carouselDisplayCount !== null ? (
               <VideoCarousel 
                 videos={institutionalVideos} 
                 loading={loadingVideo} 
                 displayCount={carouselDisplayCount}
                 onAnimationComplete={() => setHeroReady(true)}
               />
+            ) : (
+              <div className="aspect-video w-full flex items-center justify-center">
+                <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-2xl border border-border bg-card card-solid">
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-6">
+                    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center border border-border shadow-lg animate-pulse">
+                      <Play className="w-12 h-12 text-primary-foreground ml-1" />
+                    </div>
+                    <p className="text-muted-foreground text-sm">Carregando...</p>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
         </div>
