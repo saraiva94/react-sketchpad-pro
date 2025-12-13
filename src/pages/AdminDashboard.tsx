@@ -44,7 +44,8 @@ import {
   Youtube,
   Globe,
   Settings2,
-  Save
+  Save,
+  Lightbulb
 } from "lucide-react";
 
 interface Project {
@@ -806,10 +807,22 @@ const AdminDashboard = () => {
       <Navbar 
         showNav={false} 
         rightContent={
-          <Button variant="outline" size="sm" onClick={handleSignOut}>
-            <LogOut className="w-4 h-4 mr-2" />
-            Sair
-          </Button>
+          <div className="flex items-center gap-4">
+            <Link to="/porto-de-ideias">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="rainbow-border-glow"
+              >
+                <Lightbulb className="w-4 h-4 mr-2" />
+                Porto de Ideias
+              </Button>
+            </Link>
+            <Button variant="outline" size="sm" onClick={handleSignOut}>
+              <LogOut className="w-4 h-4 mr-2" />
+              Sair
+            </Button>
+          </div>
         }
       />
 
@@ -878,22 +891,6 @@ const AdminDashboard = () => {
             <Users className="w-4 h-4 mr-2" />
             Cadastros
           </Button>
-
-          {/* Separator */}
-          <div className="h-6 w-px bg-border mx-2" />
-
-          {/* Porto de Ideias Button - Links to page */}
-          <Link to="/porto-de-ideias">
-            <Button 
-              type="button"
-              variant="outline"
-              size="sm"
-              className="rounded-md rainbow-border-glow"
-            >
-              <ExternalLink className="w-4 h-4 mr-2" />
-              Porto de Ideias
-            </Button>
-          </Link>
         </div>
 
         {/* Homepage Section (formerly Settings + Featured) */}
