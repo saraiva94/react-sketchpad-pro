@@ -86,9 +86,9 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
             {/* Porto de Ideias Link with Lightbulb - Destacado com Rainbow */}
             <Link
               to="/porto-de-ideias"
-              className="group flex items-center gap-2 px-4 py-2 text-base font-semibold transition-all duration-300 rounded-xl rainbow-border-glow rainbow-text-hover"
+              className="group flex items-center gap-2 px-4 py-2 text-lg font-semibold transition-all duration-300 rounded-xl rainbow-border-glow rainbow-text-hover"
             >
-              <Lightbulb className="w-5 h-5 text-yellow-400 group-hover:fill-yellow-400 group-hover:drop-shadow-[0_0_16px_rgba(250,204,21,1)] group-hover:scale-125 transition-all duration-300" />
+              <Lightbulb className="w-6 h-6 text-yellow-400 group-hover:fill-yellow-400 group-hover:drop-shadow-[0_0_16px_rgba(250,204,21,1)] group-hover:scale-125 transition-all duration-300" />
               <span className="text-foreground">Porto de Ideias</span>
             </Link>
             
@@ -168,9 +168,9 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
                       <Link
                         to="/porto-de-ideias"
                         onClick={handleNavClick}
-                        className="group flex items-center gap-2 px-4 py-3 text-base font-semibold transition-all duration-300 rounded-xl rainbow-border-glow rainbow-text-hover"
+                        className="group flex items-center gap-2 px-4 py-3 text-lg font-semibold transition-all duration-300 rounded-xl rainbow-border-glow rainbow-text-hover"
                       >
-                        <Lightbulb className="w-5 h-5 text-yellow-400 group-hover:fill-yellow-400 group-hover:drop-shadow-[0_0_16px_rgba(250,204,21,1)] transition-all duration-300" />
+                        <Lightbulb className="w-6 h-6 text-yellow-400 group-hover:fill-yellow-400 group-hover:drop-shadow-[0_0_16px_rgba(250,204,21,1)] transition-all duration-300" />
                         <span className="text-foreground">Porto de Ideias</span>
                       </Link>
                       
