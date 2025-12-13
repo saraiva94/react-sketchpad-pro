@@ -629,12 +629,12 @@ const HomePage = () => {
                   >
                     {/* Texto - entra do lado oposto à imagem */}
                     <div 
-                      className={`space-y-8 ${isEven ? 'lg:order-2' : ''} transition-all duration-1000 ease-out ${
+                      className={`space-y-8 ${isEven ? 'lg:order-2' : ''} transition-all duration-300 ease-out ${
                         heroReady && portoIdeiasInView 
                           ? 'opacity-100 translate-x-0' 
                           : `opacity-0 ${isEven ? 'translate-x-20' : '-translate-x-20'}`
                       }`}
-                      style={{ transitionDelay: heroReady && portoIdeiasInView ? `${(index + 1) * 250}ms` : '0ms' }}
+                      style={{ transitionDelay: heroReady && portoIdeiasInView ? `${index * 50}ms` : '0ms' }}
                     >
                       <div>
                         <ShinyText delay={400 + index * 100}>
@@ -651,12 +651,12 @@ const HomePage = () => {
                         {projectHighlights.map((highlightItem, itemIndex) => (
                           <div 
                             key={highlightItem.title} 
-                            className={`flex gap-4 items-start transition-all duration-700 ease-out ${
+                            className={`flex gap-4 items-start transition-all duration-200 ease-out ${
                               heroReady && portoIdeiasInView 
                                 ? 'opacity-100 translate-x-0' 
                                 : `opacity-0 ${isEven ? 'translate-x-16' : '-translate-x-16'}`
                             }`}
-                            style={{ transitionDelay: heroReady && portoIdeiasInView ? `${(index * 250) + (itemIndex * 150) + 400}ms` : '0ms' }}
+                            style={{ transitionDelay: heroReady && portoIdeiasInView ? `${(index * 50) + (itemIndex * 30)}ms` : '0ms' }}
                           >
                             <div className={`${highlightItem.color} w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg`}>
                               <highlightItem.icon className="w-6 h-6 text-primary-foreground" />
@@ -672,10 +672,10 @@ const HomePage = () => {
                       {/* Link para ver mais */}
                       <Link 
                         to={linkUrl}
-                        className={`inline-flex items-center gap-2 text-primary font-medium hover:gap-3 transition-all group duration-700 ${
+                        className={`inline-flex items-center gap-2 text-primary font-medium hover:gap-3 transition-all group duration-200 ${
                           heroReady && portoIdeiasInView ? 'opacity-100 translate-x-0' : `opacity-0 ${isEven ? 'translate-x-12' : '-translate-x-12'}`
                         }`}
-                        style={{ transitionDelay: heroReady && portoIdeiasInView ? `${(index * 250) + 850}ms` : '0ms' }}
+                        style={{ transitionDelay: heroReady && portoIdeiasInView ? `${(index * 50) + 100}ms` : '0ms' }}
                       >
                         {isExample ? "Ver Exemplo Completo" : "Ver Projeto Completo"}
                         <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -685,12 +685,12 @@ const HomePage = () => {
                     {/* Thumbnail - entra do lado oposto ao texto */}
                     <Link 
                       to={linkUrl}
-                      className={`relative group ${isEven ? 'lg:order-1' : ''} transition-all duration-1000 ease-out ${
+                      className={`relative group ${isEven ? 'lg:order-1' : ''} transition-all duration-300 ease-out ${
                         heroReady && portoIdeiasInView 
                           ? 'opacity-100 translate-x-0' 
                           : `opacity-0 ${isEven ? '-translate-x-20' : 'translate-x-20'}`
                       }`}
-                      style={{ transitionDelay: heroReady && portoIdeiasInView ? `${(index + 1) * 250}ms` : '0ms' }}
+                      style={{ transitionDelay: heroReady && portoIdeiasInView ? `${index * 50}ms` : '0ms' }}
                     >
                       <div className="relative">
                         <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl border border-border card-solid bg-card group-hover:shadow-3xl transition-shadow duration-300">
