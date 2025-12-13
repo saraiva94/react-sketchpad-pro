@@ -583,24 +583,36 @@
     }
   }
 
-  /* Prevent body scroll-lock shifting from Radix Select - CRITICAL */
-  html {
-    overflow-y: scroll;
-    scrollbar-gutter: stable;
-  }
-  
-  /* Override Radix scroll-lock body styles completely */
-  body[data-scroll-locked] {
-    padding-right: 0 !important;
-    margin-right: 0 !important;
-    overflow: visible !important;
-    position: static !important;
-    --removed-body-scroll-bar-size: 0px !important;
-  }
-  
-  /* Ensure all children don't shift */
-  body[data-scroll-locked] > * {
-    margin-right: 0 !important;
-    padding-right: 0 !important;
-  }
+}
+
+/* CRITICAL: Prevent Radix scroll-lock shifting - OUTSIDE @layer for highest priority */
+html {
+  overflow-y: scroll !important;
+  scrollbar-gutter: stable !important;
+}
+
+/* Override Radix scroll-lock inline styles completely */
+body[data-scroll-locked],
+body[data-scroll-locked="true"],
+body[data-scroll-locked="1"] {
+  padding-right: 0 !important;
+  margin-right: 0 !important;
+  overflow: auto !important;
+  position: static !important;
+  width: 100% !important;
+  --removed-body-scroll-bar-size: 0px !important;
+}
+
+/* Force all elements to maintain position when scroll locked */
+body[data-scroll-locked] *,
+body[data-scroll-locked="true"] *,
+body[data-scroll-locked="1"] * {
+  margin-right: unset;
+  padding-right: unset;
+}
+
+/* Keep fixed elements in place */
+body[data-scroll-locked] [style*="position: fixed"],
+body[data-scroll-locked] .fixed {
+  right: 0 !important;
 }
