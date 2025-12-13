@@ -174,8 +174,8 @@ function SortableCard({
     navigate(targetUrl);
   };
 
-  // Only apply drag listeners when hold is ready
-  const dragListeners = isAdmin && holdReady ? listeners : {};
+  // Always apply listeners when admin, the sensor handles activation
+  const dragListeners = isAdmin ? listeners : {};
 
   if (item.type === "real") {
     const project = item.data as Project;
@@ -366,12 +366,14 @@ export function DraggableProjectGrid({
   const sensors = useSensors(
     useSensor(MouseSensor, {
       activationConstraint: {
-        distance: 5,
+        delay: 2000,
+        tolerance: 50,
       },
     }),
     useSensor(TouchSensor, {
       activationConstraint: {
-        distance: 5,
+        delay: 2000,
+        tolerance: 50,
       },
     }),
     useSensor(KeyboardSensor, {
