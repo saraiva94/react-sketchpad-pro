@@ -585,19 +585,12 @@
 
   /* Prevent body scroll-lock shifting from Radix Select */
   html {
-    overflow-y: scroll !important;
+    overflow-y: scroll;
     scrollbar-gutter: stable;
   }
   
   body[data-scroll-locked] {
     padding-right: 0 !important;
     margin-right: 0 !important;
-    overflow: auto !important;
-    --removed-body-scroll-bar-size: 0px !important;
-  }
-  
-  /* Prevent content shift when scroll locked */
-  body[data-scroll-locked] [data-radix-scroll-area-viewport] {
-    overflow: visible !important;
   }
 }
