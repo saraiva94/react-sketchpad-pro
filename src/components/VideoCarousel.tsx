@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ChevronLeft, ChevronRight, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -16,6 +16,20 @@ interface VideoCarouselProps {
 
 export function VideoCarousel({ videos, loading = false, displayCount = 5 }: VideoCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [enableTransition, setEnableTransition] = useState(false);
+  const wasLoading = useRef(true);
+
+  // Enable transitions only after first render post-loading
+  useEffect(() => {
+    if (wasLoading.current && !loading) {
+      // Wait a frame before enabling transitions
+      const timer = setTimeout(() => {
+        setEnableTransition(true);
+      }, 50);
+      wasLoading.current = false;
+      return () => clearTimeout(timer);
+    }
+  }, [loading]);
 
   // Use displayCount for how many cards to show
   const totalSlots = displayCount;
@@ -194,7 +208,7 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5 }: Vid
           return (
             <div
               key={index}
-              className="absolute inset-0 transition-all duration-500 ease-out"
+              className={`absolute inset-0 ${enableTransition ? 'transition-all duration-500 ease-out' : ''}`}
               style={{
                 ...styles,
                 transformStyle: 'preserve-3d',
