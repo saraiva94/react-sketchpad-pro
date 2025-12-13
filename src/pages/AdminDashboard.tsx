@@ -800,25 +800,21 @@ const AdminDashboard = () => {
                 {/* Carousel Display Count Selector */}
                 <div className="p-4 border rounded-lg bg-muted/30">
                   <Label className="text-base font-medium mb-3 block">Quantidade de vídeos visíveis</Label>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Defina quantos vídeos serão exibidos simultaneamente no carrossel.
-                  </p>
                   <div className="flex gap-3">
                     {([1, 3, 5] as const).map((count) => (
                       <Button
                         key={count}
                         variant={carouselDisplayCount === count ? "default" : "outline"}
-                        size="sm"
                         onClick={() => updateCarouselDisplayCount(count)}
-                        className="flex-1"
+                        className="w-12 h-12 text-lg font-bold"
                       >
-                        {count === 1 ? "1 (Central)" : count === 3 ? "3 (Principal + 2)" : "5 (Completo)"}
+                        {count}
                       </Button>
                     ))}
                   </div>
                 </div>
                 
-                {institutionalVideos.map((video, index) => (
+                {institutionalVideos.slice(0, carouselDisplayCount).map((video, index) => (
                   <div key={index} className="p-4 border rounded-lg space-y-3">
                     <div className="flex items-center justify-between">
                       <h4 className="font-medium">Vídeo {index + 1}</h4>
