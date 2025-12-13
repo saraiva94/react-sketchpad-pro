@@ -349,11 +349,13 @@ const HomePage = () => {
       <section ref={heroRef} id="inicio" className="relative py-20 lg:py-32 overflow-hidden z-10">
         <div className="container mx-auto px-4 relative z-10">
           <div className={`max-w-5xl mx-auto transition-all duration-1000 ease-out ${heroInView ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
-            <VideoCarousel 
-              videos={institutionalVideos} 
-              loading={loadingVideo || carouselDisplayCount === null} 
-              displayCount={carouselDisplayCount || 5} 
-            />
+            {carouselDisplayCount !== null && (
+              <VideoCarousel 
+                videos={institutionalVideos} 
+                loading={loadingVideo} 
+                displayCount={carouselDisplayCount} 
+              />
+            )}
           </div>
         </div>
       </section>
