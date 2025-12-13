@@ -751,9 +751,14 @@ const AdminDashboard = () => {
         {/* Navigation Tabs */}
         <div className="flex flex-wrap gap-2 mb-8 p-1 bg-muted rounded-lg">
           <Button 
+            type="button"
             variant={activeSection === "projects" ? "default" : "ghost"}
             size="sm"
-            onClick={() => setActiveSection("projects")}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setActiveSection("projects");
+            }}
             className="rounded-md"
           >
             <FileText className="w-4 h-4 mr-2" />
@@ -763,9 +768,14 @@ const AdminDashboard = () => {
             )}
           </Button>
           <Button 
+            type="button"
             variant={activeSection === "requests" ? "default" : "ghost"}
             size="sm"
-            onClick={() => setActiveSection("requests")}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setActiveSection("requests");
+            }}
             className="rounded-md"
           >
             <MessageSquare className="w-4 h-4 mr-2" />
@@ -775,18 +785,28 @@ const AdminDashboard = () => {
             )}
           </Button>
           <Button 
+            type="button"
             variant={activeSection === "contacts" ? "default" : "ghost"}
             size="sm"
-            onClick={() => setActiveSection("contacts")}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setActiveSection("contacts");
+            }}
             className="rounded-md"
           >
             <Users className="w-4 h-4 mr-2" />
             Cadastros
           </Button>
           <Button 
+            type="button"
             variant={activeSection === "homepage" ? "default" : "ghost"}
             size="sm"
-            onClick={() => setActiveSection("homepage")}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setActiveSection("homepage");
+            }}
             className="rounded-md"
           >
             <Home className="w-4 h-4 mr-2" />
