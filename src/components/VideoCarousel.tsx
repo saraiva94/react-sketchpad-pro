@@ -23,12 +23,12 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5 }: Vid
     // Start expanding animation after a brief moment
     const expandTimer = setTimeout(() => {
       setAnimationPhase('expanding');
-    }, 300);
+    }, 150);
     
     // Complete animation
     const completeTimer = setTimeout(() => {
       setAnimationPhase('complete');
-    }, 1100);
+    }, 1150);
     
     return () => {
       clearTimeout(expandTimer);
@@ -83,23 +83,28 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5 }: Vid
     const maxVisible = displayCount === 1 ? 0 : displayCount === 3 ? 1 : 2;
     const isVisible = absPosition <= maxVisible;
     
-    // Initial state - all cards stacked at center with their layer depths
+    // Calculate staggered delay based on layer (further cards animate slightly later)
+    const staggerDelay = absPosition * 80;
+    
+    // Initial state - all cards stacked at center, faded out
     if (animationPhase === 'initial') {
       return {
-        opacity: isVisible ? 1 : 0,
-        transform: `translateX(0%) translateZ(${final.translateZ}px) scale(${final.scale})`,
+        opacity: 0,
+        transform: `translateX(0%) translateZ(${final.translateZ}px) scale(${final.scale * 0.9})`,
         zIndex: 10 - absPosition,
         visibility: (isVisible ? 'visible' : 'hidden') as 'visible' | 'hidden',
+        transitionDelay: '0ms',
       };
     }
     
-    // After initial phase - cards slide horizontally to their positions
+    // After initial phase - cards slide horizontally with fade-in
     if (!isVisible) {
       return {
         opacity: 0,
         transform: `translateX(${position * 100}%) scale(0.4)`,
         zIndex: 0,
         visibility: 'hidden' as const,
+        transitionDelay: '0ms',
       };
     }
     
@@ -108,6 +113,7 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5 }: Vid
       transform: `translateX(${final.translateX}%) translateZ(${final.translateZ}px) scale(${final.scale})`,
       zIndex: 10 - absPosition,
       visibility: 'visible' as const,
+      transitionDelay: `${staggerDelay}ms`,
     };
   };
 
@@ -152,7 +158,7 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5 }: Vid
                 cursor: isCenter ? 'default' : 'pointer',
                 transition: animationPhase === 'initial' 
                   ? 'none' 
-                  : 'all 800ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+                  : `opacity 1000ms ease-out ${styles.transitionDelay}, transform 1000ms cubic-bezier(0.25, 0.46, 0.45, 0.94) ${styles.transitionDelay}`,
               }}
               onClick={() => !isCenter && setCurrentIndex(index)}
             >
