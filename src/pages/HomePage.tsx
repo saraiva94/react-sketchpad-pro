@@ -478,11 +478,11 @@ const HomePage = () => {
       )}
 
       {/* Quem Somos Section - only animates after hero is ready AND in view */}
-      <section ref={quemSomosRef} id="sobre" className={`py-20 lg:py-28 relative z-10 transition-opacity duration-500 ${heroReady ? 'opacity-100' : 'opacity-0'}`}>
+      <section ref={quemSomosRef} id="sobre" className="py-20 lg:py-28 relative z-10">
         <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent" />
         
         <div className="container mx-auto px-4 relative z-10">
-          <div className={`text-center mb-12 transition-all duration-700 ${heroReady && quemSomosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+          <div className={`text-center mb-12 transition-all duration-700 ${quemSomosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
             <ShinyText className="inline-block" delay={200}>
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif font-semibold text-foreground mb-6 decorative-line">
                 Quem Somos
@@ -490,7 +490,7 @@ const HomePage = () => {
             </ShinyText>
           </div>
           
-          <div className={`max-w-5xl mx-auto mb-20 transition-all duration-700 ${heroReady && quemSomosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`} style={{ transitionDelay: '150ms' }}>
+          <div className={`max-w-5xl mx-auto mb-20 transition-all duration-700 ${quemSomosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`} style={{ transitionDelay: '150ms' }}>
             <div className="text-base md:text-lg text-muted-foreground leading-relaxed space-y-6">
               <p>
                 A Porto Bello Filmes é uma produtora audiovisual que nasce da vontade de realização que pulsa em cada uma de nós. Às vezes as coisas que a gente sonha realmente acontecem, o que a gente precisa é correr atrás na prática cotidiana e acreditar que o nosso movimento também movimenta a vida. A nossa equipe une a capacidade de colocar a mão na massa com a sensibilidade de transformar vivências em narrativas para compartilhar com o mundo.
@@ -512,8 +512,8 @@ const HomePage = () => {
             ].map((card, index) => (
               <Card 
                 key={card.title}
-                className={`text-center p-8 card-solid bg-card border-border card-hover group transition-all duration-700 ${heroReady && quemSomosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
-                style={{ transitionDelay: heroReady && quemSomosInView ? `${(index + 2) * 150}ms` : '0ms' }}
+                className={`text-center p-8 card-solid bg-card border-border card-hover group transition-all duration-700 ${quemSomosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+                style={{ transitionDelay: quemSomosInView ? `${(index + 2) * 150}ms` : '0ms' }}
               >
                 <div className={`w-20 h-20 bg-gradient-to-br ${card.color} rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-elegant group-hover:scale-110 transition-transform duration-300`}>
                   <card.icon className={`w-10 h-10 ${card.textColor}`} />
@@ -529,12 +529,12 @@ const HomePage = () => {
       </section>
 
       {/* Porto de Ideias Section - Ecossistema de Conexões (Projetos em Destaque) */}
-      <section ref={portoIdeiasRef} id="porto-de-ideias" className={`py-20 lg:py-28 relative overflow-hidden z-10 transition-opacity duration-500 ${heroReady ? 'opacity-100' : 'opacity-0'}`}>
+      <section ref={portoIdeiasRef} id="porto-de-ideias" className="py-20 lg:py-28 relative overflow-hidden z-10">
         <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent" />
         
         <div className="container mx-auto px-4 relative">
           {/* Header */}
-          <div className={`text-center mb-16 transition-all duration-700 ${heroReady && portoIdeiasInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+          <div className={`text-center mb-16 transition-all duration-700 ${portoIdeiasInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
             <ShinyText className="inline-block" delay={300}>
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif font-semibold text-foreground mb-4">
                 Um Ecossistema de Conexões
