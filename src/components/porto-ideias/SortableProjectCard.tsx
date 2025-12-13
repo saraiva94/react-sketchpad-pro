@@ -50,6 +50,9 @@ export function SortableProjectCard({
     isDragging,
   } = useSortable({ id: project.id, disabled: !isAdmin });
 
+  // Debug log
+  console.log("SortableProjectCard - project:", project.title, "isAdmin:", isAdmin, "disabled:", !isAdmin);
+
   const budgetInfo = getBudgetRange(project.valor_sugerido);
   const stageInfo = getStageInfo(project.stage);
 
@@ -60,12 +63,12 @@ export function SortableProjectCard({
     zIndex: isDragging ? 1000 : 1,
   };
 
+  // For admin, we apply listeners to the whole card wrapper, not inside cardContent
   const cardContent = (
     <div 
-      {...(isAdmin ? { ...attributes, ...listeners } : {})}
       className={`card-solid bg-card border border-border rounded-2xl overflow-hidden shadow-2xl h-full transition-all duration-300 ${
         isDragging ? "ring-2 ring-primary shadow-xl scale-105 rotate-1" : "hover:-translate-y-2"
-      } ${isAdmin ? "cursor-grab active:cursor-grabbing touch-none" : ""}`}
+      } ${isAdmin ? "cursor-grab active:cursor-grabbing" : ""}`}
     >
       {/* Admin Drag Indicator */}
       {isAdmin && (
@@ -182,23 +185,16 @@ export function SortableProjectCard({
         transition: isDragging ? transition : `all 0.6s ease-out ${index * 100}ms`,
       }}
       className="block group relative"
+      {...(isAdmin ? { ...attributes, ...listeners } : {})}
     >
       {isAdmin ? (
-        // Admin view - entire card for drag, click navigates
-        <>
+        // Admin view - drag on whole container, navigate on double click or via button
+        <div 
+          className="cursor-grab active:cursor-grabbing"
+          onDoubleClick={() => window.location.assign(`/project/${project.id}`)}
+        >
           {cardContent}
-          {/* Overlay for navigation when not dragging */}
-          {!isDragging && (
-            <Link 
-              to={`/project/${project.id}`}
-              className="absolute inset-0 z-10"
-              onClick={(e) => {
-                // Only navigate if it was a quick click, not a drag attempt
-                if (isDragging) e.preventDefault();
-              }}
-            />
-          )}
-        </>
+        </div>
       ) : (
         // Regular user view - normal link
         <Link to={`/project/${project.id}`} className="block">
