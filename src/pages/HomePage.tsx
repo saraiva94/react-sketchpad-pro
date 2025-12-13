@@ -358,16 +358,22 @@ const HomePage = () => {
 
   // Construir lista de projetos combinando reais + exemplos respeitando a ordem global
   const buildDisplayProjects = () => {
-    // Filtrar exemplos pela visibilidade
-    const visibleExamples = exampleProjects.filter(ex => featuredVisibility[ex.id] !== false);
-    
     // Criar lista de todos os itens com seu tipo
     type DisplayItem = { type: 'real'; data: Project } | { type: 'example'; data: typeof exampleProjects[0] };
     
     const realItems: DisplayItem[] = featuredProjects.map(p => ({ type: 'real', data: p }));
-    const exampleItems: DisplayItem[] = visibleExamples.map(e => ({ type: 'example', data: e }));
+    const exampleItems: DisplayItem[] = exampleProjects.map(e => ({ type: 'example', data: e }));
     
     let allItems: DisplayItem[] = [...realItems, ...exampleItems];
+    
+    // Filtrar por visibilidade - usa o estado se estiver preenchido
+    const hasVisibilitySettings = Object.keys(featuredVisibility).length > 0;
+    if (hasVisibilitySettings) {
+      allItems = allItems.filter(item => {
+        const itemId = item.type === 'real' ? `real-${item.data.id}` : item.data.id;
+        return featuredVisibility[itemId] !== false;
+      });
+    }
     
     // Ordenar pela ordem salva
     if (featuredOrder.length > 0) {
