@@ -13,6 +13,7 @@ import ProjectPage from "./pages/ProjectPage";
 import ProjectsPortfolioPage from "./pages/ProjectsPortfolioPage";
 import PortoDeIdeiasPage from "./pages/PortoDeIdeiasPage";
 import ExampleProjectPage from "./pages/ExampleProjectPage";
+import PendingProjectPage from "./pages/PendingProjectPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +30,7 @@ const App = () => (
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/add-project" element={<AdminAddProjectPage />} />
+            <Route path="/admin/pending/:id" element={<PendingProjectPage />} />
             <Route path="/submit" element={<SubmitProjectPage />} />
             <Route path="/projetos" element={<ProjectsPortfolioPage />} />
             <Route path="/porto-de-ideias" element={<PortoDeIdeiasPage />} />
