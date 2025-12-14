@@ -1,10 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { ArrowLeft, CheckCircle, XCircle, Home, MapPin, Users, Phone, Mail, Calendar, DollarSign, Shield, FileText, Film } from "lucide-react";
+import { ArrowLeft, CheckCircle, XCircle, Home, MapPin, Users, Phone, Mail, Calendar, DollarSign, Shield, FileText, Film, Pencil, Upload, Link as LinkIcon, Save, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Footer } from "@/components/Footer";
@@ -58,6 +61,17 @@ const PendingProjectPage = () => {
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
+  
+  // Media editing states
+  const [isEditingImage, setIsEditingImage] = useState(false);
+  const [isEditingVideo, setIsEditingVideo] = useState(false);
+  const [imageUrl, setImageUrl] = useState("");
+  const [videoUrl, setVideoUrl] = useState("");
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadingVideo, setUploadingVideo] = useState(false);
+  
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     // Check if admin is logged in
@@ -72,6 +86,13 @@ const PendingProjectPage = () => {
       fetchTeamMembers();
     }
   }, [id, navigate]);
+
+  useEffect(() => {
+    if (project) {
+      setImageUrl(project.image_url || "");
+      setVideoUrl(project.link_video || "");
+    }
+  }, [project]);
 
   const fetchProject = async () => {
     if (!id) return;
@@ -138,6 +159,170 @@ const PendingProjectPage = () => {
     setUpdating(false);
   };
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !project) return;
+
+    setUploadingImage(true);
+    
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${project.id}-${Date.now()}.${fileExt}`;
+    const filePath = `project-images/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('project-media')
+      .upload(filePath, file);
+
+    if (uploadError) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível fazer upload da imagem.",
+        variant: "destructive",
+      });
+      setUploadingImage(false);
+      return;
+    }
+
+    const { data: urlData } = supabase.storage
+      .from('project-media')
+      .getPublicUrl(filePath);
+
+    const newUrl = urlData.publicUrl;
+    
+    const { error: updateError } = await supabase
+      .from("projects")
+      .update({ image_url: newUrl })
+      .eq("id", project.id);
+
+    if (updateError) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível atualizar a imagem.",
+        variant: "destructive",
+      });
+    } else {
+      setProject({ ...project, image_url: newUrl });
+      setImageUrl(newUrl);
+      toast({
+        title: "Sucesso",
+        description: "Imagem atualizada com sucesso.",
+      });
+    }
+    
+    setUploadingImage(false);
+    setIsEditingImage(false);
+  };
+
+  const handleImageUrlSave = async () => {
+    if (!project) return;
+    
+    setUploadingImage(true);
+    
+    const { error } = await supabase
+      .from("projects")
+      .update({ image_url: imageUrl || null })
+      .eq("id", project.id);
+
+    if (error) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível atualizar a URL da imagem.",
+        variant: "destructive",
+      });
+    } else {
+      setProject({ ...project, image_url: imageUrl || null });
+      toast({
+        title: "Sucesso",
+        description: "URL da imagem atualizada com sucesso.",
+      });
+    }
+    
+    setUploadingImage(false);
+    setIsEditingImage(false);
+  };
+
+  const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !project) return;
+
+    setUploadingVideo(true);
+    
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${project.id}-video-${Date.now()}.${fileExt}`;
+    const filePath = `project-videos/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('project-media')
+      .upload(filePath, file);
+
+    if (uploadError) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível fazer upload do vídeo.",
+        variant: "destructive",
+      });
+      setUploadingVideo(false);
+      return;
+    }
+
+    const { data: urlData } = supabase.storage
+      .from('project-media')
+      .getPublicUrl(filePath);
+
+    const newUrl = urlData.publicUrl;
+    
+    const { error: updateError } = await supabase
+      .from("projects")
+      .update({ link_video: newUrl })
+      .eq("id", project.id);
+
+    if (updateError) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível atualizar o vídeo.",
+        variant: "destructive",
+      });
+    } else {
+      setProject({ ...project, link_video: newUrl });
+      setVideoUrl(newUrl);
+      toast({
+        title: "Sucesso",
+        description: "Vídeo atualizado com sucesso.",
+      });
+    }
+    
+    setUploadingVideo(false);
+    setIsEditingVideo(false);
+  };
+
+  const handleVideoUrlSave = async () => {
+    if (!project) return;
+    
+    setUploadingVideo(true);
+    
+    const { error } = await supabase
+      .from("projects")
+      .update({ link_video: videoUrl || null })
+      .eq("id", project.id);
+
+    if (error) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível atualizar o link do vídeo.",
+        variant: "destructive",
+      });
+    } else {
+      setProject({ ...project, link_video: videoUrl || null });
+      toast({
+        title: "Sucesso",
+        description: "Link do vídeo atualizado com sucesso.",
+      });
+    }
+    
+    setUploadingVideo(false);
+    setIsEditingVideo(false);
+  };
+
   const getStageLabel = (stage: string | null): string => {
     switch (stage) {
       case 'development': return 'Desenvolvimento';
@@ -155,6 +340,19 @@ const PendingProjectPage = () => {
       case 'prefiro_nao_informar': return 'Prefiro não informar';
       default: return 'Não informado';
     }
+  };
+
+  const isVideoUrl = (url: string): boolean => {
+    return url.includes('youtube.com') || url.includes('youtu.be') || url.includes('vimeo.com');
+  };
+
+  const getYoutubeEmbedUrl = (url: string): string | null => {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    if (match && match[2].length === 11) {
+      return `https://www.youtube.com/embed/${match[2]}`;
+    }
+    return null;
   };
 
   if (loading) {
@@ -239,21 +437,34 @@ const PendingProjectPage = () => {
             </CardContent>
           </Card>
 
-          {/* Project Header */}
+          {/* Project Header with Editable Image */}
           <Card className="mb-6">
             <CardContent className="p-8">
               <div className="flex flex-col md:flex-row gap-6">
-                {project.image_url ? (
-                  <img
-                    src={project.image_url}
-                    alt={project.title}
-                    className="w-full md:w-48 h-48 object-cover rounded-lg"
-                  />
-                ) : (
-                  <div className="w-full md:w-48 h-48 bg-gradient-to-br from-primary/20 to-accent/20 rounded-lg flex items-center justify-center">
-                    <Film className="w-16 h-16 text-primary/50" />
-                  </div>
-                )}
+                {/* Image Section with Edit */}
+                <div className="relative group">
+                  {project.image_url ? (
+                    <img
+                      src={project.image_url}
+                      alt={project.title}
+                      className="w-full md:w-48 h-48 object-cover rounded-lg"
+                    />
+                  ) : (
+                    <div className="w-full md:w-48 h-48 bg-gradient-to-br from-primary/20 to-accent/20 rounded-lg flex items-center justify-center">
+                      <Film className="w-16 h-16 text-primary/50" />
+                    </div>
+                  )}
+                  
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={() => setIsEditingImage(true)}
+                  >
+                    <Pencil className="w-3 h-3 mr-1" />
+                    Editar
+                  </Button>
+                </div>
                 
                 <div className="flex-1">
                   <h1 className="text-3xl font-bold text-foreground mb-3">{project.title}</h1>
@@ -293,6 +504,74 @@ const PendingProjectPage = () => {
               </div>
             </CardContent>
           </Card>
+
+          {/* Image Edit Modal */}
+          {isEditingImage && (
+            <Card className="mb-6 border-primary">
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <span>Editar Imagem do Projeto</span>
+                  <Button variant="ghost" size="sm" onClick={() => setIsEditingImage(false)}>
+                    <X className="w-4 h-4" />
+                  </Button>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Tabs defaultValue="url" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="url">
+                      <LinkIcon className="w-4 h-4 mr-2" />
+                      URL
+                    </TabsTrigger>
+                    <TabsTrigger value="upload">
+                      <Upload className="w-4 h-4 mr-2" />
+                      Upload
+                    </TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="url" className="space-y-4">
+                    <div>
+                      <Label>URL da Imagem</Label>
+                      <Input
+                        value={imageUrl}
+                        onChange={(e) => setImageUrl(e.target.value)}
+                        placeholder="https://exemplo.com/imagem.jpg"
+                      />
+                    </div>
+                    {imageUrl && (
+                      <div className="p-4 border rounded-lg">
+                        <p className="text-sm text-muted-foreground mb-2">Pré-visualização:</p>
+                        <img src={imageUrl} alt="Preview" className="max-h-48 rounded-lg object-cover" />
+                      </div>
+                    )}
+                    <Button onClick={handleImageUrlSave} disabled={uploadingImage}>
+                      <Save className="w-4 h-4 mr-2" />
+                      {uploadingImage ? "Salvando..." : "Salvar URL"}
+                    </Button>
+                  </TabsContent>
+                  <TabsContent value="upload" className="space-y-4">
+                    <div>
+                      <Label>Upload de Imagem</Label>
+                      <Input
+                        ref={imageInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        disabled={uploadingImage}
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Formatos aceitos: JPG, PNG, GIF, WebP
+                      </p>
+                    </div>
+                    {uploadingImage && (
+                      <p className="text-sm text-muted-foreground animate-pulse">
+                        Fazendo upload...
+                      </p>
+                    )}
+                  </TabsContent>
+                </Tabs>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Responsável */}
           <Card className="mb-6">
@@ -437,25 +716,73 @@ const PendingProjectPage = () => {
             </Card>
           )}
 
-          {/* Media */}
-          {(project.link_video || project.media_url) && (
-            <Card className="mb-6">
-              <CardHeader>
-                <CardTitle>Mídia</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {project.link_video && (
+          {/* Media Section with Editable Video */}
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <span className="flex items-center gap-2">
+                  <Film className="w-5 h-5" />
+                  Mídia
+                </span>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setIsEditingVideo(true)}
+                >
+                  <Pencil className="w-3 h-3 mr-1" />
+                  Editar Vídeo
+                </Button>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Video Preview */}
+              {project.link_video && (
+                <div className="space-y-2">
+                  <h4 className="font-medium">Vídeo do Projeto</h4>
+                  {isVideoUrl(project.link_video) ? (
+                    <div className="aspect-video rounded-lg overflow-hidden bg-black">
+                      {getYoutubeEmbedUrl(project.link_video) ? (
+                        <iframe
+                          src={getYoutubeEmbedUrl(project.link_video)!}
+                          className="w-full h-full"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        />
+                      ) : (
+                        <video
+                          src={project.link_video}
+                          controls
+                          className="w-full h-full"
+                        />
+                      )}
+                    </div>
+                  ) : (
+                    <div className="aspect-video rounded-lg overflow-hidden bg-black">
+                      <video
+                        src={project.link_video}
+                        controls
+                        className="w-full h-full"
+                      />
+                    </div>
+                  )}
                   <a 
                     href={project.link_video}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-primary hover:underline flex items-center gap-2"
+                    className="text-sm text-primary hover:underline flex items-center gap-1"
                   >
-                    <Film className="w-4 h-4" />
-                    Link de Vídeo
+                    <LinkIcon className="w-3 h-3" />
+                    {project.link_video}
                   </a>
-                )}
-                {project.media_url && (
+                </div>
+              )}
+              
+              {!project.link_video && (
+                <p className="text-muted-foreground text-sm">Nenhum vídeo anexado ao projeto.</p>
+              )}
+              
+              {project.media_url && (
+                <div className="pt-4 border-t">
                   <a 
                     href={project.media_url}
                     target="_blank"
@@ -465,7 +792,85 @@ const PendingProjectPage = () => {
                     <FileText className="w-4 h-4" />
                     Material de Apoio
                   </a>
-                )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Video Edit Modal */}
+          {isEditingVideo && (
+            <Card className="mb-6 border-primary">
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <span>Editar Vídeo do Projeto</span>
+                  <Button variant="ghost" size="sm" onClick={() => setIsEditingVideo(false)}>
+                    <X className="w-4 h-4" />
+                  </Button>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Tabs defaultValue="url" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="url">
+                      <LinkIcon className="w-4 h-4 mr-2" />
+                      Link (YouTube, Vimeo)
+                    </TabsTrigger>
+                    <TabsTrigger value="upload">
+                      <Upload className="w-4 h-4 mr-2" />
+                      Upload
+                    </TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="url" className="space-y-4">
+                    <div>
+                      <Label>URL do Vídeo</Label>
+                      <Input
+                        value={videoUrl}
+                        onChange={(e) => setVideoUrl(e.target.value)}
+                        placeholder="https://youtube.com/watch?v=..."
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Suporta links do YouTube, Vimeo ou URL direta de vídeo
+                      </p>
+                    </div>
+                    {videoUrl && getYoutubeEmbedUrl(videoUrl) && (
+                      <div className="p-4 border rounded-lg">
+                        <p className="text-sm text-muted-foreground mb-2">Pré-visualização:</p>
+                        <div className="aspect-video rounded-lg overflow-hidden bg-black">
+                          <iframe
+                            src={getYoutubeEmbedUrl(videoUrl)!}
+                            className="w-full h-full"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                          />
+                        </div>
+                      </div>
+                    )}
+                    <Button onClick={handleVideoUrlSave} disabled={uploadingVideo}>
+                      <Save className="w-4 h-4 mr-2" />
+                      {uploadingVideo ? "Salvando..." : "Salvar Link"}
+                    </Button>
+                  </TabsContent>
+                  <TabsContent value="upload" className="space-y-4">
+                    <div>
+                      <Label>Upload de Vídeo</Label>
+                      <Input
+                        ref={videoInputRef}
+                        type="file"
+                        accept="video/*"
+                        onChange={handleVideoUpload}
+                        disabled={uploadingVideo}
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Formatos aceitos: MP4, MOV, AVI, WebM (máximo recomendado: 100MB)
+                      </p>
+                    </div>
+                    {uploadingVideo && (
+                      <p className="text-sm text-muted-foreground animate-pulse">
+                        Fazendo upload... (isso pode demorar para arquivos grandes)
+                      </p>
+                    )}
+                  </TabsContent>
+                </Tabs>
               </CardContent>
             </Card>
           )}
