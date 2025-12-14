@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
@@ -70,6 +71,7 @@ interface CreatorInfo {
 
 const ProjectPage = () => {
   const { id } = useParams();
+  const { toast } = useToast();
   const [project, setProject] = useState<Project | null>(null);
   const [members, setMembers] = useState<ProjectMember[]>([]);
   const [loading, setLoading] = useState(true);
@@ -159,7 +161,11 @@ const ProjectPage = () => {
     if (project?.media_url) {
       window.open(project.media_url, "_blank");
     } else {
-      alert("Apresentação em PDF não disponível para este projeto.");
+      toast({
+        title: "PDF não disponível",
+        description: "A apresentação em PDF não está disponível para este projeto.",
+        variant: "destructive",
+      });
     }
   };
 
