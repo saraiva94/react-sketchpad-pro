@@ -20,6 +20,48 @@
     
     <link rel="canonical" href="https://portobellofilmes.com.br" />
     <link rel="icon" href="/favicon.png" type="image/png">
+    
+    <!-- Critical CSS inline for first paint - Protocolo 14KB -->
+    <style>
+      /* Critical base styles - above the fold */
+      :root {
+        --background: 0 0% 98%;
+        --foreground: 0 0% 12%;
+        --card: 0 0% 100%;
+        --primary: 0 0% 15%;
+        --primary-foreground: 0 0% 100%;
+        --accent: 175 55% 45%;
+        --muted: 0 0% 94%;
+        --muted-foreground: 0 0% 45%;
+        --border: 0 0% 88%;
+      }
+      .dark {
+        --background: 0 0% 6%;
+        --foreground: 0 0% 95%;
+        --card: 0 0% 10%;
+        --primary: 0 0% 85%;
+        --border: 0 0% 18%;
+      }
+      *,::before,::after{box-sizing:border-box;border-width:0;border-style:solid}
+      html{line-height:1.5;-webkit-text-size-adjust:100%;font-family:Montserrat,system-ui,sans-serif}
+      body{margin:0;background-color:hsl(var(--background));color:hsl(var(--foreground));min-height:100vh}
+      #root{min-height:100vh;display:flex;flex-direction:column}
+      /* Loading skeleton */
+      .loading-skeleton{animation:pulse 2s cubic-bezier(0.4,0,0.6,1) infinite}
+      @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+    </style>
+    
+    <!-- Preload critical fonts with font-display: swap -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Sacramento&family=Montserrat:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Sacramento&family=Montserrat:wght@300;400;500;600;700&display=swap" media="print" onload="this.media='all'">
+    <noscript>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Sacramento&family=Montserrat:wght@300;400;500;600;700&display=swap">
+    </noscript>
+    
+    <!-- DNS prefetch for external resources -->
+    <link rel="dns-prefetch" href="https://zfcyxzutsbdxntzhychl.supabase.co">
   </head>
 
   <body>

@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
-import { ArtisticBackground } from "@/components/ArtisticBackground";
+import { LazyArtisticBackground } from "@/components/LazyArtisticBackground";
 import { ProjectGrid } from "@/components/porto-ideias/ProjectGrid";
 import { supabase } from "@/integrations/supabase/client";
 import { useInView } from "@/hooks/useInView";
@@ -431,8 +431,8 @@ const PortoDeIdeiasPage = () => {
 
   return (
     <div className="min-h-screen bg-background relative">
-      {/* Artistic Background Animation */}
-      <ArtisticBackground />
+      {/* Lazy Artistic Background Animation - deferred loading */}
+      <LazyArtisticBackground />
       
       {/* Navbar */}
       <Navbar currentPage="porto-de-ideias" />
