@@ -2,32 +2,27 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { Footer } from "@/components/Footer";
-import portobelloLogo from "@/assets/portobello-logo.png";
+import { Navbar } from "@/components/Navbar";
 import { 
   ArrowLeft, 
   MapPin, 
-  DollarSign,
-  Calendar,
   Sparkles,
   Heart,
   MessageCircle,
-  HandHeart,
   Download,
   Users,
   Target,
   Globe,
   Star,
-  FileText,
   Shield,
-  BarChart,
-  Lock,
   CheckCircle,
   Play,
   Mail,
   Phone,
-  Anchor
+  ExternalLink
 } from "lucide-react";
 
 interface Project {
@@ -44,7 +39,7 @@ interface Project {
   location: string | null;
   created_at: string;
   categorias_tags: string[] | null;
-  responsavel_primeiro_nome: string | null;  // Only first name, no email/phone
+  responsavel_primeiro_nome: string | null;
   link_video: string | null;
   link_pagamento: string | null;
   impacto_cultural: string | null;
@@ -61,22 +56,39 @@ interface ProjectMember {
   email: string | null;
 }
 
+interface ContactButton {
+  id: string;
+  name: string;
+  link: string;
+}
+
+interface CreatorInfo {
+  nome: string | null;
+  email: string | null;
+  telefone: string | null;
+}
+
 const ProjectPage = () => {
   const { id } = useParams();
   const [project, setProject] = useState<Project | null>(null);
   const [members, setMembers] = useState<ProjectMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [isFavorited, setIsFavorited] = useState(false);
+  const [contactButtons, setContactButtons] = useState<ContactButton[]>([]);
+  const [showContactPopup, setShowContactPopup] = useState(false);
+  const [showCreatorPopup, setShowCreatorPopup] = useState(false);
+  const [creatorInfo, setCreatorInfo] = useState<CreatorInfo | null>(null);
 
   useEffect(() => {
     if (id) {
       fetchProject();
       fetchMembers();
+      fetchContactButtons();
+      fetchCreatorInfo();
     }
   }, [id]);
 
   const fetchProject = async () => {
-    // Use projects_public view to avoid exposing sensitive contact information
     const { data, error } = await supabase
       .from("projects_public")
       .select("*")
@@ -97,6 +109,57 @@ const ProjectPage = () => {
     
     if (data) {
       setMembers(data);
+    }
+  };
+
+  const fetchContactButtons = async () => {
+    const { data } = await supabase
+      .from("settings")
+      .select("value")
+      .eq("key", "contact_buttons")
+      .maybeSingle();
+
+    if (data) {
+      const value = data.value as unknown as { contacts: ContactButton[] };
+      setContactButtons(value.contacts || []);
+    } else {
+      setContactButtons([{
+        id: "default",
+        name: "WhatsApp Porto Bello",
+        link: "https://wa.me/5521967264730"
+      }]);
+    }
+  };
+
+  const fetchCreatorInfo = async () => {
+    const { data } = await supabase
+      .from("projects")
+      .select("responsavel_nome, responsavel_email, responsavel_telefone")
+      .eq("id", id)
+      .maybeSingle();
+
+    if (data) {
+      setCreatorInfo({
+        nome: data.responsavel_nome,
+        email: data.responsavel_email,
+        telefone: data.responsavel_telefone
+      });
+    }
+  };
+
+  const handleContactClick = () => {
+    if (contactButtons.length === 1) {
+      window.open(contactButtons[0].link, "_blank");
+    } else if (contactButtons.length > 1) {
+      setShowContactPopup(true);
+    }
+  };
+
+  const handleDownloadPDF = () => {
+    if (project?.media_url) {
+      window.open(project.media_url, "_blank");
+    } else {
+      alert("Apresentação em PDF não disponível para este projeto.");
     }
   };
 
@@ -146,18 +209,8 @@ const ProjectPage = () => {
   if (!project) {
     return (
       <div className="min-h-screen bg-background">
-        {/* Simple navbar for not found */}
-        <nav className="bg-card/80 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-border/50">
-          <div className="container mx-auto px-6 py-4">
-            <Link to="/" className="flex items-center group">
-              <img 
-                src={portobelloLogo} 
-                alt="Porto Bello" 
-                className="h-20 w-auto group-hover:scale-105 transition-transform duration-300"
-              />
-            </Link>
-          </div>
-        </nav>
+        <Navbar showNav={false} />
+        <div className="h-20" />
         <main className="container mx-auto px-4 py-16 text-center">
           <Sparkles className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
           <h1 className="text-2xl font-serif font-bold mb-2">Projeto não encontrado</h1>
@@ -179,38 +232,14 @@ const ProjectPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Navigation Breadcrumb */}
-      <nav className="bg-card/80 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-border/50">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Link to="/porto-de-ideias" className="flex items-center text-muted-foreground hover:text-primary transition-colors">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Voltar
-              </Link>
-            </div>
-            
-            <Link to="/" className="flex items-center group -ml-12">
-              <img 
-                src={portobelloLogo} 
-                alt="Porto Bello" 
-                className="h-32 md:h-44 w-auto group-hover:scale-105 transition-transform duration-300"
-              />
-            </Link>
-            
-            <div className="flex items-center space-x-4">
-              <button 
-                onClick={() => setIsFavorited(!isFavorited)}
-                className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
-                  isFavorited ? 'bg-red-100 text-red-600 dark:bg-red-900/30' : 'bg-muted text-muted-foreground hover:text-red-600'
-                }`}
-              >
-                <Heart className={`w-5 h-5 ${isFavorited ? 'fill-current' : ''}`} />
-              </button>
-            </div>
-          </div>
-        </div>
-      </nav>
+      {/* Standard Navbar */}
+      <Navbar showNav={false} rightContent={
+        <Link to="/porto-de-ideias" className="flex items-center text-muted-foreground hover:text-primary transition-colors">
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Voltar
+        </Link>
+      } />
+      <div className="h-20" />
 
       {/* Hero Section */}
       <section className="relative">
@@ -245,7 +274,7 @@ const ProjectPage = () => {
                   </Badge>
                 )}
               </div>
-              <Button variant="secondary" className="rounded-full">
+              <Button variant="secondary" className="rounded-full" onClick={handleDownloadPDF}>
                 <Download className="w-4 h-4 mr-2" />
                 Baixar apresentação em PDF
               </Button>
@@ -382,23 +411,6 @@ const ProjectPage = () => {
               </section>
             )}
 
-            {/* Documents Section */}
-            <section>
-              <h2 className="text-2xl font-serif font-bold text-foreground mb-6 flex items-center gap-2">
-                <FileText className="w-6 h-6 text-primary" />
-                Documentos do Projeto
-              </h2>
-              <div className="text-center p-8 bg-muted/50 rounded-2xl border border-border">
-                <Lock className="w-12 h-12 text-muted-foreground/50 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-foreground mb-2">Documentos Restritos</h3>
-                <p className="text-muted-foreground mb-6">Para acessar os documentos completos do projeto, você precisa ter uma conta verificada.</p>
-                <Link to="/auth">
-                  <Button className="rounded-full">
-                    Criar Conta Verificada
-                  </Button>
-                </Link>
-              </div>
-            </section>
           </div>
 
           {/* Sidebar */}
@@ -432,29 +444,12 @@ const ProjectPage = () => {
                 </div>
               </div>
 
-              {/* Action Buttons */}
+              {/* Contact Button */}
               <div className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-4">
-                <h3 className="font-serif font-bold text-lg text-foreground mb-4">Ações</h3>
-                <Button className="w-full rounded-full" size="lg">
+                <h3 className="font-serif font-bold text-lg text-foreground mb-4">Contato</h3>
+                <Button className="w-full rounded-full" size="lg" onClick={handleContactClick}>
                   <MessageCircle className="w-4 h-4 mr-2" />
-                  Solicitar Conexão
-                </Button>
-                {project.link_pagamento && (
-                  <a href={project.link_pagamento} target="_blank" rel="noopener noreferrer" className="block">
-                    <Button variant="secondary" className="w-full rounded-full bg-emerald-500 hover:bg-emerald-600 text-white" size="lg">
-                      <HandHeart className="w-4 h-4 mr-2" />
-                      Quero Apoiar
-                    </Button>
-                  </a>
-                )}
-                <Button 
-                  variant="outline"
-                  className={`w-full rounded-full ${isFavorited ? 'bg-red-50 text-red-600 border-red-200 dark:bg-red-900/20 dark:border-red-800' : ''}`}
-                  size="lg"
-                  onClick={() => setIsFavorited(!isFavorited)}
-                >
-                  <Heart className={`w-4 h-4 mr-2 ${isFavorited ? 'fill-current' : ''}`} />
-                  {isFavorited ? 'Salvo nos Favoritos' : 'Salvar nos Favoritos'}
+                  Contato
                 </Button>
               </div>
 
@@ -475,14 +470,87 @@ const ProjectPage = () => {
                     <p className="text-sm text-muted-foreground">Produtor(a) Cultural</p>
                   </div>
                 </div>
-                <Button variant="outline" className="w-full rounded-full">
-                  Ver Perfil Completo
+                <Button variant="outline" className="w-full rounded-full" onClick={() => setShowCreatorPopup(true)}>
+                  Ver Informações de Contato
                 </Button>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Contact Popup - for multiple contacts */}
+      <Dialog open={showContactPopup} onOpenChange={setShowContactPopup}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-serif">Escolha um contato</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            {contactButtons.map((contact) => (
+              <a
+                key={contact.id}
+                href={contact.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-between p-4 rounded-xl border border-border hover:bg-muted/50 transition-colors"
+              >
+                <span className="font-medium">{contact.name}</span>
+                <ExternalLink className="w-4 h-4 text-muted-foreground" />
+              </a>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Creator Info Popup */}
+      <Dialog open={showCreatorPopup} onOpenChange={setShowCreatorPopup}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-serif">Informações do Criador</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {creatorInfo ? (
+              <>
+                {creatorInfo.nome && (
+                  <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                    <CheckCircle className="w-5 h-5 text-primary" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">Nome</p>
+                      <p className="font-medium">{creatorInfo.nome}</p>
+                    </div>
+                  </div>
+                )}
+                {creatorInfo.telefone && (
+                  <a 
+                    href={`tel:${creatorInfo.telefone}`}
+                    className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
+                  >
+                    <Phone className="w-5 h-5 text-primary" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">Telefone</p>
+                      <p className="font-medium">{creatorInfo.telefone}</p>
+                    </div>
+                  </a>
+                )}
+                {creatorInfo.email && (
+                  <a 
+                    href={`mailto:${creatorInfo.email}`}
+                    className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
+                  >
+                    <Mail className="w-5 h-5 text-primary" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">Email</p>
+                      <p className="font-medium">{creatorInfo.email}</p>
+                    </div>
+                  </a>
+                )}
+              </>
+            ) : (
+              <p className="text-muted-foreground text-center py-4">Informações de contato não disponíveis.</p>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Footer */}
       <Footer />

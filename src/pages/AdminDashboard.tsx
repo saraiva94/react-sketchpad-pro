@@ -15,6 +15,7 @@ import { FeaturedProjectsManager } from "@/components/admin/FeaturedProjectsMana
 import { PortoIdeiasCardsManager } from "@/components/admin/PortoIdeiasCardsManager";
 import { QuemSomosEditor } from "@/components/admin/QuemSomosEditor";
 import { NossosServicosEditor } from "@/components/admin/NossosServicosEditor";
+import { ContactButtonsEditor } from "@/components/admin/ContactButtonsEditor";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
@@ -1520,6 +1521,14 @@ const AdminDashboard = () => {
                 </Button>
               </CardContent>
             </Card>
+
+            {/* Separador - Página de Projetos */}
+            <div className="text-lg font-semibold text-muted-foreground border-b pb-2 mb-4 mt-8">
+              📄 Página de Projetos
+            </div>
+
+            {/* Contact Buttons Editor */}
+            <ContactButtonsEditor />
 
             {/* Separador - Página Porto de Ideias */}
             <div className="text-lg font-semibold text-muted-foreground border-b pb-2 mb-4 mt-8">
