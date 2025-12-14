@@ -462,7 +462,13 @@ const AdminDashboard = () => {
       .select("*")
       .order("created_at", { ascending: false });
 
-    if (!error && data) {
+    console.log("fetchProjects - data:", data, "error:", error);
+
+    if (error) {
+      console.error("Erro ao buscar projetos:", error);
+    }
+    
+    if (data) {
       setProjects(data as Project[]);
     }
     setLoadingProjects(false);
@@ -473,7 +479,13 @@ const AdminDashboard = () => {
       .from("project_members")
       .select("*");
 
-    if (!error && data) {
+    console.log("fetchProjectMembers - data:", data, "error:", error);
+
+    if (error) {
+      console.error("Erro ao buscar membros:", error);
+    }
+    
+    if (data) {
       setProjectMembers(data as ProjectMember[]);
     }
   };
