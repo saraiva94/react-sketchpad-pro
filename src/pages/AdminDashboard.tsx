@@ -899,6 +899,34 @@ const AdminDashboard = () => {
         {/* Homepage Section (formerly Settings + Featured) */}
         {activeSection === "homepage" && (
           <div className="space-y-6">
+            {/* Detalhamento Geral - PRIMEIRO */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="w-5 h-5" />
+                  Detalhamento Geral
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between p-4 border rounded-lg">
+                  <div>
+                    <h4 className="font-medium">Estatísticas Públicas</h4>
+                    <p className="text-sm text-muted-foreground">Mostrar painel de números na homepage</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Switch 
+                      checked={statsVisible} 
+                      onCheckedChange={toggleStatsVisibility}
+                      disabled={loadingSettings}
+                    />
+                    <Badge variant={statsVisible ? "default" : "secondary"}>
+                      {statsVisible ? "Público" : "Privado"}
+                    </Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Seção dividida por área */}
             <div className="text-lg font-semibold text-muted-foreground border-b pb-2 mb-4">
               🏠 Homepage
@@ -1372,36 +1400,6 @@ const AdminDashboard = () => {
               projects={projects.filter(p => p.status === "approved")}
               onFeaturedChange={() => setFeaturedRefreshKey(prev => prev + 1)}
             />
-
-            {/* Separador - Configurações Gerais */}
-            <div className="text-lg font-semibold text-muted-foreground border-b pb-2 mb-4 mt-8">
-              ⚙️ Configurações Gerais
-            </div>
-
-            {/* 8. Detalhamento Geral */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Detalhamento Geral</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div>
-                    <h4 className="font-medium">Estatísticas Públicas</h4>
-                    <p className="text-sm text-muted-foreground">Mostrar painel de números na homepage</p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Switch 
-                      checked={statsVisible} 
-                      onCheckedChange={toggleStatsVisibility}
-                      disabled={loadingSettings}
-                    />
-                    <Badge variant={statsVisible ? "default" : "secondary"}>
-                      {statsVisible ? "Público" : "Privado"}
-                    </Badge>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
           </div>
         )}
 
