@@ -301,6 +301,31 @@ const ProjectPage = () => {
       });
     }
 
+    // Creator/Responsible contact info
+    if (creatorInfo && (creatorInfo.nome || creatorInfo.email || creatorInfo.telefone)) {
+      if (yPos > 240) { doc.addPage(); yPos = 20; }
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(0);
+      doc.text("Contato do Responsável", margin, yPos);
+      yPos += 8;
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "normal");
+      if (creatorInfo.nome) {
+        doc.text(`Nome: ${creatorInfo.nome}`, margin, yPos);
+        yPos += 6;
+      }
+      if (creatorInfo.email) {
+        doc.text(`E-mail: ${creatorInfo.email}`, margin, yPos);
+        yPos += 6;
+      }
+      if (creatorInfo.telefone) {
+        doc.text(`Telefone: ${creatorInfo.telefone}`, margin, yPos);
+        yPos += 6;
+      }
+      yPos += 10;
+    }
+
     // Footer
     doc.setFontSize(9);
     doc.setTextColor(150);
