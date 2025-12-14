@@ -645,33 +645,42 @@ const HomePage = () => {
 
       {/* Animated Stats Section - conditionally rendered only after settings loaded */}
       {!loadingSettings && statsVisible && (
-        <AnimatedStats stats={[
-          {
-            label: "Projetos Cadastrados",
-            value: stats.totalProjects,
-            icon: <Briefcase className="w-8 h-8 text-white" />,
-            color: "bg-gradient-to-br from-primary to-blue-600"
-          },
-          {
-            label: "Criadores Culturais",
-            value: stats.uniqueCreators,
-            icon: <Users className="w-8 h-8 text-white" />,
-            color: "bg-gradient-to-br from-emerald-500 to-emerald-600"
-          },
-          {
-            label: "Projetos Aprovados",
-            value: stats.approvedProjects,
-            icon: <Award className="w-8 h-8 text-white" />,
-            color: "bg-gradient-to-br from-violet-500 to-violet-600"
-          },
-          {
-            label: "Taxa de Sucesso",
-            value: stats.successRate,
-            suffix: "%",
-            icon: <TrendingUp className="w-8 h-8 text-white" />,
-            color: "bg-gradient-to-br from-amber-500 to-orange-500"
-          }
-        ]} />
+        <section className="relative">
+          <AnimatedStats stats={[
+            {
+              label: "Projetos Cadastrados",
+              value: stats.totalProjects,
+              icon: <Briefcase className="w-8 h-8 text-white" />,
+              color: "bg-gradient-to-br from-primary to-blue-600"
+            },
+            {
+              label: "Criadores Culturais",
+              value: stats.uniqueCreators,
+              icon: <Users className="w-8 h-8 text-white" />,
+              color: "bg-gradient-to-br from-emerald-500 to-emerald-600"
+            },
+            {
+              label: "Projetos Aprovados",
+              value: stats.approvedProjects,
+              icon: <Award className="w-8 h-8 text-white" />,
+              color: "bg-gradient-to-br from-violet-500 to-violet-600"
+            },
+            {
+              label: "Taxa de Sucesso",
+              value: stats.successRate,
+              suffix: "%",
+              icon: <TrendingUp className="w-8 h-8 text-white" />,
+              color: "bg-gradient-to-br from-amber-500 to-orange-500"
+            }
+          ]} />
+          {stats.totalProjects === 0 && (
+            <div className="text-center pb-8 -mt-8">
+              <p className="text-sm text-muted-foreground/70 italic">
+                Estatísticas de projetos reais cadastrados na plataforma
+              </p>
+            </div>
+          )}
+        </section>
       )}
 
       {/* Quem Somos Section - only animates after hero is ready AND in view */}
