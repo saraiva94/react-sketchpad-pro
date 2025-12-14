@@ -134,12 +134,6 @@ export const ContactButtonsEditor = () => {
             <div className="flex-1 space-y-1">
               <Label className="text-xs">Link (wa.me, tel:, ou URL)</Label>
               <div className="flex gap-2">
-                <Input
-                  value={contact.link}
-                  onChange={(e) => updateContact(contact.id, "link", e.target.value)}
-                  placeholder={contact.link.startsWith("https://wa.me/55") ? "Complete com DDD + número (ex: 21967264730)" : "Ex: https://wa.me/5521967264730"}
-                  className="flex-1"
-                />
                 <Button
                   type="button"
                   variant="outline"
@@ -150,6 +144,12 @@ export const ContactButtonsEditor = () => {
                 >
                   <MessageCircle className="w-4 h-4 text-emerald-500" />
                 </Button>
+                <Input
+                  value={contact.link}
+                  onChange={(e) => updateContact(contact.id, "link", e.target.value)}
+                  placeholder={contact.link.startsWith("https://wa.me/55") ? "Complete com DDD + número (ex: 21967264730)" : "Clique no botão WhatsApp para preencher com número ou cole o link do site de contato"}
+                  className="flex-1"
+                />
               </div>
             </div>
             <Button
