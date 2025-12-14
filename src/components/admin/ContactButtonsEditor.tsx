@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Trash2, Save, Phone, Globe } from "lucide-react";
+import { Plus, Trash2, Save, Phone, MessageCircle } from "lucide-react";
 
 export interface ContactButton {
   id: string;
@@ -51,6 +51,10 @@ export const ContactButtonsEditor = () => {
         link: ""
       }
     ]);
+  };
+
+  const prefillWhatsApp = (id: string) => {
+    updateContact(id, "link", "https://wa.me/55");
   };
 
   const removeContact = (id: string) => {
@@ -129,11 +133,24 @@ export const ContactButtonsEditor = () => {
             </div>
             <div className="flex-1 space-y-1">
               <Label className="text-xs">Link (wa.me, tel:, ou URL)</Label>
-              <Input
-                value={contact.link}
-                onChange={(e) => updateContact(contact.id, "link", e.target.value)}
-                placeholder="Ex: https://wa.me/5521967264730"
-              />
+              <div className="flex gap-2">
+                <Input
+                  value={contact.link}
+                  onChange={(e) => updateContact(contact.id, "link", e.target.value)}
+                  placeholder={contact.link.startsWith("https://wa.me/55") ? "Complete com DDD + número (ex: 21967264730)" : "Ex: https://wa.me/5521967264730"}
+                  className="flex-1"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={() => prefillWhatsApp(contact.id)}
+                  title="Preencher com WhatsApp"
+                  className="shrink-0 bg-emerald-500/10 hover:bg-emerald-500/20 border-emerald-500/30"
+                >
+                  <MessageCircle className="w-4 h-4 text-emerald-500" />
+                </Button>
+              </div>
             </div>
             <Button
               variant="destructive"
