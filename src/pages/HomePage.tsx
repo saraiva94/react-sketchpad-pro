@@ -7,8 +7,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
 import { AnimatedStats } from "@/components/AnimatedStats";
-import { ArtisticBackground } from "@/components/ArtisticBackground";
-import { FloatingOrbs } from "@/components/FloatingOrbs";
+import { LazyArtisticBackground } from "@/components/LazyArtisticBackground";
+import { LazyFloatingOrbs } from "@/components/LazyFloatingOrbs";
 import { ShinyText } from "@/components/ShinyText";
 import { VideoCarousel } from "@/components/VideoCarousel";
 import { useInView } from "@/hooks/useInView";
@@ -581,11 +581,11 @@ const HomePage = () => {
 
   return (
     <div className="min-h-screen bg-background relative">
-      {/* Artistic Background Animation */}
-      <ArtisticBackground />
+      {/* Lazy Artistic Background Animation - deferred loading */}
+      <LazyArtisticBackground />
       
-      {/* Floating Orbs */}
-      <FloatingOrbs />
+      {/* Lazy Floating Orbs - deferred loading */}
+      <LazyFloatingOrbs />
       
       {/* Navbar */}
       <Navbar currentPage="home" />

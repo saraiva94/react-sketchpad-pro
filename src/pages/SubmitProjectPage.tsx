@@ -17,7 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Footer, SocialLinksDisplay } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
-import { ArtisticBackground } from "@/components/ArtisticBackground";
+import { LazyArtisticBackground } from "@/components/LazyArtisticBackground";
 import { ImageCropper } from "@/components/ImageCropper";
 
 interface TeamMember {
@@ -232,8 +232,8 @@ const SubmitProjectPage = () => {
 
   return (
     <div className="min-h-screen bg-background relative">
-      {/* Animated Background */}
-      <ArtisticBackground />
+      {/* Lazy Animated Background - deferred loading */}
+      <LazyArtisticBackground />
       
       {/* Navbar */}
       <Navbar currentPage="submit" />

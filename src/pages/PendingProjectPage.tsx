@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Footer } from "@/components/Footer";
-import { ArtisticBackground } from "@/components/ArtisticBackground";
+import { LazyArtisticBackground } from "@/components/LazyArtisticBackground";
 import portobelloLogo from "@/assets/portobello-logo.png";
 
 interface Project {
@@ -373,7 +373,7 @@ const PendingProjectPage = () => {
 
   return (
     <div className="min-h-screen bg-background relative">
-      <ArtisticBackground />
+      <LazyArtisticBackground />
 
       {/* Custom Navbar for pending project */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-md border-b border-border">
