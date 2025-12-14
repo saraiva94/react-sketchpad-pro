@@ -61,9 +61,6 @@ const AuthPage = () => {
       <main className="container mx-auto px-4 py-16 flex items-center justify-center min-h-[calc(100vh-4rem)]">
         <Card className="w-full max-w-md shadow-lg animate-in fade-in-50 slide-in-from-bottom-4 duration-500">
           <CardHeader className="text-center">
-            <p className="text-sm uppercase tracking-widest text-muted-foreground font-serif mb-2">
-              Painel Administrativo
-            </p>
             <CardTitle className="text-2xl font-serif font-bold">
               Acesso Administrativo
             </CardTitle>
