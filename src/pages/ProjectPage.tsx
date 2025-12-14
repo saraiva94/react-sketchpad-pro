@@ -576,18 +576,6 @@ const ProjectPage = () => {
               </section>
             )}
 
-            {/* Incentive Law */}
-            {project.has_incentive_law && project.incentive_law_details && (
-              <section>
-                <h2 className="text-2xl font-serif font-bold text-foreground mb-6 flex items-center gap-2">
-                  <Shield className="w-6 h-6 text-primary" />
-                  Lei de Incentivo
-                </h2>
-                <div className="p-6 bg-primary/5 border border-primary/20 rounded-2xl">
-                  <p className="text-muted-foreground">{project.incentive_law_details}</p>
-                </div>
-              </section>
-            )}
 
           </div>
 
@@ -652,6 +640,19 @@ const ProjectPage = () => {
                   Ver Informações de Contato
                 </Button>
               </div>
+
+              {/* Incentive Law Card */}
+              {project.has_incentive_law && project.incentive_law_details && (
+                <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+                  <h3 className="font-serif font-bold text-lg text-foreground mb-4 flex items-center gap-2">
+                    <Shield className="w-5 h-5 text-violet-500" />
+                    Lei de Incentivo
+                  </h3>
+                  <div className="p-4 bg-violet-500/10 border border-violet-500/20 rounded-xl">
+                    <p className="text-sm text-muted-foreground">{project.incentive_law_details}</p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
