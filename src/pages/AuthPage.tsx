@@ -64,7 +64,7 @@ const AuthPage = () => {
             <p className="text-sm uppercase tracking-widest text-muted-foreground font-serif mb-2">
               Painel Administrativo
             </p>
-            <CardTitle className="text-2xl font-handwritten font-bold">
+            <CardTitle className="text-2xl font-serif font-bold">
               Acesso Administrativo
             </CardTitle>
             <CardDescription>
