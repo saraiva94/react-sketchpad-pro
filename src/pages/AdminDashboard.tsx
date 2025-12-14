@@ -157,6 +157,7 @@ const AdminDashboard = () => {
     instagram: SocialLink;
     linkedin: SocialLink;
     youtube: SocialLink;
+    imdb: SocialLink;
     website: SocialLink;
   }
   const [socialLinks, setSocialLinks] = useState<SocialLinksConfig>({
@@ -164,6 +165,7 @@ const AdminDashboard = () => {
     instagram: { enabled: true, url: "https://www.instagram.com/portobellofilmes/" },
     linkedin: { enabled: false, url: "" },
     youtube: { enabled: false, url: "" },
+    imdb: { enabled: false, url: "" },
     website: { enabled: false, url: "" }
   });
   const [savingSocialLinks, setSavingSocialLinks] = useState(false);
@@ -1186,11 +1188,11 @@ const AdminDashboard = () => {
                     </div>
 
                     {video.url && (
-                      <div className="mt-2 rounded-lg overflow-hidden border">
+                      <div className="mt-2 rounded-lg overflow-hidden border aspect-video">
                         <video
                           src={video.url}
                           controls
-                          className="w-full max-h-40 object-contain bg-black"
+                          className="w-full h-full object-cover"
                         />
                       </div>
                     )}
@@ -1488,11 +1490,38 @@ const AdminDashboard = () => {
                   )}
                 </div>
 
+                {/* IMDB */}
+                <div className="p-4 border rounded-lg space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-[#F5C518] flex items-center justify-center">
+                        <span className="text-black font-bold text-xs">IMDb</span>
+                      </div>
+                      <span className="font-medium">IMDb</span>
+                    </div>
+                    <Switch
+                      checked={socialLinks.imdb?.enabled || false}
+                      onCheckedChange={(checked) => 
+                        setSocialLinks(prev => ({ ...prev, imdb: { ...prev.imdb, enabled: checked } }))
+                      }
+                    />
+                  </div>
+                  {socialLinks.imdb?.enabled && (
+                    <Input
+                      placeholder="https://www.imdb.com/name/nm0000000/"
+                      value={socialLinks.imdb?.url || ""}
+                      onChange={(e) => 
+                        setSocialLinks(prev => ({ ...prev, imdb: { ...prev.imdb, url: e.target.value } }))
+                      }
+                    />
+                  )}
+                </div>
+
                 {/* Site Pessoal */}
                 <div className="p-4 border rounded-lg space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center">
+                      <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center">
                         <Globe className="w-4 h-4 text-white" />
                       </div>
                       <span className="font-medium">Site Pessoal</span>
