@@ -65,8 +65,8 @@ import {
   LucideIcon
 } from "lucide-react";
 
-// Icon map for dynamic Quem Somos cards
-const quemSomosIconMap: Record<string, LucideIcon> = {
+// Icon map for dynamic Quem Somos cards and Nossos Serviços
+const iconMap: Record<string, LucideIcon> = {
   Lightbulb,
   Target,
   Heart,
@@ -105,6 +105,13 @@ const quemSomosIconMap: Record<string, LucideIcon> = {
   Umbrella,
   Waves,
   Wind,
+  Settings,
+  FileText,
+  DollarSign,
+  Calendar,
+  Megaphone,
+  Mic,
+  HelpCircle,
 };
 
 interface Project {
@@ -180,12 +187,37 @@ const HomePage = () => {
     ]
   });
 
+  // Nossos Serviços content
+  interface ServiceItem {
+    icon: string;
+    text: string;
+    hoverColor: string;
+  }
+  interface ServicosContent {
+    title: string;
+    services: ServiceItem[];
+  }
+  const [servicosContent, setServicosContent] = useState<ServicosContent>({
+    title: "Nossos Serviços",
+    services: [
+      { icon: "Film", text: "Desenvolvimento de projetos culturais e audiovisuais", hoverColor: "group-hover:text-rose-500" },
+      { icon: "Settings", text: "Produção executiva e gestão de equipe", hoverColor: "group-hover:text-amber-500" },
+      { icon: "FileText", text: "Estruturação para leis de incentivo", hoverColor: "group-hover:text-emerald-500" },
+      { icon: "DollarSign", text: "Captação de recursos públicos e privados", hoverColor: "group-hover:text-cyan-500" },
+      { icon: "Calendar", text: "Produção de obras audiovisuais e eventos culturais", hoverColor: "group-hover:text-violet-500" },
+      { icon: "Megaphone", text: "Distribuição, comunicação e lançamento de projetos", hoverColor: "group-hover:text-pink-500" },
+      { icon: "Mic", text: "Criação e roteirização de videocasts e podcasts", hoverColor: "group-hover:text-orange-500" },
+      { icon: "HelpCircle", text: "Consultoria para formatação de projetos", hoverColor: "group-hover:text-sky-500" },
+    ]
+  });
+
   useEffect(() => {
     fetchFeaturedProjects();
     fetchStats();
     fetchStatsVisibility();
     fetchInstitutionalVideo();
     fetchQuemSomosContent();
+    fetchServicosContent();
 
     // Subscribe to settings changes for real-time sync
     const channel = supabase
@@ -214,6 +246,9 @@ const HomePage = () => {
           } else if (record.key === 'quem_somos_content') {
             // Update quem somos content in real-time
             setQuemSomosContent(record.value as unknown as QuemSomosContent);
+          } else if (record.key === 'nossos_servicos_content') {
+            // Update servicos content in real-time
+            setServicosContent(record.value as unknown as ServicosContent);
           }
         }
       )
@@ -299,6 +334,18 @@ const HomePage = () => {
     
     if (data && data.value) {
       setQuemSomosContent(data.value as unknown as QuemSomosContent);
+    }
+  };
+
+  const fetchServicosContent = async () => {
+    const { data } = await supabase
+      .from("settings")
+      .select("value")
+      .eq("key", "nossos_servicos_content")
+      .maybeSingle();
+    
+    if (data && data.value) {
+      setServicosContent(data.value as unknown as ServicosContent);
     }
   };
 
@@ -534,17 +581,6 @@ const HomePage = () => {
   
   const displayItems = buildDisplayProjects();
 
-  const services = [
-    { icon: Film, text: "Desenvolvimento de projetos culturais e audiovisuais", hoverColor: "group-hover:text-rose-500" },
-    { icon: Settings, text: "Produção executiva e gestão de equipe", hoverColor: "group-hover:text-amber-500" },
-    { icon: FileText, text: "Estruturação para leis de incentivo", hoverColor: "group-hover:text-emerald-500" },
-    { icon: DollarSign, text: "Captação de recursos públicos e privados", hoverColor: "group-hover:text-cyan-500" },
-    { icon: Calendar, text: "Produção de obras audiovisuais e eventos culturais", hoverColor: "group-hover:text-violet-500" },
-    { icon: Megaphone, text: "Distribuição, comunicação e lançamento de projetos", hoverColor: "group-hover:text-pink-500" },
-    { icon: Mic, text: "Criação e roteirização de videocasts e podcasts", hoverColor: "group-hover:text-orange-500" },
-    { icon: HelpCircle, text: "Consultoria para formatação de projetos", hoverColor: "group-hover:text-sky-500" },
-  ];
-
   // Intersection observers for animations - each section only animates when entering viewport
   const { ref: heroRef, isInView: heroInView } = useInView<HTMLElement>({ threshold: 0.1 });
   const { ref: quemSomosRef, isInView: quemSomosInView } = useInView<HTMLElement>({ threshold: 0.1, rootMargin: '-50px 0px' });
@@ -661,7 +697,7 @@ const HomePage = () => {
 
           <div className="grid md:grid-cols-3 gap-8">
             {quemSomosContent.cards.map((card, index) => {
-              const IconComponent = quemSomosIconMap[card.icon] || Lightbulb;
+              const IconComponent = iconMap[card.icon] || Lightbulb;
               return (
                 <Card 
                   key={card.title}
@@ -887,33 +923,36 @@ const HomePage = () => {
           <div className={`text-center mb-16 transition-all duration-700 ${servicosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
             <ShinyText className="inline-block" delay={200}>
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif font-semibold text-foreground mb-4 decorative-line">
-                Nossos Serviços
+                {servicosContent.title}
               </h2>
             </ShinyText>
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
-            {services.map((service, index) => (
-              <Card 
-                key={index} 
-                className={`group relative overflow-visible card-solid bg-card border-border rainbow-card-glow ${servicosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
-                style={{ 
-                  transition: 'opacity 300ms ease-out, transform 300ms ease-out',
-                  transitionDelay: servicosInView ? `${(index + 1) * 50}ms` : '0ms',
-                }}
-              >
-                <div className="relative p-6 flex flex-col items-center text-center gap-4">
-                  <div className="relative">
-                    <div className="relative w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 border border-border shadow-lg" style={{ transition: 'transform 0ms' }}>
-                      <service.icon className={`w-8 h-8 text-black rainbow-icon-glow ${service.hoverColor}`} style={{ transition: 'color 0ms' }} />
+            {servicosContent.services.map((service, index) => {
+              const ServiceIcon = iconMap[service.icon] || Star;
+              return (
+                <Card 
+                  key={index} 
+                  className={`group relative overflow-visible card-solid bg-card border-border rainbow-card-glow ${servicosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+                  style={{ 
+                    transition: 'opacity 300ms ease-out, transform 300ms ease-out',
+                    transitionDelay: servicosInView ? `${(index + 1) * 50}ms` : '0ms',
+                  }}
+                >
+                  <div className="relative p-6 flex flex-col items-center text-center gap-4">
+                    <div className="relative">
+                      <div className="relative w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 border border-border shadow-lg" style={{ transition: 'transform 0ms' }}>
+                        <ServiceIcon className={`w-8 h-8 text-black rainbow-icon-glow ${service.hoverColor}`} style={{ transition: 'color 0ms' }} />
+                      </div>
                     </div>
+                    <p className="text-sm text-muted-foreground leading-relaxed font-medium rainbow-text-glow">
+                      {service.text}
+                    </p>
                   </div>
-                  <p className="text-sm text-muted-foreground leading-relaxed font-medium rainbow-text-glow">
-                    {service.text}
-                  </p>
-                </div>
-              </Card>
-            ))}
+                </Card>
+              );
+            })}
           </div>
         </div>
       </section>
