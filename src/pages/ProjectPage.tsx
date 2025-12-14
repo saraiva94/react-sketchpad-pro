@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
+import jsPDF from "jspdf";
 import { 
   ArrowLeft, 
   MapPin, 
@@ -158,15 +159,161 @@ const ProjectPage = () => {
   };
 
   const handleDownloadPDF = () => {
-    if (project?.media_url) {
-      window.open(project.media_url, "_blank");
-    } else {
-      toast({
-        title: "PDF não disponível",
-        description: "A apresentação em PDF não está disponível para este projeto.",
-        variant: "destructive",
+    if (!project) return;
+    
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 20;
+    const contentWidth = pageWidth - margin * 2;
+    let yPos = 20;
+
+    // Title
+    doc.setFontSize(22);
+    doc.setFont("helvetica", "bold");
+    const titleLines = doc.splitTextToSize(project.title, contentWidth);
+    doc.text(titleLines, margin, yPos);
+    yPos += titleLines.length * 10 + 5;
+
+    // Project type and location
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(100);
+    let subInfo = project.project_type;
+    if (project.location) subInfo += ` | ${project.location}`;
+    doc.text(subInfo, margin, yPos);
+    yPos += 10;
+
+    // Incentive law badge
+    if (project.has_incentive_law) {
+      doc.setTextColor(128, 0, 128);
+      doc.text("✓ Projeto com Lei de Incentivo", margin, yPos);
+      yPos += 8;
+    }
+
+    doc.setTextColor(0);
+    yPos += 5;
+
+    // Synopsis
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.text("Sinopse", margin, yPos);
+    yPos += 8;
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "normal");
+    const synopsisLines = doc.splitTextToSize(project.synopsis, contentWidth);
+    doc.text(synopsisLines, margin, yPos);
+    yPos += synopsisLines.length * 6 + 10;
+
+    // Description
+    if (project.description) {
+      if (yPos > 250) { doc.addPage(); yPos = 20; }
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text("Descrição Completa", margin, yPos);
+      yPos += 8;
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "normal");
+      const descLines = doc.splitTextToSize(project.description, contentWidth);
+      descLines.forEach((line: string) => {
+        if (yPos > 280) { doc.addPage(); yPos = 20; }
+        doc.text(line, margin, yPos);
+        yPos += 6;
+      });
+      yPos += 10;
+    }
+
+    // Budget
+    if (project.valor_sugerido || project.budget) {
+      if (yPos > 260) { doc.addPage(); yPos = 20; }
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text("Orçamento", margin, yPos);
+      yPos += 8;
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "normal");
+      const budgetText = project.valor_sugerido 
+        ? formatBudget(project.valor_sugerido) 
+        : (project.budget || "A definir");
+      doc.text(budgetText, margin, yPos);
+      yPos += 12;
+    }
+
+    // Impact sections
+    const impacts = [
+      { title: "Impacto Cultural", content: project.impacto_cultural },
+      { title: "Impacto Social", content: project.impacto_social },
+      { title: "Público Estimado", content: project.publico_alvo },
+      { title: "Diferenciais", content: project.diferenciais },
+    ].filter(i => i.content);
+
+    impacts.forEach(({ title, content }) => {
+      if (yPos > 250) { doc.addPage(); yPos = 20; }
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text(title, margin, yPos);
+      yPos += 8;
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "normal");
+      const lines = doc.splitTextToSize(content!, contentWidth);
+      lines.forEach((line: string) => {
+        if (yPos > 280) { doc.addPage(); yPos = 20; }
+        doc.text(line, margin, yPos);
+        yPos += 6;
+      });
+      yPos += 10;
+    });
+
+    // Incentive law details
+    if (project.has_incentive_law && project.incentive_law_details) {
+      if (yPos > 250) { doc.addPage(); yPos = 20; }
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text("Detalhes da Lei de Incentivo", margin, yPos);
+      yPos += 8;
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "normal");
+      const lawLines = doc.splitTextToSize(project.incentive_law_details, contentWidth);
+      lawLines.forEach((line: string) => {
+        if (yPos > 280) { doc.addPage(); yPos = 20; }
+        doc.text(line, margin, yPos);
+        yPos += 6;
+      });
+      yPos += 10;
+    }
+
+    // Team members
+    if (members.length > 0) {
+      if (yPos > 240) { doc.addPage(); yPos = 20; }
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text("Ficha Técnica", margin, yPos);
+      yPos += 8;
+      doc.setFontSize(11);
+      members.forEach((member) => {
+        if (yPos > 280) { doc.addPage(); yPos = 20; }
+        doc.setFont("helvetica", "bold");
+        doc.text(`• ${member.nome}`, margin, yPos);
+        if (member.funcao) {
+          doc.setFont("helvetica", "normal");
+          doc.text(` - ${member.funcao}`, margin + doc.getTextWidth(`• ${member.nome}`), yPos);
+        }
+        yPos += 7;
       });
     }
+
+    // Footer
+    doc.setFontSize(9);
+    doc.setTextColor(150);
+    doc.text(`Gerado em ${new Date().toLocaleDateString("pt-BR")} | Porto Bello Filmes`, margin, 285);
+
+    // Download
+    const fileName = `${project.title.replace(/[^a-zA-Z0-9]/g, '_')}_apresentacao.pdf`;
+    doc.save(fileName);
+    
+    toast({
+      title: "PDF gerado com sucesso",
+      description: "O download foi iniciado automaticamente.",
+    });
   };
 
   const formatBudget = (value: number | null): string => {
