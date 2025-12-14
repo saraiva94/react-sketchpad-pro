@@ -79,6 +79,7 @@ interface Project {
   publico_alvo: string | null;
   diferenciais: string | null;
   featured_on_homepage: boolean;
+  stage: string | null;
 }
 
 interface AccessRequest {
@@ -170,6 +171,26 @@ const AdminDashboard = () => {
   const [editBudget, setEditBudget] = useState("");
   const [editLocation, setEditLocation] = useState("");
   const [editAdminNotes, setEditAdminNotes] = useState("");
+  
+  // Extended edit fields
+  const [editTitle, setEditTitle] = useState("");
+  const [editSynopsis, setEditSynopsis] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editProjectType, setEditProjectType] = useState("");
+  const [editStage, setEditStage] = useState("");
+  const [editHasIncentiveLaw, setEditHasIncentiveLaw] = useState(false);
+  const [editIncentiveLawDetails, setEditIncentiveLawDetails] = useState("");
+  const [editLinkVideo, setEditLinkVideo] = useState("");
+  const [editValorSugerido, setEditValorSugerido] = useState("");
+  const [editLinkPagamento, setEditLinkPagamento] = useState("");
+  const [editImpactoCultural, setEditImpactoCultural] = useState("");
+  const [editImpactoSocial, setEditImpactoSocial] = useState("");
+  const [editPublicoAlvo, setEditPublicoAlvo] = useState("");
+  const [editDiferenciais, setEditDiferenciais] = useState("");
+  const [editResponsavelNome, setEditResponsavelNome] = useState("");
+  const [editResponsavelEmail, setEditResponsavelEmail] = useState("");
+  const [editResponsavelTelefone, setEditResponsavelTelefone] = useState("");
+  const [editResponsavelGenero, setEditResponsavelGenero] = useState("");
 
   // Contacts filters
   const [contactFilterGender, setContactFilterGender] = useState<string>("all");
@@ -598,6 +619,24 @@ const AdminDashboard = () => {
     setEditBudget(project.budget || "");
     setEditLocation(project.location || "");
     setEditAdminNotes(project.admin_notes || "");
+    setEditTitle(project.title || "");
+    setEditSynopsis(project.synopsis || "");
+    setEditDescription(project.description || "");
+    setEditProjectType(project.project_type || "");
+    setEditStage(project.stage || "development");
+    setEditHasIncentiveLaw(project.has_incentive_law || false);
+    setEditIncentiveLawDetails(project.incentive_law_details || "");
+    setEditLinkVideo(project.link_video || "");
+    setEditValorSugerido(project.valor_sugerido?.toString() || "");
+    setEditLinkPagamento(project.link_pagamento || "");
+    setEditImpactoCultural(project.impacto_cultural || "");
+    setEditImpactoSocial(project.impacto_social || "");
+    setEditPublicoAlvo(project.publico_alvo || "");
+    setEditDiferenciais(project.diferenciais || "");
+    setEditResponsavelNome(project.responsavel_nome || "");
+    setEditResponsavelEmail(project.responsavel_email || "");
+    setEditResponsavelTelefone(project.responsavel_telefone || "");
+    setEditResponsavelGenero(project.responsavel_genero || "");
     setShowEditDialog(true);
   };
 
@@ -607,10 +646,28 @@ const AdminDashboard = () => {
     const { error } = await supabase
       .from("projects")
       .update({
+        title: editTitle || null,
+        synopsis: editSynopsis || null,
+        description: editDescription || null,
+        project_type: editProjectType || null,
+        stage: editStage || null,
         image_url: editImageUrl || null,
         budget: editBudget || null,
         location: editLocation || null,
         admin_notes: editAdminNotes || null,
+        has_incentive_law: editHasIncentiveLaw,
+        incentive_law_details: editIncentiveLawDetails || null,
+        link_video: editLinkVideo || null,
+        valor_sugerido: editValorSugerido ? parseFloat(editValorSugerido) : null,
+        link_pagamento: editLinkPagamento || null,
+        impacto_cultural: editImpactoCultural || null,
+        impacto_social: editImpactoSocial || null,
+        publico_alvo: editPublicoAlvo || null,
+        diferenciais: editDiferenciais || null,
+        responsavel_nome: editResponsavelNome || null,
+        responsavel_email: editResponsavelEmail || null,
+        responsavel_telefone: editResponsavelTelefone || null,
+        responsavel_genero: editResponsavelGenero || null,
       })
       .eq("id", selectedProject.id);
 
@@ -1498,7 +1555,7 @@ const AdminDashboard = () => {
           </Card>
         )}
 
-        {/* Contacts Section */}
+        {/* Contacts Section - Grouped by Project */}
         {activeSection === "contacts" && (
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
@@ -1510,13 +1567,13 @@ const AdminDashboard = () => {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground mb-4">
-                Lista de todas as pessoas que fizeram cadastro ao submeter projetos (pendentes, aprovados ou rejeitados).
+                Lista de todas as pessoas que fizeram cadastro ao submeter projetos (pendentes, aprovados ou rejeitados), agrupados por projeto.
               </p>
 
               {/* Filters */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 p-4 border rounded-lg bg-muted/30">
                 <div className="space-y-2">
-                  <Label className="text-sm">Gênero</Label>
+                  <Label className="text-sm">Gênero do Responsável</Label>
                   <Select value={contactFilterGender} onValueChange={setContactFilterGender}>
                     <SelectTrigger>
                       <SelectValue placeholder="Todos" />
@@ -1564,7 +1621,25 @@ const AdminDashboard = () => {
 
               <div className="flex items-center justify-between mb-4">
                 <p className="text-sm text-muted-foreground">
-                  Exibindo {contacts.length} de {allContacts.length} cadastros
+                  Exibindo {(() => {
+                    const filteredProjects = projects.filter(p => {
+                      if (contactFilterGender !== "all" && p.responsavel_genero !== contactFilterGender) return false;
+                      if (contactFilterStatus !== "all" && p.status !== contactFilterStatus) return false;
+                      if (contactFilterDateFrom) {
+                        const projectDate = new Date(p.created_at);
+                        const filterDate = new Date(contactFilterDateFrom);
+                        if (projectDate < filterDate) return false;
+                      }
+                      if (contactFilterDateTo) {
+                        const projectDate = new Date(p.created_at);
+                        const filterDate = new Date(contactFilterDateTo);
+                        filterDate.setHours(23, 59, 59, 999);
+                        if (projectDate > filterDate) return false;
+                      }
+                      return p.responsavel_nome || p.responsavel_email || p.responsavel_telefone;
+                    });
+                    return filteredProjects.length;
+                  })()} de {projects.filter(p => p.responsavel_nome || p.responsavel_email || p.responsavel_telefone).length} projetos com cadastros
                 </p>
                 {(contactFilterGender !== "all" || contactFilterStatus !== "all" || contactFilterDateFrom || contactFilterDateTo) && (
                   <Button
@@ -1584,54 +1659,116 @@ const AdminDashboard = () => {
                 )}
               </div>
 
-              {contacts.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b">
-                        <th className="text-left py-3 px-4 font-medium">Tipo</th>
-                        <th className="text-left py-3 px-4 font-medium">Nome</th>
-                        <th className="text-left py-3 px-4 font-medium">Função</th>
-                        <th className="text-left py-3 px-4 font-medium">Telefone</th>
-                        <th className="text-left py-3 px-4 font-medium">Email</th>
-                        <th className="text-left py-3 px-4 font-medium">Gênero</th>
-                        <th className="text-left py-3 px-4 font-medium">Projeto</th>
-                        <th className="text-left py-3 px-4 font-medium">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {contacts.map((contact) => (
-                        <tr key={contact.id} className="border-b hover:bg-muted/50">
-                          <td className="py-3 px-4">
-                            <Badge variant={contact.tipo === 'Responsável' ? 'default' : 'secondary'}>
-                              {contact.tipo}
-                            </Badge>
-                          </td>
-                          <td className="py-3 px-4">{contact.nome || "-"}</td>
-                          <td className="py-3 px-4 text-sm text-muted-foreground">{contact.funcao}</td>
-                          <td className="py-3 px-4">{contact.telefone || "-"}</td>
-                          <td className="py-3 px-4">{contact.email || "-"}</td>
-                          <td className="py-3 px-4">{contact.tipo === 'Responsável' ? getGeneroLabel(contact.genero) : 'N/A'}</td>
-                          <td className="py-3 px-4">{contact.projeto}</td>
-                          <td className="py-3 px-4">
-                            <Badge variant={
-                              contact.status === "approved" ? "default" :
-                              contact.status === "rejected" ? "destructive" : "secondary"
-                            }>
-                              {contact.status === "approved" ? "Aprovado" :
-                               contact.status === "rejected" ? "Rejeitado" : "Pendente"}
-                            </Badge>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              ) : (
-                <p className="text-center text-muted-foreground py-8">
-                  Nenhum cadastro encontrado.
-                </p>
-              )}
+              {/* Project Cards with Contacts */}
+              {(() => {
+                const filteredProjects = projects.filter(p => {
+                  if (contactFilterGender !== "all" && p.responsavel_genero !== contactFilterGender) return false;
+                  if (contactFilterStatus !== "all" && p.status !== contactFilterStatus) return false;
+                  if (contactFilterDateFrom) {
+                    const projectDate = new Date(p.created_at);
+                    const filterDate = new Date(contactFilterDateFrom);
+                    if (projectDate < filterDate) return false;
+                  }
+                  if (contactFilterDateTo) {
+                    const projectDate = new Date(p.created_at);
+                    const filterDate = new Date(contactFilterDateTo);
+                    filterDate.setHours(23, 59, 59, 999);
+                    if (projectDate > filterDate) return false;
+                  }
+                  return p.responsavel_nome || p.responsavel_email || p.responsavel_telefone;
+                });
+
+                return filteredProjects.length > 0 ? (
+                  <div className="space-y-4">
+                    {filteredProjects.map((project) => {
+                      const members = projectMembers.filter(m => m.project_id === project.id);
+                      
+                      return (
+                        <Card key={project.id} className="border">
+                          <CardHeader className="pb-3">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <CardTitle className="text-lg">{project.title}</CardTitle>
+                                <p className="text-sm text-muted-foreground">
+                                  {new Date(project.created_at).toLocaleDateString("pt-BR")}
+                                </p>
+                              </div>
+                              <Badge variant={
+                                project.status === "approved" ? "default" :
+                                project.status === "rejected" ? "destructive" : "secondary"
+                              }>
+                                {project.status === "approved" ? "Aprovado" :
+                                 project.status === "rejected" ? "Rejeitado" : "Pendente"}
+                              </Badge>
+                            </div>
+                          </CardHeader>
+                          <CardContent className="pt-0">
+                            {/* Responsável */}
+                            <div className="mb-4">
+                              <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
+                                <Badge variant="default" className="text-xs">Responsável</Badge>
+                              </h4>
+                              <div className="grid grid-cols-1 md:grid-cols-4 gap-2 p-3 bg-muted/30 rounded-lg">
+                                <div>
+                                  <p className="text-xs text-muted-foreground">Nome</p>
+                                  <p className="text-sm font-medium">{project.responsavel_nome || "-"}</p>
+                                </div>
+                                <div>
+                                  <p className="text-xs text-muted-foreground">Telefone</p>
+                                  <p className="text-sm">{project.responsavel_telefone || "-"}</p>
+                                </div>
+                                <div>
+                                  <p className="text-xs text-muted-foreground">Email</p>
+                                  <p className="text-sm">{project.responsavel_email || "-"}</p>
+                                </div>
+                                <div>
+                                  <p className="text-xs text-muted-foreground">Gênero</p>
+                                  <p className="text-sm">{getGeneroLabel(project.responsavel_genero)}</p>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Integrantes */}
+                            {members.length > 0 && (
+                              <div>
+                                <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
+                                  <Badge variant="secondary" className="text-xs">Integrantes ({members.length})</Badge>
+                                </h4>
+                                <div className="space-y-2">
+                                  {members.map((member) => (
+                                    <div key={member.id} className="grid grid-cols-1 md:grid-cols-4 gap-2 p-3 bg-muted/20 rounded-lg border">
+                                      <div>
+                                        <p className="text-xs text-muted-foreground">Nome</p>
+                                        <p className="text-sm font-medium">{member.nome || "-"}</p>
+                                      </div>
+                                      <div>
+                                        <p className="text-xs text-muted-foreground">Função</p>
+                                        <p className="text-sm">{member.funcao || "-"}</p>
+                                      </div>
+                                      <div>
+                                        <p className="text-xs text-muted-foreground">Telefone</p>
+                                        <p className="text-sm">{member.telefone || "-"}</p>
+                                      </div>
+                                      <div>
+                                        <p className="text-xs text-muted-foreground">Email</p>
+                                        <p className="text-sm">{member.email || "-"}</p>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-center text-muted-foreground py-8">
+                    Nenhum cadastro encontrado.
+                  </p>
+                );
+              })()}
             </CardContent>
           </Card>
         )}
@@ -2024,56 +2161,307 @@ const AdminDashboard = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Edit Dialog */}
+      {/* Edit Dialog - Complete Form */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Editar Projeto</DialogTitle>
             <DialogDescription>
-              Atualize as informações do projeto.
+              Atualize todas as informações do projeto.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="edit-image">URL da Imagem de Capa</Label>
-              <Input
-                id="edit-image"
-                placeholder="https://..."
-                value={editImageUrl}
-                onChange={(e) => setEditImageUrl(e.target.value)}
-              />
+          <div className="space-y-6 py-4">
+            {/* Informações Básicas */}
+            <div className="space-y-4">
+              <h4 className="font-semibold text-sm border-b pb-2">Informações Básicas</h4>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-title">Título do Projeto *</Label>
+                  <Input
+                    id="edit-title"
+                    placeholder="Nome do projeto"
+                    value={editTitle}
+                    onChange={(e) => setEditTitle(e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="edit-project-type">Tipo de Projeto</Label>
+                  <Select value={editProjectType} onValueChange={setEditProjectType}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o tipo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Filme">Filme</SelectItem>
+                      <SelectItem value="Documentário">Documentário</SelectItem>
+                      <SelectItem value="Série">Série</SelectItem>
+                      <SelectItem value="Curta-metragem">Curta-metragem</SelectItem>
+                      <SelectItem value="Evento Cultural">Evento Cultural</SelectItem>
+                      <SelectItem value="Musical">Musical</SelectItem>
+                      <SelectItem value="Teatro">Teatro</SelectItem>
+                      <SelectItem value="Outro">Outro</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="edit-stage">Estágio do Projeto</Label>
+                  <Select value={editStage} onValueChange={setEditStage}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o estágio" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="development">Desenvolvimento</SelectItem>
+                      <SelectItem value="production">Produção</SelectItem>
+                      <SelectItem value="distribution">Difusão</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="edit-location">Localização</Label>
+                  <Input
+                    id="edit-location"
+                    placeholder="Ex: São Paulo, SP"
+                    value={editLocation}
+                    onChange={(e) => setEditLocation(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-synopsis">Sinopse *</Label>
+                <Textarea
+                  id="edit-synopsis"
+                  placeholder="Breve descrição do projeto"
+                  value={editSynopsis}
+                  onChange={(e) => setEditSynopsis(e.target.value)}
+                  rows={2}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-description">Descrição Completa</Label>
+                <Textarea
+                  id="edit-description"
+                  placeholder="Descrição detalhada do projeto"
+                  value={editDescription}
+                  onChange={(e) => setEditDescription(e.target.value)}
+                  rows={4}
+                />
+              </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="edit-budget">Orçamento</Label>
-              <Input
-                id="edit-budget"
-                placeholder="Ex: R$ 500.000"
-                value={editBudget}
-                onChange={(e) => setEditBudget(e.target.value)}
-              />
+            {/* Mídia */}
+            <div className="space-y-4">
+              <h4 className="font-semibold text-sm border-b pb-2">Mídia e Imagens</h4>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-image">URL da Imagem de Capa</Label>
+                  <Input
+                    id="edit-image"
+                    placeholder="https://..."
+                    value={editImageUrl}
+                    onChange={(e) => setEditImageUrl(e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="edit-link-video">Link do Vídeo</Label>
+                  <Input
+                    id="edit-link-video"
+                    placeholder="https://youtube.com/..."
+                    value={editLinkVideo}
+                    onChange={(e) => setEditLinkVideo(e.target.value)}
+                  />
+                </div>
+              </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="edit-location">Localização</Label>
-              <Input
-                id="edit-location"
-                placeholder="Ex: São Paulo, SP"
-                value={editLocation}
-                onChange={(e) => setEditLocation(e.target.value)}
-              />
+            {/* Financeiro */}
+            <div className="space-y-4">
+              <h4 className="font-semibold text-sm border-b pb-2">Informações Financeiras</h4>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-budget">Orçamento</Label>
+                  <Input
+                    id="edit-budget"
+                    placeholder="Ex: R$ 500.000"
+                    value={editBudget}
+                    onChange={(e) => setEditBudget(e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="edit-valor">Valor Sugerido (R$)</Label>
+                  <Input
+                    id="edit-valor"
+                    type="number"
+                    placeholder="50000"
+                    value={editValorSugerido}
+                    onChange={(e) => setEditValorSugerido(e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="edit-link-pagamento">Link de Pagamento</Label>
+                  <Input
+                    id="edit-link-pagamento"
+                    placeholder="https://..."
+                    value={editLinkPagamento}
+                    onChange={(e) => setEditLinkPagamento(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4 p-3 border rounded-lg">
+                <Switch
+                  checked={editHasIncentiveLaw}
+                  onCheckedChange={setEditHasIncentiveLaw}
+                />
+                <div>
+                  <Label>Possui Lei de Incentivo</Label>
+                  <p className="text-xs text-muted-foreground">Marque se o projeto tem lei de incentivo aprovada</p>
+                </div>
+              </div>
+
+              {editHasIncentiveLaw && (
+                <div className="space-y-2">
+                  <Label htmlFor="edit-incentive-details">Detalhes da Lei de Incentivo</Label>
+                  <Textarea
+                    id="edit-incentive-details"
+                    placeholder="Ex: Lei Rouanet, PRONAC 123456"
+                    value={editIncentiveLawDetails}
+                    onChange={(e) => setEditIncentiveLawDetails(e.target.value)}
+                    rows={2}
+                  />
+                </div>
+              )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="edit-notes">Notas do Administrador</Label>
-              <Textarea
-                id="edit-notes"
-                placeholder="Adicione observações internas sobre este projeto..."
-                value={editAdminNotes}
-                onChange={(e) => setEditAdminNotes(e.target.value)}
-                rows={3}
-              />
+            {/* Impacto */}
+            <div className="space-y-4">
+              <h4 className="font-semibold text-sm border-b pb-2">Impacto e Diferenciação</h4>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-impacto-cultural">Impacto Cultural</Label>
+                  <Textarea
+                    id="edit-impacto-cultural"
+                    placeholder="Descreva o impacto cultural do projeto"
+                    value={editImpactoCultural}
+                    onChange={(e) => setEditImpactoCultural(e.target.value)}
+                    rows={2}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="edit-impacto-social">Impacto Social</Label>
+                  <Textarea
+                    id="edit-impacto-social"
+                    placeholder="Descreva o impacto social do projeto"
+                    value={editImpactoSocial}
+                    onChange={(e) => setEditImpactoSocial(e.target.value)}
+                    rows={2}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="edit-publico">Público-Alvo</Label>
+                  <Textarea
+                    id="edit-publico"
+                    placeholder="Descreva o público-alvo"
+                    value={editPublicoAlvo}
+                    onChange={(e) => setEditPublicoAlvo(e.target.value)}
+                    rows={2}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="edit-diferenciais">Diferenciais</Label>
+                  <Textarea
+                    id="edit-diferenciais"
+                    placeholder="Descreva os diferenciais do projeto"
+                    value={editDiferenciais}
+                    onChange={(e) => setEditDiferenciais(e.target.value)}
+                    rows={2}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Responsável */}
+            <div className="space-y-4">
+              <h4 className="font-semibold text-sm border-b pb-2">Dados do Responsável</h4>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-resp-nome">Nome do Responsável</Label>
+                  <Input
+                    id="edit-resp-nome"
+                    placeholder="Nome completo"
+                    value={editResponsavelNome}
+                    onChange={(e) => setEditResponsavelNome(e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="edit-resp-genero">Gênero</Label>
+                  <Select value={editResponsavelGenero} onValueChange={setEditResponsavelGenero}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="masculino">Masculino</SelectItem>
+                      <SelectItem value="feminino">Feminino</SelectItem>
+                      <SelectItem value="outro">Outro</SelectItem>
+                      <SelectItem value="prefiro_nao_informar">Prefiro não informar</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="edit-resp-email">Email</Label>
+                  <Input
+                    id="edit-resp-email"
+                    type="email"
+                    placeholder="email@exemplo.com"
+                    value={editResponsavelEmail}
+                    onChange={(e) => setEditResponsavelEmail(e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="edit-resp-telefone">Telefone</Label>
+                  <Input
+                    id="edit-resp-telefone"
+                    placeholder="(00) 00000-0000"
+                    value={editResponsavelTelefone}
+                    onChange={(e) => setEditResponsavelTelefone(e.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Notas Admin */}
+            <div className="space-y-4">
+              <h4 className="font-semibold text-sm border-b pb-2">Notas Internas</h4>
+              
+              <div className="space-y-2">
+                <Label htmlFor="edit-notes">Notas do Administrador</Label>
+                <Textarea
+                  id="edit-notes"
+                  placeholder="Adicione observações internas sobre este projeto..."
+                  value={editAdminNotes}
+                  onChange={(e) => setEditAdminNotes(e.target.value)}
+                  rows={3}
+                />
+                <p className="text-xs text-muted-foreground">Estas notas são visíveis apenas para administradores.</p>
+              </div>
             </div>
           </div>
 
