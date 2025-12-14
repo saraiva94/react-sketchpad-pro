@@ -700,13 +700,15 @@ const ProjectPage = () => {
                 )}
                 {creatorInfo.telefone && (
                   <a 
-                    href={`tel:${creatorInfo.telefone}`}
-                    className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
+                    href={`https://wa.me/55${creatorInfo.telefone.replace(/\D/g, '')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg hover:bg-emerald-500/20 transition-colors cursor-pointer"
                   >
-                    <Phone className="w-5 h-5 text-primary" />
+                    <Phone className="w-5 h-5 text-emerald-500" />
                     <div>
                       <p className="text-sm text-muted-foreground">Telefone</p>
-                      <p className="font-medium">{creatorInfo.telefone}</p>
+                      <p className="font-medium text-emerald-500 hover:underline">{creatorInfo.telefone}</p>
                     </div>
                   </a>
                 )}
