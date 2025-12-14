@@ -8,7 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { 
-  Save, 
+  Save,
+  Plus,
+  Trash2,
   Lightbulb,
   Target,
   Heart,
@@ -209,6 +211,29 @@ export const QuemSomosEditor = () => {
     setContent({ ...content, cards: newCards });
   };
 
+  const addCard = () => {
+    const newCard: QuemSomosCard = {
+      icon: "Star",
+      title: "Novo Card",
+      description: "Descrição do novo card",
+      color: "from-primary to-accent"
+    };
+    setContent({ ...content, cards: [...content.cards, newCard] });
+  };
+
+  const removeCard = (index: number) => {
+    if (content.cards.length <= 1) {
+      toast({
+        title: "Ação não permitida",
+        description: "É necessário manter pelo menos 1 card.",
+        variant: "destructive"
+      });
+      return;
+    }
+    const newCards = content.cards.filter((_, i) => i !== index);
+    setContent({ ...content, cards: newCards });
+  };
+
   const IconComponent = ({ iconName }: { iconName: string }) => {
     const Icon = iconMap[iconName];
     return Icon ? <Icon className="w-5 h-5" /> : null;
@@ -261,14 +286,30 @@ export const QuemSomosEditor = () => {
 
         {/* Cards */}
         <div className="space-y-6">
-          <h3 className="font-semibold text-lg">Cards</h3>
+          <div className="flex items-center justify-between">
+            <h3 className="font-semibold text-lg">Cards ({content.cards.length})</h3>
+            <Button onClick={addCard} size="sm" variant="outline">
+              <Plus className="w-4 h-4 mr-1" />
+              Adicionar Card
+            </Button>
+          </div>
           {content.cards.map((card, index) => (
-            <div key={index} className="p-4 border rounded-lg space-y-4 bg-muted/20">
-              <div className="flex items-center gap-2 mb-2">
-                <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${card.color} flex items-center justify-center`}>
-                  <IconComponent iconName={card.icon} />
+            <div key={index} className="p-4 border rounded-lg space-y-4 bg-muted/20 relative">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${card.color} flex items-center justify-center text-white`}>
+                    <IconComponent iconName={card.icon} />
+                  </div>
+                  <h4 className="font-medium">Card {index + 1}</h4>
                 </div>
-                <h4 className="font-medium">Card {index + 1}</h4>
+                <Button 
+                  onClick={() => removeCard(index)} 
+                  size="sm" 
+                  variant="ghost" 
+                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
               </div>
               
               {/* Icon Selector */}
