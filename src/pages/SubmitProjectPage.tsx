@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Send, CheckCircle2, ArrowLeft, Plus, X, Upload } from "lucide-react";
+import { Send, CheckCircle2, ArrowLeft, Plus, X, Upload, Image } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -18,6 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Footer, SocialLinksDisplay } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
 import { ArtisticBackground } from "@/components/ArtisticBackground";
+import { ImageCropper } from "@/components/ImageCropper";
 
 interface TeamMember {
   nome: string;
@@ -29,6 +30,10 @@ interface TeamMember {
 const SubmitProjectPage = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  
+  // Imagem de Capa
+  const [thumbnailBlob, setThumbnailBlob] = useState<Blob | null>(null);
+  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
   
   // Responsável
   const [responsavelNome, setResponsavelNome] = useState("");
@@ -63,6 +68,16 @@ const SubmitProjectPage = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
 
+  const handleImageCropped = (blob: Blob, previewUrl: string) => {
+    setThumbnailBlob(blob);
+    setThumbnailPreview(previewUrl);
+  };
+
+  const handleClearImage = () => {
+    setThumbnailBlob(null);
+    setThumbnailPreview(null);
+  };
+
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
@@ -80,7 +95,7 @@ const SubmitProjectPage = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const uploadFile = async (file: File, path: string) => {
+  const uploadFile = async (file: File | Blob, path: string) => {
     const { data, error } = await supabase.storage
       .from("project-media")
       .upload(path, file);
@@ -103,6 +118,14 @@ const SubmitProjectPage = () => {
 
     try {
       let mediaUrl = linkVideo;
+      let imageUrl = null;
+      
+      // Upload thumbnail if provided
+      if (thumbnailBlob) {
+        const timestamp = Date.now();
+        const path = `thumbnails/${timestamp}_cover.jpg`;
+        imageUrl = await uploadFile(thumbnailBlob, path);
+      }
       
       // Upload video if provided
       if (videoFile) {
@@ -129,6 +152,7 @@ const SubmitProjectPage = () => {
           categorias_tags: tags,
           link_video: linkVideo,
           media_url: mediaUrl,
+          image_url: imageUrl,
           valor_sugerido: valorSugerido ? parseFloat(valorSugerido) : null,
           link_pagamento: linkPagamento || null,
           impacto_cultural: impactoCultural || null,
@@ -170,6 +194,8 @@ const SubmitProjectPage = () => {
   };
 
   const clearForm = () => {
+    setThumbnailBlob(null);
+    setThumbnailPreview(null);
     setResponsavelNome("");
     setResponsavelEmail("");
     setResponsavelTelefone("");
@@ -237,6 +263,23 @@ const SubmitProjectPage = () => {
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-8">
+                {/* Imagem de Capa - PRIMEIRO */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-foreground border-b pb-2 flex items-center gap-2">
+                    <Image className="w-5 h-5" />
+                    Imagem de Capa do Projeto
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Adicione uma imagem que representará seu projeto. Você pode ajustar o enquadramento antes de salvar.
+                  </p>
+                  <ImageCropper
+                    onImageCropped={handleImageCropped}
+                    currentImage={thumbnailPreview}
+                    onClear={handleClearImage}
+                    aspectRatio={16 / 9}
+                  />
+                </div>
+
                 {/* Responsável */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-foreground border-b pb-2">
