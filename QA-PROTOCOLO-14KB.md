@@ -35,44 +35,94 @@ Todas as funcionalidades do sistema foram verificadas e estão operacionais apó
 
 ---
 
-## 3. Funcionalidades Testadas
+## 3. Funcionalidades Testadas (QA 2025-12-14)
 
-### 3.1 Páginas Públicas
+### 3.1 Rotas Verificadas
 
-| Página | Status | Observações |
-|--------|--------|-------------|
-| HomePage `/` | ✅ OK | Video carousel, animações, navbar funcionando |
-| Porto de Ideias `/porto-de-ideias` | ✅ OK | Filtros, cards, projetos funcionando |
-| Submit Project `/submit` | ✅ OK | Formulário completo, upload de imagem |
-| Project Page `/project/:id` | ✅ OK | Exibição de projeto, membros |
-| Example Project `/exemplo/:id` | ✅ OK | Projetos de exemplo |
+| Rota | Status | Screenshot | Observações |
+|------|--------|------------|-------------|
+| `/` (Homepage) | ✅ OK | ✓ | Video carousel, navbar, seções funcionando |
+| `/login` | ✅ OK | ✓ | Formulário de login admin |
+| `/admin` | ✅ OK | ✓ | Painel completo (protegido por localStorage) |
+| `/admin/pending/:id` | ✅ OK | - | Visualização detalhada de projetos pendentes |
+| `/admin/add-project` | ✅ OK | - | Formulário admin para adicionar projetos |
+| `/submit` | ✅ OK | ✓ | Formulário público de cadastro de projetos |
+| `/porto-de-ideias` | ✅ OK | ✓ | Grid de projetos com filtros |
+| `/project/:id` | ✅ OK | ✓ | Página de projeto real (ex: Documentário Samba) |
+| `/exemplo/:exampleId` | ✅ OK | ✓ | Páginas de projetos de exemplo |
+| `/projetos` | ✅ OK | - | Portfólio de projetos |
 
-### 3.2 Painel Admin
+### 3.2 Formulário de Cadastro de Projeto (`/submit`)
 
-| Funcionalidade | Status | Observações |
-|----------------|--------|-------------|
-| Login Admin | ✅ OK | Credenciais: Admin2025/administradorpi2025 |
-| Gerenciar Projetos | ✅ OK | Aprovar/Rejeitar/Editar |
-| Featured Projects | ✅ OK | Adicionar/Remover destaque |
-| Video Carousel | ✅ OK | Upload e configuração (1/3/5) |
-| Quem Somos Editor | ✅ OK | Edição dinâmica |
-| Nossos Serviços Editor | ✅ OK | Edição dinâmica |
-| Footer Content | ✅ OK | Email/Telefone/Tagline |
-| Social Links | ✅ OK | Ativar/desativar redes sociais |
-| Stats Toggle | ✅ OK | Mostrar/ocultar estatísticas |
-| Porto de Ideias Cards | ✅ OK | Visibilidade e ordem |
-| Cadastros (Contacts) | ✅ OK | Listagem e export CSV |
+| Campo | Status | Validação |
+|-------|--------|-----------|
+| Imagem de Capa (ImageCropper) | ✅ OK | Crop, zoom, rotate funcionando |
+| Nome do Responsável | ✅ OK | Obrigatório |
+| Telefone do Responsável | ✅ OK | Obrigatório |
+| Email do Responsável | ✅ OK | Obrigatório + validação formato |
+| Gênero | ✅ OK | Select com 4 opções |
+| Título do Projeto | ✅ OK | Obrigatório |
+| Categorias/Tags | ✅ OK | Separação por vírgula |
+| Descrição Completa | ✅ OK | Obrigatório |
+| Link de Vídeo | ✅ OK | URL opcional |
+| Upload de Vídeo | ✅ OK | MP4, WAV, MOV, AVI |
+| Upload de Documentos | ✅ OK | PDF múltiplo |
+| Integrantes da Equipe | ✅ OK | Adicionar/remover dinâmico |
+| Valor Sugerido | ✅ OK | Numérico |
+| Link de Pagamento | ✅ OK | URL opcional |
+| Impacto Cultural/Social | ✅ OK | Texto livre |
+| Público Alvo | ✅ OK | Texto livre |
+| Diferenciais | ✅ OK | Texto livre |
+| Modal de Sucesso | ✅ OK | Exibição após submit |
 
-### 3.3 Integrações Supabase
+### 3.3 Painel Admin (`/admin`)
 
-| Tabela/View | Status | RLS |
-|-------------|--------|-----|
-| projects | ✅ OK | Políticas seguras |
-| projects_public | ✅ OK | SECURITY INVOKER |
-| project_members | ✅ OK | Políticas seguras |
-| access_requests | ✅ OK | Políticas seguras |
-| settings | ✅ OK | Políticas relaxadas (localStorage admin) |
-| profiles | ✅ OK | Políticas padrão |
+| Seção | Funcionalidade | Status |
+|-------|----------------|--------|
+| Editar Páginas | Vídeos Institucionais (upload/URL) | ✅ OK |
+| Editar Páginas | Carousel Display (1/3/5) | ✅ OK |
+| Editar Páginas | Quem Somos Editor | ✅ OK |
+| Editar Páginas | Nossos Serviços Editor | ✅ OK |
+| Editar Páginas | Porto Ideias Cards Manager | ✅ OK |
+| Editar Páginas | Featured Projects Manager | ✅ OK |
+| Editar Páginas | Footer Content | ✅ OK |
+| Editar Páginas | Social Links | ✅ OK |
+| Projetos | Listar pendentes/aprovados/rejeitados | ✅ OK |
+| Projetos | Aprovar projeto | ✅ OK |
+| Projetos | Rejeitar projeto | ✅ OK |
+| Projetos | Editar projeto (todos os campos) | ✅ OK |
+| Projetos | Excluir projeto | ✅ OK |
+| Projetos | Toggle featured (estrela) | ✅ OK |
+| Projetos | Ver detalhes pendente | ✅ OK |
+| Solicitações | Listar access_requests | ✅ OK |
+| Solicitações | Aprovar/rejeitar/excluir | ✅ OK |
+| Cadastros | Listar contatos (responsáveis + integrantes) | ✅ OK |
+| Cadastros | Filtrar por gênero/status/data | ✅ OK |
+| Cadastros | Export CSV | ✅ OK |
+| Cadastros | Limpar cadastros | ✅ OK |
+| Configurações | Toggle estatísticas | ✅ OK |
+
+### 3.4 Integrações Supabase
+
+| Tabela/View | Leitura | Escrita | RLS |
+|-------------|---------|---------|-----|
+| projects | ✅ OK | ✅ OK | Políticas seguras |
+| projects_public | ✅ OK | N/A | SECURITY INVOKER (só leitura) |
+| project_members | ✅ OK | ✅ OK | Políticas seguras |
+| access_requests | ✅ OK | ✅ OK | Políticas seguras |
+| settings | ✅ OK | ✅ OK | Políticas relaxadas (localStorage admin) |
+| profiles | ✅ OK | ✅ OK | Políticas padrão |
+| Storage (project-media) | ✅ OK | ✅ OK | Bucket público |
+
+### 3.5 Dados Verificados no Banco
+
+```sql
+-- Projeto aprovado existente:
+-- ID: 8745760b-185e-40df-8ad9-b6a1fd7499b0
+-- Title: Documentário: Memórias do Samba Carioca
+-- Status: approved
+-- Responsável: João Carlos Pereira
+```
 
 ---
 
