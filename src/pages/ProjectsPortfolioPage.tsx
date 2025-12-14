@@ -23,7 +23,7 @@ interface Project {
   image_url: string | null;
   location: string | null;
   categorias_tags: string[] | null;
-  responsavel_nome: string | null;
+  responsavel_primeiro_nome: string | null;
   link_pagamento: string | null;
   valor_sugerido: number | null;
 }
@@ -39,13 +39,13 @@ const ProjectsPortfolioPage = () => {
   }, []);
 
   const fetchApprovedProjects = async () => {
+    // Use projects_public view to avoid exposing sensitive contact information
     const { data } = await supabase
-      .from("projects")
-      .select("id, title, synopsis, project_type, image_url, location, categorias_tags, responsavel_nome, link_pagamento, valor_sugerido")
-      .eq("status", "approved")
+      .from("projects_public")
+      .select("id, title, synopsis, project_type, image_url, location, categorias_tags, responsavel_primeiro_nome, link_pagamento, valor_sugerido")
       .order("created_at", { ascending: false });
     
-    setProjects(data || []);
+    setProjects((data || []) as Project[]);
     setLoading(false);
   };
 
@@ -169,7 +169,7 @@ const ProjectsPortfolioPage = () => {
                         <Users className="w-4 h-4 text-muted-foreground" />
                       </div>
                       <span className="text-xs text-muted-foreground">
-                        {project.responsavel_nome || "Produtor"}
+                        {project.responsavel_primeiro_nome || "Produtor"}
                       </span>
                     </div>
                     <div className="flex gap-2">

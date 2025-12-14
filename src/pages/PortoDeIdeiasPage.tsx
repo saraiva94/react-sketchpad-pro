@@ -172,13 +172,19 @@ const PortoDeIdeiasPage = () => {
   }, []);
 
   const fetchProjects = async () => {
+    // Use projects_public view to avoid exposing sensitive contact information
     const { data } = await supabase
-      .from("projects")
-      .select("id, title, synopsis, project_type, image_url, location, categorias_tags, responsavel_nome, valor_sugerido, budget, has_incentive_law, incentive_law_details, stage")
-      .eq("status", "approved")
+      .from("projects_public")
+      .select("id, title, synopsis, project_type, image_url, location, categorias_tags, responsavel_primeiro_nome, valor_sugerido, budget, has_incentive_law, incentive_law_details, stage")
       .order("created_at", { ascending: false });
     
-    setProjects(data || []);
+    // Map responsavel_primeiro_nome to responsavel_nome for compatibility
+    const mappedData = (data || []).map(p => ({
+      ...p,
+      responsavel_nome: p.responsavel_primeiro_nome
+    }));
+    
+    setProjects(mappedData as Project[]);
     setLoading(false);
   };
 

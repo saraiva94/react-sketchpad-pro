@@ -122,7 +122,7 @@ interface Project {
   image_url: string | null;
   location: string | null;
   categorias_tags: string[] | null;
-  responsavel_nome: string | null;
+  responsavel_primeiro_nome: string | null;  // Only first name from public view
   link_pagamento: string | null;
   valor_sugerido: number | null;
   has_incentive_law: boolean;
@@ -130,6 +130,7 @@ interface Project {
   stage: string | null;
   impacto_cultural: string | null;
   impacto_social: string | null;
+  featured_on_homepage: boolean;
 }
 
 interface ProjectStats {
@@ -350,44 +351,25 @@ const HomePage = () => {
   };
 
   const fetchStats = async () => {
-    // Fetch total projects count
-    const { count: totalCount } = await supabase
-      .from("projects")
+    // Use projects_public for count (only approved projects)
+    const { count: approvedCount } = await supabase
+      .from("projects_public")
       .select("*", { count: "exact", head: true });
 
-    // Fetch approved projects count
-    const { count: approvedCount } = await supabase
-      .from("projects")
-      .select("*", { count: "exact", head: true })
-      .eq("status", "approved");
-
-    // Fetch unique creators (distinct responsavel_nome or responsavel_email)
-    const { data: creatorsData } = await supabase
-      .from("projects")
-      .select("responsavel_email")
-      .not("responsavel_email", "is", null);
-    
-    const uniqueCreators = new Set(creatorsData?.map(p => p.responsavel_email)).size;
-
-    // Calculate success rate
-    const successRate = totalCount && totalCount > 0 
-      ? Math.round((approvedCount || 0) / totalCount * 100) 
-      : 0;
-
+    // For stats, we count based on approved projects only (public view)
     setStats({
-      totalProjects: totalCount || 0,
+      totalProjects: approvedCount || 0,
       approvedProjects: approvedCount || 0,
-      uniqueCreators: uniqueCreators || 0,
-      successRate: successRate
+      uniqueCreators: approvedCount || 0, // Simplified - we don't expose email counts
+      successRate: 100 // All projects in public view are approved
     });
   };
 
   const fetchFeaturedProjects = async () => {
-    // Fetch featured projects from database
+    // Use projects_public view to avoid exposing sensitive contact information
     const { data: projectsData } = await supabase
-      .from("projects")
-      .select("id, title, synopsis, project_type, image_url, location, categorias_tags, responsavel_nome, link_pagamento, valor_sugerido, has_incentive_law, incentive_law_details, stage, impacto_cultural, impacto_social")
-      .eq("status", "approved")
+      .from("projects_public")
+      .select("id, title, synopsis, project_type, image_url, location, categorias_tags, responsavel_primeiro_nome, link_pagamento, valor_sugerido, has_incentive_law, incentive_law_details, stage, impacto_cultural, impacto_social, featured_on_homepage")
       .eq("featured_on_homepage", true)
       .order("created_at", { ascending: true })
       .limit(6);
@@ -487,7 +469,7 @@ const HomePage = () => {
       project_type: "Audiovisual",
       image_url: "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=800&h=600&fit=crop",
       location: "Rio de Janeiro",
-      responsavel_nome: "Maria Silva",
+      responsavel_primeiro_nome: "Maria",
       valor_sugerido: 250000,
       has_incentive_law: true,
       incentive_law_details: "Lei Rouanet",
@@ -502,7 +484,7 @@ const HomePage = () => {
       project_type: "Produção Cultural",
       image_url: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=800&h=600&fit=crop",
       location: "São Paulo",
-      responsavel_nome: "Carlos Mendes",
+      responsavel_primeiro_nome: "Carlos",
       valor_sugerido: 450000,
       has_incentive_law: true,
       incentive_law_details: "Lei Rouanet",
@@ -517,7 +499,7 @@ const HomePage = () => {
       project_type: "Teatro",
       image_url: "https://images.unsplash.com/photo-1507924538820-ede94a04019d?w=800&h=600&fit=crop",
       location: "São Paulo",
-      responsavel_nome: "João Santos",
+      responsavel_primeiro_nome: "João",
       valor_sugerido: 180000,
       has_incentive_law: true,
       incentive_law_details: "PROAC",
@@ -532,7 +514,7 @@ const HomePage = () => {
       project_type: "Música",
       image_url: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=800&h=600&fit=crop",
       location: "Belo Horizonte",
-      responsavel_nome: "Ana Costa",
+      responsavel_primeiro_nome: "Ana",
       valor_sugerido: 320000,
       has_incentive_law: true,
       incentive_law_details: "Lei do Audiovisual",
@@ -903,12 +885,12 @@ const HomePage = () => {
                           <div className="flex items-center gap-3 bg-background/90 backdrop-blur-sm rounded-xl p-3 border border-border">
                             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
                               <span className="text-sm text-primary-foreground font-semibold">
-                                {getInitials(project.responsavel_nome)}
+                                {getInitials(project.responsavel_primeiro_nome)}
                               </span>
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className="text-sm font-medium text-foreground truncate">
-                                {project.responsavel_nome || "Produtor Cultural"}
+                                {project.responsavel_primeiro_nome || "Produtor Cultural"}
                               </p>
                               <p className="text-xs text-muted-foreground">Responsável pelo projeto</p>
                             </div>
