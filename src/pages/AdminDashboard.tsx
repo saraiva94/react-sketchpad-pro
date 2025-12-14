@@ -201,6 +201,10 @@ const AdminDashboard = () => {
   // Delete confirmation dialog
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
+  
+  // Delete contacts confirmation dialog
+  const [showDeleteContactsConfirm, setShowDeleteContactsConfirm] = useState(false);
+  const [contactsProjectToDelete, setContactsProjectToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     const isLoggedIn = localStorage.getItem("isAdminLoggedIn");
@@ -716,11 +720,56 @@ const AdminDashboard = () => {
         description: "O projeto foi excluído com sucesso.",
       });
       fetchProjects();
+      fetchProjectMembers();
       setFeaturedRefreshKey(prev => prev + 1);
     }
     
     setShowDeleteConfirm(false);
     setProjectToDelete(null);
+  };
+
+  const openDeleteContactsConfirm = (projectId: string) => {
+    setContactsProjectToDelete(projectId);
+    setShowDeleteContactsConfirm(true);
+  };
+
+  const confirmDeleteContacts = async () => {
+    if (!contactsProjectToDelete) return;
+
+    // Clear responsible party contact data
+    const { error: projectError } = await supabase
+      .from("projects")
+      .update({
+        responsavel_nome: null,
+        responsavel_email: null,
+        responsavel_telefone: null,
+        responsavel_genero: null,
+      })
+      .eq("id", contactsProjectToDelete);
+
+    // Delete all project members
+    const { error: membersError } = await supabase
+      .from("project_members")
+      .delete()
+      .eq("project_id", contactsProjectToDelete);
+
+    if (projectError || membersError) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível excluir os cadastros.",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Cadastros excluídos",
+        description: "Os dados de contato foram removidos com sucesso.",
+      });
+      fetchProjects();
+      fetchProjectMembers();
+    }
+    
+    setShowDeleteContactsConfirm(false);
+    setContactsProjectToDelete(null);
   };
 
   const downloadContactsCSV = () => {
@@ -1706,13 +1755,24 @@ const AdminDashboard = () => {
                                   {new Date(project.created_at).toLocaleDateString("pt-BR")}
                                 </p>
                               </div>
-                              <Badge variant={
-                                project.status === "approved" ? "default" :
-                                project.status === "rejected" ? "destructive" : "secondary"
-                              }>
-                                {project.status === "approved" ? "Aprovado" :
-                                 project.status === "rejected" ? "Rejeitado" : "Pendente"}
-                              </Badge>
+                              <div className="flex items-center gap-2">
+                                <Badge variant={
+                                  project.status === "approved" ? "default" :
+                                  project.status === "rejected" ? "destructive" : "secondary"
+                                }>
+                                  {project.status === "approved" ? "Aprovado" :
+                                   project.status === "rejected" ? "Rejeitado" : "Pendente"}
+                                </Badge>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => openDeleteContactsConfirm(project.id)}
+                                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                  title="Excluir cadastros deste projeto"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
                             </div>
                           </CardHeader>
                           <CardContent className="pt-0">
@@ -2494,7 +2554,7 @@ const AdminDashboard = () => {
       <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Confirmar Exclusão</DialogTitle>
+            <DialogTitle>Confirmar Exclusão do Projeto</DialogTitle>
             <DialogDescription>
               Tem certeza que deseja excluir este projeto? Esta ação não pode ser desfeita.
             </DialogDescription>
@@ -2508,7 +2568,31 @@ const AdminDashboard = () => {
             </Button>
             <Button variant="destructive" onClick={confirmDeleteProject}>
               <Trash2 className="w-4 h-4 mr-2" />
-              Excluir
+              Excluir Projeto
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Contacts Confirmation Dialog */}
+      <Dialog open={showDeleteContactsConfirm} onOpenChange={setShowDeleteContactsConfirm}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Confirmar Exclusão dos Cadastros</DialogTitle>
+            <DialogDescription>
+              Tem certeza que deseja excluir os dados de contato (responsável e integrantes) deste projeto? Esta ação não pode ser desfeita.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => {
+              setShowDeleteContactsConfirm(false);
+              setContactsProjectToDelete(null);
+            }}>
+              Cancelar
+            </Button>
+            <Button variant="destructive" onClick={confirmDeleteContacts}>
+              <Trash2 className="w-4 h-4 mr-2" />
+              Excluir Cadastros
             </Button>
           </DialogFooter>
         </DialogContent>
