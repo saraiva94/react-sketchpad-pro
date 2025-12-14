@@ -65,13 +65,17 @@ const PendingProjectPage = () => {
   // Media editing states
   const [isEditingImage, setIsEditingImage] = useState(false);
   const [isEditingVideo, setIsEditingVideo] = useState(false);
+  const [isEditingPdf, setIsEditingPdf] = useState(false);
   const [imageUrl, setImageUrl] = useState("");
   const [videoUrl, setVideoUrl] = useState("");
+  const [pdfUrl, setPdfUrl] = useState("");
   const [uploadingImage, setUploadingImage] = useState(false);
   const [uploadingVideo, setUploadingVideo] = useState(false);
+  const [uploadingPdf, setUploadingPdf] = useState(false);
   
   const imageInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
+  const pdfInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     // Check if admin is logged in
@@ -91,6 +95,7 @@ const PendingProjectPage = () => {
     if (project) {
       setImageUrl(project.image_url || "");
       setVideoUrl(project.link_video || "");
+      setPdfUrl(project.media_url || "");
     }
   }, [project]);
 
@@ -321,6 +326,88 @@ const PendingProjectPage = () => {
     
     setUploadingVideo(false);
     setIsEditingVideo(false);
+  };
+
+  const handlePdfUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !project) return;
+
+    setUploadingPdf(true);
+    
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${project.id}-pdf-${Date.now()}.${fileExt}`;
+    const filePath = `project-pdfs/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('project-media')
+      .upload(filePath, file);
+
+    if (uploadError) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível fazer upload do PDF.",
+        variant: "destructive",
+      });
+      setUploadingPdf(false);
+      return;
+    }
+
+    const { data: urlData } = supabase.storage
+      .from('project-media')
+      .getPublicUrl(filePath);
+
+    const newUrl = urlData.publicUrl;
+    
+    const { error: updateError } = await supabase
+      .from("projects")
+      .update({ media_url: newUrl })
+      .eq("id", project.id);
+
+    if (updateError) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível atualizar o PDF.",
+        variant: "destructive",
+      });
+    } else {
+      setProject({ ...project, media_url: newUrl });
+      setPdfUrl(newUrl);
+      toast({
+        title: "Sucesso",
+        description: "PDF atualizado com sucesso.",
+      });
+    }
+    
+    setUploadingPdf(false);
+    setIsEditingPdf(false);
+  };
+
+  const handlePdfUrlSave = async () => {
+    if (!project) return;
+    
+    setUploadingPdf(true);
+    
+    const { error } = await supabase
+      .from("projects")
+      .update({ media_url: pdfUrl || null })
+      .eq("id", project.id);
+
+    if (error) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível atualizar a URL do PDF.",
+        variant: "destructive",
+      });
+    } else {
+      setProject({ ...project, media_url: pdfUrl || null });
+      toast({
+        title: "Sucesso",
+        description: "URL do PDF atualizada com sucesso.",
+      });
+    }
+    
+    setUploadingPdf(false);
+    setIsEditingPdf(false);
   };
 
   const getStageLabel = (stage: string | null): string => {
@@ -716,7 +803,7 @@ const PendingProjectPage = () => {
             </Card>
           )}
 
-          {/* Media Section with Editable Video */}
+          {/* Media Section with Editable Video and PDF */}
           <Card className="mb-6">
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
@@ -724,14 +811,24 @@ const PendingProjectPage = () => {
                   <Film className="w-5 h-5" />
                   Mídia
                 </span>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => setIsEditingVideo(true)}
-                >
-                  <Pencil className="w-3 h-3 mr-1" />
-                  Editar Vídeo
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setIsEditingVideo(true)}
+                  >
+                    <Pencil className="w-3 h-3 mr-1" />
+                    Editar Vídeo
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setIsEditingPdf(true)}
+                  >
+                    <FileText className="w-3 h-3 mr-1" />
+                    Editar PDF
+                  </Button>
+                </div>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -781,8 +878,10 @@ const PendingProjectPage = () => {
                 <p className="text-muted-foreground text-sm">Nenhum vídeo anexado ao projeto.</p>
               )}
               
-              {project.media_url && (
-                <div className="pt-4 border-t">
+              {/* PDF Preview */}
+              <div className="pt-4 border-t">
+                <h4 className="font-medium mb-2">Apresentação em PDF</h4>
+                {project.media_url ? (
                   <a 
                     href={project.media_url}
                     target="_blank"
@@ -790,12 +889,90 @@ const PendingProjectPage = () => {
                     className="text-primary hover:underline flex items-center gap-2"
                   >
                     <FileText className="w-4 h-4" />
-                    Material de Apoio
+                    Baixar Apresentação PDF
                   </a>
-                </div>
-              )}
+                ) : (
+                  <p className="text-muted-foreground text-sm">Nenhum PDF anexado ao projeto.</p>
+                )}
+              </div>
             </CardContent>
           </Card>
+
+          {/* PDF Edit Modal */}
+          {isEditingPdf && (
+            <Card className="mb-6 border-primary">
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <span>Editar PDF do Projeto</span>
+                  <Button variant="ghost" size="sm" onClick={() => setIsEditingPdf(false)}>
+                    <X className="w-4 h-4" />
+                  </Button>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Tabs defaultValue="upload" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="upload">
+                      <Upload className="w-4 h-4 mr-2" />
+                      Upload
+                    </TabsTrigger>
+                    <TabsTrigger value="url">
+                      <LinkIcon className="w-4 h-4 mr-2" />
+                      URL
+                    </TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="upload" className="space-y-4">
+                    <div>
+                      <Label>Upload de PDF</Label>
+                      <Input
+                        ref={pdfInputRef}
+                        type="file"
+                        accept=".pdf,application/pdf"
+                        onChange={handlePdfUpload}
+                        disabled={uploadingPdf}
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Formato aceito: PDF
+                      </p>
+                    </div>
+                    {uploadingPdf && (
+                      <p className="text-sm text-muted-foreground animate-pulse">
+                        Fazendo upload...
+                      </p>
+                    )}
+                    {project.media_url && (
+                      <div className="p-4 border rounded-lg">
+                        <p className="text-sm text-muted-foreground mb-2">PDF atual:</p>
+                        <a 
+                          href={project.media_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary hover:underline flex items-center gap-2"
+                        >
+                          <FileText className="w-4 h-4" />
+                          Ver PDF atual
+                        </a>
+                      </div>
+                    )}
+                  </TabsContent>
+                  <TabsContent value="url" className="space-y-4">
+                    <div>
+                      <Label>URL do PDF</Label>
+                      <Input
+                        value={pdfUrl}
+                        onChange={(e) => setPdfUrl(e.target.value)}
+                        placeholder="https://exemplo.com/apresentacao.pdf"
+                      />
+                    </div>
+                    <Button onClick={handlePdfUrlSave} disabled={uploadingPdf}>
+                      <Save className="w-4 h-4 mr-2" />
+                      {uploadingPdf ? "Salvando..." : "Salvar URL"}
+                    </Button>
+                  </TabsContent>
+                </Tabs>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Video Edit Modal */}
           {isEditingVideo && (
