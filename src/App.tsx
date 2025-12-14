@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import HomePage from "./pages/HomePage";
@@ -29,10 +29,13 @@ const App = () => (
           <ScrollToTop />
           <Routes>
             <Route path="/" element={<HomePage />} />
-            <Route path="/auth" element={<AuthPage />} />
+            <Route path="/login" element={<AuthPage />} />
+            <Route path="/auth" element={<Navigate to="/login" replace />} />
+
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/add-project" element={<AdminAddProjectPage />} />
             <Route path="/admin/pending/:id" element={<PendingProjectPage />} />
+
             <Route path="/submit" element={<SubmitProjectPage />} />
             <Route path="/projetos" element={<ProjectsPortfolioPage />} />
             <Route path="/porto-de-ideias" element={<PortoDeIdeiasPage />} />

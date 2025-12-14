@@ -423,6 +423,8 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5, onAni
                   <>
                     {isCenter ? (
                       <video
+                        autoPlay
+                        loop
                         src={video.url}
                         controls
                         className="w-full h-full object-cover"
