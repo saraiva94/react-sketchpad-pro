@@ -31,8 +31,81 @@ import {
   MapPin,
   Shield,
   ArrowRight,
-  Play
+  Play,
+  Star,
+  Camera,
+  Music,
+  Palette,
+  Pen,
+  Rocket,
+  Smile,
+  Sparkles,
+  Sun,
+  Zap,
+  Globe,
+  BookOpen,
+  Compass,
+  Crown,
+  Diamond,
+  Eye,
+  Flame,
+  Gift,
+  Handshake,
+  Key,
+  Leaf,
+  MessageCircle,
+  Mountain,
+  Puzzle,
+  Rainbow,
+  Telescope,
+  Trophy,
+  Umbrella,
+  Waves,
+  Wind,
+  LucideIcon
 } from "lucide-react";
+
+// Icon map for dynamic Quem Somos cards
+const quemSomosIconMap: Record<string, LucideIcon> = {
+  Lightbulb,
+  Target,
+  Heart,
+  Users,
+  Star,
+  Award,
+  Briefcase,
+  Camera,
+  Film,
+  Music,
+  Palette,
+  Pen,
+  Rocket,
+  Shield,
+  Smile,
+  Sparkles,
+  Sun,
+  Zap,
+  Globe,
+  BookOpen,
+  Compass,
+  Crown,
+  Diamond,
+  Eye,
+  Flame,
+  Gift,
+  Handshake,
+  Key,
+  Leaf,
+  MessageCircle,
+  Mountain,
+  Puzzle,
+  Rainbow,
+  Telescope,
+  Trophy,
+  Umbrella,
+  Waves,
+  Wind,
+};
 
 interface Project {
   id: string;
@@ -82,12 +155,37 @@ const HomePage = () => {
   const [featuredVisibility, setFeaturedVisibility] = useState<Record<string, boolean>>({});
   const [featuredOrder, setFeaturedOrder] = useState<string[]>([]);
   const [featuredExampleCards, setFeaturedExampleCards] = useState<Record<string, boolean>>({});
+  
+  // Quem Somos content
+  interface QuemSomosCard {
+    icon: string;
+    title: string;
+    description: string;
+    color: string;
+  }
+  interface QuemSomosContent {
+    paragraphs: string[];
+    cards: QuemSomosCard[];
+  }
+  const [quemSomosContent, setQuemSomosContent] = useState<QuemSomosContent>({
+    paragraphs: [
+      "A Porto Bello Filmes é uma produtora audiovisual que nasce da vontade de realização que pulsa em cada uma de nós. Às vezes as coisas que a gente sonha realmente acontecem, o que a gente precisa é correr atrás na prática cotidiana e acreditar que o nosso movimento também movimenta a vida. A nossa equipe une a capacidade de colocar a mão na massa com a sensibilidade de transformar vivências em narrativas para compartilhar com o mundo.",
+      "Nossos projetos nascem de uma escuta atenta e são atravessados por experiências pessoais e profissionais diversas. Contamos com um time de parceiros que somam seus repertórios e especialidades em cada etapa. Isso fortalece nossas trocas e a forma como organizamos o trabalho para criar, produzir, finalizar e fazer acontecer.",
+      "Desenvolvemos projetos autorais e também abraçamos histórias que chegam até nós com vontade de ganhar forma. A gente escuta, estrutura, soma e ajuda a colocar no mundo. Essas diferentes perspectivas ampliam nosso repertório e guiam nossas escolhas criativas. Acreditamos no valor do trabalho bem feito, realizado em conjunto com pessoas competentes e comprometidas. É assim que seguimos: com clareza, escuta e entrega."
+    ],
+    cards: [
+      { icon: "Lightbulb", title: "Para Criadores", description: "Histórias potentes merecem estrutura sólida. Atuamos no desenvolvimento, organização e produção para tirar ideias do papel e transformá-las em obras realizadas.", color: "from-primary to-accent" },
+      { icon: "Target", title: "Para Investidores", description: "Projetos prontos para investimento, com identidade, força de execução e potencial de retorno institucional.", color: "from-emerald-500 to-emerald-600" },
+      { icon: "Heart", title: "Para a Sociedade", description: "Criamos experiências que atravessam. Conectamos narrativas a quem importa: as pessoas.", color: "from-violet-500 to-violet-600" }
+    ]
+  });
 
   useEffect(() => {
     fetchFeaturedProjects();
     fetchStats();
     fetchStatsVisibility();
     fetchInstitutionalVideo();
+    fetchQuemSomosContent();
 
     // Subscribe to settings changes for real-time sync
     const channel = supabase
@@ -108,11 +206,14 @@ const HomePage = () => {
           } else if (record.key === 'carousel_display_count') {
             const count = record.value.count;
             if (count === 1 || count === 3 || count === 5) {
-              setCarouselDisplayCount(count);
+            setCarouselDisplayCount(count);
             }
           } else if (record.key === 'featured_projects_visibility' || record.key === 'featured_projects_order' || record.key === 'porto_ideias_featured_cards') {
             // Refetch featured projects when visibility, order, or featured cards change
             fetchFeaturedProjects();
+          } else if (record.key === 'quem_somos_content') {
+            // Update quem somos content in real-time
+            setQuemSomosContent(record.value as unknown as QuemSomosContent);
           }
         }
       )
@@ -187,6 +288,18 @@ const HomePage = () => {
     }
     
     setLoadingVideo(false);
+  };
+
+  const fetchQuemSomosContent = async () => {
+    const { data } = await supabase
+      .from("settings")
+      .select("value")
+      .eq("key", "quem_somos_content")
+      .maybeSingle();
+    
+    if (data && data.value) {
+      setQuemSomosContent(data.value as unknown as QuemSomosContent);
+    }
   };
 
   const fetchStats = async () => {
@@ -540,38 +653,31 @@ const HomePage = () => {
           
           <div className={`max-w-5xl mx-auto mb-20 transition-all duration-700 ${quemSomosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`} style={{ transitionDelay: '150ms' }}>
             <div className="text-base md:text-lg text-muted-foreground leading-relaxed space-y-6">
-              <p>
-                A Porto Bello Filmes é uma produtora audiovisual que nasce da vontade de realização que pulsa em cada uma de nós. Às vezes as coisas que a gente sonha realmente acontecem, o que a gente precisa é correr atrás na prática cotidiana e acreditar que o nosso movimento também movimenta a vida. A nossa equipe une a capacidade de colocar a mão na massa com a sensibilidade de transformar vivências em narrativas para compartilhar com o mundo.
-              </p>
-              <p>
-                Nossos projetos nascem de uma escuta atenta e são atravessados por experiências pessoais e profissionais diversas. Contamos com um time de parceiros que somam seus repertórios e especialidades em cada etapa. Isso fortalece nossas trocas e a forma como organizamos o trabalho para criar, produzir, finalizar e fazer acontecer.
-              </p>
-              <p>
-                Desenvolvemos projetos autorais e também abraçamos histórias que chegam até nós com vontade de ganhar forma. A gente escuta, estrutura, soma e ajuda a colocar no mundo. Essas diferentes perspectivas ampliam nosso repertório e guiam nossas escolhas criativas. Acreditamos no valor do trabalho bem feito, realizado em conjunto com pessoas competentes e comprometidas. É assim que seguimos: com clareza, escuta e entrega.
-              </p>
+              {quemSomosContent.paragraphs.map((paragraph, index) => (
+                <p key={index}>{paragraph}</p>
+              ))}
             </div>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            {[
-              { icon: Lightbulb, title: "Para Criadores", description: "Histórias potentes merecem estrutura sólida. Atuamos no desenvolvimento, organização e produção para tirar ideias do papel e transformá-las em obras realizadas.", color: "from-primary to-accent", textColor: "text-primary-foreground" },
-              { icon: Target, title: "Para Investidores", description: "Projetos prontos para investimento, com identidade, força de execução e potencial de retorno institucional.", color: "from-emerald-500 to-emerald-600", textColor: "text-white" },
-              { icon: Heart, title: "Para a Sociedade", description: "Criamos experiências que atravessam. Conectamos narrativas a quem importa: as pessoas.", color: "from-violet-500 to-violet-600", textColor: "text-white" },
-            ].map((card, index) => (
-              <Card 
-                key={card.title}
-                className={`text-center p-8 card-solid bg-card border-border card-hover group transition-all duration-700 ${quemSomosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
-                style={{ transitionDelay: quemSomosInView ? `${(index + 2) * 150}ms` : '0ms' }}
-              >
-                <div className={`w-20 h-20 bg-gradient-to-br ${card.color} rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-elegant group-hover:scale-110 transition-transform duration-300`}>
-                  <card.icon className={`w-10 h-10 ${card.textColor}`} />
-                </div>
-                <CardTitle className="text-xl font-serif mb-3">{card.title}</CardTitle>
-                <CardDescription className="text-base leading-relaxed">
-                  {card.description}
-                </CardDescription>
-              </Card>
-            ))}
+            {quemSomosContent.cards.map((card, index) => {
+              const IconComponent = quemSomosIconMap[card.icon] || Lightbulb;
+              return (
+                <Card 
+                  key={card.title}
+                  className={`text-center p-8 card-solid bg-card border-border card-hover group transition-all duration-700 ${quemSomosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+                  style={{ transitionDelay: quemSomosInView ? `${(index + 2) * 150}ms` : '0ms' }}
+                >
+                  <div className={`w-20 h-20 bg-gradient-to-br ${card.color} rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-elegant group-hover:scale-110 transition-transform duration-300`}>
+                    <IconComponent className="w-10 h-10 text-white" />
+                  </div>
+                  <CardTitle className="text-xl font-serif mb-3">{card.title}</CardTitle>
+                  <CardDescription className="text-base leading-relaxed">
+                    {card.description}
+                  </CardDescription>
+                </Card>
+              );
+            })}
           </div>
         </div>
       </section>

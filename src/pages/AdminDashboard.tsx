@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
 import { FeaturedProjectsManager } from "@/components/admin/FeaturedProjectsManager";
 import { PortoIdeiasCardsManager } from "@/components/admin/PortoIdeiasCardsManager";
+import { QuemSomosEditor } from "@/components/admin/QuemSomosEditor";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
@@ -928,6 +929,9 @@ const AdminDashboard = () => {
               projects={projects} 
               onProjectUpdate={fetchProjects}
             />
+
+            {/* Controle e Edição - Quem Somos */}
+            <QuemSomosEditor />
 
             {/* Controle e Edição - Cards Porto de Ideias */}
             <PortoIdeiasCardsManager 
