@@ -44,8 +44,7 @@ interface Project {
   location: string | null;
   created_at: string;
   categorias_tags: string[] | null;
-  responsavel_nome: string | null;
-  responsavel_email: string | null;
+  responsavel_primeiro_nome: string | null;  // Only first name, no email/phone
   link_video: string | null;
   link_pagamento: string | null;
   impacto_cultural: string | null;
@@ -77,15 +76,15 @@ const ProjectPage = () => {
   }, [id]);
 
   const fetchProject = async () => {
+    // Use projects_public view to avoid exposing sensitive contact information
     const { data, error } = await supabase
-      .from("projects")
+      .from("projects_public")
       .select("*")
       .eq("id", id)
-      .eq("status", "approved")
       .maybeSingle();
 
     if (!error && data) {
-      setProject(data as Project);
+      setProject(data as unknown as Project);
     }
     setLoading(false);
   };
@@ -465,12 +464,12 @@ const ProjectPage = () => {
                 <div className="flex items-center space-x-3 mb-4">
                   <div className="w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center">
                     <span className="text-primary-foreground text-lg font-semibold">
-                      {project.responsavel_nome ? getInitials(project.responsavel_nome) : 'PC'}
+                      {project.responsavel_primeiro_nome ? getInitials(project.responsavel_primeiro_nome) : 'PC'}
                     </span>
                   </div>
                   <div>
                     <h4 className="font-semibold text-foreground flex items-center">
-                      {project.responsavel_nome || "Produtor Cultural"}
+                      {project.responsavel_primeiro_nome || "Produtor Cultural"}
                       <CheckCircle className="w-4 h-4 text-primary ml-2" />
                     </h4>
                     <p className="text-sm text-muted-foreground">Produtor(a) Cultural</p>
