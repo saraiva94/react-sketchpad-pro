@@ -22,6 +22,7 @@ interface SocialLinksConfig {
   instagram: SocialLink;
   linkedin: SocialLink;
   youtube: SocialLink;
+  imdb: SocialLink;
   website: SocialLink;
 }
 
@@ -30,6 +31,7 @@ const DEFAULT_SOCIAL_LINKS: SocialLinksConfig = {
   instagram: { enabled: true, url: "https://www.instagram.com/portobellofilmes/" },
   linkedin: { enabled: false, url: "" },
   youtube: { enabled: false, url: "" },
+  imdb: { enabled: false, url: "" },
   website: { enabled: false, url: "" }
 };
 
@@ -181,12 +183,23 @@ export function Footer() {
                   <Youtube className="w-3 h-3 text-white" />
                 </a>
               )}
-              {socialLinks.website.enabled && socialLinks.website.url && (
+              {socialLinks.imdb?.enabled && socialLinks.imdb?.url && (
+                <a 
+                  href={socialLinks.imdb.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="w-7 h-7 rounded-full bg-[#F5C518] flex items-center justify-center hover:opacity-80 transition-opacity"
+                  aria-label="IMDb"
+                >
+                  <span className="text-black font-bold text-[8px]">IMDb</span>
+                </a>
+              )}
+              {socialLinks.website?.enabled && socialLinks.website?.url && (
                 <a 
                   href={socialLinks.website.url} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="w-7 h-7 rounded-full bg-gray-600 flex items-center justify-center hover:opacity-80 transition-opacity"
+                  className="w-7 h-7 rounded-full bg-emerald-500 flex items-center justify-center hover:opacity-80 transition-opacity"
                   aria-label="Website"
                 >
                   <Globe className="w-3 h-3 text-white" />
@@ -274,12 +287,23 @@ export function SocialLinksDisplay() {
           <Youtube className="w-5 h-5 text-white" />
         </a>
       )}
-      {socialLinks.website.enabled && socialLinks.website.url && (
+      {socialLinks.imdb?.enabled && socialLinks.imdb?.url && (
+        <a 
+          href={socialLinks.imdb.url} 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="w-10 h-10 rounded-full bg-[#F5C518] flex items-center justify-center hover:scale-110 transition-transform"
+          aria-label="IMDb"
+        >
+          <span className="text-black font-bold text-xs">IMDb</span>
+        </a>
+      )}
+      {socialLinks.website?.enabled && socialLinks.website?.url && (
         <a 
           href={socialLinks.website.url} 
           target="_blank" 
           rel="noopener noreferrer"
-          className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center hover:scale-110 transition-transform"
+          className="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center hover:scale-110 transition-transform"
           aria-label="Website"
         >
           <Globe className="w-5 h-5 text-white" />
