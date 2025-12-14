@@ -198,6 +198,10 @@ const AdminDashboard = () => {
   const [contactFilterDateFrom, setContactFilterDateFrom] = useState<string>("");
   const [contactFilterDateTo, setContactFilterDateTo] = useState<string>("");
 
+  // Delete confirmation dialog
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
+
   useEffect(() => {
     const isLoggedIn = localStorage.getItem("isAdminLoggedIn");
     if (!isLoggedIn) {
@@ -687,13 +691,18 @@ const AdminDashboard = () => {
     }
   };
 
-  const deleteProject = async (projectId: string) => {
-    if (!confirm("Tem certeza que deseja excluir este projeto?")) return;
+  const openDeleteConfirm = (projectId: string) => {
+    setProjectToDelete(projectId);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDeleteProject = async () => {
+    if (!projectToDelete) return;
 
     const { error } = await supabase
       .from("projects")
       .delete()
-      .eq("id", projectId);
+      .eq("id", projectToDelete);
 
     if (error) {
       toast({
@@ -707,7 +716,11 @@ const AdminDashboard = () => {
         description: "O projeto foi excluído com sucesso.",
       });
       fetchProjects();
+      setFeaturedRefreshKey(prev => prev + 1);
     }
+    
+    setShowDeleteConfirm(false);
+    setProjectToDelete(null);
   };
 
   const downloadContactsCSV = () => {
@@ -1910,22 +1923,23 @@ const AdminDashboard = () => {
                                 <Edit className="w-4 h-4 mr-1" />
                                 Editar
                               </Button>
-                              {project.status === "approved" && !project.featured_on_homepage && (
+                              {project.status === "approved" && (
                                 <Button
                                   variant="outline"
                                   size="icon"
-                                  onClick={() => toggleFeatured(project.id, false)}
-                                  title="Adicionar aos destaques"
-                                  className="text-yellow-600 hover:text-yellow-700 hover:bg-yellow-50 dark:hover:bg-yellow-950"
+                                  onClick={() => toggleFeatured(project.id, project.featured_on_homepage)}
+                                  title={project.featured_on_homepage ? "Remover dos destaques" : "Adicionar aos destaques"}
+                                  className={project.featured_on_homepage 
+                                    ? "text-yellow-600 bg-yellow-50 hover:bg-yellow-100 dark:bg-yellow-950 dark:hover:bg-yellow-900" 
+                                    : "text-muted-foreground hover:text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-950"
+                                  }
                                 >
-                                  <Plus className="w-4 h-4" />
+                                  {project.featured_on_homepage ? (
+                                    <Star className="w-4 h-4 fill-current" />
+                                  ) : (
+                                    <StarOff className="w-4 h-4" />
+                                  )}
                                 </Button>
-                              )}
-                              {project.status === "approved" && project.featured_on_homepage && (
-                                <Badge className="bg-yellow-500 gap-1">
-                                  <Star className="w-3 h-3" />
-                                  Destaque
-                                </Badge>
                               )}
                               {project.status === "pending" && (
                                 <>
@@ -1950,7 +1964,7 @@ const AdminDashboard = () => {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                onClick={() => deleteProject(project.id)}
+                                onClick={() => openDeleteConfirm(project.id)}
                                 className="text-destructive hover:text-destructive"
                               >
                                 <Trash2 className="w-4 h-4" />
@@ -2471,6 +2485,30 @@ const AdminDashboard = () => {
             </Button>
             <Button onClick={saveProjectEdit}>
               Salvar Alterações
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Confirmar Exclusão</DialogTitle>
+            <DialogDescription>
+              Tem certeza que deseja excluir este projeto? Esta ação não pode ser desfeita.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => {
+              setShowDeleteConfirm(false);
+              setProjectToDelete(null);
+            }}>
+              Cancelar
+            </Button>
+            <Button variant="destructive" onClick={confirmDeleteProject}>
+              <Trash2 className="w-4 h-4 mr-2" />
+              Excluir
             </Button>
           </DialogFooter>
         </DialogContent>
