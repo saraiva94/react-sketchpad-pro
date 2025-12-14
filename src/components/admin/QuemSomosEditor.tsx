@@ -205,6 +205,23 @@ export const QuemSomosEditor = () => {
     setContent({ ...content, paragraphs: newParagraphs });
   };
 
+  const addParagraph = () => {
+    setContent({ ...content, paragraphs: [...content.paragraphs, "Novo parágrafo..."] });
+  };
+
+  const removeParagraph = (index: number) => {
+    if (content.paragraphs.length <= 1) {
+      toast({
+        title: "Ação não permitida",
+        description: "É necessário manter pelo menos 1 parágrafo.",
+        variant: "destructive"
+      });
+      return;
+    }
+    const newParagraphs = content.paragraphs.filter((_, i) => i !== index);
+    setContent({ ...content, paragraphs: newParagraphs });
+  };
+
   const updateCard = (index: number, field: keyof QuemSomosCard, value: string) => {
     const newCards = [...content.cards];
     newCards[index] = { ...newCards[index], [field]: value };
@@ -270,10 +287,26 @@ export const QuemSomosEditor = () => {
 
         {/* Paragraphs */}
         <div className="space-y-4">
-          <h3 className="font-semibold text-lg">Texto Principal</h3>
+          <div className="flex items-center justify-between">
+            <h3 className="font-semibold text-lg">Texto Principal ({content.paragraphs.length} parágrafos)</h3>
+            <Button onClick={addParagraph} size="sm" variant="outline">
+              <Plus className="w-4 h-4 mr-1" />
+              Adicionar Parágrafo
+            </Button>
+          </div>
           {content.paragraphs.map((paragraph, index) => (
-            <div key={index} className="space-y-2">
-              <Label>Parágrafo {index + 1}</Label>
+            <div key={index} className="space-y-2 p-3 border rounded-lg bg-muted/10">
+              <div className="flex items-center justify-between">
+                <Label>Parágrafo {index + 1}</Label>
+                <Button 
+                  onClick={() => removeParagraph(index)} 
+                  size="sm" 
+                  variant="ghost" 
+                  className="text-destructive hover:text-destructive hover:bg-destructive/10 h-7 px-2"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
               <Textarea
                 value={paragraph}
                 onChange={(e) => updateParagraph(index, e.target.value)}
