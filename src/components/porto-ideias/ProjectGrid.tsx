@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowRight, Anchor, Shield, MapPin } from "lucide-react";
-
+import { useDominantColor } from "@/hooks/useDominantColor";
 interface Project {
   id: string;
   title: string;
@@ -71,6 +71,9 @@ function ProjectCard({
   getStageInfo: (stage: string | null) => { label: string; color: string };
   getInitials: (name: string | null) => string;
 }) {
+  const imageUrl = item.type === "real" ? (item.data as Project).image_url : null;
+  const { backgroundColor, textColor } = useDominantColor(imageUrl);
+
   if (item.type === "real") {
     const project = item.data as Project;
     const budgetInfo = getBudgetRange(project.valor_sugerido);
@@ -104,9 +107,16 @@ function ProjectCard({
             )}
             {/* Overlay gradient */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-            {/* Type badge */}
+            {/* Type badge - with dominant color */}
             <div className="absolute top-3 left-3">
-              <Badge className="bg-primary/90 text-primary-foreground text-xs">
+              <Badge 
+                className="text-xs font-semibold shadow-lg"
+                style={{ 
+                  backgroundColor, 
+                  color: textColor,
+                  borderColor: 'transparent'
+                }}
+              >
                 {project.project_type}
               </Badge>
             </div>
