@@ -899,49 +899,12 @@ const AdminDashboard = () => {
         {/* Homepage Section (formerly Settings + Featured) */}
         {activeSection === "homepage" && (
           <div className="space-y-6">
-            {/* Detalhamento Geral - FIRST */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Detalhamento Geral</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div>
-                    <h4 className="font-medium">Estatísticas Públicas</h4>
-                    <p className="text-sm text-muted-foreground">Mostrar painel de números na homepage</p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Switch 
-                      checked={statsVisible} 
-                      onCheckedChange={toggleStatsVisibility}
-                      disabled={loadingSettings}
-                    />
-                    <Badge variant={statsVisible ? "default" : "secondary"}>
-                      {statsVisible ? "Público" : "Privado"}
-                    </Badge>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            {/* Seção dividida por área */}
+            <div className="text-lg font-semibold text-muted-foreground border-b pb-2 mb-4">
+              🏠 Homepage
+            </div>
 
-            {/* Projetos em Destaque na Homepage - Now using the new component */}
-            <FeaturedProjectsManager 
-              key={`featured-${featuredRefreshKey}`}
-              projects={projects} 
-              onProjectUpdate={fetchProjects}
-            />
-
-            {/* Controle e Edição - Quem Somos */}
-            <QuemSomosEditor />
-
-            {/* Controle e Edição - Nossos Serviços */}
-            <NossosServicosEditor />
-
-            {/* Controle e Edição - Cards Porto de Ideias */}
-            <PortoIdeiasCardsManager 
-              projects={projects.filter(p => p.status === "approved")}
-              onFeaturedChange={() => setFeaturedRefreshKey(prev => prev + 1)}
-            />
+            {/* 1. Vídeos Institucionais (Carrossel) - HERO */}
 
             {/* Vídeos Institucionais (até 5) */}
             <Card>
@@ -1113,7 +1076,20 @@ const AdminDashboard = () => {
               </CardContent>
             </Card>
 
-            {/* Controle e Edição - Conteúdo do Footer */}
+            {/* 2. Quem Somos */}
+            <QuemSomosEditor />
+
+            {/* 3. Projetos em Destaque na Homepage */}
+            <FeaturedProjectsManager 
+              key={`featured-${featuredRefreshKey}`}
+              projects={projects} 
+              onProjectUpdate={fetchProjects}
+            />
+
+            {/* 4. Nossos Serviços */}
+            <NossosServicosEditor />
+
+            {/* 5. Footer - Conteúdo */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -1383,6 +1359,47 @@ const AdminDashboard = () => {
                   <Save className="w-4 h-4 mr-2" />
                   {savingSocialLinks ? "Salvando..." : "Salvar Alterações"}
                 </Button>
+              </CardContent>
+            </Card>
+
+            {/* Separador - Página Porto de Ideias */}
+            <div className="text-lg font-semibold text-muted-foreground border-b pb-2 mb-4 mt-8">
+              💡 Página Porto de Ideias
+            </div>
+
+            {/* 7. Cards Porto de Ideias */}
+            <PortoIdeiasCardsManager 
+              projects={projects.filter(p => p.status === "approved")}
+              onFeaturedChange={() => setFeaturedRefreshKey(prev => prev + 1)}
+            />
+
+            {/* Separador - Configurações Gerais */}
+            <div className="text-lg font-semibold text-muted-foreground border-b pb-2 mb-4 mt-8">
+              ⚙️ Configurações Gerais
+            </div>
+
+            {/* 8. Detalhamento Geral */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Detalhamento Geral</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between p-4 border rounded-lg">
+                  <div>
+                    <h4 className="font-medium">Estatísticas Públicas</h4>
+                    <p className="text-sm text-muted-foreground">Mostrar painel de números na homepage</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Switch 
+                      checked={statsVisible} 
+                      onCheckedChange={toggleStatsVisibility}
+                      disabled={loadingSettings}
+                    />
+                    <Badge variant={statsVisible ? "default" : "secondary"}>
+                      {statsVisible ? "Público" : "Privado"}
+                    </Badge>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </div>
