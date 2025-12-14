@@ -8,7 +8,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
 import { ArtisticBackground } from "@/components/ArtisticBackground";
-import { DraggableProjectGrid } from "@/components/porto-ideias/DraggableProjectGrid";
+import { ProjectGrid } from "@/components/porto-ideias/ProjectGrid";
 import { supabase } from "@/integrations/supabase/client";
 import { useInView } from "@/hooks/useInView";
 import { 
@@ -151,7 +151,6 @@ const PortoDeIdeiasPage = () => {
   const [displaySlots, setDisplaySlots] = useState(6); // Default 6 project slots (2 rows of 3)
   const [cardVisibility, setCardVisibility] = useState<{ [key: string]: boolean }>({});
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
   
   // Filters
   const [searchTerm, setSearchTerm] = useState("");
@@ -170,9 +169,6 @@ const PortoDeIdeiasPage = () => {
     fetchProjects();
     fetchDisplaySlots();
     fetchCardVisibility();
-    // Check if admin is logged in
-    const adminLoggedIn = localStorage.getItem("isAdminLoggedIn") === "true";
-    setIsAdmin(adminLoggedIn);
   }, []);
 
   const fetchProjects = async () => {
@@ -523,7 +519,7 @@ const PortoDeIdeiasPage = () => {
         <div className="container mx-auto px-6">
           {/* Loading State */}
           {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {[1, 2, 3, 4, 5, 6].map((i) => (
                 <div key={i} className="animate-pulse bg-card card-solid rounded-2xl overflow-hidden border border-border shadow-2xl">
                   <div className="h-48 bg-muted" />
@@ -536,12 +532,11 @@ const PortoDeIdeiasPage = () => {
               ))}
             </div>
           ) : (
-            <DraggableProjectGrid
+            <ProjectGrid
               projects={sortedProjects}
               exampleProjects={exampleProjects.filter(e => cardVisibility[e.id] !== false)}
               displaySlots={displaySlots}
               isInView={projectsInView}
-              isAdmin={isAdmin}
               formatBudget={formatBudget}
               getBudgetRange={getBudgetRange}
               getStageInfo={getStageInfo}
