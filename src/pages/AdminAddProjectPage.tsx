@@ -14,6 +14,7 @@ import { Navbar } from "@/components/Navbar";
 import { TeamMemberEditor, TeamMemberData } from "@/components/admin/TeamMemberEditor";
 import { StagesMultiSelect } from "@/components/admin/StagesMultiSelect";
 import ContrapartidasEditor, { Contrapartida } from "@/components/admin/ContrapartidasEditor";
+import { RecognitionEditor, NewsItem } from "@/components/admin/RecognitionEditor";
 
 const PROJECT_TYPES = [
   "Longa-metragem ficção",
@@ -65,6 +66,10 @@ const AdminAddProjectPage = () => {
   
   // Contrapartidas
   const [contrapartidas, setContrapartidas] = useState<Contrapartida[]>([]);
+  
+  // Reconhecimentos e Mídia
+  const [awards, setAwards] = useState<string[]>([]);
+  const [news, setNews] = useState<NewsItem[]>([]);
   
   // Financiamento
   const [valorSugerido, setValorSugerido] = useState("");
@@ -165,8 +170,10 @@ const AdminAddProjectPage = () => {
           has_incentive_law: hasIncentiveLaw,
           incentive_law_details: incentiveLawDetails || null,
           presentation_document_url: presentationDocUrl || null,
+          awards: awards.length > 0 ? awards : [],
+          news: news.length > 0 ? news : [],
           status: "approved",
-        })
+        } as any)
         .select()
         .single();
 
@@ -616,6 +623,14 @@ const AdminAddProjectPage = () => {
                     />
                   </CardContent>
                 </Card>
+
+                {/* Reconhecimentos e Mídia */}
+                <RecognitionEditor
+                  awards={awards}
+                  news={news}
+                  onAwardsChange={setAwards}
+                  onNewsChange={setNews}
+                />
 
                 <div className="flex justify-end gap-4 pt-4">
                   <Button type="button" variant="outline" onClick={() => navigate("/admin")}>

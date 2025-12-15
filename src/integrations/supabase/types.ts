@@ -188,6 +188,7 @@ export type Database = {
       projects: {
         Row: {
           admin_notes: string | null
+          awards: string[] | null
           budget: string | null
           categorias_tags: string[] | null
           created_at: string
@@ -205,6 +206,7 @@ export type Database = {
           link_video: string | null
           location: string | null
           media_url: string | null
+          news: Json | null
           presentation_document_url: string | null
           project_type: string
           publico_alvo: string | null
@@ -223,6 +225,7 @@ export type Database = {
         }
         Insert: {
           admin_notes?: string | null
+          awards?: string[] | null
           budget?: string | null
           categorias_tags?: string[] | null
           created_at?: string
@@ -240,6 +243,7 @@ export type Database = {
           link_video?: string | null
           location?: string | null
           media_url?: string | null
+          news?: Json | null
           presentation_document_url?: string | null
           project_type: string
           publico_alvo?: string | null
@@ -258,6 +262,7 @@ export type Database = {
         }
         Update: {
           admin_notes?: string | null
+          awards?: string[] | null
           budget?: string | null
           categorias_tags?: string[] | null
           created_at?: string
@@ -275,6 +280,7 @@ export type Database = {
           link_video?: string | null
           location?: string | null
           media_url?: string | null
+          news?: Json | null
           presentation_document_url?: string | null
           project_type?: string
           publico_alvo?: string | null

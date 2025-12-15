@@ -20,6 +20,7 @@ import { Navbar } from "@/components/Navbar";
 import { LazyArtisticBackground } from "@/components/LazyArtisticBackground";
 import { ImageCropper } from "@/components/ImageCropper";
 import ContrapartidasEditor, { Contrapartida } from "@/components/admin/ContrapartidasEditor";
+import { RecognitionEditor, NewsItem } from "@/components/admin/RecognitionEditor";
 
 interface TeamMember {
   nome: string;
@@ -57,6 +58,10 @@ const SubmitProjectPage = () => {
   
   // Contrapartidas
   const [contrapartidas, setContrapartidas] = useState<Contrapartida[]>([]);
+  
+  // Reconhecimentos e Mídia
+  const [awards, setAwards] = useState<string[]>([]);
+  const [news, setNews] = useState<NewsItem[]>([]);
   
   // Financiamento
   const [valorSugerido, setValorSugerido] = useState("");
@@ -163,8 +168,10 @@ const SubmitProjectPage = () => {
           impacto_social: impactoSocial || null,
           publico_alvo: publicoAlvo || null,
           diferenciais: diferenciais || null,
+          awards: awards.length > 0 ? awards : [],
+          news: news.length > 0 ? news : [],
           status: "pending",
-        })
+        } as any)
         .select()
         .single();
 
@@ -225,6 +232,8 @@ const SubmitProjectPage = () => {
     setDocumentFiles([]);
     setTeamMembers([]);
     setContrapartidas([]);
+    setAwards([]);
+    setNews([]);
     setValorSugerido("");
     setLinkPagamento("");
     setImpactoCultural("");
@@ -585,6 +594,14 @@ const SubmitProjectPage = () => {
                     onChange={setContrapartidas} 
                   />
                 </div>
+
+                {/* Reconhecimentos e Mídia */}
+                <RecognitionEditor
+                  awards={awards}
+                  news={news}
+                  onAwardsChange={setAwards}
+                  onNewsChange={setNews}
+                />
 
                 {/* Impacto */}
                 <div className="space-y-4">
