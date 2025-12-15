@@ -24,7 +24,9 @@ import {
   Play,
   Mail,
   Phone,
-  ExternalLink
+  ExternalLink,
+  Check,
+  Gift
 } from "lucide-react";
 
 interface Project {
@@ -72,6 +74,14 @@ interface CreatorInfo {
   telefone: string | null;
 }
 
+interface Contrapartida {
+  id: string;
+  valor: string;
+  beneficios: string[];
+  ativo: boolean;
+  ordem: number;
+}
+
 const ProjectPage = () => {
   const { id } = useParams();
   const { toast } = useToast();
@@ -83,6 +93,7 @@ const ProjectPage = () => {
   const [showContactPopup, setShowContactPopup] = useState(false);
   const [showCreatorPopup, setShowCreatorPopup] = useState(false);
   const [creatorInfo, setCreatorInfo] = useState<CreatorInfo | null>(null);
+  const [contrapartidas, setContrapartidas] = useState<Contrapartida[]>([]);
 
   useEffect(() => {
     if (id) {
@@ -90,6 +101,7 @@ const ProjectPage = () => {
       fetchMembers();
       fetchContactButtons();
       fetchCreatorInfo();
+      fetchContrapartidas();
     }
   }, [id]);
 
@@ -149,6 +161,19 @@ const ProjectPage = () => {
         email: data.responsavel_email,
         telefone: data.responsavel_telefone
       });
+    }
+  };
+
+  const fetchContrapartidas = async () => {
+    const { data } = await supabase
+      .from("contrapartidas")
+      .select("*")
+      .eq("project_id", id)
+      .eq("ativo", true)
+      .order("ordem", { ascending: true });
+
+    if (data) {
+      setContrapartidas(data as Contrapartida[]);
     }
   };
 
@@ -587,6 +612,38 @@ const ProjectPage = () => {
                       <p className="text-muted-foreground">{project.diferenciais}</p>
                     </div>
                   )}
+                </div>
+              </section>
+            )}
+
+            {/* Contrapartidas */}
+            {contrapartidas.length > 0 && (
+              <section>
+                <h2 className="text-2xl font-serif font-bold text-foreground mb-6 flex items-center gap-2">
+                  <Gift className="w-6 h-6 text-primary" />
+                  Contrapartidas para Investidores
+                </h2>
+                <div className="grid gap-4">
+                  {contrapartidas.map((contrapartida) => (
+                    <div 
+                      key={contrapartida.id} 
+                      className="bg-card border border-border rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow"
+                    >
+                      <div className="mb-4">
+                        <span className="text-xl font-bold text-foreground">
+                          {contrapartida.valor}
+                        </span>
+                      </div>
+                      <ul className="space-y-2">
+                        {contrapartida.beneficios.map((beneficio, index) => (
+                          <li key={index} className="flex items-start gap-3">
+                            <Check className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" />
+                            <span className="text-muted-foreground">{beneficio}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
                 </div>
               </section>
             )}

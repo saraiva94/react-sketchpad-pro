@@ -16,6 +16,7 @@ import { PortoIdeiasCardsManager } from "@/components/admin/PortoIdeiasCardsMana
 import { QuemSomosEditor } from "@/components/admin/QuemSomosEditor";
 import { NossosServicosEditor } from "@/components/admin/NossosServicosEditor";
 import { ContactButtonsEditor } from "@/components/admin/ContactButtonsEditor";
+import ContrapartidasEditor, { Contrapartida } from "@/components/admin/ContrapartidasEditor";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
@@ -198,6 +199,7 @@ const AdminDashboard = () => {
   const [editResponsavelEmail, setEditResponsavelEmail] = useState("");
   const [editResponsavelTelefone, setEditResponsavelTelefone] = useState("");
   const [editResponsavelGenero, setEditResponsavelGenero] = useState("");
+  const [editContrapartidas, setEditContrapartidas] = useState<Contrapartida[]>([]);
 
   // Contacts filters
   const [contactFilterGender, setContactFilterGender] = useState<string>("all");
@@ -675,6 +677,21 @@ const AdminDashboard = () => {
     setEditResponsavelEmail(project.responsavel_email || "");
     setEditResponsavelTelefone(project.responsavel_telefone || "");
     setEditResponsavelGenero(project.responsavel_genero || "");
+    
+    // Fetch contrapartidas for this project
+    supabase
+      .from("contrapartidas")
+      .select("*")
+      .eq("project_id", project.id)
+      .order("ordem", { ascending: true })
+      .then(({ data }) => {
+        if (data) {
+          setEditContrapartidas(data as Contrapartida[]);
+        } else {
+          setEditContrapartidas([]);
+        }
+      });
+    
     setShowEditDialog(true);
   };
 
@@ -716,6 +733,26 @@ const AdminDashboard = () => {
         variant: "destructive",
       });
     } else {
+      // Save contrapartidas
+      // First delete existing ones
+      await supabase
+        .from("contrapartidas")
+        .delete()
+        .eq("project_id", selectedProject.id);
+      
+      // Then insert new ones
+      if (editContrapartidas.length > 0) {
+        const contrapartidasData = editContrapartidas.map((c, index) => ({
+          project_id: selectedProject.id,
+          valor: c.valor,
+          beneficios: c.beneficios,
+          ativo: c.ativo,
+          ordem: index,
+        }));
+        
+        await supabase.from("contrapartidas").insert(contrapartidasData);
+      }
+      
       toast({
         title: "Salvo!",
         description: "As alterações foram salvas com sucesso.",
@@ -2617,6 +2654,14 @@ const AdminDashboard = () => {
                   />
                 </div>
               </div>
+            </div>
+
+            {/* Contrapartidas */}
+            <div className="space-y-4 border rounded-lg p-4 bg-muted/30">
+              <ContrapartidasEditor 
+                contrapartidas={editContrapartidas} 
+                onChange={setEditContrapartidas} 
+              />
             </div>
 
             {/* Notas Admin */}
