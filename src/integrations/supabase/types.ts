@@ -86,29 +86,38 @@ export type Database = {
       project_members: {
         Row: {
           created_at: string | null
+          curriculum_url: string | null
           email: string | null
           funcao: string | null
           id: string
           nome: string
+          photo_url: string | null
           project_id: string
+          social_links: Json | null
           telefone: string | null
         }
         Insert: {
           created_at?: string | null
+          curriculum_url?: string | null
           email?: string | null
           funcao?: string | null
           id?: string
           nome: string
+          photo_url?: string | null
           project_id: string
+          social_links?: Json | null
           telefone?: string | null
         }
         Update: {
           created_at?: string | null
+          curriculum_url?: string | null
           email?: string | null
           funcao?: string | null
           id?: string
           nome?: string
+          photo_url?: string | null
           project_id?: string
+          social_links?: Json | null
           telefone?: string | null
         }
         Relationships: [
@@ -143,10 +152,12 @@ export type Database = {
           impacto_cultural: string | null
           impacto_social: string | null
           incentive_law_details: string | null
+          is_hidden: boolean
           link_pagamento: string | null
           link_video: string | null
           location: string | null
           media_url: string | null
+          presentation_document_url: string | null
           project_type: string
           publico_alvo: string | null
           responsavel_email: string | null
@@ -154,6 +165,7 @@ export type Database = {
           responsavel_nome: string | null
           responsavel_telefone: string | null
           stage: string | null
+          stages: string[] | null
           status: Database["public"]["Enums"]["project_status"]
           synopsis: string
           title: string
@@ -175,10 +187,12 @@ export type Database = {
           impacto_cultural?: string | null
           impacto_social?: string | null
           incentive_law_details?: string | null
+          is_hidden?: boolean
           link_pagamento?: string | null
           link_video?: string | null
           location?: string | null
           media_url?: string | null
+          presentation_document_url?: string | null
           project_type: string
           publico_alvo?: string | null
           responsavel_email?: string | null
@@ -186,6 +200,7 @@ export type Database = {
           responsavel_nome?: string | null
           responsavel_telefone?: string | null
           stage?: string | null
+          stages?: string[] | null
           status?: Database["public"]["Enums"]["project_status"]
           synopsis: string
           title: string
@@ -207,10 +222,12 @@ export type Database = {
           impacto_cultural?: string | null
           impacto_social?: string | null
           incentive_law_details?: string | null
+          is_hidden?: boolean
           link_pagamento?: string | null
           link_video?: string | null
           location?: string | null
           media_url?: string | null
+          presentation_document_url?: string | null
           project_type?: string
           publico_alvo?: string | null
           responsavel_email?: string | null
@@ -218,6 +235,7 @@ export type Database = {
           responsavel_nome?: string | null
           responsavel_telefone?: string | null
           stage?: string | null
+          stages?: string[] | null
           status?: Database["public"]["Enums"]["project_status"]
           synopsis?: string
           title?: string
@@ -285,14 +303,17 @@ export type Database = {
           impacto_cultural: string | null
           impacto_social: string | null
           incentive_law_details: string | null
+          is_hidden: boolean | null
           link_pagamento: string | null
           link_video: string | null
           location: string | null
           media_url: string | null
+          presentation_document_url: string | null
           project_type: string | null
           publico_alvo: string | null
           responsavel_primeiro_nome: string | null
           stage: string | null
+          stages: string[] | null
           synopsis: string | null
           title: string | null
           updated_at: string | null
@@ -311,14 +332,17 @@ export type Database = {
           impacto_cultural?: string | null
           impacto_social?: string | null
           incentive_law_details?: string | null
+          is_hidden?: boolean | null
           link_pagamento?: string | null
           link_video?: string | null
           location?: string | null
           media_url?: string | null
+          presentation_document_url?: string | null
           project_type?: string | null
           publico_alvo?: string | null
           responsavel_primeiro_nome?: never
           stage?: string | null
+          stages?: string[] | null
           synopsis?: string | null
           title?: string | null
           updated_at?: string | null
@@ -337,14 +361,17 @@ export type Database = {
           impacto_cultural?: string | null
           impacto_social?: string | null
           incentive_law_details?: string | null
+          is_hidden?: boolean | null
           link_pagamento?: string | null
           link_video?: string | null
           location?: string | null
           media_url?: string | null
+          presentation_document_url?: string | null
           project_type?: string | null
           publico_alvo?: string | null
           responsavel_primeiro_nome?: never
           stage?: string | null
+          stages?: string[] | null
           synopsis?: string | null
           title?: string | null
           updated_at?: string | null
