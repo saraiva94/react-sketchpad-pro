@@ -19,6 +19,7 @@ import { Footer, SocialLinksDisplay } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
 import { LazyArtisticBackground } from "@/components/LazyArtisticBackground";
 import { ImageCropper } from "@/components/ImageCropper";
+import ContrapartidasEditor, { Contrapartida } from "@/components/admin/ContrapartidasEditor";
 
 interface TeamMember {
   nome: string;
@@ -53,6 +54,9 @@ const SubmitProjectPage = () => {
   
   // Integrantes
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  
+  // Contrapartidas
+  const [contrapartidas, setContrapartidas] = useState<Contrapartida[]>([]);
   
   // Financiamento
   const [valorSugerido, setValorSugerido] = useState("");
@@ -179,6 +183,19 @@ const SubmitProjectPage = () => {
         await supabase.from("project_members").insert(membersData);
       }
 
+      // Insert contrapartidas
+      if (contrapartidas.length > 0 && project) {
+        const contrapartidasData = contrapartidas.map((c, index) => ({
+          project_id: project.id,
+          valor: c.valor,
+          beneficios: c.beneficios,
+          ativo: c.ativo,
+          ordem: index,
+        }));
+
+        await supabase.from("contrapartidas").insert(contrapartidasData);
+      }
+
       setShowSuccessModal(true);
       clearForm();
     } catch (error) {
@@ -207,6 +224,7 @@ const SubmitProjectPage = () => {
     setVideoFile(null);
     setDocumentFiles([]);
     setTeamMembers([]);
+    setContrapartidas([]);
     setValorSugerido("");
     setLinkPagamento("");
     setImpactoCultural("");
@@ -555,6 +573,17 @@ const SubmitProjectPage = () => {
                       />
                     </div>
                   </div>
+                </div>
+
+                {/* Contrapartidas */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-foreground border-b pb-2">
+                    Contrapartidas para Investidores
+                  </h3>
+                  <ContrapartidasEditor 
+                    contrapartidas={contrapartidas} 
+                    onChange={setContrapartidas} 
+                  />
                 </div>
 
                 {/* Impacto */}
