@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
 import { TeamMemberEditor, TeamMemberData } from "@/components/admin/TeamMemberEditor";
 import { StagesMultiSelect } from "@/components/admin/StagesMultiSelect";
+import ContrapartidasEditor, { Contrapartida } from "@/components/admin/ContrapartidasEditor";
 
 const PROJECT_TYPES = [
   "Longa-metragem ficção",
@@ -61,6 +62,9 @@ const AdminAddProjectPage = () => {
   
   // Integrantes
   const [teamMembers, setTeamMembers] = useState<TeamMemberData[]>([]);
+  
+  // Contrapartidas
+  const [contrapartidas, setContrapartidas] = useState<Contrapartida[]>([]);
   
   // Financiamento
   const [valorSugerido, setValorSugerido] = useState("");
@@ -182,6 +186,19 @@ const AdminAddProjectPage = () => {
         }));
 
         await supabase.from("project_members").insert(membersData);
+      }
+
+      // Insert contrapartidas
+      if (contrapartidas.length > 0 && project) {
+        const contrapartidasData = contrapartidas.map(c => ({
+          project_id: project.id,
+          valor: c.valor,
+          beneficios: c.beneficios,
+          ativo: c.ativo,
+          ordem: c.ordem,
+        }));
+
+        await supabase.from("contrapartidas").insert(contrapartidasData);
       }
 
       toast({
@@ -584,7 +601,22 @@ const AdminAddProjectPage = () => {
                   </div>
                 </div>
 
-                {/* Submit */}
+                {/* Contrapartidas */}
+                <Card className="shadow-sm">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg">Contrapartidas para Investidores</CardTitle>
+                    <CardDescription>
+                      Adicione opções de contrapartidas com valores e benefícios
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ContrapartidasEditor 
+                      contrapartidas={contrapartidas} 
+                      onChange={setContrapartidas} 
+                    />
+                  </CardContent>
+                </Card>
+
                 <div className="flex justify-end gap-4 pt-4">
                   <Button type="button" variant="outline" onClick={() => navigate("/admin")}>
                     Cancelar

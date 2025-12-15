@@ -50,6 +50,54 @@ export type Database = {
         }
         Relationships: []
       }
+      contrapartidas: {
+        Row: {
+          ativo: boolean
+          beneficios: string[]
+          created_at: string
+          id: string
+          ordem: number
+          project_id: string
+          updated_at: string
+          valor: string
+        }
+        Insert: {
+          ativo?: boolean
+          beneficios?: string[]
+          created_at?: string
+          id?: string
+          ordem?: number
+          project_id: string
+          updated_at?: string
+          valor: string
+        }
+        Update: {
+          ativo?: boolean
+          beneficios?: string[]
+          created_at?: string
+          id?: string
+          ordem?: number
+          project_id?: string
+          updated_at?: string
+          valor?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contrapartidas_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contrapartidas_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
