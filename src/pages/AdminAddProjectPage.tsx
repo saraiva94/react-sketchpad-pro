@@ -1,21 +1,38 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Send, ArrowLeft, Plus, X, Upload } from "lucide-react";
+import { Send, ArrowLeft, Upload, FileText, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
+import { TeamMemberEditor, TeamMemberData } from "@/components/admin/TeamMemberEditor";
+import { StagesMultiSelect } from "@/components/admin/StagesMultiSelect";
 
-interface TeamMember {
-  nome: string;
-  funcao: string;
-  email: string;
-  telefone: string;
-}
+const PROJECT_TYPES = [
+  "Longa-metragem ficção",
+  "Longa-metragem documentário", 
+  "Curta-metragem ficção",
+  "Curta-metragem documentário",
+  "Série ficção",
+  "Série documental",
+  "Videocast",
+  "Podcast",
+  "Evento Cultural",
+  "Musical",
+  "Teatro",
+  "Performance",
+  "Instalação",
+  "Videoclipe",
+  "Projeto educativo",
+  "Projeto formativo",
+  "Projeto transmídia",
+];
 
 const AdminAddProjectPage = () => {
   const navigate = useNavigate();
@@ -28,16 +45,22 @@ const AdminAddProjectPage = () => {
   
   // Projeto básico
   const [titulo, setTitulo] = useState("");
+  const [sinopse, setSinopse] = useState("");
   const [categoriasTags, setCategoriasTags] = useState("");
   const [descricao, setDescricao] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [location, setLocation] = useState("");
+  const [projectType, setProjectType] = useState("");
+  const [customProjectType, setCustomProjectType] = useState("");
+  const [stages, setStages] = useState<string[]>(["development"]);
   
   // Mídia
   const [linkVideo, setLinkVideo] = useState("");
+  const [presentationDocUrl, setPresentationDocUrl] = useState("");
+  const [uploadingDoc, setUploadingDoc] = useState(false);
   
   // Integrantes
-  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [teamMembers, setTeamMembers] = useState<TeamMemberData[]>([]);
   
   // Financiamento
   const [valorSugerido, setValorSugerido] = useState("");
@@ -48,6 +71,10 @@ const AdminAddProjectPage = () => {
   const [impactoSocial, setImpactoSocial] = useState("");
   const [publicoAlvo, setPublicoAlvo] = useState("");
   const [diferenciais, setDiferenciais] = useState("");
+  
+  // Lei de Incentivo
+  const [hasIncentiveLaw, setHasIncentiveLaw] = useState(false);
+  const [incentiveLawDetails, setIncentiveLawDetails] = useState("");
   
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
@@ -62,9 +89,40 @@ const AdminAddProjectPage = () => {
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
     if (!titulo.trim()) newErrors.titulo = "Título é obrigatório";
-    if (!descricao.trim()) newErrors.descricao = "Descrição é obrigatória";
+    if (!sinopse.trim()) newErrors.sinopse = "Sinopse é obrigatória";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  const handleDocUpload = async (file: File) => {
+    setUploadingDoc(true);
+    
+    const fileName = `presentation-${Date.now()}.${file.name.split('.').pop()}`;
+    
+    const { data, error } = await supabase.storage
+      .from("project-media")
+      .upload(fileName, file);
+    
+    if (error) {
+      toast({
+        title: "Erro no upload",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      const { data: urlData } = supabase.storage
+        .from("project-media")
+        .getPublicUrl(fileName);
+      
+      setPresentationDocUrl(urlData.publicUrl);
+      
+      toast({
+        title: "Documento enviado!",
+        description: "O documento de apresentação foi carregado.",
+      });
+    }
+    
+    setUploadingDoc(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -76,15 +134,17 @@ const AdminAddProjectPage = () => {
 
     try {
       const tags = categoriasTags.split(",").map(t => t.trim()).filter(t => t);
+      const finalProjectType = projectType === "Outro" ? customProjectType : projectType;
 
       // Insert project directly as approved (admin adding)
       const { data: project, error: projectError } = await supabase
         .from("projects")
         .insert({
           title: titulo,
-          synopsis: descricao.substring(0, 300),
-          description: descricao,
-          project_type: tags[0] || "Cultura",
+          synopsis: sinopse,
+          description: descricao || null,
+          project_type: finalProjectType || tags[0] || "Cultura",
+          stages: stages.length > 0 ? stages : ["development"],
           responsavel_nome: responsavelNome || null,
           responsavel_email: responsavelEmail || null,
           responsavel_telefone: responsavelTelefone || null,
@@ -98,7 +158,10 @@ const AdminAddProjectPage = () => {
           impacto_social: impactoSocial || null,
           publico_alvo: publicoAlvo || null,
           diferenciais: diferenciais || null,
-          status: "approved", // Admin adds directly as approved
+          has_incentive_law: hasIncentiveLaw,
+          incentive_law_details: incentiveLawDetails || null,
+          presentation_document_url: presentationDocUrl || null,
+          status: "approved",
         })
         .select()
         .single();
@@ -111,8 +174,11 @@ const AdminAddProjectPage = () => {
           project_id: project.id,
           nome: member.nome,
           funcao: member.funcao,
-          email: member.email,
-          telefone: member.telefone,
+          email: member.email || null,
+          telefone: member.telefone || null,
+          photo_url: member.photo_url || null,
+          social_links: member.social_links || {},
+          curriculum_url: member.curriculum_url || null,
         }));
 
         await supabase.from("project_members").insert(membersData);
@@ -134,20 +200,6 @@ const AdminAddProjectPage = () => {
     } finally {
       setSubmitting(false);
     }
-  };
-
-  const addTeamMember = () => {
-    setTeamMembers([...teamMembers, { nome: "", funcao: "", email: "", telefone: "" }]);
-  };
-
-  const updateTeamMember = (index: number, field: keyof TeamMember, value: string) => {
-    const updated = [...teamMembers];
-    updated[index][field] = value;
-    setTeamMembers(updated);
-  };
-
-  const removeTeamMember = (index: number) => {
-    setTeamMembers(teamMembers.filter((_, i) => i !== index));
   };
 
   return (
@@ -179,7 +231,6 @@ const AdminAddProjectPage = () => {
                   </h3>
                   
                   <div className="flex flex-col items-center gap-4">
-                    {/* Preview */}
                     <div className="w-full max-w-md aspect-video rounded-lg border-2 border-dashed border-muted-foreground/30 overflow-hidden bg-muted/50 flex items-center justify-center">
                       {imageUrl ? (
                         <img 
@@ -200,7 +251,6 @@ const AdminAddProjectPage = () => {
                       )}
                     </div>
                     
-                    {/* URL Input */}
                     <div className="w-full max-w-md">
                       <Label htmlFor="imageUrlPreview">URL da Imagem de Capa</Label>
                       <Input
@@ -210,9 +260,6 @@ const AdminAddProjectPage = () => {
                         placeholder="https://exemplo.com/imagem.jpg"
                         className="mt-1"
                       />
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Esta será a imagem exibida como thumbnail do projeto
-                      </p>
                     </div>
                   </div>
                 </div>
@@ -279,13 +326,26 @@ const AdminAddProjectPage = () => {
 
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="categoriasTags">Categorias/Tags</Label>
-                      <Input
-                        id="categoriasTags"
-                        value={categoriasTags}
-                        onChange={(e) => setCategoriasTags(e.target.value)}
-                        placeholder="Cinema, Teatro, Música"
-                      />
+                      <Label htmlFor="projectType">Tipo de Projeto</Label>
+                      <Select value={projectType} onValueChange={setProjectType}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o tipo" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {PROJECT_TYPES.map((type) => (
+                            <SelectItem key={type} value={type}>{type}</SelectItem>
+                          ))}
+                          <SelectItem value="Outro">Outro</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      {projectType === "Outro" && (
+                        <Input
+                          placeholder="Digite o tipo de projeto"
+                          className="mt-2"
+                          value={customProjectType}
+                          onChange={(e) => setCustomProjectType(e.target.value)}
+                        />
+                      )}
                     </div>
 
                     <div>
@@ -299,21 +359,78 @@ const AdminAddProjectPage = () => {
                     </div>
                   </div>
 
+                  <div>
+                    <Label htmlFor="categoriasTags">Categorias/Tags</Label>
+                    <Input
+                      id="categoriasTags"
+                      value={categoriasTags}
+                      onChange={(e) => setCategoriasTags(e.target.value)}
+                      placeholder="Cinema, Teatro, Música (separados por vírgula)"
+                    />
+                  </div>
+
+                  {/* Stages Multi-Select */}
+                  <StagesMultiSelect 
+                    value={stages} 
+                    onChange={setStages} 
+                  />
 
                   <div>
-                    <Label htmlFor="descricao">Descrição Completa *</Label>
+                    <Label htmlFor="sinopse">Sinopse *</Label>
+                    <Textarea
+                      id="sinopse"
+                      value={sinopse}
+                      onChange={(e) => setSinopse(e.target.value)}
+                      placeholder="Breve descrição do projeto (até 300 caracteres recomendado)"
+                      rows={3}
+                      className={errors.sinopse ? "border-destructive" : ""}
+                    />
+                    {errors.sinopse && (
+                      <p className="text-sm text-destructive mt-1">{errors.sinopse}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <Label htmlFor="descricao">Descrição Completa</Label>
                     <Textarea
                       id="descricao"
                       value={descricao}
                       onChange={(e) => setDescricao(e.target.value)}
                       placeholder="Descreva o projeto em detalhes..."
                       rows={6}
-                      className={errors.descricao ? "border-destructive" : ""}
                     />
-                    {errors.descricao && (
-                      <p className="text-sm text-destructive mt-1">{errors.descricao}</p>
-                    )}
                   </div>
+                </div>
+
+                {/* Lei de Incentivo */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-foreground border-b pb-2">
+                    Lei de Incentivo
+                  </h3>
+                  
+                  <div className="flex items-center justify-between p-4 border rounded-lg">
+                    <div>
+                      <h4 className="font-medium">Possui Lei de Incentivo?</h4>
+                      <p className="text-sm text-muted-foreground">Marque se o projeto é incentivado</p>
+                    </div>
+                    <Switch 
+                      checked={hasIncentiveLaw} 
+                      onCheckedChange={setHasIncentiveLaw}
+                    />
+                  </div>
+
+                  {hasIncentiveLaw && (
+                    <div>
+                      <Label htmlFor="incentiveLawDetails">Detalhes da Lei de Incentivo</Label>
+                      <Textarea
+                        id="incentiveLawDetails"
+                        value={incentiveLawDetails}
+                        onChange={(e) => setIncentiveLawDetails(e.target.value)}
+                        placeholder="Ex: Lei Rouanet, Lei do Audiovisual, PROAC..."
+                        rows={3}
+                      />
+                    </div>
+                  )}
                 </div>
 
                 {/* Mídia */}
@@ -332,71 +449,56 @@ const AdminAddProjectPage = () => {
                       placeholder="https://youtube.com/..."
                     />
                   </div>
+
+                  <div className="space-y-2">
+                    <Label>Documento de Apresentação (PDF)</Label>
+                    <div className="flex items-center gap-3">
+                      <Input
+                        value={presentationDocUrl}
+                        onChange={(e) => setPresentationDocUrl(e.target.value)}
+                        placeholder="URL do documento ou faça upload"
+                        className="flex-1"
+                      />
+                      <label className="cursor-pointer">
+                        <input
+                          type="file"
+                          accept=".pdf,.doc,.docx"
+                          className="hidden"
+                          disabled={uploadingDoc}
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleDocUpload(file);
+                          }}
+                        />
+                        <Button type="button" variant="outline" asChild>
+                          <span>
+                            <Upload className="w-4 h-4 mr-1" />
+                            {uploadingDoc ? "Enviando..." : "Upload"}
+                          </span>
+                        </Button>
+                      </label>
+                      {presentationDocUrl && (
+                        <a 
+                          href={presentationDocUrl} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-primary hover:underline"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                        </a>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Este documento será disponibilizado para download na página do projeto
+                    </p>
+                  </div>
                 </div>
 
                 {/* Integrantes */}
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between border-b pb-2">
-                    <h3 className="text-lg font-semibold text-foreground">
-                      Ficha Técnica / Integrantes
-                    </h3>
-                    <Button type="button" variant="outline" size="sm" onClick={addTeamMember}>
-                      <Plus className="w-4 h-4 mr-1" />
-                      Adicionar
-                    </Button>
-                  </div>
-
-                  {teamMembers.map((member, index) => (
-                    <Card key={index} className="p-4">
-                      <div className="flex justify-between items-start mb-4">
-                        <span className="text-sm font-medium">Integrante {index + 1}</span>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => removeTeamMember(index)}
-                        >
-                          <X className="w-4 h-4" />
-                        </Button>
-                      </div>
-                      <div className="grid md:grid-cols-2 gap-4">
-                        <div>
-                          <Label>Nome</Label>
-                          <Input
-                            value={member.nome}
-                            onChange={(e) => updateTeamMember(index, "nome", e.target.value)}
-                            placeholder="Nome"
-                          />
-                        </div>
-                        <div>
-                          <Label>Função</Label>
-                          <Input
-                            value={member.funcao}
-                            onChange={(e) => updateTeamMember(index, "funcao", e.target.value)}
-                            placeholder="Função"
-                          />
-                        </div>
-                        <div>
-                          <Label>Email</Label>
-                          <Input
-                            type="email"
-                            value={member.email}
-                            onChange={(e) => updateTeamMember(index, "email", e.target.value)}
-                            placeholder="email@exemplo.com"
-                          />
-                        </div>
-                        <div>
-                          <Label>Telefone</Label>
-                          <Input
-                            value={member.telefone}
-                            onChange={(e) => updateTeamMember(index, "telefone", e.target.value)}
-                            placeholder="(00) 00000-0000"
-                          />
-                        </div>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
+                <TeamMemberEditor 
+                  members={teamMembers} 
+                  onChange={setTeamMembers} 
+                />
 
                 {/* Financiamento */}
                 <div className="space-y-4">
