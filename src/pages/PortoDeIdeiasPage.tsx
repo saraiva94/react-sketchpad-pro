@@ -78,19 +78,7 @@ const exampleProjects = [
     link: "/exemplo/cultura-legado",
     gradientClass: "from-accent to-primary",
     emojiBgClass: "bg-accent",
-    footerContent: (
-      <div className="flex -space-x-2">
-        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-rose-400 to-rose-600 flex items-center justify-center border-2 border-card">
-          <span className="text-xs text-white">🎨</span>
-        </div>
-        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center border-2 border-card">
-          <span className="text-xs text-white">🎵</span>
-        </div>
-        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center border-2 border-card">
-          <span className="text-xs text-white">📽️</span>
-        </div>
-      </div>
-    ),
+    footerContent: <span className="text-sm text-muted-foreground">Projeto exemplo</span>,
   },
   {
     id: "exemplo-investidores-aguardam",
@@ -102,12 +90,7 @@ const exampleProjects = [
     link: "/exemplo/investidores-aguardam",
     gradientClass: "from-primary to-accent",
     emojiBgClass: "bg-primary",
-    footerContent: (
-      <div className="flex items-center gap-1">
-        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-        <span className="text-sm text-emerald-600 dark:text-emerald-400">Online agora</span>
-      </div>
-    ),
+    footerContent: <span className="text-sm text-muted-foreground">Projeto exemplo</span>,
   },
   {
     id: "exemplo-historias-sucesso",
@@ -121,7 +104,7 @@ const exampleProjects = [
     borderClass: "border-amber-500",
     gradientClass: "from-amber-400 to-orange-500",
     emojiBgClass: "bg-gradient-to-br from-amber-400 to-orange-500 shadow-lg",
-    footerContent: <span className="text-amber-500">★★★★★</span>,
+    footerContent: <span className="text-sm text-muted-foreground">Projeto exemplo</span>,
   },
   {
     id: "exemplo-recursos-disponiveis",
@@ -135,13 +118,7 @@ const exampleProjects = [
     borderClass: "border-emerald-500",
     gradientClass: "from-emerald-400 to-teal-500",
     emojiBgClass: "bg-gradient-to-br from-emerald-400 to-teal-500 shadow-lg",
-    emojiAnimate: true,
-    footerContent: (
-      <div className="flex gap-2">
-        <Badge variant="outline" className="text-xs">Rouanet</Badge>
-        <Badge variant="outline" className="text-xs">PROAC</Badge>
-      </div>
-    ),
+    footerContent: <span className="text-sm text-muted-foreground">Projeto exemplo</span>,
   },
 ];
 
