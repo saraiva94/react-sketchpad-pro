@@ -17,6 +17,7 @@ import { QuemSomosEditor } from "@/components/admin/QuemSomosEditor";
 import { NossosServicosEditor } from "@/components/admin/NossosServicosEditor";
 import { ContactButtonsEditor } from "@/components/admin/ContactButtonsEditor";
 import ContrapartidasEditor, { Contrapartida } from "@/components/admin/ContrapartidasEditor";
+import { RecognitionEditor, NewsItem } from "@/components/admin/RecognitionEditor";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
@@ -200,6 +201,8 @@ const AdminDashboard = () => {
   const [editResponsavelTelefone, setEditResponsavelTelefone] = useState("");
   const [editResponsavelGenero, setEditResponsavelGenero] = useState("");
   const [editContrapartidas, setEditContrapartidas] = useState<Contrapartida[]>([]);
+  const [editAwards, setEditAwards] = useState<string[]>([]);
+  const [editNews, setEditNews] = useState<NewsItem[]>([]);
 
   // Contacts filters
   const [contactFilterGender, setContactFilterGender] = useState<string>("all");
@@ -692,6 +695,22 @@ const AdminDashboard = () => {
         }
       });
     
+    // Fetch awards and news from project
+    supabase
+      .from("projects")
+      .select("awards, news")
+      .eq("id", project.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) {
+          setEditAwards((data.awards as string[]) || []);
+          setEditNews((data.news as unknown as NewsItem[]) || []);
+        } else {
+          setEditAwards([]);
+          setEditNews([]);
+        }
+      });
+    
     setShowEditDialog(true);
   };
 
@@ -723,7 +742,9 @@ const AdminDashboard = () => {
         responsavel_email: editResponsavelEmail || null,
         responsavel_telefone: editResponsavelTelefone || null,
         responsavel_genero: editResponsavelGenero || null,
-      })
+        awards: editAwards.length > 0 ? editAwards : [],
+        news: editNews.length > 0 ? editNews : [],
+      } as any)
       .eq("id", selectedProject.id);
 
     if (error) {
@@ -2661,6 +2682,16 @@ const AdminDashboard = () => {
               <ContrapartidasEditor 
                 contrapartidas={editContrapartidas} 
                 onChange={setEditContrapartidas} 
+              />
+            </div>
+
+            {/* Reconhecimentos e Mídia */}
+            <div className="space-y-4 border rounded-lg p-4 bg-muted/30">
+              <RecognitionEditor
+                awards={editAwards}
+                news={editNews}
+                onAwardsChange={setEditAwards}
+                onNewsChange={setEditNews}
               />
             </div>
 
