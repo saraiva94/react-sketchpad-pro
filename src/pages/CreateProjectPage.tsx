@@ -23,16 +23,11 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { StagesMultiSelect, getStageLabel } from "@/components/admin/StagesMultiSelect";
+import ContrapartidasEditor, { Contrapartida } from "@/components/admin/ContrapartidasEditor";
 
 interface TeamMember {
   name: string;
   role: string;
-}
-
-interface Reward {
-  value: string;
-  title: string;
-  benefits: string;
 }
 
 const CreateProjectPage = () => {
@@ -48,7 +43,7 @@ const CreateProjectPage = () => {
   const [location, setLocation] = useState("");
   const [year, setYear] = useState("");
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([{ name: "", role: "" }]);
-  const [rewards, setRewards] = useState<Reward[]>([{ value: "", title: "", benefits: "" }]);
+  const [contrapartidas, setContrapartidas] = useState<Contrapartida[]>([]);
   const [culturalImpact, setCulturalImpact] = useState("");
   const [socialImpact, setSocialImpact] = useState("");
   const [estimatedAudience, setEstimatedAudience] = useState("");
@@ -82,19 +77,6 @@ const CreateProjectPage = () => {
     setTeamMembers(updated);
   };
 
-  const addReward = () => {
-    setRewards([...rewards, { value: "", title: "", benefits: "" }]);
-  };
-
-  const removeReward = (index: number) => {
-    setRewards(rewards.filter((_, i) => i !== index));
-  };
-
-  const updateReward = (index: number, field: keyof Reward, value: string) => {
-    const updated = [...rewards];
-    updated[index][field] = value;
-    setRewards(updated);
-  };
 
   const handleSave = () => {
     const projectData = {
@@ -109,7 +91,7 @@ const CreateProjectPage = () => {
       location,
       year,
       teamMembers,
-      rewards,
+      contrapartidas,
       impact: {
         cultural: culturalImpact,
         social: socialImpact,
@@ -416,65 +398,16 @@ const CreateProjectPage = () => {
           </CardContent>
         </Card>
 
-        {/* Rewards */}
+        {/* Contrapartidas */}
         <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <span>Contrapartidas</span>
-              <Button onClick={addReward} size="sm" variant="outline">
-                <Plus className="w-4 h-4 mr-1" />
-                Adicionar
-              </Button>
-            </CardTitle>
+            <CardTitle>Contrapartidas para Investidores</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
-            {rewards.map((reward, index) => (
-              <Card key={index} className="border">
-                <CardContent className="p-4 space-y-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1 space-y-3">
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <Label>Valor</Label>
-                          <Input
-                            value={reward.value}
-                            onChange={(e) => updateReward(index, "value", e.target.value)}
-                            placeholder="R$ 50,00"
-                          />
-                        </div>
-                        <div>
-                          <Label>Título</Label>
-                          <Input
-                            value={reward.title}
-                            onChange={(e) => updateReward(index, "title", e.target.value)}
-                            placeholder="Apoiador Bronze"
-                          />
-                        </div>
-                      </div>
-                      <div>
-                        <Label>Benefícios (um por linha)</Label>
-                        <Textarea
-                          value={reward.benefits}
-                          onChange={(e) => updateReward(index, "benefits", e.target.value)}
-                          placeholder="Lista de benefícios"
-                          rows={3}
-                        />
-                      </div>
-                    </div>
-                    {rewards.length > 1 && (
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="ml-3"
-                        onClick={() => removeReward(index)}
-                      >
-                        <Trash2 className="w-4 h-4 text-destructive" />
-                      </Button>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+          <CardContent>
+            <ContrapartidasEditor 
+              contrapartidas={contrapartidas} 
+              onChange={setContrapartidas} 
+            />
           </CardContent>
         </Card>
 
