@@ -15,6 +15,7 @@ import ProjectsPortfolioPage from "./pages/ProjectsPortfolioPage";
 import PortoDeIdeiasPage from "./pages/PortoDeIdeiasPage";
 import ExampleProjectPage from "./pages/ExampleProjectPage";
 import PendingProjectPage from "./pages/PendingProjectPage";
+import DevMenu from "./pages/DevMenu";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -41,6 +42,7 @@ const App = () => (
             <Route path="/porto-de-ideias" element={<PortoDeIdeiasPage />} />
             <Route path="/project/:id" element={<ProjectPage />} />
             <Route path="/exemplo/:exampleId" element={<ExampleProjectPage />} />
+            <Route path="/dev" element={<DevMenu />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
