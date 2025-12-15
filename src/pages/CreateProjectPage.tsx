@@ -22,6 +22,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { StagesMultiSelect, getStageLabel } from "@/components/admin/StagesMultiSelect";
 
 interface TeamMember {
   name: string;
@@ -54,6 +55,7 @@ const CreateProjectPage = () => {
   const [differentials, setDifferentials] = useState("");
   const [metrics, setMetrics] = useState("");
   const [documents, setDocuments] = useState<FileList | null>(null);
+  const [stages, setStages] = useState<string[]>([]);
 
   const addTag = () => {
     if (currentTag.trim() && !tags.includes(currentTag.trim())) {
@@ -324,7 +326,19 @@ const CreateProjectPage = () => {
           </CardContent>
         </Card>
 
-        {/* Financial & Location */}
+        {/* Estágios do Projeto */}
+        <Card className="shadow-lg">
+          <CardHeader>
+            <CardTitle>Estágios do Projeto</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <StagesMultiSelect 
+              value={stages} 
+              onChange={setStages} 
+              label=""
+            />
+          </CardContent>
+        </Card>
         <Card className="shadow-lg">
           <CardHeader>
             <CardTitle>Financeiro e Localização</CardTitle>
