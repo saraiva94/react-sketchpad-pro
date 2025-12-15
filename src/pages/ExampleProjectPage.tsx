@@ -2,10 +2,7 @@ import { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { 
   ArrowLeft, 
   MapPin, 
@@ -14,12 +11,8 @@ import {
   Target,
   Globe,
   Star,
-  FileText,
   Shield,
-  Lock,
   Play,
-  Mail,
-  Phone,
   Anchor,
   Facebook,
   Twitter,
@@ -29,141 +22,27 @@ import {
   Heart,
   MessageCircle,
   HandHeart,
-  Send,
-  X
+  Check,
+  Gift,
+  Award,
+  Newspaper,
+  Mail,
+  Phone
 } from "lucide-react";
 
-// Component for Documents Access Request
-const DocumentsAccessSection = ({ projectTitle }: { projectTitle: string }) => {
-  const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({
-    nome: "",
-    telefone: "",
-    interesse: ""
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
+// Interface for NewsItem
+interface NewsItem {
+  title: string;
+  url?: string;
+  date?: string;
+}
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!formData.nome.trim() || !formData.telefone.trim() || !formData.interesse.trim()) {
-      toast.error("Por favor, preencha todos os campos");
-      return;
-    }
-    
-    setIsSubmitting(true);
-    
-    const { error } = await supabase
-      .from("access_requests")
-      .insert({
-        nome: formData.nome.trim(),
-        telefone: formData.telefone.trim(),
-        interesse: formData.interesse.trim(),
-        project_title: projectTitle,
-        status: "pending"
-      });
-
-    if (error) {
-      toast.error("Erro ao enviar solicitação. Tente novamente.");
-      setIsSubmitting(false);
-      return;
-    }
-
-    toast.success("Solicitação enviada com sucesso! A administração entrará em contato.");
-    setShowForm(false);
-    setFormData({ nome: "", telefone: "", interesse: "" });
-    setIsSubmitting(false);
-  };
-
-  return (
-    <section>
-      <h2 className="text-2xl font-serif font-bold text-foreground mb-6 flex items-center gap-2">
-        <FileText className="w-6 h-6 text-primary" />
-        Documentos do Projeto
-      </h2>
-      <div className="p-6 md:p-8 bg-muted/50 rounded-2xl border border-border">
-        {!showForm ? (
-          <div className="text-center">
-            <Lock className="w-12 h-12 text-muted-foreground/50 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-foreground mb-2">Documentos Restritos</h3>
-            <p className="text-muted-foreground mb-6">
-              Para acessar os documentos completos do projeto, solicite acesso à administração.
-            </p>
-            <Button 
-              className="rounded-full"
-              onClick={() => setShowForm(true)}
-            >
-              Solicitar Acesso
-            </Button>
-          </div>
-        ) : (
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-foreground">Solicitar Acesso aos Documentos</h3>
-              <Button 
-                variant="ghost" 
-                size="icon"
-                onClick={() => setShowForm(false)}
-                className="rounded-full"
-              >
-                <X className="w-5 h-5" />
-              </Button>
-            </div>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1.5">Nome</label>
-                <Input
-                  type="text"
-                  placeholder="Seu nome completo"
-                  value={formData.nome}
-                  onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
-                  className="rounded-lg"
-                  maxLength={100}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1.5">Telefone</label>
-                <Input
-                  type="tel"
-                  placeholder="(00) 00000-0000"
-                  value={formData.telefone}
-                  onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
-                  className="rounded-lg"
-                  maxLength={20}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1.5">O que gostaria de acessar?</label>
-                <Textarea
-                  placeholder="Descreva brevemente quais documentos ou informações você precisa..."
-                  value={formData.interesse}
-                  onChange={(e) => setFormData({ ...formData, interesse: e.target.value })}
-                  className="rounded-lg resize-none"
-                  rows={3}
-                  maxLength={500}
-                />
-              </div>
-              <Button 
-                type="submit" 
-                className="w-full rounded-full"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  "Enviando..."
-                ) : (
-                  <>
-                    <Send className="w-4 h-4 mr-2" />
-                    Enviar Solicitação
-                  </>
-                )}
-              </Button>
-            </form>
-          </div>
-        )}
-      </div>
-    </section>
-  );
-};
+// Interface for Contrapartida
+interface Contrapartida {
+  id: string;
+  valor: string;
+  beneficios: string[];
+}
 
 // Dados fictícios dos projetos de exemplo
 const exampleProjects: Record<string, {
@@ -186,6 +65,9 @@ const exampleProjects: Record<string, {
   has_incentive_law: boolean;
   incentive_law_details: string | null;
   members: { nome: string; funcao: string }[];
+  contrapartidas: Contrapartida[];
+  awards: string[];
+  news: NewsItem[];
 }> = {
   "cultura-legado": {
     id: "cultura-legado",
@@ -211,6 +93,16 @@ const exampleProjects: Record<string, {
       { nome: "João Santos", funcao: "Produtor Executivo" },
       { nome: "Ana Oliveira", funcao: "Coordenadora de Produção" },
       { nome: "Carlos Ferreira", funcao: "Diretor Técnico" }
+    ],
+    contrapartidas: [
+      { id: "1", valor: "R$ 5.000", beneficios: ["Agradecimento nos créditos", "Convite para vernissage", "Catálogo digital da exposição"] },
+      { id: "2", valor: "R$ 15.000", beneficios: ["Todos os benefícios anteriores", "Logo da empresa em materiais promocionais", "5 ingressos VIP para vernissage"] },
+      { id: "3", valor: "R$ 50.000", beneficios: ["Todos os benefícios anteriores", "Naming rights de uma obra", "Evento exclusivo para colaboradores", "Reportagem sobre a parceria"] }
+    ],
+    awards: ["Prêmio APCA de Melhor Exposição 2023", "Seleção Oficial - Bienal de São Paulo 2024"],
+    news: [
+      { title: "Exposição transforma comunidade através da arte", url: "https://example.com", date: "15/03/2024" },
+      { title: "Projeto cultural recebe apoio de grandes empresas", date: "10/02/2024" }
     ]
   },
   "investidores-aguardam": {
@@ -236,6 +128,14 @@ const exampleProjects: Record<string, {
       { nome: "Pedro Costa", funcao: "CEO" },
       { nome: "Lucia Mendes", funcao: "Diretora de Parcerias" },
       { nome: "Roberto Alves", funcao: "Analista de Investimentos" }
+    ],
+    contrapartidas: [
+      { id: "1", valor: "R$ 10.000", beneficios: ["Menção em materiais oficiais", "Acesso a relatórios de impacto", "Convite para eventos de lançamento"] },
+      { id: "2", valor: "R$ 25.000", beneficios: ["Todos os benefícios anteriores", "Workshop exclusivo sobre investimento cultural", "Logo em plataforma digital"] }
+    ],
+    awards: ["Top 10 Startups de Impacto Social 2023"],
+    news: [
+      { title: "Plataforma conecta investidores a projetos culturais", url: "https://example.com", date: "20/01/2024" }
     ]
   },
   "historias-sucesso": {
@@ -263,6 +163,15 @@ const exampleProjects: Record<string, {
       { nome: "Beatriz Santos", funcao: "Produtora" },
       { nome: "Ricardo Nunes", funcao: "Comunicação" },
       { nome: "Camila Rocha", funcao: "Financeiro" }
+    ],
+    contrapartidas: [
+      { id: "1", valor: "R$ 20.000", beneficios: ["Certificado de apoio cultural", "Agradecimento em créditos do documentário", "3 ingressos para pré-estreia"] },
+      { id: "2", valor: "R$ 100.000", beneficios: ["Todos os benefícios anteriores", "Inserção de marca no filme", "Sessão exclusiva para empresa", "Making of personalizado"] }
+    ],
+    awards: ["Prêmio Cultura Viva 2023", "Menção Honrosa Festival Internacional de Teatro"],
+    news: [
+      { title: "Projeto teatral leva arte para comunidades rurais", url: "https://example.com", date: "05/04/2024" },
+      { title: "Festival celebra histórias de sucesso de projetos culturais", date: "12/03/2024" }
     ]
   },
   "recursos-disponiveis": {
@@ -287,6 +196,14 @@ const exampleProjects: Record<string, {
     members: [
       { nome: "André Souza", funcao: "Consultor Principal" },
       { nome: "Patricia Melo", funcao: "Analista de Projetos" }
+    ],
+    contrapartidas: [
+      { id: "1", valor: "R$ 3.000", beneficios: ["Consultoria básica de captação", "Material didático sobre leis de incentivo", "Acesso a webinars exclusivos"] },
+      { id: "2", valor: "R$ 8.000", beneficios: ["Todos os benefícios anteriores", "Mentoria personalizada de 3 meses", "Análise completa de projeto para editais"] }
+    ],
+    awards: [],
+    news: [
+      { title: "Especialista explica como captar recursos para projetos culturais", url: "https://example.com", date: "28/02/2024" }
     ]
   },
   "comunidade-criativa": {
@@ -312,6 +229,14 @@ const exampleProjects: Record<string, {
       { nome: "Juliana Araújo", funcao: "Community Manager" },
       { nome: "Diego Torres", funcao: "Curador de Eventos" },
       { nome: "Mariana Costa", funcao: "Facilitadora" }
+    ],
+    contrapartidas: [
+      { id: "1", valor: "R$ 2.000", beneficios: ["Participação em eventos exclusivos", "Networking com profissionais do setor", "Newsletter mensal com oportunidades"] },
+      { id: "2", valor: "R$ 5.000", beneficios: ["Todos os benefícios anteriores", "Mentoria com artistas renomados", "Espaço de destaque para seu projeto"] }
+    ],
+    awards: ["Comunidade do Ano - Prêmio Economia Criativa 2024"],
+    news: [
+      { title: "Rede de produtores culturais cresce 300% em um ano", date: "18/04/2024" }
     ]
   }
 };
@@ -559,21 +484,94 @@ const ExampleProjectPage = () => {
               </div>
             </section>
 
-            {/* Lei de Incentivo - Main Content */}
-            {project.has_incentive_law && project.incentive_law_details && (
+            {/* Contrapartidas para Investidores */}
+            {project.contrapartidas.length > 0 && (
               <section>
                 <h2 className="text-2xl font-serif font-bold text-foreground mb-6 flex items-center gap-2">
-                  <Shield className="w-6 h-6 text-primary" />
-                  Lei de Incentivo
+                  <Gift className="w-6 h-6 text-primary" />
+                  Contrapartidas para Investidores
                 </h2>
-                <div className="p-6 bg-muted/50 border border-border rounded-2xl">
-                  <p className="text-muted-foreground">{project.incentive_law_details}</p>
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {project.contrapartidas.map((contrapartida) => (
+                    <div 
+                      key={contrapartida.id} 
+                      className="bg-card border border-border rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow"
+                    >
+                      <div className="mb-4">
+                        <span className="text-xl font-bold text-foreground">
+                          {contrapartida.valor}
+                        </span>
+                      </div>
+                      <ul className="space-y-2">
+                        {contrapartida.beneficios.map((beneficio, index) => (
+                          <li key={index} className="flex items-start gap-3">
+                            <Check className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" />
+                            <span className="text-muted-foreground">{beneficio}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
                 </div>
               </section>
             )}
 
-            {/* Documents Section */}
-            <DocumentsAccessSection projectTitle={project.title} />
+            {/* Reconhecimentos e Mídia */}
+            {(project.awards.length > 0 || project.news.length > 0) && (
+              <section>
+                <h2 className="text-2xl font-serif font-bold text-foreground mb-6">
+                  Reconhecimentos e Mídia
+                </h2>
+                <div className="grid md:grid-cols-2 gap-6">
+                  {project.awards.length > 0 && (
+                    <div>
+                      <h3 className="font-semibold text-foreground mb-4 flex items-center">
+                        <Award className="w-5 h-5 text-amber-500 mr-2" />
+                        Prêmios e Reconhecimentos
+                      </h3>
+                      <ul className="space-y-2">
+                        {project.awards.map((award, index) => (
+                          <li key={index} className="flex items-start space-x-2">
+                            <Award className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
+                            <span className="text-muted-foreground">{award}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {project.news.length > 0 && (
+                    <div>
+                      <h3 className="font-semibold text-foreground mb-4 flex items-center">
+                        <Newspaper className="w-5 h-5 text-primary mr-2" />
+                        Na Mídia
+                      </h3>
+                      <ul className="space-y-3">
+                        {project.news.map((item, index) => (
+                          <li key={index}>
+                            {item.url ? (
+                              <a 
+                                href={item.url} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="block p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
+                              >
+                                <h4 className="font-medium text-foreground mb-1">{item.title}</h4>
+                                {item.date && <p className="text-sm text-muted-foreground">{item.date}</p>}
+                              </a>
+                            ) : (
+                              <div className="block p-3 bg-muted/50 rounded-lg">
+                                <h4 className="font-medium text-foreground mb-1">{item.title}</h4>
+                                {item.date && <p className="text-sm text-muted-foreground">{item.date}</p>}
+                              </div>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              </section>
+            )}
           </div>
 
           {/* Sidebar */}
