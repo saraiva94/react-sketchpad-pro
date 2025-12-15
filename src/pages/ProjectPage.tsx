@@ -49,6 +49,8 @@ interface Project {
   publico_alvo: string | null;
   diferenciais: string | null;
   valor_sugerido: number | null;
+  presentation_document_url: string | null;
+  stages: string[] | null;
 }
 
 interface ProjectMember {
@@ -452,10 +454,23 @@ const ProjectPage = () => {
                   </Badge>
                 )}
               </div>
-              <Button variant="secondary" className="rounded-full" onClick={handleDownloadPDF}>
-                <Download className="w-4 h-4 mr-2" />
-                Baixar apresentação em PDF
-              </Button>
+              {project.presentation_document_url ? (
+                <a 
+                  href={project.presentation_document_url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                >
+                  <Button variant="secondary" className="rounded-full">
+                    <Download className="w-4 h-4 mr-2" />
+                    Baixar apresentação em PDF
+                  </Button>
+                </a>
+              ) : (
+                <Button variant="secondary" className="rounded-full" onClick={handleDownloadPDF}>
+                  <Download className="w-4 h-4 mr-2" />
+                  Baixar apresentação em PDF
+                </Button>
+              )}
             </div>
           </div>
         </div>

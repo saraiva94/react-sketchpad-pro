@@ -23,6 +23,7 @@ import {
   XCircle, 
   Clock, 
   Eye, 
+  EyeOff,
   Edit,
   Trash2,
   LogOut,
@@ -81,6 +82,9 @@ interface Project {
   diferenciais: string | null;
   featured_on_homepage: boolean;
   stage: string | null;
+  stages: string[] | null;
+  is_hidden: boolean;
+  presentation_document_url: string | null;
 }
 
 interface AccessRequest {
@@ -619,6 +623,29 @@ const AdminDashboard = () => {
         description: !currentValue 
           ? "O projeto agora aparece na página inicial." 
           : "O projeto foi removido dos destaques.",
+      });
+      fetchProjects();
+    }
+  };
+
+  const toggleHidden = async (projectId: string, currentValue: boolean) => {
+    const { error } = await supabase
+      .from("projects")
+      .update({ is_hidden: !currentValue })
+      .eq("id", projectId);
+
+    if (error) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível atualizar a visibilidade.",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: !currentValue ? "Projeto oculto" : "Projeto visível",
+        description: !currentValue 
+          ? "O projeto foi ocultado do site público." 
+          : "O projeto agora está visível no site.",
       });
       fetchProjects();
     }
@@ -2059,6 +2086,22 @@ const AdminDashboard = () => {
                                   </Button>
                                 </>
                               )}
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => toggleHidden(project.id, project.is_hidden || false)}
+                                title={project.is_hidden ? "Tornar visível" : "Ocultar do site"}
+                                className={project.is_hidden 
+                                  ? "text-muted-foreground bg-muted" 
+                                  : "text-foreground"
+                                }
+                              >
+                                {project.is_hidden ? (
+                                  <EyeOff className="w-4 h-4" />
+                                ) : (
+                                  <Eye className="w-4 h-4" />
+                                )}
+                              </Button>
                               <Button
                                 variant="ghost"
                                 size="icon"
