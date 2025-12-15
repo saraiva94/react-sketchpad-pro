@@ -2313,6 +2313,8 @@ const AdminDashboard = () => {
                       <SelectItem value="Evento Cultural">Evento Cultural</SelectItem>
                       <SelectItem value="Musical">Musical</SelectItem>
                       <SelectItem value="Teatro">Teatro</SelectItem>
+                      <SelectItem value="Videocast">Videocast</SelectItem>
+                      <SelectItem value="Podcast">Podcast</SelectItem>
                       <SelectItem value="Outro">Outro</SelectItem>
                     </SelectContent>
                   </Select>
