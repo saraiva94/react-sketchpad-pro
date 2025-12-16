@@ -513,6 +513,19 @@ const ExampleProjectPage = () => {
                       </ul>
                     </div>
                   ))}
+                  {/* Glass slot cards to fill remaining space */}
+                  {(() => {
+                    const count = project.contrapartidas.length;
+                    const remainder = count % 3;
+                    const slotsNeeded = remainder === 0 ? 0 : 3 - remainder;
+                    return Array.from({ length: slotsNeeded }).map((_, i) => (
+                      <div key={`slot-${i}`} className="hidden lg:block glass-slot-card rounded-2xl min-h-[180px] flex items-center justify-center">
+                        <div className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/20">
+                          <span className="text-2xl text-white/40">+</span>
+                        </div>
+                      </div>
+                    ));
+                  })()}
                 </div>
               </section>
             )}
@@ -523,9 +536,10 @@ const ExampleProjectPage = () => {
                 <h2 className="text-xl font-serif font-bold text-foreground mb-4">
                   Reconhecimentos e Mídia
                 </h2>
-                <div className="grid md:grid-cols-2 gap-6">
+                <div className="grid md:grid-cols-2 gap-4">
+                  {/* Prêmios */}
                   {project.awards.length > 0 && (
-                    <div>
+                    <div className="bg-muted/30 rounded-xl p-4 border border-border/50">
                       <h3 className="font-medium text-foreground mb-3 flex items-center text-sm">
                         <Award className="w-4 h-4 text-amber-500 mr-2" />
                         Prêmios e Reconhecimentos
@@ -540,36 +554,39 @@ const ExampleProjectPage = () => {
                       </ul>
                     </div>
                   )}
-                  {project.news.length > 0 && (
-                    <div>
-                      <h3 className="font-medium text-foreground mb-3 flex items-center text-sm">
+                  {/* Na Mídia - each news as card */}
+                  {project.news.map((item, index) => (
+                    <div key={index} className="bg-muted/30 rounded-xl p-4 border border-border/50 hover:bg-muted/50 transition-colors">
+                      <h3 className="font-medium text-foreground mb-2 flex items-center text-sm">
                         <Newspaper className="w-4 h-4 text-primary mr-2" />
                         Na Mídia
                       </h3>
-                      <ul className="space-y-2">
-                        {project.news.map((item, index) => (
-                          <li key={index}>
-                            {item.url ? (
-                              <a 
-                                href={item.url} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="block p-2 bg-muted/30 rounded-md hover:bg-muted/50 transition-colors"
-                              >
-                                <h4 className="font-medium text-foreground text-sm">{item.title}</h4>
-                                {item.date && <p className="text-xs text-muted-foreground mt-0.5">{item.date}</p>}
-                              </a>
-                            ) : (
-                              <div className="block p-2 bg-muted/30 rounded-md">
-                                <h4 className="font-medium text-foreground text-sm">{item.title}</h4>
-                                {item.date && <p className="text-xs text-muted-foreground mt-0.5">{item.date}</p>}
-                              </div>
-                            )}
-                          </li>
-                        ))}
-                      </ul>
+                      {item.url ? (
+                        <a href={item.url} target="_blank" rel="noopener noreferrer" className="block">
+                          <h4 className="font-medium text-foreground text-sm hover:text-primary transition-colors">{item.title}</h4>
+                          {item.date && <p className="text-xs text-muted-foreground mt-1">{item.date}</p>}
+                        </a>
+                      ) : (
+                        <div>
+                          <h4 className="font-medium text-foreground text-sm">{item.title}</h4>
+                          {item.date && <p className="text-xs text-muted-foreground mt-1">{item.date}</p>}
+                        </div>
+                      )}
                     </div>
-                  )}
+                  ))}
+                  {/* Glass slot cards to fill remaining space */}
+                  {(() => {
+                    const totalCards = (project.awards.length > 0 ? 1 : 0) + project.news.length;
+                    const remainder = totalCards % 2;
+                    const slotsNeeded = remainder === 0 ? 0 : 2 - remainder;
+                    return Array.from({ length: slotsNeeded }).map((_, i) => (
+                      <div key={`media-slot-${i}`} className="glass-slot-card rounded-xl min-h-[100px] flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/20">
+                          <span className="text-xl text-white/40">+</span>
+                        </div>
+                      </div>
+                    ));
+                  })()}
                 </div>
               </Card>
             )}
