@@ -51,7 +51,8 @@ const SubmitProjectPage = () => {
   // Mídia
   const [linkVideo, setLinkVideo] = useState("");
   const [videoFile, setVideoFile] = useState<File | null>(null);
-  const [documentFiles, setDocumentFiles] = useState<File[]>([]);
+  const [presentationDocUrl, setPresentationDocUrl] = useState("");
+  const [uploadingDoc, setUploadingDoc] = useState(false);
   
   // Integrantes
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
@@ -85,6 +86,37 @@ const SubmitProjectPage = () => {
   const handleClearImage = () => {
     setThumbnailBlob(null);
     setThumbnailPreview(null);
+  };
+
+  const handleDocUpload = async (file: File) => {
+    setUploadingDoc(true);
+    
+    const fileName = `presentation-${Date.now()}.${file.name.split('.').pop()}`;
+    
+    const { data, error } = await supabase.storage
+      .from("project-media")
+      .upload(fileName, file);
+    
+    if (error) {
+      toast({
+        title: "Erro no upload",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      const { data: urlData } = supabase.storage
+        .from("project-media")
+        .getPublicUrl(fileName);
+      
+      setPresentationDocUrl(urlData.publicUrl);
+      
+      toast({
+        title: "Documento enviado!",
+        description: "O documento de apresentação foi carregado.",
+      });
+    }
+    
+    setUploadingDoc(false);
   };
 
   const validateForm = () => {
@@ -170,6 +202,7 @@ const SubmitProjectPage = () => {
           diferenciais: diferenciais || null,
           awards: awards.length > 0 ? awards : [],
           news: news.length > 0 ? news : [],
+          presentation_document_url: presentationDocUrl || null,
           status: "pending",
         } as any)
         .select()
@@ -229,7 +262,7 @@ const SubmitProjectPage = () => {
     setDescricao("");
     setLinkVideo("");
     setVideoFile(null);
-    setDocumentFiles([]);
+    setPresentationDocUrl("");
     setTeamMembers([]);
     setContrapartidas([]);
     setAwards([]);
@@ -460,26 +493,48 @@ const SubmitProjectPage = () => {
                     </div>
                   </div>
 
+                  {/* Presentation Document Upload */}
                   <div>
-                    <Label>Documentos (PDF)</Label>
-                    <div className="border-2 border-dashed rounded-lg p-4 text-center">
+                    <Label>Documento de Apresentação (PDF)</Label>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        placeholder="URL do documento..."
+                        value={presentationDocUrl}
+                        onChange={(e) => setPresentationDocUrl(e.target.value)}
+                        className="flex-1"
+                      />
                       <input
                         type="file"
-                        accept=".pdf"
-                        multiple
-                        onChange={(e) => setDocumentFiles(Array.from(e.target.files || []))}
-                        className="hidden"
                         id="documentUpload"
+                        accept=".pdf,.doc,.docx"
+                        className="hidden"
+                        disabled={uploadingDoc}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleDocUpload(file);
+                        }}
                       />
-                      <label htmlFor="documentUpload" className="cursor-pointer">
-                        <Upload className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
-                        <p className="text-sm text-muted-foreground">
-                          {documentFiles.length > 0 
-                            ? `${documentFiles.length} arquivo(s) selecionado(s)` 
-                            : "Clique para fazer upload de documentos"}
-                        </p>
-                      </label>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled={uploadingDoc}
+                        onClick={() => document.getElementById("documentUpload")?.click()}
+                      >
+                        <Upload className="w-4 h-4 mr-1" />
+                        {uploadingDoc ? "Enviando..." : "Upload"}
+                      </Button>
                     </div>
+                    {presentationDocUrl && (
+                      <a 
+                        href={presentationDocUrl} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-xs text-primary hover:underline flex items-center gap-1 mt-1"
+                      >
+                        Ver documento
+                      </a>
+                    )}
                   </div>
                 </div>
 

@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
+import { ImageCropper } from "@/components/ImageCropper";
 import { FeaturedProjectsManager } from "@/components/admin/FeaturedProjectsManager";
 import { PortoIdeiasCardsManager } from "@/components/admin/PortoIdeiasCardsManager";
 import { QuemSomosEditor } from "@/components/admin/QuemSomosEditor";
@@ -203,6 +204,14 @@ const AdminDashboard = () => {
   const [editContrapartidas, setEditContrapartidas] = useState<Contrapartida[]>([]);
   const [editAwards, setEditAwards] = useState<string[]>([]);
   const [editNews, setEditNews] = useState<NewsItem[]>([]);
+  
+  // Image cropper states for edit
+  const [editThumbnailBlob, setEditThumbnailBlob] = useState<Blob | null>(null);
+  const [editThumbnailPreview, setEditThumbnailPreview] = useState<string | null>(null);
+  
+  // Presentation document states for edit
+  const [editPresentationDocUrl, setEditPresentationDocUrl] = useState("");
+  const [uploadingEditDoc, setUploadingEditDoc] = useState(false);
 
   // Contacts filters
   const [contactFilterGender, setContactFilterGender] = useState<string>("all");
@@ -656,9 +665,54 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleEditImageCropped = (blob: Blob, previewUrl: string) => {
+    setEditThumbnailBlob(blob);
+    setEditThumbnailPreview(previewUrl);
+  };
+
+  const handleEditClearImage = () => {
+    setEditThumbnailBlob(null);
+    setEditThumbnailPreview(null);
+    setEditImageUrl("");
+  };
+
+  const handleEditDocUpload = async (file: File) => {
+    setUploadingEditDoc(true);
+    
+    const fileName = `presentation-${Date.now()}.${file.name.split('.').pop()}`;
+    
+    const { data, error } = await supabase.storage
+      .from("project-media")
+      .upload(fileName, file);
+    
+    if (error) {
+      toast({
+        title: "Erro no upload",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      const { data: urlData } = supabase.storage
+        .from("project-media")
+        .getPublicUrl(fileName);
+      
+      setEditPresentationDocUrl(urlData.publicUrl);
+      
+      toast({
+        title: "Documento enviado!",
+        description: "O documento de apresentação foi carregado.",
+      });
+    }
+    
+    setUploadingEditDoc(false);
+  };
+
   const openEditDialog = (project: Project) => {
     setSelectedProject(project);
     setEditImageUrl(project.image_url || "");
+    setEditThumbnailBlob(null);
+    setEditThumbnailPreview(project.image_url || null);
+    setEditPresentationDocUrl(project.presentation_document_url || "");
     setEditBudget(project.budget || "");
     setEditLocation(project.location || "");
     setEditAdminNotes(project.admin_notes || "");
@@ -717,6 +771,33 @@ const AdminDashboard = () => {
   const saveProjectEdit = async () => {
     if (!selectedProject) return;
 
+    let finalImageUrl = editImageUrl;
+    
+    // Upload new image if cropped
+    if (editThumbnailBlob) {
+      const timestamp = Date.now();
+      const path = `thumbnails/${timestamp}_cover.jpg`;
+      
+      const { data, error: uploadError } = await supabase.storage
+        .from("project-media")
+        .upload(path, editThumbnailBlob);
+      
+      if (uploadError) {
+        toast({
+          title: "Erro no upload da imagem",
+          description: uploadError.message,
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      const { data: urlData } = supabase.storage
+        .from("project-media")
+        .getPublicUrl(path);
+      
+      finalImageUrl = urlData.publicUrl;
+    }
+
     const { error } = await supabase
       .from("projects")
       .update({
@@ -725,7 +806,7 @@ const AdminDashboard = () => {
         description: editDescription || null,
         project_type: editProjectType || null,
         stage: editStage || null,
-        image_url: editImageUrl || null,
+        image_url: finalImageUrl || null,
         budget: editBudget || null,
         location: editLocation || null,
         admin_notes: editAdminNotes || null,
@@ -744,6 +825,7 @@ const AdminDashboard = () => {
         responsavel_genero: editResponsavelGenero || null,
         awards: editAwards.length > 0 ? editAwards : [],
         news: editNews.length > 0 ? editNews : [],
+        presentation_document_url: editPresentationDocUrl || null,
       } as any)
       .eq("id", selectedProject.id);
 
@@ -2488,26 +2570,70 @@ const AdminDashboard = () => {
             <div className="space-y-4">
               <h4 className="font-semibold text-sm border-b pb-2">Mídia e Imagens</h4>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="edit-image">URL da Imagem de Capa</Label>
-                  <Input
-                    id="edit-image"
-                    placeholder="https://..."
-                    value={editImageUrl}
-                    onChange={(e) => setEditImageUrl(e.target.value)}
-                  />
-                </div>
+              {/* Image Cropper */}
+              <div className="space-y-2">
+                <Label>Imagem de Capa do Projeto</Label>
+                <ImageCropper
+                  onImageCropped={handleEditImageCropped}
+                  currentImage={editThumbnailPreview}
+                  onClear={handleEditClearImage}
+                  aspectRatio={16 / 9}
+                />
+              </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="edit-link-video">Link do Vídeo</Label>
+              <div className="space-y-2">
+                <Label htmlFor="edit-link-video">Link do Vídeo</Label>
+                <Input
+                  id="edit-link-video"
+                  placeholder="https://youtube.com/..."
+                  value={editLinkVideo}
+                  onChange={(e) => setEditLinkVideo(e.target.value)}
+                />
+              </div>
+
+              {/* Presentation Document Upload */}
+              <div className="space-y-2">
+                <Label>Documento de Apresentação (PDF)</Label>
+                <div className="flex items-center gap-2">
                   <Input
-                    id="edit-link-video"
-                    placeholder="https://youtube.com/..."
-                    value={editLinkVideo}
-                    onChange={(e) => setEditLinkVideo(e.target.value)}
+                    placeholder="URL do documento..."
+                    value={editPresentationDocUrl}
+                    onChange={(e) => setEditPresentationDocUrl(e.target.value)}
+                    className="flex-1"
                   />
+                  <input
+                    type="file"
+                    id="edit-doc-upload"
+                    accept=".pdf,.doc,.docx"
+                    className="hidden"
+                    disabled={uploadingEditDoc}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleEditDocUpload(file);
+                    }}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={uploadingEditDoc}
+                    onClick={() => document.getElementById("edit-doc-upload")?.click()}
+                  >
+                    <Upload className="w-4 h-4 mr-1" />
+                    {uploadingEditDoc ? "Enviando..." : "Upload"}
+                  </Button>
                 </div>
+                {editPresentationDocUrl && (
+                  <a 
+                    href={editPresentationDocUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-xs text-primary hover:underline flex items-center gap-1"
+                  >
+                    <FileText className="w-3 h-3" />
+                    Ver documento atual
+                  </a>
+                )}
               </div>
             </div>
 
