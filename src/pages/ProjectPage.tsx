@@ -631,29 +631,33 @@ const ProjectPage = () => {
                     return (
                       <div 
                         key={contrapartida.id} 
-                        className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:border-primary/30 flex flex-col aspect-square"
+                        className="bg-card border border-border rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300"
                       >
-                        {/* Header with value */}
-                        <div className="bg-gradient-to-br from-primary/15 via-primary/5 to-transparent px-5 py-5 border-b border-border/50">
-                          <div className="text-center">
-                            <span className="text-3xl font-bold text-foreground block">
-                              {formatCurrency(contrapartida.valor)}
+                        {/* Nível label */}
+                        <p className="text-sm italic text-muted-foreground mb-1">Nível</p>
+                        
+                        {/* Value with index */}
+                        <div className="mb-4">
+                          <span className="text-2xl font-bold text-foreground">
+                            {formatCurrency(contrapartida.valor)}
+                          </span>
+                          {indiceLabel && (
+                            <span className="text-lg text-foreground ml-2">
+                              {indiceLabel}
                             </span>
-                            {indiceLabel && (
-                              <span className="text-sm text-primary font-medium mt-1 block">
-                                {indiceLabel}
-                              </span>
-                            )}
-                          </div>
+                          )}
                         </div>
                         
-                        {/* Benefits list */}
-                        <div className="p-5 flex-1 overflow-y-auto">
+                        {/* Benefits section */}
+                        <div>
+                          <p className="text-sm font-medium text-foreground border-b border-foreground/30 pb-1 mb-3">
+                            Benefícios
+                          </p>
                           <ul className="space-y-2">
                             {contrapartida.beneficios.map((beneficio, index) => (
                               <li key={index} className="flex items-start gap-2">
                                 <Check className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
-                                <span className="text-sm text-foreground/90 leading-snug">{beneficio}</span>
+                                <span className="text-sm text-muted-foreground leading-relaxed">{beneficio}</span>
                               </li>
                             ))}
                           </ul>
