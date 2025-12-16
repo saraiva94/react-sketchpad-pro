@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Trash2, GripVertical, Check, X } from "lucide-react";
 
 export interface Contrapartida {
@@ -12,7 +13,17 @@ export interface Contrapartida {
   beneficios: string[];
   ativo: boolean;
   ordem: number;
+  indice?: string;
 }
+
+const INDICE_OPTIONS = [
+  { value: 'por_episodio', label: 'por episódio' },
+  { value: 'por_temporada', label: 'por temporada' },
+  { value: 'por_projeto', label: 'por projeto' },
+  { value: 'por_evento', label: 'por evento' },
+  { value: 'por_mes', label: 'por mês' },
+  { value: 'por_ano', label: 'por ano' },
+];
 
 interface ContrapartidasEditorProps {
   contrapartidas: Contrapartida[];
@@ -31,7 +42,8 @@ const ContrapartidasEditor: React.FC<ContrapartidasEditorProps> = ({
       valor: '',
       beneficios: [],
       ativo: true,
-      ordem: contrapartidas.length
+      ordem: contrapartidas.length,
+      indice: undefined
     };
     onChange([...contrapartidas, newContrapartida]);
   };
@@ -151,17 +163,40 @@ const ContrapartidasEditor: React.FC<ContrapartidasEditorProps> = ({
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Valor */}
-            <div className="space-y-2">
-              <Label htmlFor={`valor-${contrapartida.id}`}>
-                Valor (ex: R$ 5.000 - R$ 14.999)
-              </Label>
-              <Input
-                id={`valor-${contrapartida.id}`}
-                value={contrapartida.valor}
-                onChange={(e) => updateContrapartida(contrapartida.id, 'valor', e.target.value)}
-                placeholder="R$ 5.000 - R$ 14.999"
-              />
+            {/* Valor e Índice */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor={`valor-${contrapartida.id}`}>
+                  Valor (ex: 5000)
+                </Label>
+                <Input
+                  id={`valor-${contrapartida.id}`}
+                  value={contrapartida.valor}
+                  onChange={(e) => updateContrapartida(contrapartida.id, 'valor', e.target.value)}
+                  placeholder="5000"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor={`indice-${contrapartida.id}`}>
+                  Índice (tag)
+                </Label>
+                <Select
+                  value={contrapartida.indice || ''}
+                  onValueChange={(value) => updateContrapartida(contrapartida.id, 'indice', value || undefined)}
+                >
+                  <SelectTrigger id={`indice-${contrapartida.id}`}>
+                    <SelectValue placeholder="Selecionar índice..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Nenhum</SelectItem>
+                    {INDICE_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             {/* Benefícios */}

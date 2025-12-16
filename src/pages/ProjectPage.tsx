@@ -80,6 +80,7 @@ interface Contrapartida {
   beneficios: string[];
   ativo: boolean;
   ordem: number;
+  indice?: string;
 }
 
 const ProjectPage = () => {
@@ -593,16 +594,14 @@ const ProjectPage = () => {
                   <Gift className="w-6 h-6 text-primary" />
                   Contrapartidas para Investidores
                 </h2>
-                <div className="grid gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {contrapartidas.map((contrapartida) => {
                     // Format value as Brazilian currency
                     const formatCurrency = (value: string) => {
-                      // Remove any existing formatting
                       const numericValue = value.replace(/[^\d,.-]/g, '').replace(',', '.');
                       const number = parseFloat(numericValue);
                       
                       if (isNaN(number)) {
-                        // If not a valid number, return original with R$ prefix if not present
                         return value.startsWith('R$') ? value : `R$ ${value}`;
                       }
                       
@@ -614,36 +613,47 @@ const ProjectPage = () => {
                       }).format(number);
                     };
 
+                    // Map indice to display label
+                    const getIndiceLabel = (indice?: string) => {
+                      const labels: Record<string, string> = {
+                        'por_episodio': 'por episódio',
+                        'por_temporada': 'por temporada',
+                        'por_projeto': 'por projeto',
+                        'por_evento': 'por evento',
+                        'por_mes': 'por mês',
+                        'por_ano': 'por ano',
+                      };
+                      return indice && indice !== 'none' ? labels[indice] : null;
+                    };
+
+                    const indiceLabel = getIndiceLabel(contrapartida.indice);
+
                     return (
                       <div 
                         key={contrapartida.id} 
-                        className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:border-primary/30"
+                        className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:border-primary/30 flex flex-col aspect-square"
                       >
                         {/* Header with value */}
-                        <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent px-6 py-4 border-b border-border/50">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 bg-primary/10 rounded-lg">
-                              <Gift className="w-5 h-5 text-primary" />
-                            </div>
-                            <div>
-                              <p className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Investimento</p>
-                              <span className="text-2xl font-bold text-foreground">
-                                {formatCurrency(contrapartida.valor)}
+                        <div className="bg-gradient-to-br from-primary/15 via-primary/5 to-transparent px-5 py-5 border-b border-border/50">
+                          <div className="text-center">
+                            <span className="text-3xl font-bold text-foreground block">
+                              {formatCurrency(contrapartida.valor)}
+                            </span>
+                            {indiceLabel && (
+                              <span className="text-sm text-primary font-medium mt-1 block">
+                                {indiceLabel}
                               </span>
-                            </div>
+                            )}
                           </div>
                         </div>
                         
                         {/* Benefits list */}
-                        <div className="p-6">
-                          <p className="text-sm font-medium text-muted-foreground mb-4 uppercase tracking-wide">Benefícios inclusos</p>
-                          <ul className="space-y-3">
+                        <div className="p-5 flex-1 overflow-y-auto">
+                          <ul className="space-y-2">
                             {contrapartida.beneficios.map((beneficio, index) => (
-                              <li key={index} className="flex items-start gap-3 group">
-                                <div className="p-1 bg-emerald-500/10 rounded-full flex-shrink-0 mt-0.5">
-                                  <Check className="w-4 h-4 text-emerald-500" />
-                                </div>
-                                <span className="text-foreground/90 leading-relaxed">{beneficio}</span>
+                              <li key={index} className="flex items-start gap-2">
+                                <Check className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
+                                <span className="text-sm text-foreground/90 leading-snug">{beneficio}</span>
                               </li>
                             ))}
                           </ul>
