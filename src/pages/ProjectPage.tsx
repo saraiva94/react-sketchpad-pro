@@ -12,7 +12,6 @@ import {
   ArrowLeft, 
   MapPin, 
   Sparkles,
-  Heart,
   MessageCircle,
   Download,
   Users,
@@ -20,10 +19,7 @@ import {
   Globe,
   Star,
   Shield,
-  CheckCircle,
   Play,
-  Mail,
-  Phone,
   ExternalLink,
   Check,
   Gift,
@@ -78,12 +74,6 @@ interface ContactButton {
   link: string;
 }
 
-interface CreatorInfo {
-  nome: string | null;
-  email: string | null;
-  telefone: string | null;
-}
-
 interface Contrapartida {
   id: string;
   valor: string;
@@ -101,8 +91,6 @@ const ProjectPage = () => {
   const [isFavorited, setIsFavorited] = useState(false);
   const [contactButtons, setContactButtons] = useState<ContactButton[]>([]);
   const [showContactPopup, setShowContactPopup] = useState(false);
-  const [showCreatorPopup, setShowCreatorPopup] = useState(false);
-  const [creatorInfo, setCreatorInfo] = useState<CreatorInfo | null>(null);
   const [contrapartidas, setContrapartidas] = useState<Contrapartida[]>([]);
 
   useEffect(() => {
@@ -110,7 +98,6 @@ const ProjectPage = () => {
       fetchProject();
       fetchMembers();
       fetchContactButtons();
-      fetchCreatorInfo();
       fetchContrapartidas();
     }
   }, [id]);
@@ -168,22 +155,6 @@ const ProjectPage = () => {
         name: "WhatsApp Porto Bello",
         link: "https://wa.me/5521967264730"
       }]);
-    }
-  };
-
-  const fetchCreatorInfo = async () => {
-    const { data } = await supabase
-      .from("projects")
-      .select("responsavel_nome, responsavel_email, responsavel_telefone")
-      .eq("id", id)
-      .maybeSingle();
-
-    if (data) {
-      setCreatorInfo({
-        nome: data.responsavel_nome,
-        email: data.responsavel_email,
-        telefone: data.responsavel_telefone
-      });
     }
   };
 
@@ -351,30 +322,6 @@ const ProjectPage = () => {
       });
     }
 
-    // Creator/Responsible contact info
-    if (creatorInfo && (creatorInfo.nome || creatorInfo.email || creatorInfo.telefone)) {
-      if (yPos > 240) { doc.addPage(); yPos = 20; }
-      doc.setFontSize(14);
-      doc.setFont("helvetica", "bold");
-      doc.setTextColor(0);
-      doc.text("Contato do Responsável", margin, yPos);
-      yPos += 8;
-      doc.setFontSize(11);
-      doc.setFont("helvetica", "normal");
-      if (creatorInfo.nome) {
-        doc.text(`Nome: ${creatorInfo.nome}`, margin, yPos);
-        yPos += 6;
-      }
-      if (creatorInfo.email) {
-        doc.text(`E-mail: ${creatorInfo.email}`, margin, yPos);
-        yPos += 6;
-      }
-      if (creatorInfo.telefone) {
-        doc.text(`Telefone: ${creatorInfo.telefone}`, margin, yPos);
-        yPos += 6;
-      }
-      yPos += 10;
-    }
 
     // Footer
     doc.setFontSize(9);
@@ -738,19 +685,30 @@ const ProjectPage = () => {
                 <h3 className="font-serif font-bold text-xl text-foreground mb-4">Informações do Projeto</h3>
                 <div className="space-y-4">
                   <div>
-                    <span className="text-sm text-muted-foreground">Orçamento Total</span>
-                    <div className="text-2xl font-bold text-foreground">
-                      {project.valor_sugerido ? formatBudget(project.valor_sugerido) : (project.budget || "A definir")}
-                    </div>
+                    <span className="text-sm text-muted-foreground">Título</span>
+                    <div className="font-semibold text-foreground">{project.title}</div>
                   </div>
                   <div>
-                    <span className="text-sm text-muted-foreground">Publicado em</span>
-                    <div className="font-medium text-foreground">
-                      {new Date(project.created_at).toLocaleDateString("pt-BR")}
-                    </div>
+                    <span className="text-sm text-muted-foreground">Tipo do Projeto</span>
+                    <div className="font-medium text-foreground">{project.project_type}</div>
                   </div>
+                  {project.stages && project.stages.length > 0 && (
+                    <div>
+                      <span className="text-sm text-muted-foreground">Estágio do Projeto</span>
+                      <div className="font-medium text-foreground">{project.stages.join(", ")}</div>
+                    </div>
+                  )}
+                  {project.location && (
+                    <div>
+                      <span className="text-sm text-muted-foreground">Localização</span>
+                      <div className="font-medium text-foreground flex items-center gap-1">
+                        <MapPin className="w-4 h-4" />
+                        {project.location}
+                      </div>
+                    </div>
+                  )}
                   {project.categorias_tags && project.categorias_tags.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-2 pt-2">
                       {project.categorias_tags.map((tag, index) => (
                         <Badge key={index} variant="secondary" className="rounded-full">
                           {tag}
@@ -770,27 +728,6 @@ const ProjectPage = () => {
                 </Button>
               </div>
 
-              {/* Creator Info */}
-              <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
-                <h3 className="font-serif font-bold text-lg text-foreground mb-4">Criador do Projeto</h3>
-                <div className="flex items-center space-x-3 mb-4">
-                  <div className="w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center">
-                    <span className="text-primary-foreground text-lg font-semibold">
-                      {project.responsavel_primeiro_nome ? getInitials(project.responsavel_primeiro_nome) : 'PC'}
-                    </span>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-foreground flex items-center">
-                      {project.responsavel_primeiro_nome || "Produtor Cultural"}
-                      <CheckCircle className="w-4 h-4 text-primary ml-2" />
-                    </h4>
-                    <p className="text-sm text-muted-foreground">Produtor(a) Cultural</p>
-                  </div>
-                </div>
-                <Button variant="outline" className="w-full rounded-full" onClick={() => setShowCreatorPopup(true)}>
-                  Ver Informações de Contato
-                </Button>
-              </div>
 
               {/* Incentive Law Card */}
               {project.has_incentive_law && project.incentive_law_details && (
@@ -832,57 +769,6 @@ const ProjectPage = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Creator Info Popup */}
-      <Dialog open={showCreatorPopup} onOpenChange={setShowCreatorPopup}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="font-serif">Informações do Criador</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            {creatorInfo ? (
-              <>
-                {creatorInfo.nome && (
-                  <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
-                    <CheckCircle className="w-5 h-5 text-primary" />
-                    <div>
-                      <p className="text-sm text-muted-foreground">Nome</p>
-                      <p className="font-medium">{creatorInfo.nome}</p>
-                    </div>
-                  </div>
-                )}
-                {creatorInfo.telefone && (
-                  <a 
-                    href={`https://wa.me/55${creatorInfo.telefone.replace(/\D/g, '')}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg hover:bg-emerald-500/20 transition-colors cursor-pointer"
-                  >
-                    <Phone className="w-5 h-5 text-emerald-500" />
-                    <div>
-                      <p className="text-sm text-muted-foreground">Telefone</p>
-                      <p className="font-medium text-emerald-500 hover:underline">{creatorInfo.telefone}</p>
-                    </div>
-                  </a>
-                )}
-                {creatorInfo.email && (
-                  <a 
-                    href={`mailto:${creatorInfo.email}`}
-                    className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
-                  >
-                    <Mail className="w-5 h-5 text-primary" />
-                    <div>
-                      <p className="text-sm text-muted-foreground">Email</p>
-                      <p className="font-medium">{creatorInfo.email}</p>
-                    </div>
-                  </a>
-                )}
-              </>
-            ) : (
-              <p className="text-muted-foreground text-center py-4">Informações de contato não disponíveis.</p>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
 
       {/* Footer */}
       <Footer />
