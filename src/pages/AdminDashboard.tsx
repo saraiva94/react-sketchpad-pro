@@ -1119,7 +1119,7 @@ const AdminDashboard = () => {
                 className="rainbow-border-glow"
               >
                 <Lightbulb className="w-4 h-4 mr-2" />
-                Porto de Ideias
+                Projetos em Captação
               </Button>
             </Link>
             <Button variant="outline" size="sm" onClick={handleSignOut}>
