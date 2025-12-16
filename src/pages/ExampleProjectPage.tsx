@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { 
   ArrowLeft, 
@@ -518,22 +519,22 @@ const ExampleProjectPage = () => {
 
             {/* Reconhecimentos e Mídia */}
             {(project.awards.length > 0 || project.news.length > 0) && (
-              <section>
-                <h2 className="text-2xl font-serif font-bold text-foreground mb-6">
+              <Card className="p-6">
+                <h2 className="text-xl font-serif font-bold text-foreground mb-4">
                   Reconhecimentos e Mídia
                 </h2>
                 <div className="grid md:grid-cols-2 gap-6">
                   {project.awards.length > 0 && (
                     <div>
-                      <h3 className="font-semibold text-foreground mb-4 flex items-center">
-                        <Award className="w-5 h-5 text-amber-500 mr-2" />
+                      <h3 className="font-medium text-foreground mb-3 flex items-center text-sm">
+                        <Award className="w-4 h-4 text-amber-500 mr-2" />
                         Prêmios e Reconhecimentos
                       </h3>
                       <ul className="space-y-2">
                         {project.awards.map((award, index) => (
                           <li key={index} className="flex items-start space-x-2">
-                            <Award className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
-                            <span className="text-muted-foreground">{award}</span>
+                            <Award className="w-3 h-3 text-amber-500 mt-1 flex-shrink-0" />
+                            <span className="text-sm text-muted-foreground">{award}</span>
                           </li>
                         ))}
                       </ul>
@@ -541,11 +542,11 @@ const ExampleProjectPage = () => {
                   )}
                   {project.news.length > 0 && (
                     <div>
-                      <h3 className="font-semibold text-foreground mb-4 flex items-center">
-                        <Newspaper className="w-5 h-5 text-primary mr-2" />
+                      <h3 className="font-medium text-foreground mb-3 flex items-center text-sm">
+                        <Newspaper className="w-4 h-4 text-primary mr-2" />
                         Na Mídia
                       </h3>
-                      <ul className="space-y-3">
+                      <ul className="space-y-2">
                         {project.news.map((item, index) => (
                           <li key={index}>
                             {item.url ? (
@@ -553,15 +554,15 @@ const ExampleProjectPage = () => {
                                 href={item.url} 
                                 target="_blank" 
                                 rel="noopener noreferrer"
-                                className="block p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
+                                className="block p-2 bg-muted/30 rounded-md hover:bg-muted/50 transition-colors"
                               >
-                                <h4 className="font-medium text-foreground mb-1">{item.title}</h4>
-                                {item.date && <p className="text-sm text-muted-foreground">{item.date}</p>}
+                                <h4 className="font-medium text-foreground text-sm">{item.title}</h4>
+                                {item.date && <p className="text-xs text-muted-foreground mt-0.5">{item.date}</p>}
                               </a>
                             ) : (
-                              <div className="block p-3 bg-muted/50 rounded-lg">
-                                <h4 className="font-medium text-foreground mb-1">{item.title}</h4>
-                                {item.date && <p className="text-sm text-muted-foreground">{item.date}</p>}
+                              <div className="block p-2 bg-muted/30 rounded-md">
+                                <h4 className="font-medium text-foreground text-sm">{item.title}</h4>
+                                {item.date && <p className="text-xs text-muted-foreground mt-0.5">{item.date}</p>}
                               </div>
                             )}
                           </li>
@@ -570,7 +571,7 @@ const ExampleProjectPage = () => {
                     </div>
                   )}
                 </div>
-              </section>
+              </Card>
             )}
           </div>
 
