@@ -519,7 +519,7 @@ const ExampleProjectPage = () => {
                     const remainder = count % 3;
                     const slotsNeeded = remainder === 0 ? 0 : 3 - remainder;
                     return Array.from({ length: slotsNeeded }).map((_, i) => (
-                      <div key={`slot-${i}`} className="hidden lg:flex glass-slot-card rounded-2xl min-h-[180px] items-center justify-center">
+                      <div key={`slot-${i}`} className="glass-slot-card rounded-2xl min-h-[180px] flex items-center justify-center">
                         <div className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/20">
                           <span className="text-2xl text-white/40">+</span>
                         </div>
