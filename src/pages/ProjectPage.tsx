@@ -594,26 +594,63 @@ const ProjectPage = () => {
                   Contrapartidas para Investidores
                 </h2>
                 <div className="grid gap-4">
-                  {contrapartidas.map((contrapartida) => (
-                    <div 
-                      key={contrapartida.id} 
-                      className="bg-card border border-border rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow"
-                    >
-                      <div className="mb-4">
-                        <span className="text-xl font-bold text-foreground">
-                          {contrapartida.valor}
-                        </span>
+                  {contrapartidas.map((contrapartida) => {
+                    // Format value as Brazilian currency
+                    const formatCurrency = (value: string) => {
+                      // Remove any existing formatting
+                      const numericValue = value.replace(/[^\d,.-]/g, '').replace(',', '.');
+                      const number = parseFloat(numericValue);
+                      
+                      if (isNaN(number)) {
+                        // If not a valid number, return original with R$ prefix if not present
+                        return value.startsWith('R$') ? value : `R$ ${value}`;
+                      }
+                      
+                      return new Intl.NumberFormat('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL',
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 2,
+                      }).format(number);
+                    };
+
+                    return (
+                      <div 
+                        key={contrapartida.id} 
+                        className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:border-primary/30"
+                      >
+                        {/* Header with value */}
+                        <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent px-6 py-4 border-b border-border/50">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-primary/10 rounded-lg">
+                              <Gift className="w-5 h-5 text-primary" />
+                            </div>
+                            <div>
+                              <p className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Investimento</p>
+                              <span className="text-2xl font-bold text-foreground">
+                                {formatCurrency(contrapartida.valor)}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Benefits list */}
+                        <div className="p-6">
+                          <p className="text-sm font-medium text-muted-foreground mb-4 uppercase tracking-wide">Benefícios inclusos</p>
+                          <ul className="space-y-3">
+                            {contrapartida.beneficios.map((beneficio, index) => (
+                              <li key={index} className="flex items-start gap-3 group">
+                                <div className="p-1 bg-emerald-500/10 rounded-full flex-shrink-0 mt-0.5">
+                                  <Check className="w-4 h-4 text-emerald-500" />
+                                </div>
+                                <span className="text-foreground/90 leading-relaxed">{beneficio}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
                       </div>
-                      <ul className="space-y-2">
-                        {contrapartida.beneficios.map((beneficio, index) => (
-                          <li key={index} className="flex items-start gap-3">
-                            <Check className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" />
-                            <span className="text-muted-foreground">{beneficio}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </section>
             )}
