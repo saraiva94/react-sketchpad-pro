@@ -695,7 +695,24 @@ const ProjectPage = () => {
                   {project.stages && project.stages.length > 0 && (
                     <div>
                       <span className="text-sm text-muted-foreground">Estágio do Projeto</span>
-                      <div className="font-medium text-foreground">{project.stages.join(", ")}</div>
+                      <div className="font-medium text-foreground">
+                        {project.stages.map(stage => {
+                          const stageTranslations: Record<string, string> = {
+                            'development': 'Desenvolvimento',
+                            'production': 'Produção',
+                            'distribution': 'Distribuição',
+                            'Ideia inicial': 'Ideia inicial',
+                            'Desenvolvimento': 'Desenvolvimento',
+                            'Captação de recursos': 'Captação de recursos',
+                            'Pré-produção': 'Pré-produção',
+                            'Pós-produção': 'Pós-produção',
+                            'Finalizado': 'Finalizado',
+                            'Em exibição': 'Em exibição',
+                            'Distribuição': 'Distribuição'
+                          };
+                          return stageTranslations[stage] || stage;
+                        }).join(", ")}
+                      </div>
                     </div>
                   )}
                   {project.location && (
