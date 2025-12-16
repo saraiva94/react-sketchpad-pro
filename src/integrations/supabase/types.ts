@@ -56,6 +56,7 @@ export type Database = {
           beneficios: string[]
           created_at: string
           id: string
+          indice: string | null
           ordem: number
           project_id: string
           updated_at: string
@@ -66,6 +67,7 @@ export type Database = {
           beneficios?: string[]
           created_at?: string
           id?: string
+          indice?: string | null
           ordem?: number
           project_id: string
           updated_at?: string
@@ -76,6 +78,7 @@ export type Database = {
           beneficios?: string[]
           created_at?: string
           id?: string
+          indice?: string | null
           ordem?: number
           project_id?: string
           updated_at?: string
