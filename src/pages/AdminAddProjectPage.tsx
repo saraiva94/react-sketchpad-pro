@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Send, ArrowLeft, Upload, FileText, ExternalLink } from "lucide-react";
+import { Send, ArrowLeft, Upload, FileText, ExternalLink, Image } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -15,6 +15,7 @@ import { TeamMemberEditor, TeamMemberData } from "@/components/admin/TeamMemberE
 import { StagesMultiSelect } from "@/components/admin/StagesMultiSelect";
 import ContrapartidasEditor, { Contrapartida } from "@/components/admin/ContrapartidasEditor";
 import { RecognitionEditor, NewsItem } from "@/components/admin/RecognitionEditor";
+import { ImageCropper } from "@/components/ImageCropper";
 
 const PROJECT_TYPES = [
   "Longa-metragem ficção",
@@ -45,12 +46,15 @@ const AdminAddProjectPage = () => {
   const [responsavelEmail, setResponsavelEmail] = useState("");
   const [responsavelTelefone, setResponsavelTelefone] = useState("");
   
+  // Imagem de Capa
+  const [thumbnailBlob, setThumbnailBlob] = useState<Blob | null>(null);
+  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
+  
   // Projeto básico
   const [titulo, setTitulo] = useState("");
   const [sinopse, setSinopse] = useState("");
   const [categoriasTags, setCategoriasTags] = useState("");
   const [descricao, setDescricao] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
   const [location, setLocation] = useState("");
   const [projectType, setProjectType] = useState("");
   const [customProjectType, setCustomProjectType] = useState("");
@@ -134,6 +138,16 @@ const AdminAddProjectPage = () => {
     setUploadingDoc(false);
   };
 
+  const handleImageCropped = (blob: Blob, previewUrl: string) => {
+    setThumbnailBlob(blob);
+    setThumbnailPreview(previewUrl);
+  };
+
+  const handleClearImage = () => {
+    setThumbnailBlob(null);
+    setThumbnailPreview(null);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -144,6 +158,23 @@ const AdminAddProjectPage = () => {
     try {
       const tags = categoriasTags.split(",").map(t => t.trim()).filter(t => t);
       const finalProjectType = projectType === "Outro" ? customProjectType : projectType;
+      
+      // Upload thumbnail if provided
+      let imageUrl = null;
+      if (thumbnailBlob) {
+        const timestamp = Date.now();
+        const fileName = `thumbnails/${timestamp}_cover.jpg`;
+        const { error: uploadError } = await supabase.storage
+          .from("project-media")
+          .upload(fileName, thumbnailBlob);
+        
+        if (!uploadError) {
+          const { data: urlData } = supabase.storage
+            .from("project-media")
+            .getPublicUrl(fileName);
+          imageUrl = urlData.publicUrl;
+        }
+      }
 
       // Insert project directly as approved (admin adding)
       const { data: project, error: projectError } = await supabase
@@ -159,7 +190,7 @@ const AdminAddProjectPage = () => {
           responsavel_telefone: responsavelTelefone || null,
           categorias_tags: tags.length > 0 ? tags : null,
           link_video: linkVideo || null,
-          image_url: imageUrl || null,
+          image_url: imageUrl,
           location: location || null,
           valor_sugerido: valorSugerido ? parseFloat(valorSugerido) : null,
           link_pagamento: linkPagamento || null,
@@ -248,44 +279,21 @@ const AdminAddProjectPage = () => {
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-8">
-                {/* Thumbnail Preview */}
+                {/* Imagem de Capa */}
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-foreground border-b pb-2">
-                    Capa do Projeto
+                  <h3 className="text-lg font-semibold text-foreground border-b pb-2 flex items-center gap-2">
+                    <Image className="w-5 h-5" />
+                    Imagem de Capa do Projeto
                   </h3>
-                  
-                  <div className="flex flex-col items-center gap-4">
-                    <div className="w-full max-w-md aspect-video rounded-lg border-2 border-dashed border-muted-foreground/30 overflow-hidden bg-muted/50 flex items-center justify-center">
-                      {imageUrl ? (
-                        <img 
-                          src={imageUrl} 
-                          alt="Preview da capa"
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).style.display = 'none';
-                          }}
-                        />
-                      ) : (
-                        <div className="text-center p-6">
-                          <Upload className="w-12 h-12 mx-auto mb-3 text-muted-foreground/50" />
-                          <p className="text-sm text-muted-foreground">
-                            Cole a URL da imagem abaixo para visualizar
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                    
-                    <div className="w-full max-w-md">
-                      <Label htmlFor="imageUrlPreview">URL da Imagem de Capa</Label>
-                      <Input
-                        id="imageUrlPreview"
-                        value={imageUrl}
-                        onChange={(e) => setImageUrl(e.target.value)}
-                        placeholder="https://exemplo.com/imagem.jpg"
-                        className="mt-1"
-                      />
-                    </div>
-                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Adicione uma imagem que representará o projeto. Você pode ajustar o enquadramento antes de salvar.
+                  </p>
+                  <ImageCropper
+                    onImageCropped={handleImageCropped}
+                    currentImage={thumbnailPreview}
+                    onClear={handleClearImage}
+                    aspectRatio={16 / 9}
+                  />
                 </div>
 
                 {/* Responsável */}
