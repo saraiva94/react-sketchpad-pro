@@ -1,5 +1,9 @@
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { X, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const STAGE_OPTIONS = [
@@ -18,9 +22,17 @@ interface StagesMultiSelectProps {
   value: string[];
   onChange: (stages: string[]) => void;
   label?: string;
+  allowCustom?: boolean;
 }
 
-export const StagesMultiSelect = ({ value, onChange, label = "Estágios do Projeto" }: StagesMultiSelectProps) => {
+export const StagesMultiSelect = ({ 
+  value, 
+  onChange, 
+  label = "Estágios do Projeto",
+  allowCustom = false 
+}: StagesMultiSelectProps) => {
+  const [newStage, setNewStage] = useState("");
+
   const toggleStage = (stage: string) => {
     if (value.includes(stage)) {
       onChange(value.filter(s => s !== stage));
@@ -29,9 +41,52 @@ export const StagesMultiSelect = ({ value, onChange, label = "Estágios do Proje
     }
   };
 
+  const removeStage = (stage: string) => {
+    onChange(value.filter(s => s !== stage));
+  };
+
+  const addCustomStage = () => {
+    const trimmed = newStage.trim();
+    if (trimmed && !value.includes(trimmed)) {
+      onChange([...value, trimmed]);
+      setNewStage("");
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      addCustomStage();
+    }
+  };
+
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       {label && <Label>{label}</Label>}
+      
+      {/* Add custom stage input */}
+      {allowCustom && (
+        <div className="flex gap-2">
+          <Input
+            placeholder="Adicionar novo estágio..."
+            value={newStage}
+            onChange={(e) => setNewStage(e.target.value)}
+            onKeyDown={handleKeyDown}
+            className="flex-1"
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            onClick={addCustomStage}
+            disabled={!newStage.trim()}
+          >
+            <Plus className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
+
+      {/* All stages with remove X */}
       <div className="flex flex-wrap gap-2">
         {STAGE_OPTIONS.map((stage) => {
           const isSelected = value.includes(stage.value);
@@ -40,18 +95,49 @@ export const StagesMultiSelect = ({ value, onChange, label = "Estágios do Proje
               key={stage.value}
               variant={isSelected ? "default" : "outline"}
               className={cn(
-                "cursor-pointer transition-all select-none",
+                "cursor-pointer transition-all select-none flex items-center gap-1",
                 isSelected 
-                  ? "bg-primary text-primary-foreground hover:bg-primary/80" 
+                  ? "bg-primary text-primary-foreground hover:bg-primary/80 pr-1" 
                   : "hover:bg-muted"
               )}
-              onClick={() => toggleStage(stage.value)}
+              onClick={() => !isSelected && toggleStage(stage.value)}
             >
               {stage.label}
+              {isSelected && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeStage(stage.value);
+                  }}
+                  className="ml-0.5 hover:bg-red-500/20 rounded-full p-0.5"
+                >
+                  <X className="h-3 w-3 text-red-400" />
+                </button>
+              )}
             </Badge>
           );
         })}
+        
+        {/* Custom stages */}
+        {value.filter(v => !STAGE_OPTIONS.find(s => s.value === v)).map((stage) => (
+          <Badge
+            key={stage}
+            variant="default"
+            className="bg-accent text-accent-foreground pr-1 flex items-center gap-1"
+          >
+            {stage}
+            <button
+              type="button"
+              onClick={() => removeStage(stage)}
+              className="ml-0.5 hover:bg-red-500/20 rounded-full p-0.5"
+            >
+              <X className="h-3 w-3 text-red-400" />
+            </button>
+          </Badge>
+        ))}
       </div>
+
       {value.length === 0 && (
         <p className="text-xs text-muted-foreground">Clique para selecionar os estágios</p>
       )}

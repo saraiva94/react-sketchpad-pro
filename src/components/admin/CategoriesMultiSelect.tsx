@@ -73,41 +73,15 @@ export const CategoriesMultiSelect = ({
     }
   };
 
-  // Get custom tags (tags that are not in predefined options)
-  const predefinedValues = CATEGORY_OPTIONS.map(c => c.value);
-  const customTags = value.filter(v => !predefinedValues.includes(v));
+  const getLabel = (val: string) => {
+    const predefined = CATEGORY_OPTIONS.find(c => c.value === val);
+    return predefined?.label || val;
+  };
 
   return (
     <div className="space-y-3">
       {label && <Label>{label}</Label>}
       
-      {/* Selected tags with remove button */}
-      {value.length > 0 && (
-        <div className="flex flex-wrap gap-2 p-2 bg-muted/30 rounded-md">
-          <span className="text-xs text-muted-foreground w-full mb-1">Selecionadas:</span>
-          {value.map((tag) => {
-            const predefined = CATEGORY_OPTIONS.find(c => c.value === tag);
-            const displayLabel = predefined?.label || tag;
-            return (
-              <Badge
-                key={tag}
-                variant="default"
-                className="bg-primary text-primary-foreground pr-1 flex items-center gap-1"
-              >
-                {displayLabel}
-                <button
-                  type="button"
-                  onClick={() => removeTag(tag)}
-                  className="ml-1 hover:bg-primary-foreground/20 rounded-full p-0.5"
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              </Badge>
-            );
-          })}
-        </div>
-      )}
-
       {/* Add custom tag input */}
       {allowCustom && (
         <div className="flex gap-2">
@@ -121,7 +95,7 @@ export const CategoriesMultiSelect = ({
           <Button
             type="button"
             variant="outline"
-            size="sm"
+            size="icon"
             onClick={addCustomTag}
             disabled={!newTag.trim()}
           >
@@ -130,45 +104,57 @@ export const CategoriesMultiSelect = ({
         </div>
       )}
 
-      {/* Predefined options */}
+      {/* All tags with remove X */}
       <div className="flex flex-wrap gap-2">
         {CATEGORY_OPTIONS.map((cat) => {
           const isSelected = value.includes(cat.value);
           return (
             <Badge
               key={cat.value}
-              variant={isSelected ? "secondary" : "outline"}
+              variant={isSelected ? "default" : "outline"}
               className={cn(
-                "cursor-pointer transition-all select-none text-xs",
+                "cursor-pointer transition-all select-none text-xs flex items-center gap-1",
                 isSelected 
-                  ? "bg-secondary text-secondary-foreground opacity-50" 
+                  ? "bg-primary text-primary-foreground hover:bg-primary/80 pr-1" 
                   : "hover:bg-muted"
               )}
-              onClick={() => toggleCategory(cat.value)}
+              onClick={() => !isSelected && toggleCategory(cat.value)}
             >
               {cat.label}
+              {isSelected && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeTag(cat.value);
+                  }}
+                  className="ml-0.5 hover:bg-red-500/20 rounded-full p-0.5"
+                >
+                  <X className="h-3 w-3 text-red-400" />
+                </button>
+              )}
             </Badge>
           );
         })}
+        
+        {/* Custom tags */}
+        {value.filter(v => !CATEGORY_OPTIONS.find(c => c.value === v)).map((tag) => (
+          <Badge
+            key={tag}
+            variant="default"
+            className="bg-accent text-accent-foreground pr-1 flex items-center gap-1 text-xs"
+          >
+            {tag}
+            <button
+              type="button"
+              onClick={() => removeTag(tag)}
+              className="ml-0.5 hover:bg-red-500/20 rounded-full p-0.5"
+            >
+              <X className="h-3 w-3 text-red-400" />
+            </button>
+          </Badge>
+        ))}
       </div>
-
-      {/* Custom tags section */}
-      {customTags.length > 0 && (
-        <div className="pt-2 border-t border-border">
-          <span className="text-xs text-muted-foreground">Tags personalizadas:</span>
-          <div className="flex flex-wrap gap-2 mt-1">
-            {customTags.map((tag) => (
-              <Badge
-                key={tag}
-                variant="secondary"
-                className="bg-accent text-accent-foreground opacity-50"
-              >
-                {tag}
-              </Badge>
-            ))}
-          </div>
-        </div>
-      )}
 
       {value.length === 0 && (
         <p className="text-xs text-muted-foreground">Clique para selecionar as categorias</p>

@@ -2547,6 +2547,7 @@ const AdminDashboard = () => {
                     value={editStages} 
                     onChange={setEditStages}
                     label="Estágios do Projeto"
+                    allowCustom={true}
                   />
                 </div>
 
@@ -2703,6 +2704,7 @@ const AdminDashboard = () => {
               <IncentiveLawsMultiSelect 
                 value={editIncentiveLaws}
                 onChange={setEditIncentiveLaws}
+                allowCustom={true}
               />
             </div>
 
