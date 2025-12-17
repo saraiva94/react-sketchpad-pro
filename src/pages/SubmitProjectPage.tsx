@@ -21,6 +21,7 @@ import { LazyArtisticBackground } from "@/components/LazyArtisticBackground";
 import { ImageCropper } from "@/components/ImageCropper";
 import ContrapartidasEditor, { Contrapartida } from "@/components/admin/ContrapartidasEditor";
 import { RecognitionEditor, NewsItem } from "@/components/admin/RecognitionEditor";
+import { CategoriesMultiSelect, getCategoryLabel } from "@/components/admin/CategoriesMultiSelect";
 
 interface TeamMember {
   nome: string;
@@ -45,7 +46,7 @@ const SubmitProjectPage = () => {
   
   // Projeto básico
   const [titulo, setTitulo] = useState("");
-  const [categoriasTags, setCategoriasTags] = useState("");
+  const [categoriasTags, setCategoriasTags] = useState<string[]>([]);
   const [descricao, setDescricao] = useState("");
   
   // Mídia
@@ -175,8 +176,8 @@ const SubmitProjectPage = () => {
         mediaUrl = await uploadFile(videoFile, path);
       }
 
-      // Parse tags
-      const tags = categoriasTags.split(",").map(t => t.trim()).filter(t => t);
+      // Use categoriasTags directly (already an array)
+      const tags = categoriasTags.map(c => getCategoryLabel(c));
 
       // Insert project
       const { data: project, error: projectError } = await supabase
@@ -260,7 +261,7 @@ const SubmitProjectPage = () => {
     setResponsavelTelefone("");
     setResponsavelGenero("");
     setTitulo("");
-    setCategoriasTags("");
+    setCategoriasTags([]);
     setDescricao("");
     setLinkVideo("");
     setVideoFile(null);
@@ -430,18 +431,10 @@ const SubmitProjectPage = () => {
                     )}
                   </div>
 
-                  <div>
-                    <Label htmlFor="categoriasTags">Categorias/Tags</Label>
-                    <Input
-                      id="categoriasTags"
-                      value={categoriasTags}
-                      onChange={(e) => setCategoriasTags(e.target.value)}
-                      placeholder="Cinema, Teatro, Música (separados por vírgula)"
-                    />
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Separe as categorias por vírgula
-                    </p>
-                  </div>
+                  <CategoriesMultiSelect
+                    value={categoriasTags}
+                    onChange={setCategoriasTags}
+                  />
 
                   <div>
                     <Label htmlFor="descricao">Descrição Completa *</Label>
