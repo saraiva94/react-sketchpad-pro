@@ -36,14 +36,20 @@ export const StagesMultiSelect = ({
   onOptionsChange
 }: StagesMultiSelectProps) => {
   const [newStage, setNewStage] = useState("");
+  
+  // Internal state for options when allowCustom but no external control
+  const [internalOptions, setInternalOptions] = useState<string[]>(() => 
+    DEFAULT_STAGE_OPTIONS.map(o => o.value)
+  );
 
-  // Use provided options or defaults
-  const options = availableOptions 
-    ? availableOptions.map(v => {
-        const def = DEFAULT_STAGE_OPTIONS.find(d => d.value === v);
-        return { value: v, label: def?.label || v };
-      })
-    : DEFAULT_STAGE_OPTIONS;
+  // Determine which options to use
+  const optionValues = availableOptions ?? internalOptions;
+  
+  // Build display options
+  const options = optionValues.map(v => {
+    const def = DEFAULT_STAGE_OPTIONS.find(d => d.value === v);
+    return { value: v, label: def?.label || v };
+  });
 
   const toggleStage = (stage: string) => {
     if (value.includes(stage)) {
@@ -58,25 +64,34 @@ export const StagesMultiSelect = ({
     if (value.includes(optionValue)) {
       onChange(value.filter(s => s !== optionValue));
     }
-    // Remove from available options
+    // Remove from options
     if (onOptionsChange && availableOptions) {
       onOptionsChange(availableOptions.filter(o => o !== optionValue));
+    } else if (allowCustom) {
+      setInternalOptions(prev => prev.filter(o => o !== optionValue));
     }
   };
 
   const addCustomStage = () => {
     const trimmed = newStage.trim();
-    if (trimmed) {
-      // Add to available options if using custom options
-      if (onOptionsChange && availableOptions && !availableOptions.includes(trimmed)) {
+    if (!trimmed) return;
+    
+    // Add to options list
+    if (onOptionsChange && availableOptions) {
+      if (!availableOptions.includes(trimmed)) {
         onOptionsChange([...availableOptions, trimmed]);
       }
-      // Also select it
-      if (!value.includes(trimmed)) {
-        onChange([...value, trimmed]);
+    } else if (allowCustom) {
+      if (!internalOptions.includes(trimmed)) {
+        setInternalOptions(prev => [...prev, trimmed]);
       }
-      setNewStage("");
     }
+    
+    // Select the new option
+    if (!value.includes(trimmed)) {
+      onChange([...value, trimmed]);
+    }
+    setNewStage("");
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {

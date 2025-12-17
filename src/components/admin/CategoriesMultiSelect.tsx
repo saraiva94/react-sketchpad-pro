@@ -43,20 +43,26 @@ interface CategoriesMultiSelectProps {
 export const CategoriesMultiSelect = ({ 
   value, 
   onChange, 
-  label = "Categorias/Tags",
+  label = "Categorias",
   allowCustom = false,
   availableOptions,
   onOptionsChange
 }: CategoriesMultiSelectProps) => {
   const [newTag, setNewTag] = useState("");
+  
+  // Internal state for options when allowCustom but no external control
+  const [internalOptions, setInternalOptions] = useState<string[]>(() => 
+    DEFAULT_CATEGORY_OPTIONS.map(o => o.value)
+  );
 
-  // Use provided options or defaults
-  const options = availableOptions 
-    ? availableOptions.map(v => {
-        const def = DEFAULT_CATEGORY_OPTIONS.find(d => d.value === v);
-        return { value: v, label: def?.label || v };
-      })
-    : DEFAULT_CATEGORY_OPTIONS;
+  // Determine which options to use
+  const optionValues = availableOptions ?? internalOptions;
+  
+  // Build display options
+  const options = optionValues.map(v => {
+    const def = DEFAULT_CATEGORY_OPTIONS.find(d => d.value === v);
+    return { value: v, label: def?.label || v };
+  });
 
   const toggleCategory = (category: string) => {
     if (value.includes(category)) {
@@ -71,25 +77,34 @@ export const CategoriesMultiSelect = ({
     if (value.includes(optionValue)) {
       onChange(value.filter(c => c !== optionValue));
     }
-    // Remove from available options
+    // Remove from options
     if (onOptionsChange && availableOptions) {
       onOptionsChange(availableOptions.filter(o => o !== optionValue));
+    } else if (allowCustom) {
+      setInternalOptions(prev => prev.filter(o => o !== optionValue));
     }
   };
 
   const addCustomTag = () => {
     const trimmed = newTag.trim();
-    if (trimmed) {
-      // Add to available options if using custom options
-      if (onOptionsChange && availableOptions && !availableOptions.includes(trimmed)) {
+    if (!trimmed) return;
+    
+    // Add to options list
+    if (onOptionsChange && availableOptions) {
+      if (!availableOptions.includes(trimmed)) {
         onOptionsChange([...availableOptions, trimmed]);
       }
-      // Also select it
-      if (!value.includes(trimmed)) {
-        onChange([...value, trimmed]);
+    } else if (allowCustom) {
+      if (!internalOptions.includes(trimmed)) {
+        setInternalOptions(prev => [...prev, trimmed]);
       }
-      setNewTag("");
     }
+    
+    // Select the new option
+    if (!value.includes(trimmed)) {
+      onChange([...value, trimmed]);
+    }
+    setNewTag("");
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -107,7 +122,7 @@ export const CategoriesMultiSelect = ({
       {allowCustom && (
         <div className="flex gap-2">
           <Input
-            placeholder="Adicionar nova tag..."
+            placeholder="Adicionar nova categoria..."
             value={newTag}
             onChange={(e) => setNewTag(e.target.value)}
             onKeyDown={handleKeyDown}

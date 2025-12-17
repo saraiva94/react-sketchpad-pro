@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -33,14 +33,20 @@ export const IncentiveLawsMultiSelect = ({
   onOptionsChange
 }: IncentiveLawsMultiSelectProps) => {
   const [newLaw, setNewLaw] = useState("");
+  
+  // Internal state for options when allowCustom but no external control
+  const [internalOptions, setInternalOptions] = useState<string[]>(() => 
+    DEFAULT_INCENTIVE_LAW_OPTIONS.map(o => o.value)
+  );
 
-  // Use provided options or defaults
-  const options = availableOptions 
-    ? availableOptions.map(v => {
-        const def = DEFAULT_INCENTIVE_LAW_OPTIONS.find(d => d.value === v);
-        return { value: v, label: def?.label || v };
-      })
-    : DEFAULT_INCENTIVE_LAW_OPTIONS;
+  // Determine which options to use
+  const optionValues = availableOptions ?? internalOptions;
+  
+  // Build display options
+  const options = optionValues.map(v => {
+    const def = DEFAULT_INCENTIVE_LAW_OPTIONS.find(d => d.value === v);
+    return { value: v, label: def?.label || v };
+  });
 
   const toggleLaw = (law: string) => {
     if (value.includes(law)) {
@@ -55,25 +61,34 @@ export const IncentiveLawsMultiSelect = ({
     if (value.includes(optionValue)) {
       onChange(value.filter(l => l !== optionValue));
     }
-    // Remove from available options
+    // Remove from options
     if (onOptionsChange && availableOptions) {
       onOptionsChange(availableOptions.filter(o => o !== optionValue));
+    } else if (allowCustom) {
+      setInternalOptions(prev => prev.filter(o => o !== optionValue));
     }
   };
 
   const addCustomLaw = () => {
     const trimmed = newLaw.trim();
-    if (trimmed) {
-      // Add to available options if using custom options
-      if (onOptionsChange && availableOptions && !availableOptions.includes(trimmed)) {
+    if (!trimmed) return;
+    
+    // Add to options list
+    if (onOptionsChange && availableOptions) {
+      if (!availableOptions.includes(trimmed)) {
         onOptionsChange([...availableOptions, trimmed]);
       }
-      // Also select it
-      if (!value.includes(trimmed)) {
-        onChange([...value, trimmed]);
+    } else if (allowCustom) {
+      if (!internalOptions.includes(trimmed)) {
+        setInternalOptions(prev => [...prev, trimmed]);
       }
-      setNewLaw("");
     }
+    
+    // Select the new option
+    if (!value.includes(trimmed)) {
+      onChange([...value, trimmed]);
+    }
+    setNewLaw("");
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
