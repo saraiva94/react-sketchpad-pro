@@ -137,12 +137,12 @@ export const CategoriesMultiSelect = ({
           );
         })}
         
-        {/* Custom tags */}
+        {/* Custom tags - same style as predefined */}
         {value.filter(v => !CATEGORY_OPTIONS.find(c => c.value === v)).map((tag) => (
           <Badge
             key={tag}
             variant="default"
-            className="bg-accent text-accent-foreground pr-1 flex items-center gap-1 text-xs"
+            className="bg-primary text-primary-foreground pr-1 flex items-center gap-1 text-xs"
           >
             {tag}
             <button
