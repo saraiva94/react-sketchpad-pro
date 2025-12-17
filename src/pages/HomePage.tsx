@@ -163,6 +163,7 @@ const HomePage = () => {
   const [featuredVisibility, setFeaturedVisibility] = useState<Record<string, boolean>>({});
   const [featuredOrder, setFeaturedOrder] = useState<string[]>([]);
   const [featuredExampleCards, setFeaturedExampleCards] = useState<Record<string, boolean>>({});
+  const [ecossistemaTitle, setEcossistemaTitle] = useState("Um Ecossistema de Conexões");
   
   // Quem Somos content
   interface QuemSomosCard {
@@ -219,6 +220,7 @@ const HomePage = () => {
     fetchInstitutionalVideo();
     fetchQuemSomosContent();
     fetchServicosContent();
+    fetchEcossistemaTitle();
 
     // Subscribe to settings changes for real-time sync
     const channel = supabase
@@ -347,6 +349,19 @@ const HomePage = () => {
     
     if (data && data.value) {
       setServicosContent(data.value as unknown as ServicosContent);
+    }
+  };
+
+  const fetchEcossistemaTitle = async () => {
+    const { data } = await supabase
+      .from("settings")
+      .select("value")
+      .eq("key", "ecossistema_text")
+      .maybeSingle();
+    
+    if (data && data.value) {
+      const settings = data.value as { title?: string };
+      if (settings.title) setEcossistemaTitle(settings.title);
     }
   };
 
@@ -718,7 +733,7 @@ const HomePage = () => {
           <div className={`text-center mb-16 transition-all duration-700 ${portoIdeiasInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
             <ShinyText className="inline-block" delay={300}>
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif font-semibold text-foreground mb-4">
-                Um Ecossistema de Conexões
+                {ecossistemaTitle}
               </h2>
             </ShinyText>
             <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto mt-6">

@@ -59,6 +59,7 @@ export type Database = {
           indice: string | null
           ordem: number
           project_id: string
+          titulo: string | null
           updated_at: string
           valor: string
         }
@@ -70,6 +71,7 @@ export type Database = {
           indice?: string | null
           ordem?: number
           project_id: string
+          titulo?: string | null
           updated_at?: string
           valor: string
         }
@@ -81,6 +83,7 @@ export type Database = {
           indice?: string | null
           ordem?: number
           project_id?: string
+          titulo?: string | null
           updated_at?: string
           valor?: string
         }

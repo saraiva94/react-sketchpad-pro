@@ -15,10 +15,12 @@ import { ImageCropper } from "@/components/ImageCropper";
 import { FeaturedProjectsManager } from "@/components/admin/FeaturedProjectsManager";
 import { PortoIdeiasCardsManager } from "@/components/admin/PortoIdeiasCardsManager";
 import { QuemSomosEditor } from "@/components/admin/QuemSomosEditor";
+import { EcossistemaTextEditor } from "@/components/admin/EcossistemaTextEditor";
 import { NossosServicosEditor } from "@/components/admin/NossosServicosEditor";
 import { ContactButtonsEditor } from "@/components/admin/ContactButtonsEditor";
 import ContrapartidasEditor, { Contrapartida } from "@/components/admin/ContrapartidasEditor";
 import { RecognitionEditor, NewsItem } from "@/components/admin/RecognitionEditor";
+import { StagesMultiSelect } from "@/components/admin/StagesMultiSelect";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
@@ -187,7 +189,7 @@ const AdminDashboard = () => {
   const [editSynopsis, setEditSynopsis] = useState("");
   const [editDescription, setEditDescription] = useState("");
   const [editProjectType, setEditProjectType] = useState("");
-  const [editStage, setEditStage] = useState("");
+  const [editStages, setEditStages] = useState<string[]>([]);
   const [editHasIncentiveLaw, setEditHasIncentiveLaw] = useState(false);
   const [editIncentiveLawDetails, setEditIncentiveLawDetails] = useState("");
   const [editLinkVideo, setEditLinkVideo] = useState("");
@@ -720,7 +722,7 @@ const AdminDashboard = () => {
     setEditSynopsis(project.synopsis || "");
     setEditDescription(project.description || "");
     setEditProjectType(project.project_type || "");
-    setEditStage(project.stage || "development");
+    setEditStages(project.stages || []);
     setEditHasIncentiveLaw(project.has_incentive_law || false);
     setEditIncentiveLawDetails(project.incentive_law_details || "");
     setEditLinkVideo(project.link_video || "");
@@ -805,7 +807,7 @@ const AdminDashboard = () => {
         synopsis: editSynopsis || null,
         description: editDescription || null,
         project_type: editProjectType || null,
-        stage: editStage || null,
+        stages: editStages.length > 0 ? editStages : null,
         image_url: finalImageUrl || null,
         budget: editBudget || null,
         location: editLocation || null,
@@ -847,10 +849,12 @@ const AdminDashboard = () => {
       if (editContrapartidas.length > 0) {
         const contrapartidasData = editContrapartidas.map((c, index) => ({
           project_id: selectedProject.id,
+          titulo: c.titulo || null,
           valor: c.valor,
           beneficios: c.beneficios,
           ativo: c.ativo,
           ordem: index,
+          indice: c.indice || null,
         }));
         
         await supabase.from("contrapartidas").insert(contrapartidasData);
@@ -1407,6 +1411,9 @@ const AdminDashboard = () => {
 
             {/* 2. Quem Somos */}
             <QuemSomosEditor />
+
+            {/* 2.5. Ecossistema de Conexões Title */}
+            <EcossistemaTextEditor />
 
             {/* 3. Projetos em Destaque na Homepage */}
             <FeaturedProjectsManager 
@@ -2519,17 +2526,11 @@ const AdminDashboard = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="edit-stage">Estágio do Projeto</Label>
-                  <Select value={editStage} onValueChange={setEditStage}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione o estágio" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="development">Desenvolvimento</SelectItem>
-                      <SelectItem value="production">Produção</SelectItem>
-                      <SelectItem value="distribution">Difusão</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <StagesMultiSelect 
+                    value={editStages} 
+                    onChange={setEditStages}
+                    label="Estágios do Projeto"
+                  />
                 </div>
 
                 <div className="space-y-2">

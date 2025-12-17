@@ -38,7 +38,26 @@ interface Project {
   stage: string | null;
 }
 
-const categories = ["Todos", "Artes Visuais", "Teatro", "Música", "Audiovisual", "Educação Cultural", "Dança", "Literatura", "Patrimônio"];
+const projectTypes = [
+  "Todos",
+  "Longa-metragem ficção",
+  "Longa-metragem documentário", 
+  "Curta-metragem ficção",
+  "Curta-metragem documentário",
+  "Série ficção",
+  "Série documental",
+  "Videocast",
+  "Podcast",
+  "Evento Cultural",
+  "Musical",
+  "Teatro",
+  "Performance",
+  "Instalação",
+  "Videoclipe",
+  "Projeto educativo",
+  "Projeto formativo",
+  "Projeto transmídia",
+];
 const locations = ["Todas", "São Paulo", "Rio de Janeiro", "Belo Horizonte", "Brasília", "Salvador", "Recife", "Porto Alegre", "Manaus", "Curitiba"];
 const budgetRanges = [
   { value: "all", label: "Todos os Portes" },
@@ -48,9 +67,15 @@ const budgetRanges = [
 ];
 const projectStages = [
   { value: "all", label: "Todos os Estágios" },
+  { value: "ideia", label: "Ideia inicial" },
   { value: "development", label: "Desenvolvimento" },
-  { value: "production", label: "Produção" },
-  { value: "distribution", label: "Difusão" }
+  { value: "captacao", label: "Captação de recursos" },
+  { value: "pre_producao", label: "Pré-produção" },
+  { value: "producao", label: "Produção" },
+  { value: "pos_producao", label: "Pós-produção" },
+  { value: "finalizado", label: "Finalizado" },
+  { value: "em_exibicao", label: "Em exibição" },
+  { value: "distribution", label: "Distribuição" }
 ];
 const incentiveLaws = [
   { value: "all", label: "Todas as Leis" },
@@ -316,14 +341,14 @@ const PortoDeIdeiasPage = () => {
         />
       </div>
 
-      {/* Category */}
+      {/* Project Type */}
       <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-        <SelectTrigger className={`rounded-full ${isMobile ? 'w-full' : 'w-[140px]'}`}>
-          <SelectValue placeholder="Categoria" />
+        <SelectTrigger className={`rounded-full ${isMobile ? 'w-full' : 'w-[180px]'}`}>
+          <SelectValue placeholder="Tipo de Projeto" />
         </SelectTrigger>
         <SelectContent position="popper" sideOffset={4}>
-          {categories.map(cat => (
-            <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+          {projectTypes.map(type => (
+            <SelectItem key={type} value={type}>{type}</SelectItem>
           ))}
         </SelectContent>
       </Select>
