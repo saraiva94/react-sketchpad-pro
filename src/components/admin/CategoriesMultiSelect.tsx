@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Plus, X } from "lucide-react";
+import { Plus, X, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const DEFAULT_CATEGORY_OPTIONS = [
@@ -49,6 +49,7 @@ export const CategoriesMultiSelect = ({
   onOptionsChange
 }: CategoriesMultiSelectProps) => {
   const [newTag, setNewTag] = useState("");
+  const [confirmingDelete, setConfirmingDelete] = useState<string | null>(null);
   
   // Internal state for options when allowCustom but no external control
   const [internalOptions, setInternalOptions] = useState<string[]>(() => 
@@ -65,6 +66,7 @@ export const CategoriesMultiSelect = ({
   });
 
   const toggleCategory = (category: string) => {
+    if (confirmingDelete) return; // Don't toggle while confirming delete
     if (value.includes(category)) {
       onChange(value.filter(c => c !== category));
     } else {
@@ -72,7 +74,7 @@ export const CategoriesMultiSelect = ({
     }
   };
 
-  const deleteOption = (optionValue: string) => {
+  const confirmDelete = (optionValue: string) => {
     // Remove from selected values
     if (value.includes(optionValue)) {
       onChange(value.filter(c => c !== optionValue));
@@ -83,6 +85,7 @@ export const CategoriesMultiSelect = ({
     } else if (allowCustom) {
       setInternalOptions(prev => prev.filter(o => o !== optionValue));
     }
+    setConfirmingDelete(null);
   };
 
   const addCustomTag = () => {
@@ -144,6 +147,8 @@ export const CategoriesMultiSelect = ({
       <div className="flex flex-wrap gap-2">
         {options.map((cat) => {
           const isSelected = value.includes(cat.value);
+          const isConfirming = confirmingDelete === cat.value;
+          
           return (
             <Badge
               key={cat.value}
@@ -152,21 +157,46 @@ export const CategoriesMultiSelect = ({
                 "cursor-pointer transition-all select-none text-xs flex items-center gap-1",
                 isSelected 
                   ? "bg-primary text-primary-foreground hover:bg-primary/80" 
-                  : "hover:bg-muted"
+                  : "hover:bg-muted",
+                isConfirming && "ring-2 ring-red-500/50"
               )}
             >
               <span onClick={() => toggleCategory(cat.value)}>{cat.label}</span>
-              {allowCustom && (
+              {allowCustom && !isConfirming && (
                 <button
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
-                    deleteOption(cat.value);
+                    setConfirmingDelete(cat.value);
                   }}
                   className="ml-0.5 hover:bg-red-500/30 rounded-full p-0.5"
                 >
                   <X className="h-3 w-3 text-red-400" />
                 </button>
+              )}
+              {isConfirming && (
+                <div className="flex items-center gap-0.5 ml-1">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      confirmDelete(cat.value);
+                    }}
+                    className="hover:bg-green-500/30 rounded-full p-0.5"
+                  >
+                    <Check className="h-3 w-3 text-green-400" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setConfirmingDelete(null);
+                    }}
+                    className="hover:bg-red-500/30 rounded-full p-0.5"
+                  >
+                    <X className="h-3 w-3 text-red-400" />
+                  </button>
+                </div>
               )}
             </Badge>
           );
