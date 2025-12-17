@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useLocation } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -15,27 +16,61 @@ interface VideoCarouselProps {
   onAnimationComplete?: () => void;
 }
 
+// Helper function to stop all videos
+const stopAllVideos = (videoRefs: React.MutableRefObject<(HTMLVideoElement | null)[]>) => {
+  videoRefs.current.forEach(video => {
+    if (video) {
+      video.pause();
+      video.currentTime = 0;
+      video.src = '';
+      video.load(); // Forces browser to release media resource
+    }
+  });
+};
+
 export function VideoCarousel({ videos, loading = false, displayCount = 5, onAnimationComplete }: VideoCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [hasEntered, setHasEntered] = useState(false);
   const hasCalledComplete = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
+  const location = useLocation();
   
   // Touch/swipe state
   const touchStartX = useRef<number>(0);
   const touchEndX = useRef<number>(0);
   const isDragging = useRef(false);
 
+  // Stop videos when route changes (navigating away from homepage)
+  useEffect(() => {
+    // If we're not on the homepage, stop all videos
+    if (location.pathname !== '/') {
+      stopAllVideos(videoRefs);
+    }
+  }, [location.pathname]);
+
   // Cleanup: pause all videos when component unmounts
   useEffect(() => {
     return () => {
-      videoRefs.current.forEach(video => {
-        if (video) {
-          video.pause();
-          video.src = '';
-        }
-      });
+      stopAllVideos(videoRefs);
+    };
+  }, []);
+
+  // Pause videos when page visibility changes (user switches tabs)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        videoRefs.current.forEach(video => {
+          if (video) {
+            video.pause();
+          }
+        });
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, []);
 
