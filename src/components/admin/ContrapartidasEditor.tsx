@@ -9,6 +9,7 @@ import { Plus, Trash2, GripVertical, Check, X } from "lucide-react";
 
 export interface Contrapartida {
   id: string;
+  titulo?: string;
   valor: string;
   beneficios: string[];
   ativo: boolean;
@@ -30,6 +31,25 @@ interface ContrapartidasEditorProps {
   onChange: (contrapartidas: Contrapartida[]) => void;
 }
 
+// Função para formatar valor como moeda brasileira
+const formatCurrencyInput = (value: string): string => {
+  // Remove tudo exceto números
+  const numbers = value.replace(/\D/g, '');
+  
+  if (!numbers) return '';
+  
+  // Converte para número e formata
+  const numValue = parseInt(numbers, 10);
+  
+  // Formata como moeda brasileira
+  return numValue.toLocaleString('pt-BR');
+};
+
+// Função para extrair número do valor formatado
+const extractNumber = (formattedValue: string): string => {
+  return formattedValue.replace(/\D/g, '');
+};
+
 const ContrapartidasEditor: React.FC<ContrapartidasEditorProps> = ({ 
   contrapartidas, 
   onChange 
@@ -39,6 +59,7 @@ const ContrapartidasEditor: React.FC<ContrapartidasEditorProps> = ({
   const addContrapartida = () => {
     const newContrapartida: Contrapartida = {
       id: crypto.randomUUID(),
+      titulo: '',
       valor: '',
       beneficios: [],
       ativo: true,
@@ -56,6 +77,18 @@ const ContrapartidasEditor: React.FC<ContrapartidasEditorProps> = ({
     onChange(contrapartidas.map(c => 
       c.id === id ? { ...c, [field]: value } : c
     ));
+  };
+
+  const handleValorChange = (id: string, rawValue: string) => {
+    const formatted = formatCurrencyInput(rawValue);
+    updateContrapartida(id, 'valor', extractNumber(formatted));
+  };
+
+  const getDisplayValue = (valor: string): string => {
+    if (!valor) return '';
+    const num = parseInt(valor, 10);
+    if (isNaN(num)) return valor;
+    return num.toLocaleString('pt-BR');
   };
 
   const addBeneficio = (contrapartidaId: string) => {
@@ -163,26 +196,45 @@ const ContrapartidasEditor: React.FC<ContrapartidasEditorProps> = ({
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Título do Nível */}
+            <div className="space-y-2">
+              <Label htmlFor={`titulo-${contrapartida.id}`}>
+                Nome do Nível
+              </Label>
+              <Input
+                id={`titulo-${contrapartida.id}`}
+                value={contrapartida.titulo || ''}
+                onChange={(e) => updateContrapartida(contrapartida.id, 'titulo', e.target.value)}
+                placeholder="Ex: PATINHAS DE OURO, BRONZE, PRATA..."
+              />
+            </div>
+
             {/* Valor e Índice */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor={`valor-${contrapartida.id}`}>
-                  Valor (ex: 5000)
+                  Valor (R$)
                 </Label>
-                <Input
-                  id={`valor-${contrapartida.id}`}
-                  value={contrapartida.valor}
-                  onChange={(e) => updateContrapartida(contrapartida.id, 'valor', e.target.value)}
-                  placeholder="5000"
-                />
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                    R$
+                  </span>
+                  <Input
+                    id={`valor-${contrapartida.id}`}
+                    value={getDisplayValue(contrapartida.valor)}
+                    onChange={(e) => handleValorChange(contrapartida.id, e.target.value)}
+                    placeholder="5.000"
+                    className="pl-10"
+                  />
+                </div>
               </div>
               <div className="space-y-2">
                 <Label htmlFor={`indice-${contrapartida.id}`}>
                   Índice (tag)
                 </Label>
                 <Select
-                  value={contrapartida.indice || ''}
-                  onValueChange={(value) => updateContrapartida(contrapartida.id, 'indice', value || undefined)}
+                  value={contrapartida.indice || 'none'}
+                  onValueChange={(value) => updateContrapartida(contrapartida.id, 'indice', value === 'none' ? undefined : value)}
                 >
                   <SelectTrigger id={`indice-${contrapartida.id}`}>
                     <SelectValue placeholder="Selecionar índice..." />
