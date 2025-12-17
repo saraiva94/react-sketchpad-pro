@@ -16,6 +16,8 @@ import { StagesMultiSelect } from "@/components/admin/StagesMultiSelect";
 import ContrapartidasEditor, { Contrapartida } from "@/components/admin/ContrapartidasEditor";
 import { RecognitionEditor, NewsItem } from "@/components/admin/RecognitionEditor";
 import { ImageCropper } from "@/components/ImageCropper";
+import { CategoriesMultiSelect, getCategoryLabel } from "@/components/admin/CategoriesMultiSelect";
+import { IncentiveLawsMultiSelect, getIncentiveLawLabel } from "@/components/admin/IncentiveLawsMultiSelect";
 
 const PROJECT_TYPES = [
   "Longa-metragem ficção",
@@ -53,7 +55,7 @@ const AdminAddProjectPage = () => {
   // Projeto básico
   const [titulo, setTitulo] = useState("");
   const [sinopse, setSinopse] = useState("");
-  const [categoriasTags, setCategoriasTags] = useState("");
+  const [categoriasTags, setCategoriasTags] = useState<string[]>([]);
   const [descricao, setDescricao] = useState("");
   const [location, setLocation] = useState("");
   const [projectType, setProjectType] = useState("");
@@ -86,8 +88,7 @@ const AdminAddProjectPage = () => {
   const [diferenciais, setDiferenciais] = useState("");
   
   // Lei de Incentivo
-  const [hasIncentiveLaw, setHasIncentiveLaw] = useState(false);
-  const [incentiveLawDetails, setIncentiveLawDetails] = useState("");
+  const [incentiveLaws, setIncentiveLaws] = useState<string[]>([]);
   
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
@@ -156,7 +157,8 @@ const AdminAddProjectPage = () => {
     setSubmitting(true);
 
     try {
-      const tags = categoriasTags.split(",").map(t => t.trim()).filter(t => t);
+      // Use categoriasTags directly (already an array)
+      const tags = categoriasTags.map(c => getCategoryLabel(c));
       const finalProjectType = projectType === "Outro" ? customProjectType : projectType;
       
       // Upload thumbnail if provided
@@ -175,6 +177,10 @@ const AdminAddProjectPage = () => {
           imageUrl = urlData.publicUrl;
         }
       }
+
+      // Prepare incentive law details from multi-select
+      const hasIncentiveLaw = incentiveLaws.length > 0;
+      const incentiveLawDetails = incentiveLaws.map(l => getIncentiveLawLabel(l)).join(", ");
 
       // Insert project directly as approved (admin adding)
       const { data: project, error: projectError } = await supabase
@@ -393,15 +399,10 @@ const AdminAddProjectPage = () => {
                     </div>
                   </div>
 
-                  <div>
-                    <Label htmlFor="categoriasTags">Categorias/Tags</Label>
-                    <Input
-                      id="categoriasTags"
-                      value={categoriasTags}
-                      onChange={(e) => setCategoriasTags(e.target.value)}
-                      placeholder="Cinema, Teatro, Música (separados por vírgula)"
-                    />
-                  </div>
+                  <CategoriesMultiSelect
+                    value={categoriasTags}
+                    onChange={setCategoriasTags}
+                  />
 
                   {/* Stages Multi-Select */}
                   <StagesMultiSelect 
@@ -442,29 +443,10 @@ const AdminAddProjectPage = () => {
                     Lei de Incentivo
                   </h3>
                   
-                  <div className="flex items-center justify-between p-4 border rounded-lg">
-                    <div>
-                      <h4 className="font-medium">Possui Lei de Incentivo?</h4>
-                      <p className="text-sm text-muted-foreground">Marque se o projeto é incentivado</p>
-                    </div>
-                    <Switch 
-                      checked={hasIncentiveLaw} 
-                      onCheckedChange={setHasIncentiveLaw}
-                    />
-                  </div>
-
-                  {hasIncentiveLaw && (
-                    <div>
-                      <Label htmlFor="incentiveLawDetails">Detalhes da Lei de Incentivo</Label>
-                      <Textarea
-                        id="incentiveLawDetails"
-                        value={incentiveLawDetails}
-                        onChange={(e) => setIncentiveLawDetails(e.target.value)}
-                        placeholder="Ex: Lei Rouanet, Lei do Audiovisual, PROAC..."
-                        rows={3}
-                      />
-                    </div>
-                  )}
+                  <IncentiveLawsMultiSelect
+                    value={incentiveLaws}
+                    onChange={setIncentiveLaws}
+                  />
                 </div>
 
                 {/* Mídia */}
