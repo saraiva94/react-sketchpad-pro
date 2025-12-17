@@ -7,6 +7,7 @@ const STAGE_OPTIONS = [
   { value: "development", label: "Desenvolvimento" },
   { value: "captacao", label: "Captação de recursos" },
   { value: "pre_producao", label: "Pré-produção" },
+  { value: "producao", label: "Produção" },
   { value: "pos_producao", label: "Pós-produção" },
   { value: "finalizado", label: "Finalizado" },
   { value: "em_exibicao", label: "Em exibição" },

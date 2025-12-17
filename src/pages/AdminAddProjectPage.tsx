@@ -58,7 +58,7 @@ const AdminAddProjectPage = () => {
   const [location, setLocation] = useState("");
   const [projectType, setProjectType] = useState("");
   const [customProjectType, setCustomProjectType] = useState("");
-  const [stages, setStages] = useState<string[]>(["development"]);
+  const [stages, setStages] = useState<string[]>([]);
   
   // Mídia
   const [linkVideo, setLinkVideo] = useState("");
