@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Plus, X } from "lucide-react";
+import { Plus, X, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const DEFAULT_INCENTIVE_LAW_OPTIONS = [
@@ -33,6 +33,7 @@ export const IncentiveLawsMultiSelect = ({
   onOptionsChange
 }: IncentiveLawsMultiSelectProps) => {
   const [newLaw, setNewLaw] = useState("");
+  const [confirmingDelete, setConfirmingDelete] = useState<string | null>(null);
   
   // Internal state for options when allowCustom but no external control
   const [internalOptions, setInternalOptions] = useState<string[]>(() => 
@@ -49,6 +50,7 @@ export const IncentiveLawsMultiSelect = ({
   });
 
   const toggleLaw = (law: string) => {
+    if (confirmingDelete) return; // Don't toggle while confirming delete
     if (value.includes(law)) {
       onChange(value.filter(l => l !== law));
     } else {
@@ -56,7 +58,7 @@ export const IncentiveLawsMultiSelect = ({
     }
   };
 
-  const deleteOption = (optionValue: string) => {
+  const confirmDelete = (optionValue: string) => {
     // Remove from selected values
     if (value.includes(optionValue)) {
       onChange(value.filter(l => l !== optionValue));
@@ -67,6 +69,7 @@ export const IncentiveLawsMultiSelect = ({
     } else if (allowCustom) {
       setInternalOptions(prev => prev.filter(o => o !== optionValue));
     }
+    setConfirmingDelete(null);
   };
 
   const addCustomLaw = () => {
@@ -128,6 +131,8 @@ export const IncentiveLawsMultiSelect = ({
       <div className="flex flex-wrap gap-2">
         {options.map((law) => {
           const isSelected = value.includes(law.value);
+          const isConfirming = confirmingDelete === law.value;
+          
           return (
             <Badge
               key={law.value}
@@ -136,21 +141,46 @@ export const IncentiveLawsMultiSelect = ({
                 "cursor-pointer transition-all select-none flex items-center gap-1",
                 isSelected 
                   ? "bg-primary text-primary-foreground hover:bg-primary/80" 
-                  : "hover:bg-muted"
+                  : "hover:bg-muted",
+                isConfirming && "ring-2 ring-red-500/50"
               )}
             >
               <span onClick={() => toggleLaw(law.value)}>{law.label}</span>
-              {allowCustom && (
+              {allowCustom && !isConfirming && (
                 <button
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
-                    deleteOption(law.value);
+                    setConfirmingDelete(law.value);
                   }}
                   className="ml-0.5 hover:bg-red-500/30 rounded-full p-0.5"
                 >
                   <X className="h-3 w-3 text-red-400" />
                 </button>
+              )}
+              {isConfirming && (
+                <div className="flex items-center gap-0.5 ml-1">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      confirmDelete(law.value);
+                    }}
+                    className="hover:bg-green-500/30 rounded-full p-0.5"
+                  >
+                    <Check className="h-3 w-3 text-green-400" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setConfirmingDelete(null);
+                    }}
+                    className="hover:bg-red-500/30 rounded-full p-0.5"
+                  >
+                    <X className="h-3 w-3 text-red-400" />
+                  </button>
+                </div>
               )}
             </Badge>
           );
