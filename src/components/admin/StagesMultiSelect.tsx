@@ -3,10 +3,10 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const STAGE_OPTIONS = [
+const DEFAULT_STAGE_OPTIONS = [
   { value: "ideia", label: "Ideia inicial" },
   { value: "development", label: "Desenvolvimento" },
   { value: "captacao", label: "Captação de recursos" },
@@ -23,15 +23,27 @@ interface StagesMultiSelectProps {
   onChange: (stages: string[]) => void;
   label?: string;
   allowCustom?: boolean;
+  availableOptions?: string[];
+  onOptionsChange?: (options: string[]) => void;
 }
 
 export const StagesMultiSelect = ({ 
   value, 
   onChange, 
   label = "Estágios do Projeto",
-  allowCustom = false 
+  allowCustom = false,
+  availableOptions,
+  onOptionsChange
 }: StagesMultiSelectProps) => {
   const [newStage, setNewStage] = useState("");
+
+  // Use provided options or defaults
+  const options = availableOptions 
+    ? availableOptions.map(v => {
+        const def = DEFAULT_STAGE_OPTIONS.find(d => d.value === v);
+        return { value: v, label: def?.label || v };
+      })
+    : DEFAULT_STAGE_OPTIONS;
 
   const toggleStage = (stage: string) => {
     if (value.includes(stage)) {
@@ -41,10 +53,28 @@ export const StagesMultiSelect = ({
     }
   };
 
+  const deleteOption = (optionValue: string) => {
+    // Remove from selected values
+    if (value.includes(optionValue)) {
+      onChange(value.filter(s => s !== optionValue));
+    }
+    // Remove from available options
+    if (onOptionsChange && availableOptions) {
+      onOptionsChange(availableOptions.filter(o => o !== optionValue));
+    }
+  };
+
   const addCustomStage = () => {
     const trimmed = newStage.trim();
-    if (trimmed && !value.includes(trimmed)) {
-      onChange([...value, trimmed]);
+    if (trimmed) {
+      // Add to available options if using custom options
+      if (onOptionsChange && availableOptions && !availableOptions.includes(trimmed)) {
+        onOptionsChange([...availableOptions, trimmed]);
+      }
+      // Also select it
+      if (!value.includes(trimmed)) {
+        onChange([...value, trimmed]);
+      }
       setNewStage("");
     }
   };
@@ -55,13 +85,6 @@ export const StagesMultiSelect = ({
       addCustomStage();
     }
   };
-
-  // Merge predefined options with custom stages
-  const customStages = value.filter(v => !STAGE_OPTIONS.find(s => s.value === v));
-  const allOptions = [
-    ...STAGE_OPTIONS,
-    ...customStages.map(stage => ({ value: stage, label: stage }))
-  ];
 
   return (
     <div className="space-y-3">
@@ -89,23 +112,34 @@ export const StagesMultiSelect = ({
         </div>
       )}
 
-      {/* All stages - click to toggle */}
+      {/* All stages - click to toggle, X to delete */}
       <div className="flex flex-wrap gap-2">
-        {allOptions.map((stage) => {
+        {options.map((stage) => {
           const isSelected = value.includes(stage.value);
           return (
             <Badge
               key={stage.value}
               variant={isSelected ? "default" : "outline"}
               className={cn(
-                "cursor-pointer transition-all select-none",
+                "cursor-pointer transition-all select-none flex items-center gap-1",
                 isSelected 
                   ? "bg-primary text-primary-foreground hover:bg-primary/80" 
                   : "hover:bg-muted"
               )}
-              onClick={() => toggleStage(stage.value)}
             >
-              {stage.label}
+              <span onClick={() => toggleStage(stage.value)}>{stage.label}</span>
+              {allowCustom && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    deleteOption(stage.value);
+                  }}
+                  className="ml-0.5 hover:bg-red-500/30 rounded-full p-0.5"
+                >
+                  <X className="h-3 w-3 text-red-400" />
+                </button>
+              )}
             </Badge>
           );
         })}
@@ -119,8 +153,8 @@ export const StagesMultiSelect = ({
 };
 
 export const getStageLabel = (value: string): string => {
-  const stage = STAGE_OPTIONS.find(s => s.value === value);
+  const stage = DEFAULT_STAGE_OPTIONS.find(s => s.value === value);
   return stage?.label || value;
 };
 
-export const STAGES = STAGE_OPTIONS;
+export const STAGES = DEFAULT_STAGE_OPTIONS;

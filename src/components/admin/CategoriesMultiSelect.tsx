@@ -3,10 +3,10 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const CATEGORY_OPTIONS = [
+const DEFAULT_CATEGORY_OPTIONS = [
   { value: "cinema", label: "Cinema" },
   { value: "teatro", label: "Teatro" },
   { value: "audiovisual", label: "Audiovisual" },
@@ -36,15 +36,27 @@ interface CategoriesMultiSelectProps {
   onChange: (categories: string[]) => void;
   label?: string;
   allowCustom?: boolean;
+  availableOptions?: string[];
+  onOptionsChange?: (options: string[]) => void;
 }
 
 export const CategoriesMultiSelect = ({ 
   value, 
   onChange, 
   label = "Categorias/Tags",
-  allowCustom = false 
+  allowCustom = false,
+  availableOptions,
+  onOptionsChange
 }: CategoriesMultiSelectProps) => {
   const [newTag, setNewTag] = useState("");
+
+  // Use provided options or defaults
+  const options = availableOptions 
+    ? availableOptions.map(v => {
+        const def = DEFAULT_CATEGORY_OPTIONS.find(d => d.value === v);
+        return { value: v, label: def?.label || v };
+      })
+    : DEFAULT_CATEGORY_OPTIONS;
 
   const toggleCategory = (category: string) => {
     if (value.includes(category)) {
@@ -54,10 +66,28 @@ export const CategoriesMultiSelect = ({
     }
   };
 
+  const deleteOption = (optionValue: string) => {
+    // Remove from selected values
+    if (value.includes(optionValue)) {
+      onChange(value.filter(c => c !== optionValue));
+    }
+    // Remove from available options
+    if (onOptionsChange && availableOptions) {
+      onOptionsChange(availableOptions.filter(o => o !== optionValue));
+    }
+  };
+
   const addCustomTag = () => {
     const trimmed = newTag.trim();
-    if (trimmed && !value.includes(trimmed)) {
-      onChange([...value, trimmed]);
+    if (trimmed) {
+      // Add to available options if using custom options
+      if (onOptionsChange && availableOptions && !availableOptions.includes(trimmed)) {
+        onOptionsChange([...availableOptions, trimmed]);
+      }
+      // Also select it
+      if (!value.includes(trimmed)) {
+        onChange([...value, trimmed]);
+      }
       setNewTag("");
     }
   };
@@ -68,13 +98,6 @@ export const CategoriesMultiSelect = ({
       addCustomTag();
     }
   };
-
-  // Merge predefined options with custom tags
-  const customTags = value.filter(v => !CATEGORY_OPTIONS.find(c => c.value === v));
-  const allOptions = [
-    ...CATEGORY_OPTIONS,
-    ...customTags.map(tag => ({ value: tag, label: tag }))
-  ];
 
   return (
     <div className="space-y-3">
@@ -102,23 +125,34 @@ export const CategoriesMultiSelect = ({
         </div>
       )}
 
-      {/* All tags - click to toggle */}
+      {/* All tags - click to toggle, X to delete */}
       <div className="flex flex-wrap gap-2">
-        {allOptions.map((cat) => {
+        {options.map((cat) => {
           const isSelected = value.includes(cat.value);
           return (
             <Badge
               key={cat.value}
               variant={isSelected ? "default" : "outline"}
               className={cn(
-                "cursor-pointer transition-all select-none text-xs",
+                "cursor-pointer transition-all select-none text-xs flex items-center gap-1",
                 isSelected 
                   ? "bg-primary text-primary-foreground hover:bg-primary/80" 
                   : "hover:bg-muted"
               )}
-              onClick={() => toggleCategory(cat.value)}
             >
-              {cat.label}
+              <span onClick={() => toggleCategory(cat.value)}>{cat.label}</span>
+              {allowCustom && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    deleteOption(cat.value);
+                  }}
+                  className="ml-0.5 hover:bg-red-500/30 rounded-full p-0.5"
+                >
+                  <X className="h-3 w-3 text-red-400" />
+                </button>
+              )}
             </Badge>
           );
         })}
@@ -132,8 +166,8 @@ export const CategoriesMultiSelect = ({
 };
 
 export const getCategoryLabel = (value: string): string => {
-  const cat = CATEGORY_OPTIONS.find(c => c.value === value);
+  const cat = DEFAULT_CATEGORY_OPTIONS.find(c => c.value === value);
   return cat?.label || value;
 };
 
-export const CATEGORIES = CATEGORY_OPTIONS;
+export const CATEGORIES = DEFAULT_CATEGORY_OPTIONS;

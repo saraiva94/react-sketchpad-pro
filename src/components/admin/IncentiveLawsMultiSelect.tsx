@@ -3,10 +3,10 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const INCENTIVE_LAW_OPTIONS = [
+const DEFAULT_INCENTIVE_LAW_OPTIONS = [
   { value: "lei_rouanet", label: "Lei Rouanet" },
   { value: "lei_audiovisual", label: "Lei do Audiovisual" },
   { value: "icms_rj", label: "ICMS RJ" },
@@ -20,15 +20,27 @@ interface IncentiveLawsMultiSelectProps {
   onChange: (laws: string[]) => void;
   label?: string;
   allowCustom?: boolean;
+  availableOptions?: string[];
+  onOptionsChange?: (options: string[]) => void;
 }
 
 export const IncentiveLawsMultiSelect = ({ 
   value, 
   onChange, 
   label = "Leis de Incentivo",
-  allowCustom = false 
+  allowCustom = false,
+  availableOptions,
+  onOptionsChange
 }: IncentiveLawsMultiSelectProps) => {
   const [newLaw, setNewLaw] = useState("");
+
+  // Use provided options or defaults
+  const options = availableOptions 
+    ? availableOptions.map(v => {
+        const def = DEFAULT_INCENTIVE_LAW_OPTIONS.find(d => d.value === v);
+        return { value: v, label: def?.label || v };
+      })
+    : DEFAULT_INCENTIVE_LAW_OPTIONS;
 
   const toggleLaw = (law: string) => {
     if (value.includes(law)) {
@@ -38,10 +50,28 @@ export const IncentiveLawsMultiSelect = ({
     }
   };
 
+  const deleteOption = (optionValue: string) => {
+    // Remove from selected values
+    if (value.includes(optionValue)) {
+      onChange(value.filter(l => l !== optionValue));
+    }
+    // Remove from available options
+    if (onOptionsChange && availableOptions) {
+      onOptionsChange(availableOptions.filter(o => o !== optionValue));
+    }
+  };
+
   const addCustomLaw = () => {
     const trimmed = newLaw.trim();
-    if (trimmed && !value.includes(trimmed)) {
-      onChange([...value, trimmed]);
+    if (trimmed) {
+      // Add to available options if using custom options
+      if (onOptionsChange && availableOptions && !availableOptions.includes(trimmed)) {
+        onOptionsChange([...availableOptions, trimmed]);
+      }
+      // Also select it
+      if (!value.includes(trimmed)) {
+        onChange([...value, trimmed]);
+      }
       setNewLaw("");
     }
   };
@@ -52,13 +82,6 @@ export const IncentiveLawsMultiSelect = ({
       addCustomLaw();
     }
   };
-
-  // Merge predefined options with custom laws
-  const customLaws = value.filter(v => !INCENTIVE_LAW_OPTIONS.find(l => l.value === v));
-  const allOptions = [
-    ...INCENTIVE_LAW_OPTIONS,
-    ...customLaws.map(law => ({ value: law, label: law }))
-  ];
 
   return (
     <div className="space-y-3">
@@ -86,23 +109,34 @@ export const IncentiveLawsMultiSelect = ({
         </div>
       )}
 
-      {/* All laws - click to toggle */}
+      {/* All laws - click to toggle, X to delete */}
       <div className="flex flex-wrap gap-2">
-        {allOptions.map((law) => {
+        {options.map((law) => {
           const isSelected = value.includes(law.value);
           return (
             <Badge
               key={law.value}
               variant={isSelected ? "default" : "outline"}
               className={cn(
-                "cursor-pointer transition-all select-none",
+                "cursor-pointer transition-all select-none flex items-center gap-1",
                 isSelected 
                   ? "bg-primary text-primary-foreground hover:bg-primary/80" 
                   : "hover:bg-muted"
               )}
-              onClick={() => toggleLaw(law.value)}
             >
-              {law.label}
+              <span onClick={() => toggleLaw(law.value)}>{law.label}</span>
+              {allowCustom && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    deleteOption(law.value);
+                  }}
+                  className="ml-0.5 hover:bg-red-500/30 rounded-full p-0.5"
+                >
+                  <X className="h-3 w-3 text-red-400" />
+                </button>
+              )}
             </Badge>
           );
         })}
@@ -116,8 +150,8 @@ export const IncentiveLawsMultiSelect = ({
 };
 
 export const getIncentiveLawLabel = (value: string): string => {
-  const law = INCENTIVE_LAW_OPTIONS.find(l => l.value === value);
+  const law = DEFAULT_INCENTIVE_LAW_OPTIONS.find(l => l.value === value);
   return law?.label || value;
 };
 
-export const INCENTIVE_LAWS = INCENTIVE_LAW_OPTIONS;
+export const INCENTIVE_LAWS = DEFAULT_INCENTIVE_LAW_OPTIONS;
