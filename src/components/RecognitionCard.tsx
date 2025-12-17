@@ -28,10 +28,9 @@ export function RecognitionCard({ awards = [], news = [] }: RecognitionCardProps
             </h3>
             <ul className="space-y-3">
               {awards.map((award, index) => (
-                <li key={index} className="block p-3 bg-muted/50 rounded-lg">
-                  <div className="flex items-start space-x-2">
-                    <Award className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-foreground">{award}</span>
+                <li key={index}>
+                  <div className="block p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors">
+                    <h4 className="font-medium text-foreground">{award}</h4>
                   </div>
                 </li>
               ))}
