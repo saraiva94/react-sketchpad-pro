@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { X, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const STAGE_OPTIONS = [
@@ -41,10 +41,6 @@ export const StagesMultiSelect = ({
     }
   };
 
-  const removeStage = (stage: string) => {
-    onChange(value.filter(s => s !== stage));
-  };
-
   const addCustomStage = () => {
     const trimmed = newStage.trim();
     if (trimmed && !value.includes(trimmed)) {
@@ -59,6 +55,13 @@ export const StagesMultiSelect = ({
       addCustomStage();
     }
   };
+
+  // Merge predefined options with custom stages
+  const customStages = value.filter(v => !STAGE_OPTIONS.find(s => s.value === v));
+  const allOptions = [
+    ...STAGE_OPTIONS,
+    ...customStages.map(stage => ({ value: stage, label: stage }))
+  ];
 
   return (
     <div className="space-y-3">
@@ -86,56 +89,26 @@ export const StagesMultiSelect = ({
         </div>
       )}
 
-      {/* All stages with remove X */}
+      {/* All stages - click to toggle */}
       <div className="flex flex-wrap gap-2">
-        {STAGE_OPTIONS.map((stage) => {
+        {allOptions.map((stage) => {
           const isSelected = value.includes(stage.value);
           return (
             <Badge
               key={stage.value}
               variant={isSelected ? "default" : "outline"}
               className={cn(
-                "cursor-pointer transition-all select-none flex items-center gap-1",
+                "cursor-pointer transition-all select-none",
                 isSelected 
-                  ? "bg-primary text-primary-foreground hover:bg-primary/80 pr-1" 
+                  ? "bg-primary text-primary-foreground hover:bg-primary/80" 
                   : "hover:bg-muted"
               )}
-              onClick={() => !isSelected && toggleStage(stage.value)}
+              onClick={() => toggleStage(stage.value)}
             >
               {stage.label}
-              {isSelected && (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    removeStage(stage.value);
-                  }}
-                  className="ml-0.5 hover:bg-red-500/20 rounded-full p-0.5"
-                >
-                  <X className="h-3 w-3 text-red-400" />
-                </button>
-              )}
             </Badge>
           );
         })}
-        
-        {/* Custom stages - same style as predefined */}
-        {value.filter(v => !STAGE_OPTIONS.find(s => s.value === v)).map((stage) => (
-          <Badge
-            key={stage}
-            variant="default"
-            className="bg-primary text-primary-foreground pr-1 flex items-center gap-1"
-          >
-            {stage}
-            <button
-              type="button"
-              onClick={() => removeStage(stage)}
-              className="ml-0.5 hover:bg-red-500/20 rounded-full p-0.5"
-            >
-              <X className="h-3 w-3 text-red-400" />
-            </button>
-          </Badge>
-        ))}
       </div>
 
       {value.length === 0 && (

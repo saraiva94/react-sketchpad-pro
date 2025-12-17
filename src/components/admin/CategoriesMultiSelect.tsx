@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { X, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const CATEGORY_OPTIONS = [
@@ -54,10 +54,6 @@ export const CategoriesMultiSelect = ({
     }
   };
 
-  const removeTag = (tag: string) => {
-    onChange(value.filter(c => c !== tag));
-  };
-
   const addCustomTag = () => {
     const trimmed = newTag.trim();
     if (trimmed && !value.includes(trimmed)) {
@@ -73,10 +69,12 @@ export const CategoriesMultiSelect = ({
     }
   };
 
-  const getLabel = (val: string) => {
-    const predefined = CATEGORY_OPTIONS.find(c => c.value === val);
-    return predefined?.label || val;
-  };
+  // Merge predefined options with custom tags
+  const customTags = value.filter(v => !CATEGORY_OPTIONS.find(c => c.value === v));
+  const allOptions = [
+    ...CATEGORY_OPTIONS,
+    ...customTags.map(tag => ({ value: tag, label: tag }))
+  ];
 
   return (
     <div className="space-y-3">
@@ -104,56 +102,26 @@ export const CategoriesMultiSelect = ({
         </div>
       )}
 
-      {/* All tags with remove X */}
+      {/* All tags - click to toggle */}
       <div className="flex flex-wrap gap-2">
-        {CATEGORY_OPTIONS.map((cat) => {
+        {allOptions.map((cat) => {
           const isSelected = value.includes(cat.value);
           return (
             <Badge
               key={cat.value}
               variant={isSelected ? "default" : "outline"}
               className={cn(
-                "cursor-pointer transition-all select-none text-xs flex items-center gap-1",
+                "cursor-pointer transition-all select-none text-xs",
                 isSelected 
-                  ? "bg-primary text-primary-foreground hover:bg-primary/80 pr-1" 
+                  ? "bg-primary text-primary-foreground hover:bg-primary/80" 
                   : "hover:bg-muted"
               )}
-              onClick={() => !isSelected && toggleCategory(cat.value)}
+              onClick={() => toggleCategory(cat.value)}
             >
               {cat.label}
-              {isSelected && (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    removeTag(cat.value);
-                  }}
-                  className="ml-0.5 hover:bg-red-500/20 rounded-full p-0.5"
-                >
-                  <X className="h-3 w-3 text-red-400" />
-                </button>
-              )}
             </Badge>
           );
         })}
-        
-        {/* Custom tags - same style as predefined */}
-        {value.filter(v => !CATEGORY_OPTIONS.find(c => c.value === v)).map((tag) => (
-          <Badge
-            key={tag}
-            variant="default"
-            className="bg-primary text-primary-foreground pr-1 flex items-center gap-1 text-xs"
-          >
-            {tag}
-            <button
-              type="button"
-              onClick={() => removeTag(tag)}
-              className="ml-0.5 hover:bg-red-500/20 rounded-full p-0.5"
-            >
-              <X className="h-3 w-3 text-red-400" />
-            </button>
-          </Badge>
-        ))}
       </div>
 
       {value.length === 0 && (

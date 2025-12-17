@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { X, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const INCENTIVE_LAW_OPTIONS = [
@@ -38,10 +38,6 @@ export const IncentiveLawsMultiSelect = ({
     }
   };
 
-  const removeLaw = (law: string) => {
-    onChange(value.filter(l => l !== law));
-  };
-
   const addCustomLaw = () => {
     const trimmed = newLaw.trim();
     if (trimmed && !value.includes(trimmed)) {
@@ -56,6 +52,13 @@ export const IncentiveLawsMultiSelect = ({
       addCustomLaw();
     }
   };
+
+  // Merge predefined options with custom laws
+  const customLaws = value.filter(v => !INCENTIVE_LAW_OPTIONS.find(l => l.value === v));
+  const allOptions = [
+    ...INCENTIVE_LAW_OPTIONS,
+    ...customLaws.map(law => ({ value: law, label: law }))
+  ];
 
   return (
     <div className="space-y-3">
@@ -83,56 +86,26 @@ export const IncentiveLawsMultiSelect = ({
         </div>
       )}
 
-      {/* All laws with remove X */}
+      {/* All laws - click to toggle */}
       <div className="flex flex-wrap gap-2">
-        {INCENTIVE_LAW_OPTIONS.map((law) => {
+        {allOptions.map((law) => {
           const isSelected = value.includes(law.value);
           return (
             <Badge
               key={law.value}
               variant={isSelected ? "default" : "outline"}
               className={cn(
-                "cursor-pointer transition-all select-none flex items-center gap-1",
+                "cursor-pointer transition-all select-none",
                 isSelected 
-                  ? "bg-primary text-primary-foreground hover:bg-primary/80 pr-1" 
+                  ? "bg-primary text-primary-foreground hover:bg-primary/80" 
                   : "hover:bg-muted"
               )}
-              onClick={() => !isSelected && toggleLaw(law.value)}
+              onClick={() => toggleLaw(law.value)}
             >
               {law.label}
-              {isSelected && (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    removeLaw(law.value);
-                  }}
-                  className="ml-0.5 hover:bg-red-500/20 rounded-full p-0.5"
-                >
-                  <X className="h-3 w-3 text-red-400" />
-                </button>
-              )}
             </Badge>
           );
         })}
-        
-        {/* Custom laws - same style as predefined */}
-        {value.filter(v => !INCENTIVE_LAW_OPTIONS.find(l => l.value === v)).map((law) => (
-          <Badge
-            key={law}
-            variant="default"
-            className="bg-primary text-primary-foreground pr-1 flex items-center gap-1"
-          >
-            {law}
-            <button
-              type="button"
-              onClick={() => removeLaw(law)}
-              className="ml-0.5 hover:bg-red-500/20 rounded-full p-0.5"
-            >
-              <X className="h-3 w-3 text-red-400" />
-            </button>
-          </Badge>
-        ))}
       </div>
 
       {value.length === 0 && (
