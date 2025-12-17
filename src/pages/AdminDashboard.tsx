@@ -2554,6 +2554,7 @@ const AdminDashboard = () => {
                   <CategoriesMultiSelect 
                     value={editCategoriasTags} 
                     onChange={setEditCategoriasTags}
+                    allowCustom={true}
                   />
                 </div>
 
