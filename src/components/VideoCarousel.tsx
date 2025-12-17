@@ -20,11 +20,24 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5, onAni
   const [hasEntered, setHasEntered] = useState(false);
   const hasCalledComplete = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   
   // Touch/swipe state
   const touchStartX = useRef<number>(0);
   const touchEndX = useRef<number>(0);
   const isDragging = useRef(false);
+
+  // Cleanup: pause all videos when component unmounts
+  useEffect(() => {
+    return () => {
+      videoRefs.current.forEach(video => {
+        if (video) {
+          video.pause();
+          video.src = '';
+        }
+      });
+    };
+  }, []);
 
   // Entrance animation - single expansion from center to final positions
   useEffect(() => {
@@ -423,6 +436,7 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5, onAni
                   <>
                     {isCenter ? (
                       <video
+                        ref={el => { videoRefs.current[index] = el; }}
                         autoPlay
                         loop
                         src={video.url}
@@ -434,6 +448,7 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5, onAni
                     ) : (
                       <>
                         <video
+                          ref={el => { videoRefs.current[index] = el; }}
                           src={video.url}
                           className="w-full h-full object-cover"
                           muted
