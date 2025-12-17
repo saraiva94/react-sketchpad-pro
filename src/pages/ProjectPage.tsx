@@ -265,7 +265,7 @@ const ProjectPage = () => {
     const impacts = [
       { title: "Impacto Cultural", content: project.impacto_cultural },
       { title: "Impacto Social", content: project.impacto_social },
-      { title: "Público Estimado", content: project.publico_alvo },
+      { title: "Público-Alvo", content: project.publico_alvo },
       { title: "Diferenciais", content: project.diferenciais },
     ].filter(i => i.content);
 

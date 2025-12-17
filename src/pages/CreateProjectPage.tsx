@@ -438,7 +438,7 @@ const CreateProjectPage = () => {
               />
             </div>
             <div>
-              <Label htmlFor="audience">Público Estimado</Label>
+              <Label htmlFor="audience">Público-Alvo</Label>
               <Input
                 id="audience"
                 value={estimatedAudience}

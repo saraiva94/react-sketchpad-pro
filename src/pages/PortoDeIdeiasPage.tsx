@@ -40,6 +40,8 @@ interface Project {
 
 const projectTypes = [
   "Todos",
+  "Filme de Ficção",
+  "Documentário",
   "Longa-metragem ficção",
   "Longa-metragem documentário", 
   "Curta-metragem ficção",
@@ -57,6 +59,7 @@ const projectTypes = [
   "Projeto educativo",
   "Projeto formativo",
   "Projeto transmídia",
+  "Outro",
 ];
 const locations = ["Todas", "São Paulo", "Rio de Janeiro", "Belo Horizonte", "Brasília", "Salvador", "Recife", "Porto Alegre", "Manaus", "Curitiba"];
 const budgetRanges = [

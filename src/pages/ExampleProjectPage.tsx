@@ -471,7 +471,7 @@ const ExampleProjectPage = () => {
                 <div className="bg-violet-500/5 p-6 rounded-2xl border border-violet-500/10">
                   <h3 className="font-semibold text-foreground mb-3 flex items-center">
                     <Users className="w-5 h-5 text-violet-600 dark:text-violet-400 mr-2" />
-                    Público Estimado
+                    Público-Alvo
                   </h3>
                   <p className="text-muted-foreground">{project.publico_alvo}</p>
                 </div>
