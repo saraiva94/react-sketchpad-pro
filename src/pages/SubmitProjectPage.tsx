@@ -227,10 +227,12 @@ const SubmitProjectPage = () => {
       if (contrapartidas.length > 0 && project) {
         const contrapartidasData = contrapartidas.map((c, index) => ({
           project_id: project.id,
+          titulo: c.titulo || null,
           valor: c.valor,
           beneficios: c.beneficios,
           ativo: c.ativo,
           ordem: index,
+          indice: c.indice || null,
         }));
 
         await supabase.from("contrapartidas").insert(contrapartidasData);

@@ -76,6 +76,7 @@ interface ContactButton {
 
 interface Contrapartida {
   id: string;
+  titulo?: string;
   valor: string;
   beneficios: string[];
   ativo: boolean;
@@ -635,6 +636,11 @@ const ProjectPage = () => {
                       >
                         {/* Nível label */}
                         <p className="text-sm italic text-muted-foreground mb-1">Nível</p>
+                        
+                        {/* Título do nível (se existir) */}
+                        {contrapartida.titulo && (
+                          <p className="text-lg font-semibold text-foreground mb-2">{contrapartida.titulo}</p>
+                        )}
                         
                         {/* Value with index */}
                         <div className="mb-4">

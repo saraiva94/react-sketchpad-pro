@@ -12,10 +12,12 @@ import { Trash2, Eye, Edit, Check, X, Home } from "lucide-react";
 
 interface Contrapartida {
   id: string;
+  titulo?: string;
   valor: string;
   beneficios: string[];
   ativo: boolean;
   ordem: number;
+  indice?: string;
 }
 
 interface TestProject {
@@ -166,10 +168,12 @@ const DevMenu = () => {
       if (editContrapartidas.length > 0) {
         const contrapartidasToInsert = editContrapartidas.map((c, index) => ({
           project_id: editingProject.id,
+          titulo: c.titulo || null,
           valor: c.valor,
           beneficios: c.beneficios,
           ativo: c.ativo,
-          ordem: index
+          ordem: index,
+          indice: c.indice || null,
         }));
 
         const { error } = await supabase.from("contrapartidas").insert(contrapartidasToInsert);
