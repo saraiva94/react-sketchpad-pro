@@ -21,6 +21,8 @@ import { ContactButtonsEditor } from "@/components/admin/ContactButtonsEditor";
 import ContrapartidasEditor, { Contrapartida } from "@/components/admin/ContrapartidasEditor";
 import { RecognitionEditor, NewsItem } from "@/components/admin/RecognitionEditor";
 import { StagesMultiSelect } from "@/components/admin/StagesMultiSelect";
+import { CategoriesMultiSelect, getCategoryLabel } from "@/components/admin/CategoriesMultiSelect";
+import { IncentiveLawsMultiSelect, getIncentiveLawLabel } from "@/components/admin/IncentiveLawsMultiSelect";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
@@ -190,6 +192,8 @@ const AdminDashboard = () => {
   const [editDescription, setEditDescription] = useState("");
   const [editProjectType, setEditProjectType] = useState("");
   const [editStages, setEditStages] = useState<string[]>([]);
+  const [editCategoriasTags, setEditCategoriasTags] = useState<string[]>([]);
+  const [editIncentiveLaws, setEditIncentiveLaws] = useState<string[]>([]);
   const [editHasIncentiveLaw, setEditHasIncentiveLaw] = useState(false);
   const [editIncentiveLawDetails, setEditIncentiveLawDetails] = useState("");
   const [editLinkVideo, setEditLinkVideo] = useState("");
@@ -723,6 +727,18 @@ const AdminDashboard = () => {
     setEditDescription(project.description || "");
     setEditProjectType(project.project_type || "");
     setEditStages(project.stages || []);
+    setEditCategoriasTags(project.categorias_tags || []);
+    // Parse incentive laws from details string
+    const parsedIncentiveLaws: string[] = [];
+    if (project.incentive_law_details) {
+      const details = project.incentive_law_details.toLowerCase();
+      if (details.includes('rouanet')) parsedIncentiveLaws.push('rouanet');
+      if (details.includes('audiovisual')) parsedIncentiveLaws.push('audiovisual');
+      if (details.includes('icms')) parsedIncentiveLaws.push('icms_rj');
+      if (details.includes('iss')) parsedIncentiveLaws.push('iss_rj');
+      if (details.includes('outro') || (project.has_incentive_law && parsedIncentiveLaws.length === 0)) parsedIncentiveLaws.push('outros');
+    }
+    setEditIncentiveLaws(parsedIncentiveLaws);
     setEditHasIncentiveLaw(project.has_incentive_law || false);
     setEditIncentiveLawDetails(project.incentive_law_details || "");
     setEditLinkVideo(project.link_video || "");
@@ -812,8 +828,9 @@ const AdminDashboard = () => {
         budget: editBudget || null,
         location: editLocation || null,
         admin_notes: editAdminNotes || null,
-        has_incentive_law: editHasIncentiveLaw,
-        incentive_law_details: editIncentiveLawDetails || null,
+        categorias_tags: editCategoriasTags.length > 0 ? editCategoriasTags : null,
+        has_incentive_law: editIncentiveLaws.length > 0,
+        incentive_law_details: editIncentiveLaws.length > 0 ? editIncentiveLaws.map(l => getIncentiveLawLabel(l)).join(', ') : null,
         link_video: editLinkVideo || null,
         valor_sugerido: editValorSugerido ? parseFloat(editValorSugerido) : null,
         link_pagamento: editLinkPagamento || null,
@@ -2534,6 +2551,13 @@ const AdminDashboard = () => {
                 </div>
 
                 <div className="space-y-2">
+                  <CategoriesMultiSelect 
+                    value={editCategoriasTags} 
+                    onChange={setEditCategoriasTags}
+                  />
+                </div>
+
+                <div className="space-y-2">
                   <Label htmlFor="edit-location">Localização</Label>
                   <Input
                     id="edit-location"
@@ -2675,29 +2699,10 @@ const AdminDashboard = () => {
                 </div>
               </div>
 
-              <div className="flex items-center gap-4 p-3 border rounded-lg">
-                <Switch
-                  checked={editHasIncentiveLaw}
-                  onCheckedChange={setEditHasIncentiveLaw}
-                />
-                <div>
-                  <Label>Possui Lei de Incentivo</Label>
-                  <p className="text-xs text-muted-foreground">Marque se o projeto tem lei de incentivo aprovada</p>
-                </div>
-              </div>
-
-              {editHasIncentiveLaw && (
-                <div className="space-y-2">
-                  <Label htmlFor="edit-incentive-details">Detalhes da Lei de Incentivo</Label>
-                  <Textarea
-                    id="edit-incentive-details"
-                    placeholder="Ex: Lei Rouanet, PRONAC 123456"
-                    value={editIncentiveLawDetails}
-                    onChange={(e) => setEditIncentiveLawDetails(e.target.value)}
-                    rows={2}
-                  />
-                </div>
-              )}
+              <IncentiveLawsMultiSelect 
+                value={editIncentiveLaws}
+                onChange={setEditIncentiveLaws}
+              />
             </div>
 
             {/* Impacto */}

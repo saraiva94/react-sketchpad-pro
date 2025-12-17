@@ -22,6 +22,8 @@ import { ImageCropper } from "@/components/ImageCropper";
 import ContrapartidasEditor, { Contrapartida } from "@/components/admin/ContrapartidasEditor";
 import { RecognitionEditor, NewsItem } from "@/components/admin/RecognitionEditor";
 import { CategoriesMultiSelect, getCategoryLabel } from "@/components/admin/CategoriesMultiSelect";
+import { StagesMultiSelect } from "@/components/admin/StagesMultiSelect";
+import { IncentiveLawsMultiSelect } from "@/components/admin/IncentiveLawsMultiSelect";
 
 interface TeamMember {
   nome: string;
@@ -74,6 +76,12 @@ const SubmitProjectPage = () => {
   const [impactoSocial, setImpactoSocial] = useState("");
   const [publicoAlvo, setPublicoAlvo] = useState("");
   const [diferenciais, setDiferenciais] = useState("");
+  
+  // Stages
+  const [stages, setStages] = useState<string[]>([]);
+  
+  // Incentive Laws
+  const [incentiveLaws, setIncentiveLaws] = useState<string[]>([]);
   
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -204,6 +212,9 @@ const SubmitProjectPage = () => {
           awards: awards.length > 0 ? awards : [],
           news: news.length > 0 ? news : [],
           presentation_document_url: presentationDocUrl || null,
+          stages: stages.length > 0 ? stages : null,
+          has_incentive_law: incentiveLaws.length > 0,
+          incentive_law_details: incentiveLaws.length > 0 ? incentiveLaws.join(', ') : null,
           status: "pending",
         } as any)
         .select()
@@ -434,6 +445,16 @@ const SubmitProjectPage = () => {
                   <CategoriesMultiSelect
                     value={categoriasTags}
                     onChange={setCategoriasTags}
+                  />
+
+                  <StagesMultiSelect
+                    value={stages}
+                    onChange={setStages}
+                  />
+
+                  <IncentiveLawsMultiSelect
+                    value={incentiveLaws}
+                    onChange={setIncentiveLaws}
                   />
 
                   <div>
