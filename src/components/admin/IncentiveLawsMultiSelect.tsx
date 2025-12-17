@@ -116,12 +116,12 @@ export const IncentiveLawsMultiSelect = ({
           );
         })}
         
-        {/* Custom laws */}
+        {/* Custom laws - same style as predefined */}
         {value.filter(v => !INCENTIVE_LAW_OPTIONS.find(l => l.value === v)).map((law) => (
           <Badge
             key={law}
             variant="default"
-            className="bg-accent text-accent-foreground pr-1 flex items-center gap-1"
+            className="bg-primary text-primary-foreground pr-1 flex items-center gap-1"
           >
             {law}
             <button

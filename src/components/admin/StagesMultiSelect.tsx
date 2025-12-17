@@ -119,12 +119,12 @@ export const StagesMultiSelect = ({
           );
         })}
         
-        {/* Custom stages */}
+        {/* Custom stages - same style as predefined */}
         {value.filter(v => !STAGE_OPTIONS.find(s => s.value === v)).map((stage) => (
           <Badge
             key={stage}
             variant="default"
-            className="bg-accent text-accent-foreground pr-1 flex items-center gap-1"
+            className="bg-primary text-primary-foreground pr-1 flex items-center gap-1"
           >
             {stage}
             <button
