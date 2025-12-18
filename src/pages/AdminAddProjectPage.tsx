@@ -61,7 +61,7 @@ const AdminAddProjectPage = () => {
   const [projectType, setProjectType] = useState("");
   const [customProjectType, setCustomProjectType] = useState("");
   const [stages, setStages] = useState<string[]>([]);
-  
+  const [additionalInfo, setAdditionalInfo] = useState("");
   // Mídia
   const [linkVideo, setLinkVideo] = useState("");
   const [presentationDocUrl, setPresentationDocUrl] = useState("");
@@ -209,6 +209,7 @@ const AdminAddProjectPage = () => {
           presentation_document_url: presentationDocUrl || null,
           awards: awards.length > 0 ? awards : [],
           news: news.length > 0 ? news : [],
+          additional_info: additionalInfo || null,
           status: "approved",
         } as any)
         .select()
@@ -434,6 +435,19 @@ const AdminAddProjectPage = () => {
                       placeholder="Descreva o projeto em detalhes..."
                       rows={6}
                     />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="additionalInfo">Informações Adicionais</Label>
+                    <Textarea
+                      id="additionalInfo"
+                      value={additionalInfo}
+                      onChange={(e) => setAdditionalInfo(e.target.value.slice(0, 100))}
+                      placeholder="Informações adicionais sobre o projeto (máx. 100 caracteres)"
+                      rows={2}
+                      maxLength={100}
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">{additionalInfo.length}/100 caracteres</p>
                   </div>
                 </div>
 
