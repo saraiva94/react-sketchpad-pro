@@ -18,13 +18,13 @@ export interface Contrapartida {
   indice?: string;
 }
 
-const INDICE_OPTIONS = [
-  { value: 'por_episodio', label: 'por episódio' },
-  { value: 'por_temporada', label: 'por temporada' },
-  { value: 'por_projeto', label: 'por projeto' },
-  { value: 'por_evento', label: 'por evento' },
-  { value: 'por_mes', label: 'por mês' },
-  { value: 'por_ano', label: 'por ano' },
+const DEFAULT_INDICE_OPTIONS = [
+  'por episódio',
+  'por temporada',
+  'por projeto',
+  'por evento',
+  'por mês',
+  'por ano',
 ];
 
 interface ContrapartidasEditorProps {
@@ -57,6 +57,9 @@ const ContrapartidasEditor: React.FC<ContrapartidasEditorProps> = ({
 }) => {
   const [newBeneficio, setNewBeneficio] = useState<{ [key: string]: string }>({});
   const [confirmingDelete, setConfirmingDelete] = useState<{ contrapartidaId: string; beneficioIndex: number } | null>(null);
+  const [indiceOptions, setIndiceOptions] = useState<string[]>(DEFAULT_INDICE_OPTIONS);
+  const [newIndice, setNewIndice] = useState("");
+  const [confirmingDeleteIndice, setConfirmingDeleteIndice] = useState<string | null>(null);
 
   const addContrapartida = () => {
     const newContrapartida: Contrapartida = {
@@ -231,35 +234,120 @@ const ContrapartidasEditor: React.FC<ContrapartidasEditorProps> = ({
                   />
                 </div>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <Label>Índice (tag)</Label>
+                
+                {/* Adicionar novo índice */}
+                <div className="flex gap-2">
+                  <Input
+                    value={newIndice}
+                    onChange={(e) => setNewIndice(e.target.value)}
+                    placeholder="Adicionar novo índice..."
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const trimmed = newIndice.trim();
+                        if (trimmed && !indiceOptions.includes(trimmed)) {
+                          setIndiceOptions([...indiceOptions, trimmed]);
+                          setNewIndice("");
+                        }
+                      }
+                    }}
+                    className="flex-1"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => {
+                      const trimmed = newIndice.trim();
+                      if (trimmed && !indiceOptions.includes(trimmed)) {
+                        setIndiceOptions([...indiceOptions, trimmed]);
+                        setNewIndice("");
+                      }
+                    }}
+                    disabled={!newIndice.trim() || indiceOptions.includes(newIndice.trim())}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                {/* Lista de índices */}
                 <div className="flex flex-wrap gap-2">
-                  {INDICE_OPTIONS.map((option) => {
-                    const isSelected = contrapartida.indice === option.value;
+                  {indiceOptions.map((option) => {
+                    const isSelected = contrapartida.indice === option;
+                    const isConfirming = confirmingDeleteIndice === option;
+                    
                     return (
                       <Badge
-                        key={option.value}
+                        key={option}
                         variant={isSelected ? "default" : "outline"}
-                        onClick={() => updateContrapartida(
-                          contrapartida.id, 
-                          'indice', 
-                          isSelected ? undefined : option.value
-                        )}
+                        onClick={() => {
+                          if (!isConfirming) {
+                            updateContrapartida(
+                              contrapartida.id, 
+                              'indice', 
+                              isSelected ? undefined : option
+                            );
+                          }
+                        }}
                         className={cn(
-                          "cursor-pointer transition-all select-none",
+                          "cursor-pointer transition-all select-none flex items-center gap-1",
                           isSelected 
                             ? "bg-primary text-primary-foreground hover:bg-primary/80" 
-                            : "hover:bg-muted"
+                            : "hover:bg-muted",
+                          isConfirming && "ring-2 ring-red-500/50"
                         )}
                       >
-                        {option.label}
+                        <span>{option}</span>
+                        {!isConfirming && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setConfirmingDeleteIndice(option);
+                            }}
+                            className="ml-0.5 hover:bg-red-500/30 rounded-full p-0.5"
+                          >
+                            <X className="h-3 w-3 text-red-400" />
+                          </button>
+                        )}
+                        {isConfirming && (
+                          <div className="flex items-center gap-0.5 ml-1">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                // Remove from options
+                                setIndiceOptions(indiceOptions.filter(o => o !== option));
+                                // Clear from any contrapartida using this indice
+                                contrapartidas.forEach(c => {
+                                  if (c.indice === option) {
+                                    updateContrapartida(c.id, 'indice', undefined);
+                                  }
+                                });
+                                setConfirmingDeleteIndice(null);
+                              }}
+                              className="hover:bg-green-500/30 rounded-full p-0.5"
+                            >
+                              <Check className="h-3 w-3 text-green-400" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setConfirmingDeleteIndice(null);
+                              }}
+                              className="hover:bg-red-500/30 rounded-full p-0.5"
+                            >
+                              <X className="h-3 w-3 text-red-400" />
+                            </button>
+                          </div>
+                        )}
                       </Badge>
                     );
                   })}
                 </div>
-                {!contrapartida.indice && (
-                  <p className="text-xs text-muted-foreground">Clique para selecionar um índice (opcional)</p>
-                )}
               </div>
             </div>
 
