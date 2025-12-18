@@ -253,7 +253,7 @@ const PortoDeIdeiasPage = () => {
   };
 
   const formatBudget = (value: number | null): string => {
-    if (!value) return "A definir";
+    if (!value) return "";
     if (value >= 1000000) {
       return `R$ ${(value / 1000000).toFixed(1)}M`;
     } else if (value >= 1000) {
@@ -263,7 +263,7 @@ const PortoDeIdeiasPage = () => {
   };
 
   const getBudgetRange = (value: number | null): { label: string; color: string } => {
-    if (!value) return { label: "A definir", color: "bg-muted text-muted-foreground" };
+    if (!value) return { label: "", color: "" };
     if (value < 100000) return { label: "Pequeno", color: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400" };
     if (value < 500000) return { label: "Médio", color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400" };
     return { label: "Grande", color: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400" };

@@ -150,13 +150,14 @@ const ProjectPage = () => {
   const fetchMembers = async () => {
     const { data } = await supabase
       .from("project_members")
-      .select("id, nome, funcao, email, telefone, photo_url, curriculum_url, social_links")
+      .select("id, nome, funcao, email, telefone, photo_url, curriculum_url, social_links, detalhes")
       .eq("project_id", id);
     
     if (data) {
       setMembers(data.map(m => ({
         ...m,
-        social_links: m.social_links as ProjectMember['social_links']
+        social_links: m.social_links as ProjectMember['social_links'],
+        detalhes: m.detalhes
       })));
     }
   };
@@ -276,7 +277,7 @@ const ProjectPage = () => {
       doc.setFont("helvetica", "normal");
       const budgetText = project.valor_sugerido 
         ? formatBudget(project.valor_sugerido) 
-        : (project.budget || "A definir");
+        : (project.budget || "Não informado");
       doc.text(budgetText, margin, yPos);
       yPos += 12;
     }
@@ -361,7 +362,7 @@ const ProjectPage = () => {
   };
 
   const formatBudget = (value: number | null): string => {
-    if (!value) return "A definir";
+    if (!value) return "";
     if (value >= 1000000) {
       return `R$ ${(value / 1000000).toFixed(1)}M`;
     } else if (value >= 1000) {
@@ -562,6 +563,11 @@ const ProjectPage = () => {
                           <h4 className="font-semibold text-foreground text-sm">{member.nome}</h4>
                           {member.funcao && (
                             <p className="text-xs text-muted-foreground">{member.funcao}</p>
+                          )}
+                          
+                          {/* Detalhes */}
+                          {member.detalhes && (
+                            <p className="text-xs text-muted-foreground mt-1">{member.detalhes}</p>
                           )}
                           
                           {/* Social Links e CV */}

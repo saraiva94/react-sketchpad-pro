@@ -141,6 +141,7 @@ export type Database = {
         Row: {
           created_at: string | null
           curriculum_url: string | null
+          detalhes: string | null
           email: string | null
           funcao: string | null
           id: string
@@ -153,6 +154,7 @@ export type Database = {
         Insert: {
           created_at?: string | null
           curriculum_url?: string | null
+          detalhes?: string | null
           email?: string | null
           funcao?: string | null
           id?: string
@@ -165,6 +167,7 @@ export type Database = {
         Update: {
           created_at?: string | null
           curriculum_url?: string | null
+          detalhes?: string | null
           email?: string | null
           funcao?: string | null
           id?: string
