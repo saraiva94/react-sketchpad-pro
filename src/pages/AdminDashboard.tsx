@@ -807,6 +807,7 @@ const AdminDashboard = () => {
             photo_url: m.photo_url || "",
             social_links: m.social_links || {},
             curriculum_url: m.curriculum_url || "",
+            detalhes: m.detalhes || "",
           }));
           setEditTeamMembers(members);
         } else {
@@ -927,6 +928,7 @@ const AdminDashboard = () => {
           photo_url: member.photo_url || null,
           social_links: member.social_links || {},
           curriculum_url: member.curriculum_url || null,
+          detalhes: member.detalhes || null,
         }));
         
         await supabase.from("project_members").insert(membersData);

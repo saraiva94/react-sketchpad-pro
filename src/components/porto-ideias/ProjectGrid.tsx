@@ -168,9 +168,13 @@ function ProjectCard({
 
             {/* Footer */}
             <div className="flex items-center justify-between pt-4 border-t border-border">
-              <span className="text-sm font-medium text-primary">
-                {formatBudget(project.valor_sugerido)}
-              </span>
+              {project.valor_sugerido ? (
+                <span className="text-sm font-medium text-primary">
+                  {formatBudget(project.valor_sugerido)}
+                </span>
+              ) : (
+                <span className="text-sm text-muted-foreground"></span>
+              )}
               <span className="text-sm font-bold flex items-center gap-2 group-hover:translate-x-2 transition-transform text-foreground">
                 Ver projeto
                 <ArrowRight className="w-4 h-4" />

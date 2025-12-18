@@ -228,6 +228,7 @@ const AdminAddProjectPage = () => {
           photo_url: member.photo_url || null,
           social_links: member.social_links || {},
           curriculum_url: member.curriculum_url || null,
+          detalhes: member.detalhes || null,
         }));
 
         await supabase.from("project_members").insert(membersData);
