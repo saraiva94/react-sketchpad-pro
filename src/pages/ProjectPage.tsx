@@ -811,8 +811,12 @@ const ProjectPage = () => {
                     <Shield className="w-5 h-5 text-violet-500" />
                     Lei de Incentivo
                   </h3>
-                  <div className="p-4 bg-violet-500/10 border border-violet-500/20 rounded-xl">
-                    <p className="text-sm text-muted-foreground">{project.incentive_law_details}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {project.incentive_law_details.split(',').map((law, index) => (
+                      <Badge key={index} variant="secondary" className="rounded-full">
+                        {law.trim()}
+                      </Badge>
+                    ))}
                   </div>
                 </div>
               )}
