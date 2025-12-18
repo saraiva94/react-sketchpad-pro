@@ -398,9 +398,8 @@ const PortoDeIdeiasPage = () => {
       </div>
 
       {/* Project Type */}
-      {/* Project Type */}
       <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-        <SelectTrigger className={`rounded-full ${isMobile ? 'w-full' : 'min-w-[140px]'}`}>
+        <SelectTrigger className={`rounded-full ${isMobile ? 'w-full' : 'w-fit'}`}>
           <SelectValue placeholder="Tipo de Projeto" />
         </SelectTrigger>
         <SelectContent position="popper" sideOffset={4}>
@@ -412,7 +411,7 @@ const PortoDeIdeiasPage = () => {
 
       {/* Budget Range */}
       <Select value={selectedBudgetRange} onValueChange={setSelectedBudgetRange}>
-        <SelectTrigger className={`rounded-full ${isMobile ? 'w-full' : 'min-w-[120px]'}`}>
+        <SelectTrigger className={`rounded-full ${isMobile ? 'w-full' : 'w-fit'}`}>
           <SelectValue placeholder="Porte" />
         </SelectTrigger>
         <SelectContent position="popper" sideOffset={4}>
@@ -424,7 +423,7 @@ const PortoDeIdeiasPage = () => {
 
       {/* Stage */}
       <Select value={selectedStage} onValueChange={setSelectedStage}>
-        <SelectTrigger className={`rounded-full ${isMobile ? 'w-full' : 'min-w-[130px]'}`}>
+        <SelectTrigger className={`rounded-full ${isMobile ? 'w-full' : 'w-fit'}`}>
           <SelectValue placeholder="Estágio" />
         </SelectTrigger>
         <SelectContent position="popper" sideOffset={4}>
@@ -436,7 +435,7 @@ const PortoDeIdeiasPage = () => {
 
       {/* Incentive Law */}
       <Select value={selectedIncentiveLaw} onValueChange={setSelectedIncentiveLaw}>
-        <SelectTrigger className={`rounded-full ${isMobile ? 'w-full' : 'min-w-[150px]'}`}>
+        <SelectTrigger className={`rounded-full ${isMobile ? 'w-full' : 'w-fit'}`}>
           <SelectValue placeholder="Lei de Incentivo" />
         </SelectTrigger>
         <SelectContent position="popper" sideOffset={4}>
@@ -448,7 +447,7 @@ const PortoDeIdeiasPage = () => {
 
       {/* Location */}
       <Select value={selectedLocation} onValueChange={setSelectedLocation}>
-        <SelectTrigger className={`rounded-full ${isMobile ? 'w-full' : 'min-w-[120px]'}`}>
+        <SelectTrigger className={`rounded-full ${isMobile ? 'w-full' : 'w-fit'}`}>
           <SelectValue placeholder="Local" />
         </SelectTrigger>
         <SelectContent position="popper" sideOffset={4}>
@@ -460,7 +459,7 @@ const PortoDeIdeiasPage = () => {
 
       {/* Sort */}
       <Select value={sortBy} onValueChange={setSortBy}>
-        <SelectTrigger className={`rounded-full ${isMobile ? 'w-full' : 'min-w-[130px]'}`}>
+        <SelectTrigger className={`rounded-full ${isMobile ? 'w-full' : 'w-fit'}`}>
           <SelectValue placeholder="Ordenar" />
         </SelectTrigger>
         <SelectContent position="popper" sideOffset={4}>
