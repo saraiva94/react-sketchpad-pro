@@ -24,7 +24,12 @@ import {
   Check,
   Gift,
   Award,
-  Newspaper
+  Newspaper,
+  Instagram,
+  Linkedin,
+  Facebook,
+  Youtube,
+  FileText
 } from "lucide-react";
 
 interface NewsItem {
@@ -59,6 +64,7 @@ interface Project {
   stages: string[] | null;
   awards: string[] | null;
   news: NewsItem[] | null;
+  additional_info: string | null;
 }
 
 interface ProjectMember {
@@ -66,6 +72,17 @@ interface ProjectMember {
   nome: string;
   funcao: string | null;
   email: string | null;
+  telefone: string | null;
+  photo_url: string | null;
+  curriculum_url: string | null;
+  social_links: {
+    instagram?: string;
+    linkedin?: string;
+    facebook?: string;
+    youtube?: string;
+    website?: string;
+  } | null;
+  detalhes?: string | null;
 }
 
 interface ContactButton {
@@ -133,11 +150,14 @@ const ProjectPage = () => {
   const fetchMembers = async () => {
     const { data } = await supabase
       .from("project_members")
-      .select("id, nome, funcao, email")
+      .select("id, nome, funcao, email, telefone, photo_url, curriculum_url, social_links")
       .eq("project_id", id);
     
     if (data) {
-      setMembers(data);
+      setMembers(data.map(m => ({
+        ...m,
+        social_links: m.social_links as ProjectMember['social_links']
+      })));
     }
   };
 
@@ -522,17 +542,62 @@ const ProjectPage = () => {
                 </h2>
                 <div className="grid md:grid-cols-2 gap-4">
                   {members.map((member) => (
-                    <div key={member.id} className="flex items-center space-x-3 p-4 bg-muted/50 rounded-xl border border-border/50">
-                      <div className="w-12 h-12 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center flex-shrink-0">
-                        <span className="text-primary-foreground text-sm font-semibold">
-                          {getInitials(member.nome)}
-                        </span>
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <h4 className="font-semibold text-foreground text-sm">{member.nome}</h4>
-                        {member.funcao && (
-                          <p className="text-xs text-muted-foreground">{member.funcao}</p>
+                    <div key={member.id} className="p-4 bg-muted/50 rounded-xl border border-border/50">
+                      <div className="flex items-start space-x-3">
+                        {/* Foto */}
+                        {member.photo_url ? (
+                          <img 
+                            src={member.photo_url} 
+                            alt={member.nome}
+                            className="w-14 h-14 rounded-full object-cover flex-shrink-0 border-2 border-primary/20"
+                          />
+                        ) : (
+                          <div className="w-14 h-14 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center flex-shrink-0">
+                            <span className="text-primary-foreground text-sm font-semibold">
+                              {getInitials(member.nome)}
+                            </span>
+                          </div>
                         )}
+                        <div className="min-w-0 flex-1">
+                          <h4 className="font-semibold text-foreground text-sm">{member.nome}</h4>
+                          {member.funcao && (
+                            <p className="text-xs text-muted-foreground">{member.funcao}</p>
+                          )}
+                          
+                          {/* Social Links e CV */}
+                          <div className="flex items-center gap-2 mt-2">
+                            {member.social_links?.instagram && (
+                              <a href={member.social_links.instagram.startsWith('http') ? member.social_links.instagram : `https://instagram.com/${member.social_links.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="w-6 h-6 rounded-full bg-pink-500/10 flex items-center justify-center hover:bg-pink-500/20 transition-colors">
+                                <Instagram className="w-3 h-3 text-pink-500" />
+                              </a>
+                            )}
+                            {member.social_links?.linkedin && (
+                              <a href={member.social_links.linkedin.startsWith('http') ? member.social_links.linkedin : `https://linkedin.com/in/${member.social_links.linkedin}`} target="_blank" rel="noopener noreferrer" className="w-6 h-6 rounded-full bg-blue-600/10 flex items-center justify-center hover:bg-blue-600/20 transition-colors">
+                                <Linkedin className="w-3 h-3 text-blue-600" />
+                              </a>
+                            )}
+                            {member.social_links?.facebook && (
+                              <a href={member.social_links.facebook.startsWith('http') ? member.social_links.facebook : `https://facebook.com/${member.social_links.facebook}`} target="_blank" rel="noopener noreferrer" className="w-6 h-6 rounded-full bg-blue-500/10 flex items-center justify-center hover:bg-blue-500/20 transition-colors">
+                                <Facebook className="w-3 h-3 text-blue-500" />
+                              </a>
+                            )}
+                            {member.social_links?.youtube && (
+                              <a href={member.social_links.youtube.startsWith('http') ? member.social_links.youtube : `https://youtube.com/${member.social_links.youtube}`} target="_blank" rel="noopener noreferrer" className="w-6 h-6 rounded-full bg-red-500/10 flex items-center justify-center hover:bg-red-500/20 transition-colors">
+                                <Youtube className="w-3 h-3 text-red-500" />
+                              </a>
+                            )}
+                            {member.social_links?.website && (
+                              <a href={member.social_links.website.startsWith('http') ? member.social_links.website : `https://${member.social_links.website}`} target="_blank" rel="noopener noreferrer" className="w-6 h-6 rounded-full bg-emerald-500/10 flex items-center justify-center hover:bg-emerald-500/20 transition-colors">
+                                <Globe className="w-3 h-3 text-emerald-500" />
+                              </a>
+                            )}
+                            {member.curriculum_url && (
+                              <a href={member.curriculum_url} target="_blank" rel="noopener noreferrer" className="w-6 h-6 rounded-full bg-orange-500/10 flex items-center justify-center hover:bg-orange-500/20 transition-colors" title="Baixar Currículo">
+                                <FileText className="w-3 h-3 text-orange-500" />
+                              </a>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -783,26 +848,25 @@ const ProjectPage = () => {
                     </div>
                   )}
                   {project.categorias_tags && project.categorias_tags.length > 0 && (
-                    <div className="flex flex-wrap gap-2 pt-2">
-                      {project.categorias_tags.map((tag, index) => (
-                        <Badge key={index} variant="secondary" className="rounded-full">
-                          {tag}
-                        </Badge>
-                      ))}
+                    <div>
+                      <span className="text-sm text-muted-foreground">Categorias</span>
+                      <div className="flex flex-wrap gap-2 mt-1">
+                        {project.categorias_tags.map((tag, index) => (
+                          <Badge key={index} variant="secondary" className="rounded-full">
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {project.additional_info && (
+                    <div>
+                      <span className="text-sm text-muted-foreground">Informações Adicionais</span>
+                      <p className="font-medium text-foreground text-sm mt-1">{project.additional_info}</p>
                     </div>
                   )}
                 </div>
               </div>
-
-              {/* Contact Button */}
-              <div className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-4">
-                <h3 className="font-serif font-bold text-lg text-foreground mb-4">Contato</h3>
-                <Button className="w-full rounded-full" size="lg" onClick={handleContactClick}>
-                  <MessageCircle className="w-4 h-4 mr-2" />
-                  Contato
-                </Button>
-              </div>
-
 
               {/* Incentive Law Card */}
               {project.has_incentive_law && project.incentive_law_details && (
@@ -820,6 +884,15 @@ const ProjectPage = () => {
                   </div>
                 </div>
               )}
+
+              {/* Contact Button */}
+              <div className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-4">
+                <h3 className="font-serif font-bold text-lg text-foreground mb-4">Contato</h3>
+                <Button className="w-full rounded-full" size="lg" onClick={handleContactClick}>
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  Contato
+                </Button>
+              </div>
             </div>
           </div>
         </div>

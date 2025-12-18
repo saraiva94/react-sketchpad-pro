@@ -63,13 +63,13 @@ const projectTypes = [
 ];
 const locations = ["Todas", "São Paulo", "Rio de Janeiro", "Belo Horizonte", "Brasília", "Salvador", "Recife", "Porto Alegre", "Manaus", "Curitiba"];
 const budgetRanges = [
-  { value: "all", label: "Todos os Portes" },
+  { value: "all", label: "Porte" },
   { value: "small", label: "Pequeno Porte" },
   { value: "medium", label: "Médio Porte" },
   { value: "large", label: "Grande Porte" }
 ];
 const projectStages = [
-  { value: "all", label: "Todos os Estágios" },
+  { value: "all", label: "Estágio" },
   { value: "ideia", label: "Ideia inicial" },
   { value: "development", label: "Desenvolvimento" },
   { value: "captacao", label: "Captação de recursos" },
@@ -81,14 +81,14 @@ const projectStages = [
   { value: "distribution", label: "Distribuição" }
 ];
 const incentiveLaws = [
-  { value: "all", label: "Todas as Leis" },
+  { value: "all", label: "Lei de Incentivo" },
   { value: "rouanet", label: "Lei Rouanet" },
   { value: "audiovisual", label: "Lei do Audiovisual" },
   { value: "proac", label: "PROAC" },
   { value: "none", label: "Sem Lei de Incentivo" }
 ];
 const sortOptions = [
-  { value: "recent", label: "Mais Recentes" },
+  { value: "recent", label: "Ordenar" },
   { value: "name", label: "Nome A-Z" },
   { value: "budget-asc", label: "Menor Orçamento" },
   { value: "budget-desc", label: "Maior Orçamento" }
@@ -157,6 +157,10 @@ const PortoDeIdeiasPage = () => {
   const [cardVisibility, setCardVisibility] = useState<{ [key: string]: boolean }>({});
   const [filtersOpen, setFiltersOpen] = useState(false);
   
+  // Header content from settings
+  const [headerTitle, setHeaderTitle] = useState("Conheça os Projetos da Porto de Ideias");
+  const [headerDescription, setHeaderDescription] = useState("Selecionamos projetos com potencial de impacto. Conheça as ideias que já fazem parte da nossa rede.");
+  
   // Filters
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Todos");
@@ -165,6 +169,11 @@ const PortoDeIdeiasPage = () => {
   const [selectedStage, setSelectedStage] = useState("all");
   const [selectedIncentiveLaw, setSelectedIncentiveLaw] = useState("all");
   const [sortBy, setSortBy] = useState("recent");
+  
+  // Location suggestions
+  const [uniqueLocations, setUniqueLocations] = useState<string[]>([]);
+  const [locationInput, setLocationInput] = useState("");
+  const [showLocationSuggestions, setShowLocationSuggestions] = useState(false);
 
   // Intersection observers for animations
   const { ref: headerRef, isInView: headerInView } = useInView<HTMLElement>();
@@ -174,6 +183,7 @@ const PortoDeIdeiasPage = () => {
     fetchProjects();
     fetchDisplaySlots();
     fetchCardVisibility();
+    fetchHeaderContent();
   }, []);
 
   const fetchProjects = async () => {
@@ -217,6 +227,31 @@ const PortoDeIdeiasPage = () => {
     }
   };
 
+  const fetchHeaderContent = async () => {
+    const { data } = await supabase
+      .from("settings")
+      .select("value")
+      .eq("key", "porto_ideias_header")
+      .maybeSingle();
+    
+    if (data) {
+      const content = data.value as { title?: string; description?: string };
+      if (content.title) setHeaderTitle(content.title);
+      if (content.description) setHeaderDescription(content.description);
+    }
+    
+    // Extract unique locations from projects for autocomplete
+    const { data: projectsData } = await supabase
+      .from("projects_public")
+      .select("location")
+      .not("location", "is", null);
+    
+    if (projectsData) {
+      const locations = [...new Set(projectsData.map(p => p.location).filter(Boolean))] as string[];
+      setUniqueLocations(locations);
+    }
+  };
+
   const formatBudget = (value: number | null): string => {
     if (!value) return "A definir";
     if (value >= 1000000) {
@@ -252,6 +287,23 @@ const PortoDeIdeiasPage = () => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
 
+  // Normalize location name for better filtering
+  const normalizeLocation = (loc: string | null): string => {
+    if (!loc) return "";
+    const normalized = loc.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+    // Map common variations to standard names
+    if (normalized.includes("rio") && (normalized.includes("janeiro") || normalized === "rj")) return "Rio de Janeiro";
+    if (normalized.includes("sao paulo") || normalized === "sp") return "São Paulo";
+    if (normalized.includes("belo horizonte") || normalized === "bh") return "Belo Horizonte";
+    if (normalized.includes("brasilia") || normalized === "df") return "Brasília";
+    if (normalized.includes("salvador") || normalized === "ba") return "Salvador";
+    if (normalized.includes("recife") || normalized === "pe") return "Recife";
+    if (normalized.includes("porto alegre") || normalized === "rs" || normalized === "poa") return "Porto Alegre";
+    if (normalized.includes("manaus") || normalized === "am") return "Manaus";
+    if (normalized.includes("curitiba") || normalized === "pr") return "Curitiba";
+    return loc;
+  };
+
   const filteredProjects = projects.filter(project => {
     const matchesSearch = 
       project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -259,7 +311,8 @@ const PortoDeIdeiasPage = () => {
       project.categorias_tags?.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
     
     const matchesCategory = selectedCategory === "Todos" || project.project_type === selectedCategory;
-    const matchesLocation = selectedLocation === "Todas" || project.location === selectedLocation;
+    const normalizedProjectLocation = normalizeLocation(project.location);
+    const matchesLocation = selectedLocation === "Todas" || normalizedProjectLocation === selectedLocation;
     
     let matchesBudgetRange = true;
     if (selectedBudgetRange !== "all" && project.valor_sugerido) {
@@ -463,10 +516,10 @@ const PortoDeIdeiasPage = () => {
             </div>
             
             <h1 className="text-3xl md:text-5xl font-serif font-bold text-foreground mb-4 md:mb-6">
-              Conheça os Projetos da Porto de Ideias
+              {headerTitle}
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              Selecionamos projetos com potencial de impacto. Conheça as ideias que já fazem parte da nossa rede.
+              {headerDescription}
             </p>
           </div>
         </div>
