@@ -14,6 +14,7 @@ import { Navbar } from "@/components/Navbar";
 import { ImageCropper } from "@/components/ImageCropper";
 import { FeaturedProjectsManager } from "@/components/admin/FeaturedProjectsManager";
 import { PortoIdeiasCardsManager } from "@/components/admin/PortoIdeiasCardsManager";
+import { PortoIdeiasHeaderEditor } from "@/components/admin/PortoIdeiasHeaderEditor";
 import { QuemSomosEditor } from "@/components/admin/QuemSomosEditor";
 import { EcossistemaTextEditor } from "@/components/admin/EcossistemaTextEditor";
 import { NossosServicosEditor } from "@/components/admin/NossosServicosEditor";
@@ -1754,6 +1755,9 @@ const AdminDashboard = () => {
             <div className="text-lg font-semibold text-muted-foreground border-b pb-2 mb-4 mt-8">
               💡 Página Porto de Ideias
             </div>
+
+            {/* Porto de Ideias Header Editor */}
+            <PortoIdeiasHeaderEditor />
 
             {/* 7. Cards Porto de Ideias */}
             <PortoIdeiasCardsManager 
