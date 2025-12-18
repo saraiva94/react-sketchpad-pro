@@ -193,6 +193,7 @@ export type Database = {
       }
       projects: {
         Row: {
+          additional_info: string | null
           admin_notes: string | null
           awards: string[] | null
           budget: string | null
@@ -230,6 +231,7 @@ export type Database = {
           valor_sugerido: number | null
         }
         Insert: {
+          additional_info?: string | null
           admin_notes?: string | null
           awards?: string[] | null
           budget?: string | null
@@ -267,6 +269,7 @@ export type Database = {
           valor_sugerido?: number | null
         }
         Update: {
+          additional_info?: string | null
           admin_notes?: string | null
           awards?: string[] | null
           budget?: string | null
@@ -351,6 +354,7 @@ export type Database = {
     Views: {
       projects_public: {
         Row: {
+          additional_info: string | null
           budget: string | null
           categorias_tags: string[] | null
           created_at: string | null
@@ -380,6 +384,7 @@ export type Database = {
           valor_sugerido: number | null
         }
         Insert: {
+          additional_info?: string | null
           budget?: string | null
           categorias_tags?: string[] | null
           created_at?: string | null
@@ -409,6 +414,7 @@ export type Database = {
           valor_sugerido?: number | null
         }
         Update: {
+          additional_info?: string | null
           budget?: string | null
           categorias_tags?: string[] | null
           created_at?: string | null
