@@ -39,7 +39,7 @@ interface Project {
 }
 
 const projectTypes = [
-  "Todos",
+  "Tipo de Projeto",
   "Filme de Ficção",
   "Documentário",
   "Longa-metragem ficção",
@@ -61,7 +61,7 @@ const projectTypes = [
   "Projeto transmídia",
   "Outro",
 ];
-const locations = ["Todas", "São Paulo", "Rio de Janeiro", "Belo Horizonte", "Brasília", "Salvador", "Recife", "Porto Alegre", "Manaus", "Curitiba"];
+const locations = ["Cidade", "São Paulo", "Rio de Janeiro", "Belo Horizonte", "Brasília", "Salvador", "Recife", "Porto Alegre", "Manaus", "Curitiba"];
 const budgetRanges = [
   { value: "all", label: "Porte" },
   { value: "small", label: "Pequeno Porte" },
@@ -163,8 +163,8 @@ const PortoDeIdeiasPage = () => {
   
   // Filters
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("Todos");
-  const [selectedLocation, setSelectedLocation] = useState("Todas");
+  const [selectedCategory, setSelectedCategory] = useState("Tipo de Projeto");
+  const [selectedLocation, setSelectedLocation] = useState("Cidade");
   const [selectedBudgetRange, setSelectedBudgetRange] = useState("all");
   const [selectedStage, setSelectedStage] = useState("all");
   const [selectedIncentiveLaw, setSelectedIncentiveLaw] = useState("all");
@@ -310,9 +310,9 @@ const PortoDeIdeiasPage = () => {
       project.synopsis.toLowerCase().includes(searchTerm.toLowerCase()) ||
       project.categorias_tags?.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
     
-    const matchesCategory = selectedCategory === "Todos" || project.project_type === selectedCategory;
+    const matchesCategory = selectedCategory === "Tipo de Projeto" || project.project_type === selectedCategory;
     const normalizedProjectLocation = normalizeLocation(project.location);
-    const matchesLocation = selectedLocation === "Todas" || normalizedProjectLocation === selectedLocation;
+    const matchesLocation = selectedLocation === "Cidade" || normalizedProjectLocation === selectedLocation;
     
     let matchesBudgetRange = true;
     if (selectedBudgetRange !== "all" && project.valor_sugerido) {
@@ -363,21 +363,21 @@ const PortoDeIdeiasPage = () => {
 
   const clearFilters = () => {
     setSearchTerm("");
-    setSelectedCategory("Todos");
-    setSelectedLocation("Todas");
+    setSelectedCategory("Tipo de Projeto");
+    setSelectedLocation("Cidade");
     setSelectedBudgetRange("all");
     setSelectedStage("all");
     setSelectedIncentiveLaw("all");
     setSortBy("recent");
   };
 
-  const hasActiveFilters = searchTerm || selectedCategory !== "Todos" || selectedLocation !== "Todas" || 
+  const hasActiveFilters = searchTerm || selectedCategory !== "Tipo de Projeto" || selectedLocation !== "Cidade" || 
     selectedBudgetRange !== "all" || selectedStage !== "all" || selectedIncentiveLaw !== "all";
 
   const activeFiltersCount = [
     searchTerm,
-    selectedCategory !== "Todos",
-    selectedLocation !== "Todas",
+    selectedCategory !== "Tipo de Projeto",
+    selectedLocation !== "Cidade",
     selectedBudgetRange !== "all",
     selectedStage !== "all",
     selectedIncentiveLaw !== "all"
