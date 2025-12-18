@@ -4,8 +4,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Trash2, GripVertical, Check, X } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export interface Contrapartida {
   id: string;
@@ -55,6 +57,7 @@ const ContrapartidasEditor: React.FC<ContrapartidasEditorProps> = ({
   onChange 
 }) => {
   const [newBeneficio, setNewBeneficio] = useState<{ [key: string]: string }>({});
+  const [confirmingDelete, setConfirmingDelete] = useState<{ contrapartidaId: string; beneficioIndex: number } | null>(null);
 
   const addContrapartida = () => {
     const newContrapartida: Contrapartida = {
@@ -102,12 +105,13 @@ const ContrapartidasEditor: React.FC<ContrapartidasEditorProps> = ({
     setNewBeneficio(prev => ({ ...prev, [contrapartidaId]: '' }));
   };
 
-  const removeBeneficio = (contrapartidaId: string, index: number) => {
+  const confirmRemoveBeneficio = (contrapartidaId: string, index: number) => {
     const contrapartida = contrapartidas.find(c => c.id === contrapartidaId);
     if (!contrapartida) return;
 
     const newBeneficios = contrapartida.beneficios.filter((_, i) => i !== index);
     updateContrapartida(contrapartidaId, 'beneficios', newBeneficios);
+    setConfirmingDelete(null);
   };
 
   const moveContrapartida = (id: string, direction: 'up' | 'down') => {
@@ -252,28 +256,9 @@ const ContrapartidasEditor: React.FC<ContrapartidasEditorProps> = ({
             </div>
 
             {/* Benefícios */}
-            <div className="space-y-2">
+            <div className="space-y-3">
               <Label>Benefícios</Label>
               
-              {/* Lista de benefícios existentes */}
-              <div className="space-y-2">
-                {contrapartida.beneficios.map((beneficio, bIndex) => (
-                  <div key={bIndex} className="flex items-center gap-2 bg-muted/50 p-2 rounded-md">
-                    <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
-                    <span className="flex-1 text-sm">{beneficio}</span>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeBeneficio(contrapartida.id, bIndex)}
-                      className="h-6 w-6 p-0"
-                    >
-                      <X className="w-3 h-3" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-
               {/* Adicionar novo benefício */}
               <div className="flex gap-2">
                 <Input
@@ -293,16 +278,77 @@ const ContrapartidasEditor: React.FC<ContrapartidasEditorProps> = ({
                 />
                 <Button 
                   type="button"
-                  variant="secondary" 
-                  size="sm"
+                  variant="outline" 
+                  size="icon"
                   onClick={() => addBeneficio(contrapartida.id)}
+                  disabled={!newBeneficio[contrapartida.id]?.trim()}
                 >
                   <Plus className="w-4 h-4" />
                 </Button>
               </div>
-              <p className="text-xs text-muted-foreground">
-                Pressione Enter ou clique + para adicionar
-              </p>
+
+              {/* Lista de benefícios como badges */}
+              <div className="flex flex-wrap gap-2">
+                {contrapartida.beneficios.map((beneficio, bIndex) => {
+                  const isConfirming = confirmingDelete?.contrapartidaId === contrapartida.id && 
+                                       confirmingDelete?.beneficioIndex === bIndex;
+                  
+                  return (
+                    <Badge
+                      key={bIndex}
+                      variant="default"
+                      className={cn(
+                        "cursor-default transition-all select-none flex items-center gap-1 bg-primary text-primary-foreground",
+                        isConfirming && "ring-2 ring-red-500/50"
+                      )}
+                    >
+                      <span>{beneficio}</span>
+                      {!isConfirming && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setConfirmingDelete({ contrapartidaId: contrapartida.id, beneficioIndex: bIndex });
+                          }}
+                          className="ml-0.5 hover:bg-red-500/30 rounded-full p-0.5"
+                        >
+                          <X className="h-3 w-3 text-red-400" />
+                        </button>
+                      )}
+                      {isConfirming && (
+                        <div className="flex items-center gap-0.5 ml-1">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              confirmRemoveBeneficio(contrapartida.id, bIndex);
+                            }}
+                            className="hover:bg-green-500/30 rounded-full p-0.5"
+                          >
+                            <Check className="h-3 w-3 text-green-400" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setConfirmingDelete(null);
+                            }}
+                            className="hover:bg-red-500/30 rounded-full p-0.5"
+                          >
+                            <X className="h-3 w-3 text-red-400" />
+                          </button>
+                        </div>
+                      )}
+                    </Badge>
+                  );
+                })}
+              </div>
+
+              {contrapartida.beneficios.length === 0 && (
+                <p className="text-xs text-muted-foreground">
+                  Adicione benefícios para esta contrapartida
+                </p>
+              )}
             </div>
           </CardContent>
         </Card>
