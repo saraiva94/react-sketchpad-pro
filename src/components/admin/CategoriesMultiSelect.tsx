@@ -153,6 +153,7 @@ export const CategoriesMultiSelect = ({
             <Badge
               key={cat.value}
               variant={isSelected ? "default" : "outline"}
+              onClick={() => toggleCategory(cat.value)}
               className={cn(
                 "cursor-pointer transition-all select-none text-xs flex items-center gap-1",
                 isSelected 
@@ -161,7 +162,7 @@ export const CategoriesMultiSelect = ({
                 isConfirming && "ring-2 ring-red-500/50"
               )}
             >
-              <span onClick={() => toggleCategory(cat.value)}>{cat.label}</span>
+              <span>{cat.label}</span>
               {allowCustom && !isConfirming && (
                 <button
                   type="button"

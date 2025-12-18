@@ -140,6 +140,7 @@ export const StagesMultiSelect = ({
             <Badge
               key={stage.value}
               variant={isSelected ? "default" : "outline"}
+              onClick={() => toggleStage(stage.value)}
               className={cn(
                 "cursor-pointer transition-all select-none flex items-center gap-1",
                 isSelected 
@@ -148,7 +149,7 @@ export const StagesMultiSelect = ({
                 isConfirming && "ring-2 ring-red-500/50"
               )}
             >
-              <span onClick={() => toggleStage(stage.value)}>{stage.label}</span>
+              <span>{stage.label}</span>
               {allowCustom && !isConfirming && (
                 <button
                   type="button"

@@ -137,6 +137,7 @@ export const IncentiveLawsMultiSelect = ({
             <Badge
               key={law.value}
               variant={isSelected ? "default" : "outline"}
+              onClick={() => toggleLaw(law.value)}
               className={cn(
                 "cursor-pointer transition-all select-none flex items-center gap-1",
                 isSelected 
@@ -145,7 +146,7 @@ export const IncentiveLawsMultiSelect = ({
                 isConfirming && "ring-2 ring-red-500/50"
               )}
             >
-              <span onClick={() => toggleLaw(law.value)}>{law.label}</span>
+              <span>{law.label}</span>
               {allowCustom && !isConfirming && (
                 <button
                   type="button"
