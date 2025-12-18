@@ -4,6 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowRight, Anchor, Shield, MapPin } from "lucide-react";
 import { useDominantColor } from "@/hooks/useDominantColor";
+import { INCENTIVE_LAWS, getIncentiveLawLabel } from "@/components/admin/IncentiveLawsMultiSelect";
+
 interface Project {
   id: string;
   title: string;
@@ -120,18 +122,35 @@ function ProjectCard({
                 {project.project_type}
               </Badge>
             </div>
-            {/* Incentive Law badge - only shows if a specific law was chosen */}
-            {project.has_incentive_law && project.incentive_law_details && (
-              <div className="absolute top-3 right-3">
-                <Badge
-                  variant="outline"
-                  className="bg-emerald-500/90 border-emerald-400 text-white text-xs flex items-center gap-1"
-                >
-                  <Shield className="w-3 h-3" />
-                  {project.incentive_law_details}
-                </Badge>
-              </div>
-            )}
+            {/* Incentive Law badge - only shows if a valid law from the form options was chosen */}
+            {(() => {
+              if (!project.has_incentive_law || !project.incentive_law_details) return null;
+              
+              // Get valid law values from the form options
+              const validLawValues = INCENTIVE_LAWS.map(l => l.value);
+              
+              // Check if the stored value matches any valid option
+              const storedValue = project.incentive_law_details.trim().toLowerCase();
+              const matchedLaw = INCENTIVE_LAWS.find(l => 
+                l.value.toLowerCase() === storedValue || 
+                l.label.toLowerCase() === storedValue
+              );
+              
+              // Only show badge if it's a valid law from form options
+              if (!matchedLaw) return null;
+              
+              return (
+                <div className="absolute top-3 right-3">
+                  <Badge
+                    variant="outline"
+                    className="bg-emerald-500/90 border-emerald-400 text-white text-xs flex items-center gap-1"
+                  >
+                    <Shield className="w-3 h-3" />
+                    {matchedLaw.label}
+                  </Badge>
+                </div>
+              );
+            })()}
           </div>
 
           {/* Content */}
