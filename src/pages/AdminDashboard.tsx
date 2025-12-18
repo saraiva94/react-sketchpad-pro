@@ -24,6 +24,7 @@ import { RecognitionEditor, NewsItem } from "@/components/admin/RecognitionEdito
 import { StagesMultiSelect } from "@/components/admin/StagesMultiSelect";
 import { CategoriesMultiSelect, getCategoryLabel } from "@/components/admin/CategoriesMultiSelect";
 import { IncentiveLawsMultiSelect, getIncentiveLawLabel } from "@/components/admin/IncentiveLawsMultiSelect";
+import { TeamMemberEditor, TeamMemberData } from "@/components/admin/TeamMemberEditor";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
@@ -93,6 +94,7 @@ interface Project {
   stages: string[] | null;
   is_hidden: boolean;
   presentation_document_url: string | null;
+  additional_info: string | null;
 }
 
 interface AccessRequest {
@@ -112,6 +114,9 @@ interface ProjectMember {
   email: string | null;
   telefone: string | null;
   project_id: string;
+  photo_url: string | null;
+  curriculum_url: string | null;
+  social_links: Record<string, string> | null;
 }
 
 const AdminDashboard = () => {
@@ -211,6 +216,8 @@ const AdminDashboard = () => {
   const [editContrapartidas, setEditContrapartidas] = useState<Contrapartida[]>([]);
   const [editAwards, setEditAwards] = useState<string[]>([]);
   const [editNews, setEditNews] = useState<NewsItem[]>([]);
+  const [editTeamMembers, setEditTeamMembers] = useState<TeamMemberData[]>([]);
+  const [editAdditionalInfo, setEditAdditionalInfo] = useState("");
   
   // Image cropper states for edit
   const [editThumbnailBlob, setEditThumbnailBlob] = useState<Blob | null>(null);
@@ -753,6 +760,7 @@ const AdminDashboard = () => {
     setEditResponsavelEmail(project.responsavel_email || "");
     setEditResponsavelTelefone(project.responsavel_telefone || "");
     setEditResponsavelGenero(project.responsavel_genero || "");
+    setEditAdditionalInfo(project.additional_info || "");
     
     // Fetch contrapartidas for this project
     supabase
@@ -781,6 +789,28 @@ const AdminDashboard = () => {
         } else {
           setEditAwards([]);
           setEditNews([]);
+        }
+      });
+    
+    // Fetch team members for this project
+    supabase
+      .from("project_members")
+      .select("*")
+      .eq("project_id", project.id)
+      .then(({ data }) => {
+        if (data) {
+          const members: TeamMemberData[] = data.map((m: any) => ({
+            nome: m.nome || "",
+            funcao: m.funcao || "",
+            email: m.email || "",
+            telefone: m.telefone || "",
+            photo_url: m.photo_url || "",
+            social_links: m.social_links || {},
+            curriculum_url: m.curriculum_url || "",
+          }));
+          setEditTeamMembers(members);
+        } else {
+          setEditTeamMembers([]);
         }
       });
     
@@ -846,6 +876,7 @@ const AdminDashboard = () => {
         awards: editAwards.length > 0 ? editAwards : [],
         news: editNews.length > 0 ? editNews : [],
         presentation_document_url: editPresentationDocUrl || null,
+        additional_info: editAdditionalInfo || null,
       } as any)
       .eq("id", selectedProject.id);
 
@@ -878,11 +909,35 @@ const AdminDashboard = () => {
         await supabase.from("contrapartidas").insert(contrapartidasData);
       }
       
+      // Save team members
+      // First delete existing ones
+      await supabase
+        .from("project_members")
+        .delete()
+        .eq("project_id", selectedProject.id);
+      
+      // Then insert new ones
+      if (editTeamMembers.length > 0) {
+        const membersData = editTeamMembers.map(member => ({
+          project_id: selectedProject.id,
+          nome: member.nome,
+          funcao: member.funcao || null,
+          email: member.email || null,
+          telefone: member.telefone || null,
+          photo_url: member.photo_url || null,
+          social_links: member.social_links || {},
+          curriculum_url: member.curriculum_url || null,
+        }));
+        
+        await supabase.from("project_members").insert(membersData);
+      }
+      
       toast({
         title: "Salvo!",
         description: "As alterações foram salvas com sucesso.",
       });
       fetchProjects();
+      fetchProjectMembers();
       setShowEditDialog(false);
     }
   };
@@ -2595,6 +2650,19 @@ const AdminDashboard = () => {
                   rows={4}
                 />
               </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-additional-info">Informações Adicionais</Label>
+                <Textarea
+                  id="edit-additional-info"
+                  placeholder="Informações adicionais sobre o projeto (máx. 100 caracteres)"
+                  value={editAdditionalInfo}
+                  onChange={(e) => setEditAdditionalInfo(e.target.value.slice(0, 100))}
+                  rows={2}
+                  maxLength={100}
+                />
+                <p className="text-xs text-muted-foreground">{editAdditionalInfo.length}/100 caracteres</p>
+              </div>
             </div>
 
             {/* Mídia */}
@@ -2814,6 +2882,14 @@ const AdminDashboard = () => {
                   />
                 </div>
               </div>
+            </div>
+
+            {/* Ficha Técnica / Integrantes */}
+            <div className="space-y-4 border rounded-lg p-4 bg-muted/30">
+              <TeamMemberEditor 
+                members={editTeamMembers} 
+                onChange={setEditTeamMembers} 
+              />
             </div>
 
             {/* Contrapartidas */}
