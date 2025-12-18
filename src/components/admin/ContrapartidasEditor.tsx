@@ -5,7 +5,6 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Trash2, GripVertical, Check, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -233,25 +232,34 @@ const ContrapartidasEditor: React.FC<ContrapartidasEditorProps> = ({
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor={`indice-${contrapartida.id}`}>
-                  Índice (tag)
-                </Label>
-                <Select
-                  value={contrapartida.indice || 'none'}
-                  onValueChange={(value) => updateContrapartida(contrapartida.id, 'indice', value === 'none' ? undefined : value)}
-                >
-                  <SelectTrigger id={`indice-${contrapartida.id}`}>
-                    <SelectValue placeholder="Selecionar índice..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Nenhum</SelectItem>
-                    {INDICE_OPTIONS.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
+                <Label>Índice (tag)</Label>
+                <div className="flex flex-wrap gap-2">
+                  {INDICE_OPTIONS.map((option) => {
+                    const isSelected = contrapartida.indice === option.value;
+                    return (
+                      <Badge
+                        key={option.value}
+                        variant={isSelected ? "default" : "outline"}
+                        onClick={() => updateContrapartida(
+                          contrapartida.id, 
+                          'indice', 
+                          isSelected ? undefined : option.value
+                        )}
+                        className={cn(
+                          "cursor-pointer transition-all select-none",
+                          isSelected 
+                            ? "bg-primary text-primary-foreground hover:bg-primary/80" 
+                            : "hover:bg-muted"
+                        )}
+                      >
                         {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                      </Badge>
+                    );
+                  })}
+                </div>
+                {!contrapartida.indice && (
+                  <p className="text-xs text-muted-foreground">Clique para selecionar um índice (opcional)</p>
+                )}
               </div>
             </div>
 
