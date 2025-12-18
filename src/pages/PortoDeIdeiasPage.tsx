@@ -384,7 +384,7 @@ const PortoDeIdeiasPage = () => {
   ].filter(Boolean).length;
 
   const FilterControls = ({ isMobile = false }: { isMobile?: boolean }) => (
-    <div className={isMobile ? "space-y-4" : "flex flex-wrap gap-3 items-center"}>
+    <div className={isMobile ? "space-y-4" : "flex flex-wrap gap-3 items-center justify-center"}>
       {/* Search */}
       <div className={`relative ${isMobile ? 'w-full' : 'flex-1 min-w-[200px] max-w-xs'}`}>
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />

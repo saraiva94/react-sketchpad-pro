@@ -43,10 +43,30 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5, onAni
 
   // Stop videos when route changes (navigating away from homepage)
   useEffect(() => {
-    // If we're not on the homepage, stop all videos
+    // If we're not on the homepage, stop all videos immediately
     if (location.pathname !== '/') {
+      console.log('[VideoCarousel] Navigating away from homepage, stopping all videos');
+      videoRefs.current.forEach(video => {
+        if (video) {
+          video.pause();
+          video.muted = true;
+          video.currentTime = 0;
+        }
+      });
+      // Also use the full stop function for complete cleanup
       stopAllVideos(videoRefs);
     }
+    
+    // Cleanup when pathname changes
+    return () => {
+      console.log('[VideoCarousel] Route cleanup, pausing all videos');
+      videoRefs.current.forEach(video => {
+        if (video) {
+          video.pause();
+          video.muted = true;
+        }
+      });
+    };
   }, [location.pathname]);
 
   // Cleanup: pause all videos when component unmounts
@@ -473,6 +493,7 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5, onAni
                       <video
                         ref={el => { videoRefs.current[index] = el; }}
                         autoPlay
+                        muted
                         loop
                         src={video.url}
                         controls
