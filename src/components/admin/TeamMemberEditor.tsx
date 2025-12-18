@@ -33,6 +33,7 @@ export interface TeamMemberData {
     website?: string;
   };
   curriculum_url?: string;
+  detalhes?: string;
 }
 
 interface TeamMemberEditorProps {
@@ -53,7 +54,8 @@ export const TeamMemberEditor = ({ members, onChange }: TeamMemberEditorProps) =
       telefone: "",
       photo_url: "",
       social_links: {},
-      curriculum_url: ""
+      curriculum_url: "",
+      detalhes: ""
     }]);
   };
 
@@ -310,6 +312,20 @@ export const TeamMemberEditor = ({ members, onChange }: TeamMemberEditorProps) =
                   <ExternalLink className="w-4 h-4" />
                 </a>
               )}
+            </div>
+
+            {/* Detalhes */}
+            <div className="pt-2 border-t">
+              <Label className="text-sm mb-2 block">Detalhes <span className="text-muted-foreground text-xs">(opcional, máx. 200 caracteres)</span></Label>
+              <textarea
+                value={member.detalhes || ""}
+                onChange={(e) => updateMember(index, "detalhes", e.target.value.slice(0, 200))}
+                placeholder="Informações adicionais sobre este integrante..."
+                className="w-full px-3 py-2 text-sm border border-input rounded-md bg-background resize-none"
+                rows={2}
+                maxLength={200}
+              />
+              <p className="text-xs text-muted-foreground mt-1">{(member.detalhes || "").length}/200 caracteres</p>
             </div>
           </div>
         </Card>
