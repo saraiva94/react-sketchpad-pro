@@ -154,11 +154,6 @@ function ProjectCard({
                   {project.location}
                 </Badge>
               )}
-              {project.valor_sugerido && (
-                <Badge variant="outline" className={`text-xs ${budgetInfo.color}`}>
-                  {budgetInfo.label}
-                </Badge>
-              )}
               {project.stage && (
                 <Badge variant="outline" className={`text-xs ${stageInfo.color}`}>
                   {stageInfo.label}
