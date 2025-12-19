@@ -10,6 +10,7 @@ import { Navbar } from "@/components/Navbar";
 import { LazyArtisticBackground } from "@/components/LazyArtisticBackground";
 import { ProjectGrid } from "@/components/porto-ideias/ProjectGrid";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchProjectLocations } from "@/components/admin/DynamicLocationSelect";
 import { useInView } from "@/hooks/useInView";
 import { 
   Search,
@@ -38,10 +39,9 @@ interface Project {
   stage: string | null;
 }
 
-const projectTypes = [
+// Default values - will be overwritten by database values
+const DEFAULT_PROJECT_TYPES = [
   "Tipo de Projeto",
-  "Filme de Ficção",
-  "Documentário",
   "Longa-metragem ficção",
   "Longa-metragem documentário", 
   "Curta-metragem ficção",
@@ -61,7 +61,19 @@ const projectTypes = [
   "Projeto transmídia",
   "Outro",
 ];
-const locations = ["Cidade", "São Paulo", "Rio de Janeiro", "Belo Horizonte", "Brasília", "Salvador", "Recife", "Porto Alegre", "Manaus", "Curitiba"];
+
+const DEFAULT_LOCATIONS = [
+  "Cidade",
+  "São Paulo",
+  "Rio de Janeiro",
+  "Belo Horizonte",
+  "Brasília",
+  "Salvador",
+  "Recife",
+  "Porto Alegre",
+  "Manaus",
+  "Curitiba",
+];
 const budgetRanges = [
   { value: "all", label: "Porte" },
   { value: "small", label: "Pequeno Porte" },
@@ -170,6 +182,10 @@ const PortoDeIdeiasPage = () => {
   const [selectedIncentiveLaw, setSelectedIncentiveLaw] = useState("all");
   const [sortBy, setSortBy] = useState("recent");
   
+  // Dynamic filter options from database
+  const [projectTypes, setProjectTypes] = useState<string[]>(DEFAULT_PROJECT_TYPES);
+  const [locations, setLocations] = useState<string[]>(DEFAULT_LOCATIONS);
+  
   // Location suggestions
   const [uniqueLocations, setUniqueLocations] = useState<string[]>([]);
   const [locationInput, setLocationInput] = useState("");
@@ -184,7 +200,30 @@ const PortoDeIdeiasPage = () => {
     fetchDisplaySlots();
     fetchCardVisibility();
     fetchHeaderContent();
+    fetchDynamicFilters();
   }, []);
+
+  const fetchDynamicFilters = async () => {
+    // Fetch project types
+    const { data: typesData } = await supabase
+      .from("settings")
+      .select("value")
+      .eq("key", "project_types")
+      .maybeSingle();
+
+    if (typesData && typesData.value) {
+      const types = (typesData.value as { types: string[] }).types;
+      if (types && types.length > 0) {
+        setProjectTypes(["Tipo de Projeto", ...types, "Outro"]);
+      }
+    }
+
+    // Fetch locations
+    const locs = await fetchProjectLocations();
+    if (locs && locs.length > 0) {
+      setLocations(["Cidade", ...locs, "Outra cidade"]);
+    }
+  };
 
   const fetchProjects = async () => {
     // Use projects_public view to avoid exposing sensitive contact information

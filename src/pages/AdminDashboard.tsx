@@ -26,6 +26,7 @@ import { CategoriesMultiSelect, getCategoryLabel } from "@/components/admin/Cate
 import { IncentiveLawsMultiSelect, getIncentiveLawLabel } from "@/components/admin/IncentiveLawsMultiSelect";
 import { TeamMemberEditor, TeamMemberData } from "@/components/admin/TeamMemberEditor";
 import { DynamicProjectTypeSelect } from "@/components/admin/DynamicProjectTypeSelect";
+import { DynamicLocationSelect } from "@/components/admin/DynamicLocationSelect";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
@@ -2601,15 +2602,11 @@ const AdminDashboard = () => {
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="edit-location">Localização</Label>
-                  <Input
-                    id="edit-location"
-                    placeholder="Ex: São Paulo, SP"
-                    value={editLocation}
-                    onChange={(e) => setEditLocation(e.target.value)}
-                  />
-                </div>
+                <DynamicLocationSelect
+                  value={editLocation}
+                  onChange={setEditLocation}
+                  allowManage={true}
+                />
               </div>
 
               <div className="space-y-2">
