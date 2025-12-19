@@ -499,26 +499,26 @@ const PortoDeIdeiasPage = () => {
       <div className="h-20" />
 
       {/* Header */}
-      <section ref={headerRef} className="relative py-16 md:py-24 overflow-hidden z-10">
+      <section ref={headerRef} className="relative py-10 md:py-16 overflow-hidden z-10">
         {/* Solid background */}
         <div className="absolute inset-0 bg-background" />
-        <div className="absolute top-10 left-10 w-64 h-64 bg-primary rounded-full blur-3xl opacity-10 animate-pulse" />
-        <div className="absolute bottom-10 right-10 w-80 h-80 bg-accent rounded-full blur-3xl opacity-10 animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-6 left-10 w-64 h-64 bg-primary rounded-full blur-3xl opacity-10 animate-pulse" />
+        <div className="absolute bottom-6 right-10 w-80 h-80 bg-accent rounded-full blur-3xl opacity-10 animate-pulse" style={{ animationDelay: '1s' }} />
         
         <div className="container mx-auto px-6 relative z-10">
           <div className={`max-w-4xl mx-auto text-center transition-all duration-1000 ${headerInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
             {/* Icon */}
-            <div className="relative inline-block mb-6">
-              <div className="absolute inset-0 w-20 h-20 rounded-full bg-primary blur-xl opacity-20 animate-pulse" />
-              <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center border border-primary shadow-2xl mx-auto">
-                <Compass className="w-8 h-8 text-primary-foreground" />
+            <div className="relative inline-block mb-4">
+              <div className="absolute inset-0 w-16 h-16 rounded-full bg-primary blur-xl opacity-20 animate-pulse" />
+              <div className="relative w-12 h-12 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center border border-primary shadow-2xl mx-auto">
+                <Compass className="w-6 h-6 text-primary-foreground" />
               </div>
             </div>
             
-            <h1 className="text-3xl md:text-5xl font-serif font-bold text-foreground mb-4 md:mb-6">
+            <h1 className="text-2xl md:text-4xl font-serif font-bold text-foreground mb-2 md:mb-4">
               {headerTitle}
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+            <p className="text-base md:text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
               {headerDescription}
             </p>
           </div>
