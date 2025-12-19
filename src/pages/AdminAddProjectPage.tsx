@@ -47,6 +47,7 @@ const AdminAddProjectPage = () => {
   const [responsavelNome, setResponsavelNome] = useState("");
   const [responsavelEmail, setResponsavelEmail] = useState("");
   const [responsavelTelefone, setResponsavelTelefone] = useState("");
+  const [responsavelGenero, setResponsavelGenero] = useState("");
   
   // Imagem de Capa
   const [thumbnailBlob, setThumbnailBlob] = useState<Blob | null>(null);
@@ -80,6 +81,7 @@ const AdminAddProjectPage = () => {
   // Financiamento
   const [valorSugerido, setValorSugerido] = useState("");
   const [linkPagamento, setLinkPagamento] = useState("");
+  const [budget, setBudget] = useState("");
   
   // Impacto
   const [impactoCultural, setImpactoCultural] = useState("");
@@ -89,6 +91,9 @@ const AdminAddProjectPage = () => {
   
   // Lei de Incentivo
   const [incentiveLaws, setIncentiveLaws] = useState<string[]>([]);
+  
+  // Admin Notes
+  const [adminNotes, setAdminNotes] = useState("");
   
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
@@ -194,10 +199,12 @@ const AdminAddProjectPage = () => {
           responsavel_nome: responsavelNome || null,
           responsavel_email: responsavelEmail || null,
           responsavel_telefone: responsavelTelefone || null,
+          responsavel_genero: responsavelGenero || null,
           categorias_tags: tags.length > 0 ? tags : null,
           link_video: linkVideo || null,
           image_url: imageUrl,
           location: location || null,
+          budget: budget || null,
           valor_sugerido: valorSugerido ? parseFloat(valorSugerido) : null,
           link_pagamento: linkPagamento || null,
           impacto_cultural: impactoCultural || null,
@@ -210,6 +217,7 @@ const AdminAddProjectPage = () => {
           awards: awards.length > 0 ? awards : [],
           news: news.length > 0 ? news : [],
           additional_info: additionalInfo || null,
+          admin_notes: adminNotes || null,
           status: "approved",
         } as any)
         .select()
@@ -324,6 +332,32 @@ const AdminAddProjectPage = () => {
                     </div>
 
                     <div>
+                      <Label htmlFor="responsavelGenero">Gênero</Label>
+                      <Select value={responsavelGenero} onValueChange={setResponsavelGenero}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="masculino">Masculino</SelectItem>
+                          <SelectItem value="feminino">Feminino</SelectItem>
+                          <SelectItem value="outro">Outro</SelectItem>
+                          <SelectItem value="prefiro_nao_informar">Prefiro não informar</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="responsavelEmail">Email</Label>
+                      <Input
+                        id="responsavelEmail"
+                        type="email"
+                        value={responsavelEmail}
+                        onChange={(e) => setResponsavelEmail(e.target.value)}
+                        placeholder="email@exemplo.com"
+                      />
+                    </div>
+
+                    <div>
                       <Label htmlFor="responsavelTelefone">Telefone</Label>
                       <Input
                         id="responsavelTelefone"
@@ -332,17 +366,6 @@ const AdminAddProjectPage = () => {
                         placeholder="(00) 00000-0000"
                       />
                     </div>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="responsavelEmail">Email</Label>
-                    <Input
-                      id="responsavelEmail"
-                      type="email"
-                      value={responsavelEmail}
-                      onChange={(e) => setResponsavelEmail(e.target.value)}
-                      placeholder="email@exemplo.com"
-                    />
                   </div>
                 </div>
 
@@ -537,7 +560,17 @@ const AdminAddProjectPage = () => {
                     Financiamento
                   </h3>
                   
-                  <div className="grid md:grid-cols-2 gap-4">
+                  <div className="grid md:grid-cols-3 gap-4">
+                    <div>
+                      <Label htmlFor="budget">Orçamento</Label>
+                      <Input
+                        id="budget"
+                        value={budget}
+                        onChange={(e) => setBudget(e.target.value)}
+                        placeholder="Ex: R$ 500.000"
+                      />
+                    </div>
+
                     <div>
                       <Label htmlFor="valorSugerido">Valor Sugerido (R$)</Label>
                       <Input
@@ -638,6 +671,27 @@ const AdminAddProjectPage = () => {
                   onAwardsChange={setAwards}
                   onNewsChange={setNews}
                 />
+
+                {/* Notas do Administrador */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-foreground border-b pb-2">
+                    Notas Internas
+                  </h3>
+                  
+                  <div>
+                    <Label htmlFor="adminNotes">Notas do Administrador</Label>
+                    <Textarea
+                      id="adminNotes"
+                      value={adminNotes}
+                      onChange={(e) => setAdminNotes(e.target.value)}
+                      placeholder="Adicione observações internas sobre este projeto..."
+                      rows={3}
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Estas notas são visíveis apenas para administradores.
+                    </p>
+                  </div>
+                </div>
 
                 <div className="flex justify-end gap-4 pt-4">
                   <Button type="button" variant="outline" onClick={() => navigate("/admin")}>
