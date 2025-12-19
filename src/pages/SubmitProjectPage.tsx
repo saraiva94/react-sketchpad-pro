@@ -24,6 +24,7 @@ import { RecognitionEditor, NewsItem } from "@/components/admin/RecognitionEdito
 import { CategoriesMultiSelect, getCategoryLabel } from "@/components/admin/CategoriesMultiSelect";
 import { StagesMultiSelect } from "@/components/admin/StagesMultiSelect";
 import { IncentiveLawsMultiSelect } from "@/components/admin/IncentiveLawsMultiSelect";
+import { DynamicProjectTypeSelect } from "@/components/admin/DynamicProjectTypeSelect";
 
 interface TeamMember {
   nome: string;
@@ -48,6 +49,7 @@ const SubmitProjectPage = () => {
   
   // Projeto básico
   const [titulo, setTitulo] = useState("");
+  const [projectType, setProjectType] = useState("");
   const [categoriasTags, setCategoriasTags] = useState<string[]>([]);
   const [descricao, setDescricao] = useState("");
   
@@ -194,7 +196,7 @@ const SubmitProjectPage = () => {
           title: titulo,
           synopsis: descricao.substring(0, 300),
           description: descricao,
-          project_type: tags[0] || "Cultura",
+          project_type: projectType || tags[0] || "Cultura",
           responsavel_nome: responsavelNome,
           responsavel_email: responsavelEmail,
           responsavel_telefone: responsavelTelefone,
@@ -441,6 +443,12 @@ const SubmitProjectPage = () => {
                       <p className="text-sm text-destructive mt-1">{errors.titulo}</p>
                     )}
                   </div>
+
+                  <DynamicProjectTypeSelect
+                    value={projectType}
+                    onChange={setProjectType}
+                    allowManage={false}
+                  />
 
                   <CategoriesMultiSelect
                     value={categoriasTags}

@@ -18,26 +18,7 @@ import { RecognitionEditor, NewsItem } from "@/components/admin/RecognitionEdito
 import { ImageCropper } from "@/components/ImageCropper";
 import { CategoriesMultiSelect, getCategoryLabel } from "@/components/admin/CategoriesMultiSelect";
 import { IncentiveLawsMultiSelect, getIncentiveLawLabel } from "@/components/admin/IncentiveLawsMultiSelect";
-
-const PROJECT_TYPES = [
-  "Longa-metragem ficção",
-  "Longa-metragem documentário", 
-  "Curta-metragem ficção",
-  "Curta-metragem documentário",
-  "Série ficção",
-  "Série documental",
-  "Videocast",
-  "Podcast",
-  "Evento Cultural",
-  "Musical",
-  "Teatro",
-  "Performance",
-  "Instalação",
-  "Videoclipe",
-  "Projeto educativo",
-  "Projeto formativo",
-  "Projeto transmídia",
-];
+import { DynamicProjectTypeSelect } from "@/components/admin/DynamicProjectTypeSelect";
 
 const AdminAddProjectPage = () => {
   const navigate = useNavigate();
@@ -390,28 +371,22 @@ const AdminAddProjectPage = () => {
                   </div>
 
                   <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="projectType">Tipo de Projeto</Label>
-                      <Select value={projectType} onValueChange={setProjectType}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione o tipo" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {PROJECT_TYPES.map((type) => (
-                            <SelectItem key={type} value={type}>{type}</SelectItem>
-                          ))}
-                          <SelectItem value="Outro">Outro</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      {projectType === "Outro" && (
+                    <DynamicProjectTypeSelect
+                      value={projectType}
+                      onChange={setProjectType}
+                      allowManage={true}
+                    />
+                    {projectType === "Outro" && (
+                      <div>
+                        <Label htmlFor="customProjectType">Tipo Personalizado</Label>
                         <Input
+                          id="customProjectType"
                           placeholder="Digite o tipo de projeto"
-                          className="mt-2"
                           value={customProjectType}
                           onChange={(e) => setCustomProjectType(e.target.value)}
                         />
-                      )}
-                    </div>
+                      </div>
+                    )}
 
                     <div>
                       <Label htmlFor="location">Localização</Label>
