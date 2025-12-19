@@ -86,9 +86,19 @@ export function RecognitionEditor({
             placeholder="Ex: Prêmio Cultura Viva 2023"
             value={newAward}
             onChange={(e) => setNewAward(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addAward())}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                addAward();
+              }
+            }}
           />
-          <Button type="button" variant="secondary" onClick={addAward}>
+          <Button 
+            type="button" 
+            variant="secondary" 
+            onClick={addAward}
+            disabled={!newAward.trim()}
+          >
             <Plus className="w-4 h-4" />
           </Button>
         </div>
