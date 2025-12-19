@@ -19,6 +19,7 @@ import { ImageCropper } from "@/components/ImageCropper";
 import { CategoriesMultiSelect, getCategoryLabel } from "@/components/admin/CategoriesMultiSelect";
 import { IncentiveLawsMultiSelect, getIncentiveLawLabel } from "@/components/admin/IncentiveLawsMultiSelect";
 import { DynamicProjectTypeSelect } from "@/components/admin/DynamicProjectTypeSelect";
+import { DynamicLocationSelect } from "@/components/admin/DynamicLocationSelect";
 
 const AdminAddProjectPage = () => {
   const navigate = useNavigate();
@@ -388,15 +389,11 @@ const AdminAddProjectPage = () => {
                       </div>
                     )}
 
-                    <div>
-                      <Label htmlFor="location">Localização</Label>
-                      <Input
-                        id="location"
-                        value={location}
-                        onChange={(e) => setLocation(e.target.value)}
-                        placeholder="São Paulo, SP"
-                      />
-                    </div>
+                    <DynamicLocationSelect
+                      value={location}
+                      onChange={setLocation}
+                      allowManage={true}
+                    />
                   </div>
 
                   <CategoriesMultiSelect

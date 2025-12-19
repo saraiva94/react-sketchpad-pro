@@ -25,6 +25,7 @@ import { CategoriesMultiSelect, getCategoryLabel } from "@/components/admin/Cate
 import { StagesMultiSelect } from "@/components/admin/StagesMultiSelect";
 import { IncentiveLawsMultiSelect } from "@/components/admin/IncentiveLawsMultiSelect";
 import { DynamicProjectTypeSelect } from "@/components/admin/DynamicProjectTypeSelect";
+import { DynamicLocationSelect } from "@/components/admin/DynamicLocationSelect";
 
 interface TeamMember {
   nome: string;
@@ -52,6 +53,7 @@ const SubmitProjectPage = () => {
   const [projectType, setProjectType] = useState("");
   const [categoriasTags, setCategoriasTags] = useState<string[]>([]);
   const [descricao, setDescricao] = useState("");
+  const [location, setLocation] = useState("");
   
   // Mídia
   const [linkVideo, setLinkVideo] = useState("");
@@ -205,6 +207,7 @@ const SubmitProjectPage = () => {
           link_video: linkVideo,
           media_url: mediaUrl,
           image_url: imageUrl,
+          location: location || null,
           valor_sugerido: valorSugerido ? parseFloat(valorSugerido) : null,
           link_pagamento: linkPagamento || null,
           impacto_cultural: impactoCultural || null,
@@ -276,6 +279,7 @@ const SubmitProjectPage = () => {
     setTitulo("");
     setCategoriasTags([]);
     setDescricao("");
+    setLocation("");
     setLinkVideo("");
     setVideoFile(null);
     setPresentationDocUrl("");
@@ -463,6 +467,12 @@ const SubmitProjectPage = () => {
                   <IncentiveLawsMultiSelect
                     value={incentiveLaws}
                     onChange={setIncentiveLaws}
+                  />
+
+                  <DynamicLocationSelect
+                    value={location}
+                    onChange={setLocation}
+                    allowManage={false}
                   />
 
                   <div>
