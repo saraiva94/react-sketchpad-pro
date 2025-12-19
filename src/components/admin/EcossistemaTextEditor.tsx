@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Network, Save } from "lucide-react";
@@ -10,6 +11,7 @@ import { Network, Save } from "lucide-react";
 export const EcossistemaTextEditor = () => {
   const { toast } = useToast();
   const [title, setTitle] = useState("Um Ecossistema de Conexões");
+  const [subtitle, setSubtitle] = useState("Mais que uma vitrine, somos um porto seguro onde as ideias atracam, ganham força e partem para o mundo.");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -24,15 +26,16 @@ export const EcossistemaTextEditor = () => {
       .maybeSingle();
 
     if (data) {
-      const settings = data.value as { title?: string };
+      const settings = data.value as { title?: string; subtitle?: string };
       if (settings.title) setTitle(settings.title);
+      if (settings.subtitle) setSubtitle(settings.subtitle);
     }
   };
 
   const saveSettings = async () => {
     setSaving(true);
 
-    const settingsValue = { title };
+    const settingsValue = { title, subtitle };
 
     const { data: existing } = await supabase
       .from("settings")
@@ -80,7 +83,7 @@ export const EcossistemaTextEditor = () => {
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-sm text-muted-foreground">
-          Edite o título da seção de projetos em destaque na homepage.
+          Edite o título e subtítulo da seção de projetos em destaque na homepage.
         </p>
 
         <div className="space-y-2">
@@ -93,9 +96,20 @@ export const EcossistemaTextEditor = () => {
           />
         </div>
 
+        <div className="space-y-2">
+          <Label htmlFor="ecossistema-subtitle">Subtítulo da Seção</Label>
+          <Textarea
+            id="ecossistema-subtitle"
+            value={subtitle}
+            onChange={(e) => setSubtitle(e.target.value)}
+            placeholder="Mais que uma vitrine, somos um porto seguro onde as ideias atracam, ganham força e partem para o mundo."
+            rows={3}
+          />
+        </div>
+
         <Button onClick={saveSettings} disabled={saving} className="w-full">
           <Save className="w-4 h-4 mr-2" />
-          {saving ? "Salvando..." : "Salvar Título"}
+          {saving ? "Salvando..." : "Salvar Textos"}
         </Button>
       </CardContent>
     </Card>

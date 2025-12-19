@@ -164,6 +164,7 @@ const HomePage = () => {
   const [featuredOrder, setFeaturedOrder] = useState<string[]>([]);
   const [featuredExampleCards, setFeaturedExampleCards] = useState<Record<string, boolean>>({});
   const [ecossistemaTitle, setEcossistemaTitle] = useState("Um Ecossistema de Conexões");
+  const [ecossistemaSubtitle, setEcossistemaSubtitle] = useState("Mais que uma vitrine, somos um porto seguro onde as ideias atracam, ganham força e partem para o mundo.");
   
   // Quem Somos content
   interface QuemSomosCard {
@@ -360,8 +361,9 @@ const HomePage = () => {
       .maybeSingle();
     
     if (data && data.value) {
-      const settings = data.value as { title?: string };
+      const settings = data.value as { title?: string; subtitle?: string };
       if (settings.title) setEcossistemaTitle(settings.title);
+      if (settings.subtitle) setEcossistemaSubtitle(settings.subtitle);
     }
   };
 
@@ -737,7 +739,7 @@ const HomePage = () => {
               </h2>
             </ShinyText>
             <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto mt-6">
-              Mais que uma vitrine, somos um porto seguro onde as ideias atracam, ganham força e partem para o mundo.
+              {ecossistemaSubtitle}
             </p>
           </div>
 
