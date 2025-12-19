@@ -25,6 +25,7 @@ import { StagesMultiSelect } from "@/components/admin/StagesMultiSelect";
 import { CategoriesMultiSelect, getCategoryLabel } from "@/components/admin/CategoriesMultiSelect";
 import { IncentiveLawsMultiSelect, getIncentiveLawLabel } from "@/components/admin/IncentiveLawsMultiSelect";
 import { TeamMemberEditor, TeamMemberData } from "@/components/admin/TeamMemberEditor";
+import { DynamicProjectTypeSelect } from "@/components/admin/DynamicProjectTypeSelect";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
@@ -2567,41 +2568,21 @@ const AdminDashboard = () => {
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="edit-project-type">Tipo de Projeto</Label>
-                  <Select value={editProjectType} onValueChange={setEditProjectType}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione o tipo" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Longa-metragem ficção">Longa-metragem ficção</SelectItem>
-                      <SelectItem value="Longa-metragem documentário">Longa-metragem documentário</SelectItem>
-                      <SelectItem value="Curta-metragem ficção">Curta-metragem ficção</SelectItem>
-                      <SelectItem value="Curta-metragem documentário">Curta-metragem documentário</SelectItem>
-                      <SelectItem value="Série ficção">Série ficção</SelectItem>
-                      <SelectItem value="Série documental">Série documental</SelectItem>
-                      <SelectItem value="Videocast">Videocast</SelectItem>
-                      <SelectItem value="Podcast">Podcast</SelectItem>
-                      <SelectItem value="Evento Cultural">Evento Cultural</SelectItem>
-                      <SelectItem value="Musical">Musical</SelectItem>
-                      <SelectItem value="Teatro">Teatro</SelectItem>
-                      <SelectItem value="Performance">Performance</SelectItem>
-                      <SelectItem value="Instalação">Instalação</SelectItem>
-                      <SelectItem value="Videoclipe">Videoclipe</SelectItem>
-                      <SelectItem value="Projeto educativo">Projeto educativo</SelectItem>
-                      <SelectItem value="Projeto formativo">Projeto formativo</SelectItem>
-                      <SelectItem value="Projeto transmídia">Projeto transmídia</SelectItem>
-                      <SelectItem value="Outro">Outro</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {editProjectType === "Outro" && (
+                <DynamicProjectTypeSelect
+                  value={editProjectType}
+                  onChange={setEditProjectType}
+                  allowManage={true}
+                  label="Tipo de Projeto"
+                />
+                {editProjectType === "Outro" && (
+                  <div className="space-y-2">
+                    <Label>Tipo Personalizado</Label>
                     <Input
                       placeholder="Digite o tipo de projeto"
-                      className="mt-2"
                       onChange={(e) => setEditProjectType(e.target.value)}
                     />
-                  )}
-                </div>
+                  </div>
+                )}
 
                 <div className="space-y-2">
                   <StagesMultiSelect 
