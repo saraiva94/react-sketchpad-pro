@@ -785,22 +785,6 @@ const HomePage = () => {
                   >
                     {/* Text Content */}
                     <div className={`space-y-6 ${isEven ? 'md:order-2' : ''}`}>
-                      <div className="flex flex-wrap gap-2">
-                        <Badge className={stageInfo.color}>
-                          {stageInfo.label}
-                        </Badge>
-                        {project.has_incentive_law && (
-                          <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">
-                            {project.incentive_law_details || "Lei de Incentivo"}
-                          </Badge>
-                        )}
-                        {project.valor_sugerido && budgetInfo.label && (
-                          <Badge className={budgetInfo.color}>
-                            {formatBudget(project.valor_sugerido)}
-                          </Badge>
-                        )}
-                      </div>
-                      
                       <h3 className="text-2xl md:text-3xl lg:text-4xl font-serif font-semibold text-foreground">
                         {project.title}
                       </h3>
