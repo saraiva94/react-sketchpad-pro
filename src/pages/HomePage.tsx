@@ -575,7 +575,7 @@ const HomePage = () => {
       });
     }
     
-    return allItems.slice(0, 3);
+    return allItems.slice(0, 4);
   };
   
   const displayItems = buildDisplayProjects();
@@ -743,140 +743,94 @@ const HomePage = () => {
             </p>
           </div>
 
-          {/* Featured Projects - Alternating Layout with Cards */}
+          {/* Featured Projects - Grid Layout with 4 Cards */}
           {loadingProjects ? (
-            <div className="space-y-16">
-              {[1, 2].map((i) => (
-                <div key={i} className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
-                  <div className={`animate-pulse space-y-4 ${i % 2 === 0 ? 'md:order-2' : ''}`}>
-                    <div className="h-6 bg-muted rounded w-1/4" />
-                    <div className="h-10 bg-muted rounded w-3/4" />
-                    <div className="h-24 bg-muted rounded" />
-                  </div>
-                  <div className={`animate-pulse bg-card card-solid rounded-2xl overflow-hidden border border-border shadow-2xl h-80 ${i % 2 === 0 ? 'md:order-1' : ''}`}>
-                    <div className="h-48 bg-muted" />
-                    <div className="p-5 space-y-3">
-                      <div className="h-4 bg-muted rounded w-1/3" />
-                      <div className="h-6 bg-muted rounded w-3/4" />
-                    </div>
+            <div className="grid md:grid-cols-2 gap-6 md:gap-8">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="animate-pulse bg-card card-solid rounded-2xl overflow-hidden border border-border shadow-2xl">
+                  <div className="h-48 md:h-56 bg-muted" />
+                  <div className="p-5 space-y-3">
+                    <div className="h-4 bg-muted rounded w-1/3" />
+                    <div className="h-6 bg-muted rounded w-3/4" />
+                    <div className="h-16 bg-muted rounded" />
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="space-y-16 md:space-y-24">
+            <div className="grid md:grid-cols-2 gap-6 md:gap-8">
               {displayItems.map((item, index) => {
                 const project = item.data;
                 const isExample = item.type === 'example';
-                const budgetInfo = getBudgetRange(project.valor_sugerido);
-                const stageInfo = getStageInfo(project.stage);
                 const linkUrl = isExample ? (project as typeof exampleProjects[0]).link : `/project/${project.id}`;
-                const isEven = index % 2 === 1;
+                // Animação: cards da esquerda vêm da esquerda, cards da direita vêm da direita
+                const isLeftCard = index % 2 === 0;
                 
                 return (
                   <div 
                     key={project.id}
-                    className={`grid md:grid-cols-2 gap-8 md:gap-12 items-center transition-all duration-700 ease-out ${
+                    className={`transition-all duration-700 ease-out ${
                       heroReady && portoIdeiasInView 
                         ? 'opacity-100 translate-x-0' 
-                        : `opacity-0 ${isEven ? 'translate-x-20' : '-translate-x-20'}`
+                        : `opacity-0 ${isLeftCard ? '-translate-x-20' : 'translate-x-20'}`
                     }`}
-                    style={{ transitionDelay: heroReady && portoIdeiasInView ? `${index * 150}ms` : '0ms' }}
+                    style={{ transitionDelay: heroReady && portoIdeiasInView ? `${Math.floor(index / 2) * 150}ms` : '0ms' }}
                   >
-                    {/* Text Content */}
-                    <div className={`space-y-6 ${isEven ? 'md:order-2' : ''}`}>
-                      <h3 className="text-2xl md:text-3xl lg:text-4xl font-serif font-semibold text-foreground">
-                        {project.title}
-                      </h3>
-                      
-                      <p className="text-base md:text-lg text-muted-foreground leading-relaxed line-clamp-4">
-                        {project.synopsis}
-                      </p>
-                      
-                      {project.impacto_cultural && (
-                        <p className="text-sm text-muted-foreground/80 italic line-clamp-2">
-                          {project.impacto_cultural}
-                        </p>
-                      )}
-                      
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        {project.location && (
-                          <div className="flex items-center gap-1.5">
-                            <MapPin className="w-4 h-4" />
-                            <span>{project.location}</span>
-                          </div>
-                        )}
-                        {project.project_type && (
-                          <div className="flex items-center gap-1.5">
-                            <Film className="w-4 h-4" />
-                            <span>{project.project_type}</span>
-                          </div>
-                        )}
-                      </div>
-                      
-                      <Link 
-                        to={linkUrl}
-                        className="inline-flex items-center gap-2 text-primary font-medium px-4 py-2 rounded-full border border-transparent hover:border-primary/30 hover:bg-primary/10 hover:gap-3 transition-all duration-300 group -ml-4"
-                      >
-                        Conhecer projeto
-                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                      </Link>
-                    </div>
-                    
-                    {/* Project Card */}
-                    <div className={`${isEven ? 'md:order-1' : ''}`}>
-                      <Link
-                        to={linkUrl}
-                        className="block group"
-                      >
-                        <div className="card-solid bg-card border border-border rounded-2xl overflow-hidden shadow-2xl group-hover:shadow-3xl group-hover:scale-[1.02] transition-all duration-300">
-                          {/* Image */}
-                          <div className="relative h-56 md:h-64 overflow-hidden">
-                            {project.image_url ? (
-                              <img
-                                src={project.image_url}
-                                alt={project.title}
-                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                              />
-                            ) : (
-                              <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-                                <span className="text-4xl font-serif font-bold text-primary/50">
-                                  {getInitials(project.title)}
-                                </span>
-                              </div>
-                            )}
-                            {/* Overlay gradient */}
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                            {/* Type badge */}
-                            <div className="absolute top-3 left-3">
-                              <Badge className="bg-primary/90 text-primary-foreground backdrop-blur-sm">
-                                {project.project_type}
-                              </Badge>
+                    <Link
+                      to={linkUrl}
+                      className="block group h-full"
+                    >
+                      <div className="card-solid bg-card border border-border rounded-2xl overflow-hidden shadow-2xl group-hover:shadow-3xl group-hover:scale-[1.02] transition-all duration-300 h-full flex flex-col">
+                        {/* Image */}
+                        <div className="relative h-48 md:h-56 overflow-hidden">
+                          {project.image_url ? (
+                            <img
+                              src={project.image_url}
+                              alt={project.title}
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+                              <span className="text-4xl font-serif font-bold text-primary/50">
+                                {getInitials(project.title)}
+                              </span>
                             </div>
-                            {/* Creator info */}
-                            {project.responsavel_primeiro_nome && (
-                              <div className="absolute bottom-3 left-3 flex items-center gap-2">
-                                <div className="w-8 h-8 rounded-full bg-primary/80 flex items-center justify-center text-primary-foreground text-xs font-medium">
-                                  {getInitials(project.responsavel_primeiro_nome)}
-                                </div>
-                                <span className="text-white text-sm font-medium drop-shadow-lg">
-                                  {project.responsavel_primeiro_nome}
-                                </span>
-                              </div>
-                            )}
+                          )}
+                          {/* Overlay gradient */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                          {/* Type badge */}
+                          <div className="absolute top-3 left-3">
+                            <Badge className="bg-primary/90 text-primary-foreground backdrop-blur-sm">
+                              {project.project_type}
+                            </Badge>
                           </div>
-                          {/* Card Content */}
-                          <div className="p-5">
-                            <h4 className="text-lg font-semibold text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-1">
-                              {project.title}
-                            </h4>
-                            <p className="text-sm text-muted-foreground line-clamp-2">
-                              {project.synopsis}
-                            </p>
+                          {/* Creator info */}
+                          {project.responsavel_primeiro_nome && (
+                            <div className="absolute bottom-3 left-3 flex items-center gap-2">
+                              <div className="w-8 h-8 rounded-full bg-primary/80 flex items-center justify-center text-primary-foreground text-xs font-medium">
+                                {getInitials(project.responsavel_primeiro_nome)}
+                              </div>
+                              <span className="text-white text-sm font-medium drop-shadow-lg">
+                                {project.responsavel_primeiro_nome}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                        {/* Card Content */}
+                        <div className="p-5 flex-1 flex flex-col">
+                          <h4 className="text-lg font-semibold text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-1">
+                            {project.title}
+                          </h4>
+                          <p className="text-sm text-muted-foreground line-clamp-3 flex-1">
+                            {project.synopsis}
+                          </p>
+                          <div className="flex items-center gap-2 mt-4 text-primary font-medium text-sm">
+                            <span>Conhecer projeto</span>
+                            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                           </div>
                         </div>
-                      </Link>
-                    </div>
+                      </div>
+                    </Link>
                   </div>
                 );
               })}
