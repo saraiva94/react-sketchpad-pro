@@ -896,7 +896,7 @@ const ProjectPage = () => {
                 <h3 className="font-serif font-bold text-lg text-foreground mb-4">Contato</h3>
                 <Button className="w-full rounded-full" size="lg" onClick={handleContactClick}>
                   <MessageCircle className="w-4 h-4 mr-2" />
-                  Contato
+                  Fale conosco
                 </Button>
               </div>
             </div>
