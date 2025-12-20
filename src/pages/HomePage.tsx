@@ -804,17 +804,6 @@ const HomePage = () => {
                               {project.project_type}
                             </Badge>
                           </div>
-                          {/* Creator info */}
-                          {project.responsavel_primeiro_nome && (
-                            <div className="absolute bottom-3 left-3 flex items-center gap-2">
-                              <div className="w-8 h-8 rounded-full bg-primary/80 flex items-center justify-center text-primary-foreground text-xs font-medium">
-                                {getInitials(project.responsavel_primeiro_nome)}
-                              </div>
-                              <span className="text-white text-sm font-medium drop-shadow-lg">
-                                {project.responsavel_primeiro_nome}
-                              </span>
-                            </div>
-                          )}
                         </div>
                         {/* Card Content */}
                         <div className="p-5 flex-1 flex flex-col">
