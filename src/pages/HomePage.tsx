@@ -832,7 +832,7 @@ const HomePage = () => {
                       
                       <Link 
                         to={linkUrl}
-                        className="inline-flex items-center gap-2 text-primary font-medium hover:gap-3 transition-all duration-300 group"
+                        className="inline-flex items-center gap-2 text-primary font-medium px-4 py-2 rounded-full border border-transparent hover:border-primary/30 hover:bg-primary/10 hover:gap-3 transition-all duration-300 group -ml-4"
                       >
                         Conhecer projeto
                         <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
