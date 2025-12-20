@@ -686,7 +686,7 @@ const HomePage = () => {
       <section ref={quemSomosRef} id="sobre" className="py-20 lg:py-28 relative z-10">
         <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent" />
         
-        <div className="container mx-auto px-4 lg:px-[10%] relative z-10">
+        <div className="mx-auto px-4 sm:px-[10%] lg:px-[20%] relative z-10">
           <div className={`text-center mb-12 transition-all duration-700 ${quemSomosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
             <ShinyText className="inline-block" delay={200}>
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif font-semibold text-foreground mb-6 decorative-line">
@@ -730,7 +730,7 @@ const HomePage = () => {
       <section ref={portoIdeiasRef} id="porto-de-ideias" className="py-20 lg:py-28 relative overflow-hidden z-10">
         <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent" />
         
-        <div className="container mx-auto px-4 lg:px-[10%] relative">
+        <div className="mx-auto px-4 sm:px-[10%] lg:px-[20%] relative">
           {/* Header */}
           <div className={`text-center mb-16 transition-all duration-700 ${portoIdeiasInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
             <ShinyText className="inline-block" delay={300}>
@@ -905,7 +905,7 @@ const HomePage = () => {
       <section ref={servicosRef} id="servicos" className="py-20 lg:py-28 relative z-10">
         <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent" />
         
-        <div className="container mx-auto px-4 lg:px-[10%] relative z-10">
+        <div className="mx-auto px-4 sm:px-[10%] lg:px-[20%] relative z-10">
           <div className={`text-center mb-16 transition-all duration-700 ${servicosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
             <ShinyText className="inline-block" delay={200}>
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif font-semibold text-foreground mb-4 decorative-line">
