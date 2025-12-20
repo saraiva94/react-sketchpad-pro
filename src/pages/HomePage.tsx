@@ -776,10 +776,10 @@ const HomePage = () => {
                 return (
                   <div 
                     key={project.id}
-                    className={`grid md:grid-cols-2 gap-8 md:gap-12 items-center transition-all duration-700 ${
+                    className={`grid md:grid-cols-2 gap-8 md:gap-12 items-center transition-all duration-700 ease-out ${
                       heroReady && portoIdeiasInView 
-                        ? 'opacity-100 translate-y-0' 
-                        : 'opacity-0 translate-y-10'
+                        ? 'opacity-100 translate-x-0' 
+                        : `opacity-0 ${isEven ? 'translate-x-20' : '-translate-x-20'}`
                     }`}
                     style={{ transitionDelay: heroReady && portoIdeiasInView ? `${index * 150}ms` : '0ms' }}
                   >
