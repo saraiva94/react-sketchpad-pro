@@ -743,124 +743,157 @@ const HomePage = () => {
             </p>
           </div>
 
-          {/* Featured Projects - Card Grid Layout (like PortoDeIdeiasPage) */}
+          {/* Featured Projects - Alternating Layout with Cards */}
           {loadingProjects ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="animate-pulse bg-card card-solid rounded-2xl overflow-hidden border border-border shadow-2xl">
-                  <div className="h-48 bg-muted" />
-                  <div className="p-5 space-y-3">
-                    <div className="h-4 bg-muted rounded w-1/3" />
-                    <div className="h-6 bg-muted rounded w-3/4" />
-                    <div className="h-16 bg-muted rounded" />
+            <div className="space-y-16">
+              {[1, 2].map((i) => (
+                <div key={i} className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+                  <div className={`animate-pulse space-y-4 ${i % 2 === 0 ? 'md:order-2' : ''}`}>
+                    <div className="h-6 bg-muted rounded w-1/4" />
+                    <div className="h-10 bg-muted rounded w-3/4" />
+                    <div className="h-24 bg-muted rounded" />
+                  </div>
+                  <div className={`animate-pulse bg-card card-solid rounded-2xl overflow-hidden border border-border shadow-2xl h-80 ${i % 2 === 0 ? 'md:order-1' : ''}`}>
+                    <div className="h-48 bg-muted" />
+                    <div className="p-5 space-y-3">
+                      <div className="h-4 bg-muted rounded w-1/3" />
+                      <div className="h-6 bg-muted rounded w-3/4" />
+                    </div>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="space-y-16 md:space-y-24">
               {displayItems.map((item, index) => {
                 const project = item.data;
                 const isExample = item.type === 'example';
                 const budgetInfo = getBudgetRange(project.valor_sugerido);
                 const stageInfo = getStageInfo(project.stage);
                 const linkUrl = isExample ? (project as typeof exampleProjects[0]).link : `/project/${project.id}`;
+                const isEven = index % 2 === 1;
                 
                 return (
-                  <Link
+                  <div 
                     key={project.id}
-                    to={linkUrl}
-                    className={`block group transition-all duration-500 ease-out ${
+                    className={`grid md:grid-cols-2 gap-8 md:gap-12 items-center transition-all duration-700 ${
                       heroReady && portoIdeiasInView 
                         ? 'opacity-100 translate-y-0' 
                         : 'opacity-0 translate-y-10'
                     }`}
-                    style={{ transitionDelay: heroReady && portoIdeiasInView ? `${index * 100}ms` : '0ms' }}
+                    style={{ transitionDelay: heroReady && portoIdeiasInView ? `${index * 150}ms` : '0ms' }}
                   >
-                    <div className="card-solid bg-card border border-border rounded-2xl overflow-hidden h-full shadow-2xl group-hover:shadow-3xl group-hover:scale-[1.02] transition-all duration-300">
-                      {/* Image */}
-                      <div className="relative h-48 overflow-hidden">
-                        {project.image_url ? (
-                          <img
-                            src={project.image_url}
-                            alt={project.title}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                          />
-                        ) : (
-                          <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-                            <span className="text-4xl font-serif font-bold text-primary/50">
-                              {getInitials(project.title)}
-                            </span>
-                          </div>
-                        )}
-                        {/* Overlay gradient */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                        {/* Type badge */}
-                        <div className="absolute top-3 left-3">
-                          <Badge 
-                            variant="secondary"
-                            className="text-xs font-semibold shadow-lg backdrop-blur-sm bg-background/80"
-                          >
-                            {project.project_type}
+                    {/* Text Content */}
+                    <div className={`space-y-6 ${isEven ? 'md:order-2' : ''}`}>
+                      <div className="flex flex-wrap gap-2">
+                        <Badge className={stageInfo.color}>
+                          {stageInfo.label}
+                        </Badge>
+                        {project.has_incentive_law && (
+                          <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">
+                            {project.incentive_law_details || "Lei de Incentivo"}
                           </Badge>
-                        </div>
-                        {/* Incentive Law badge */}
-                        {project.has_incentive_law && project.incentive_law_details && (
-                          <div className="absolute top-3 right-3">
-                            <Badge
-                              variant="outline"
-                              className="bg-emerald-500/90 border-emerald-400 text-white text-xs flex items-center gap-1"
-                            >
-                              <Shield className="w-3 h-3" />
-                              {project.incentive_law_details}
-                            </Badge>
-                          </div>
                         )}
-                        {/* Example badge */}
-                        {isExample && (
-                          <div className="absolute bottom-3 left-3">
-                            <Badge className="bg-amber-500 text-white text-xs">Exemplo</Badge>
-                          </div>
+                        {project.valor_sugerido && budgetInfo.label && (
+                          <Badge className={budgetInfo.color}>
+                            {formatBudget(project.valor_sugerido)}
+                          </Badge>
                         )}
                       </div>
-
-                      {/* Content */}
-                      <div className="p-5">
-                        <h3 className="text-lg font-serif font-bold text-foreground mb-2 line-clamp-1 group-hover:text-primary transition-colors">
-                          {project.title}
-                        </h3>
-                        <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
-                          {project.synopsis}
+                      
+                      <h3 className="text-2xl md:text-3xl lg:text-4xl font-serif font-semibold text-foreground">
+                        {project.title}
+                      </h3>
+                      
+                      <p className="text-base md:text-lg text-muted-foreground leading-relaxed line-clamp-4">
+                        {project.synopsis}
+                      </p>
+                      
+                      {project.impacto_cultural && (
+                        <p className="text-sm text-muted-foreground/80 italic line-clamp-2">
+                          {project.impacto_cultural}
                         </p>
-
-                        {/* Meta info */}
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          {project.location && (
-                            <Badge
-                              variant="outline"
-                              className="text-xs flex items-center gap-1"
-                            >
-                              <MapPin className="w-3 h-3" />
-                              {project.location}
-                            </Badge>
-                          )}
-                          {project.stage && (
-                            <Badge variant="outline" className={`text-xs ${stageInfo.color}`}>
-                              {stageInfo.label}
-                            </Badge>
-                          )}
-                        </div>
-
-                        {/* Footer */}
-                        <div className="flex items-center justify-end pt-4 border-t border-border">
-                          <span className="text-sm font-bold flex items-center gap-2 group-hover:translate-x-2 transition-transform text-foreground">
-                            {isExample ? "Ver exemplo" : "Ver projeto"}
-                            <ArrowRight className="w-4 h-4" />
-                          </span>
-                        </div>
+                      )}
+                      
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        {project.location && (
+                          <div className="flex items-center gap-1.5">
+                            <MapPin className="w-4 h-4" />
+                            <span>{project.location}</span>
+                          </div>
+                        )}
+                        {project.project_type && (
+                          <div className="flex items-center gap-1.5">
+                            <Film className="w-4 h-4" />
+                            <span>{project.project_type}</span>
+                          </div>
+                        )}
                       </div>
+                      
+                      <Link 
+                        to={linkUrl}
+                        className="inline-flex items-center gap-2 text-primary font-medium hover:gap-3 transition-all duration-300 group"
+                      >
+                        Conhecer projeto
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                      </Link>
                     </div>
-                  </Link>
+                    
+                    {/* Project Card */}
+                    <div className={`${isEven ? 'md:order-1' : ''}`}>
+                      <Link
+                        to={linkUrl}
+                        className="block group"
+                      >
+                        <div className="card-solid bg-card border border-border rounded-2xl overflow-hidden shadow-2xl group-hover:shadow-3xl group-hover:scale-[1.02] transition-all duration-300">
+                          {/* Image */}
+                          <div className="relative h-56 md:h-64 overflow-hidden">
+                            {project.image_url ? (
+                              <img
+                                src={project.image_url}
+                                alt={project.title}
+                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                              />
+                            ) : (
+                              <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+                                <span className="text-4xl font-serif font-bold text-primary/50">
+                                  {getInitials(project.title)}
+                                </span>
+                              </div>
+                            )}
+                            {/* Overlay gradient */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                            {/* Type badge */}
+                            <div className="absolute top-3 left-3">
+                              <Badge className="bg-primary/90 text-primary-foreground backdrop-blur-sm">
+                                {project.project_type}
+                              </Badge>
+                            </div>
+                            {/* Creator info */}
+                            {project.responsavel_primeiro_nome && (
+                              <div className="absolute bottom-3 left-3 flex items-center gap-2">
+                                <div className="w-8 h-8 rounded-full bg-primary/80 flex items-center justify-center text-primary-foreground text-xs font-medium">
+                                  {getInitials(project.responsavel_primeiro_nome)}
+                                </div>
+                                <span className="text-white text-sm font-medium drop-shadow-lg">
+                                  {project.responsavel_primeiro_nome}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                          {/* Card Content */}
+                          <div className="p-5">
+                            <h4 className="text-lg font-semibold text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-1">
+                              {project.title}
+                            </h4>
+                            <p className="text-sm text-muted-foreground line-clamp-2">
+                              {project.synopsis}
+                            </p>
+                          </div>
+                        </div>
+                      </Link>
+                    </div>
+                  </div>
                 );
               })}
             </div>
