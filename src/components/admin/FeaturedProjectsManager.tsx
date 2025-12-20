@@ -445,18 +445,18 @@ export function FeaturedProjectsManager({ projects, onProjectUpdate }: FeaturedP
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-sm text-muted-foreground">
-          Arraste para reordenar. Os 3 primeiros projetos visíveis serão exibidos na homepage.
+          Arraste para reordenar. Os 4 primeiros projetos visíveis serão exibidos na homepage.
         </p>
 
         {/* Visible count indicator */}
         <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg">
           <Eye className="w-4 h-4 text-primary" />
           <span className="text-sm">
-            <strong>{visibleItems.slice(0, 3).length}</strong> de 3 slots preenchidos
+            <strong>{visibleItems.slice(0, 4).length}</strong> de 4 slots preenchidos
           </span>
-          {visibleItems.length > 3 && (
+          {visibleItems.length > 4 && (
             <Badge variant="outline" className="ml-2 text-xs">
-              +{visibleItems.length - 3} na fila
+              +{visibleItems.length - 4} na fila
             </Badge>
           )}
         </div>
