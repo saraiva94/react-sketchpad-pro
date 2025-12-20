@@ -74,12 +74,7 @@ const DEFAULT_LOCATIONS = [
   "Manaus",
   "Curitiba",
 ];
-const budgetRanges = [
-  { value: "all", label: "Porte" },
-  { value: "small", label: "Pequeno Porte" },
-  { value: "medium", label: "Médio Porte" },
-  { value: "large", label: "Grande Porte" }
-];
+// budgetRanges removed - feature discontinued
 const projectStages = [
   { value: "all", label: "Estágio" },
   { value: "ideia", label: "Ideia inicial" },
@@ -177,7 +172,7 @@ const PortoDeIdeiasPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Tipo de Projeto");
   const [selectedLocation, setSelectedLocation] = useState("Cidade");
-  const [selectedBudgetRange, setSelectedBudgetRange] = useState("all");
+  // selectedBudgetRange removed - feature discontinued
   const [selectedStage, setSelectedStage] = useState("all");
   const [selectedIncentiveLaw, setSelectedIncentiveLaw] = useState("all");
   const [sortBy, setSortBy] = useState("recent");
@@ -353,12 +348,7 @@ const PortoDeIdeiasPage = () => {
     const normalizedProjectLocation = normalizeLocation(project.location);
     const matchesLocation = selectedLocation === "Cidade" || normalizedProjectLocation === selectedLocation;
     
-    let matchesBudgetRange = true;
-    if (selectedBudgetRange !== "all" && project.valor_sugerido) {
-      if (selectedBudgetRange === "small") matchesBudgetRange = project.valor_sugerido < 100000;
-      else if (selectedBudgetRange === "medium") matchesBudgetRange = project.valor_sugerido >= 100000 && project.valor_sugerido < 500000;
-      else if (selectedBudgetRange === "large") matchesBudgetRange = project.valor_sugerido >= 500000;
-    }
+    // Budget range filter removed - feature discontinued
 
     let matchesStage = true;
     if (selectedStage !== "all") {
@@ -384,7 +374,7 @@ const PortoDeIdeiasPage = () => {
       }
     }
 
-    return matchesSearch && matchesCategory && matchesLocation && matchesBudgetRange && matchesStage && matchesIncentiveLaw;
+    return matchesSearch && matchesCategory && matchesLocation && matchesStage && matchesIncentiveLaw;
   });
 
   const sortedProjects = [...filteredProjects].sort((a, b) => {
@@ -404,20 +394,18 @@ const PortoDeIdeiasPage = () => {
     setSearchTerm("");
     setSelectedCategory("Tipo de Projeto");
     setSelectedLocation("Cidade");
-    setSelectedBudgetRange("all");
     setSelectedStage("all");
     setSelectedIncentiveLaw("all");
     setSortBy("recent");
   };
 
   const hasActiveFilters = searchTerm || selectedCategory !== "Tipo de Projeto" || selectedLocation !== "Cidade" || 
-    selectedBudgetRange !== "all" || selectedStage !== "all" || selectedIncentiveLaw !== "all";
+    selectedStage !== "all" || selectedIncentiveLaw !== "all";
 
   const activeFiltersCount = [
     searchTerm,
     selectedCategory !== "Tipo de Projeto",
     selectedLocation !== "Cidade",
-    selectedBudgetRange !== "all",
     selectedStage !== "all",
     selectedIncentiveLaw !== "all"
   ].filter(Boolean).length;
@@ -448,18 +436,7 @@ const PortoDeIdeiasPage = () => {
         </SelectContent>
       </Select>
 
-      {/* Budget Range */}
-      <Select value={selectedBudgetRange} onValueChange={setSelectedBudgetRange}>
-        <SelectTrigger className={`rounded-full ${isMobile ? 'w-full' : 'w-fit'}`}>
-          <SelectValue placeholder="Porte" />
-        </SelectTrigger>
-        <SelectContent position="popper" sideOffset={4}>
-          {budgetRanges.map(range => (
-            <SelectItem key={range.value} value={range.value}>{range.label}</SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-
+      {/* Budget Range filter removed - feature discontinued */}
       {/* Stage */}
       <Select value={selectedStage} onValueChange={setSelectedStage}>
         <SelectTrigger className={`rounded-full ${isMobile ? 'w-full' : 'w-fit'}`}>
