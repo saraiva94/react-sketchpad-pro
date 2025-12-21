@@ -242,118 +242,76 @@ export const ImageCropper = ({
           </DialogHeader>
 
           <div className="space-y-4">
-            {/* Crop Area */}
-            <div className="flex justify-center bg-muted rounded-lg p-4 overflow-hidden">
+            {/* Image with Hero Overlay */}
+            <div className="relative bg-muted rounded-lg overflow-hidden">
               {imageSrc && (
-                <ReactCrop
-                  crop={crop}
-                  onChange={(_, percentCrop) => setCrop(percentCrop)}
-                  onComplete={(c) => setCompletedCrop(c)}
-                  aspect={aspectRatio}
-                  className="max-h-[400px]"
-                >
+                <div className="relative">
+                  {/* Full image */}
                   <img
                     ref={imgRef}
-                    alt="Imagem para recortar"
+                    alt="Imagem para ajustar"
                     src={imageSrc}
                     style={{ 
                       transform: `scale(${scale}) rotate(${rotate}deg)`,
-                      maxHeight: '400px',
-                      width: 'auto'
+                      transformOrigin: 'center center',
+                      width: '100%',
+                      height: 'auto',
+                      display: 'block'
                     }}
                     onLoad={onImageLoad}
                   />
-                </ReactCrop>
-              )}
-            </div>
-
-            {/* Preview of how it will appear on project page */}
-            {completedCrop && imageSrc && (
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-center">Prévia: Área exibida no topo da página do projeto</p>
-                <div className="relative mx-auto border-2 border-dashed border-primary/50 rounded-lg overflow-hidden" style={{ maxWidth: '600px' }}>
-                  {/* Hero preview - shows top portion of cropped image */}
-                  <div className="relative aspect-[21/9] bg-muted overflow-hidden">
-                    <canvas
-                      ref={(canvas) => {
-                        if (canvas && imgRef.current && completedCrop) {
-                          const ctx = canvas.getContext('2d');
-                          if (!ctx) return;
-
-                          const image = imgRef.current;
-                          const scaleX = image.naturalWidth / image.width;
-                          const scaleY = image.naturalHeight / image.height;
-
-                          const cropX = completedCrop.x * scaleX;
-                          const cropY = completedCrop.y * scaleY;
-                          const cropWidth = completedCrop.width * scaleX;
-                          const cropHeight = completedCrop.height * scaleY;
-
-                          // Canvas dimensions for preview (wider aspect ratio for hero)
-                          const previewWidth = 600;
-                          const previewHeight = Math.round(previewWidth * (9 / 21));
-                          
-                          canvas.width = previewWidth;
-                          canvas.height = previewHeight;
-
-                          // Calculate source height to show (top portion of cropped area)
-                          const sourceAspect = 21 / 9;
-                          const cropAspect = cropWidth / cropHeight;
-                          
-                          let sourceX = cropX;
-                          let sourceY = cropY;
-                          let sourceWidth = cropWidth;
-                          let sourceHeight = cropHeight;
-
-                          if (cropAspect < sourceAspect) {
-                            // Crop is taller than preview - show full width, crop bottom
-                            sourceHeight = cropWidth / sourceAspect;
-                          } else {
-                            // Crop is wider than preview - show full height, crop sides
-                            sourceWidth = cropHeight * sourceAspect;
-                            sourceX = cropX + (cropWidth - sourceWidth) / 2;
-                          }
-
-                          ctx.save();
-                          const rotateRads = rotate * (Math.PI / 180);
-                          const centerX = image.naturalWidth / 2;
-                          const centerY = image.naturalHeight / 2;
-
-                          // Apply transformations
-                          ctx.translate(previewWidth / 2, previewHeight / 2);
-                          ctx.rotate(rotateRads);
-                          ctx.scale(scale, scale);
-                          
-                          const drawX = -sourceWidth / 2 - (sourceX - centerX + sourceWidth / 2);
-                          const drawY = -sourceHeight / 2 - (sourceY - centerY + sourceHeight / 2);
-                          
-                          ctx.drawImage(
-                            image,
-                            drawX,
-                            drawY,
-                            image.naturalWidth,
-                            image.naturalHeight
-                          );
-                          ctx.restore();
-                        }
-                      }}
-                      className="w-full h-full object-cover"
+                  
+                  {/* Hero visible area overlay - shows center portion that will be visible */}
+                  <div className="absolute inset-0 pointer-events-none">
+                    {/* Darkened top area */}
+                    <div 
+                      className="absolute top-0 left-0 right-0 bg-black/60"
+                      style={{ height: '20%' }}
                     />
-                    {/* Overlay indicators */}
-                    <div className="absolute inset-0 pointer-events-none">
-                      <div className="absolute top-2 left-2 right-2 flex items-center gap-2">
-                        <div className="h-px flex-1 border-t-2 border-dashed border-white/40" />
-                        <span className="text-xs text-white/60 bg-black/30 px-2 py-0.5 rounded">Área visível no hero</span>
-                        <div className="h-px flex-1 border-t-2 border-dashed border-white/40" />
+                    {/* Darkened bottom area */}
+                    <div 
+                      className="absolute bottom-0 left-0 right-0 bg-black/60"
+                      style={{ height: '20%' }}
+                    />
+                    {/* Left darkened area for the visible zone */}
+                    <div 
+                      className="absolute bg-black/60"
+                      style={{ top: '20%', bottom: '20%', left: 0, width: '5%' }}
+                    />
+                    {/* Right darkened area for the visible zone */}
+                    <div 
+                      className="absolute bg-black/60"
+                      style={{ top: '20%', bottom: '20%', right: 0, width: '5%' }}
+                    />
+                    
+                    {/* Dashed border for visible area */}
+                    <div 
+                      className="absolute border-2 border-dashed border-white/80"
+                      style={{ 
+                        top: '20%', 
+                        bottom: '20%', 
+                        left: '5%', 
+                        right: '5%',
+                        boxShadow: '0 0 0 2px rgba(0,0,0,0.3)'
+                      }}
+                    >
+                      {/* Corner indicators */}
+                      <div className="absolute -top-1 -left-1 w-3 h-3 border-t-2 border-l-2 border-white" />
+                      <div className="absolute -top-1 -right-1 w-3 h-3 border-t-2 border-r-2 border-white" />
+                      <div className="absolute -bottom-1 -left-1 w-3 h-3 border-b-2 border-l-2 border-white" />
+                      <div className="absolute -bottom-1 -right-1 w-3 h-3 border-b-2 border-r-2 border-white" />
+                      
+                      {/* Label */}
+                      <div className="absolute top-2 left-1/2 transform -translate-x-1/2">
+                        <span className="text-xs text-white bg-black/50 px-2 py-1 rounded whitespace-nowrap">
+                          Área visível na página do projeto
+                        </span>
                       </div>
                     </div>
                   </div>
                 </div>
-                <p className="text-xs text-muted-foreground text-center">
-                  Esta é a área que aparecerá na seção principal (hero) da página do projeto
-                </p>
-              </div>
-            )}
+              )}
+            </div>
 
             {/* Controls */}
             <div className="space-y-4 p-4 bg-muted/50 rounded-lg">
@@ -406,7 +364,8 @@ export const ImageCropper = ({
             </div>
 
             <p className="text-xs text-muted-foreground text-center">
-              Arraste os cantos da área selecionada para ajustar o enquadramento da imagem
+              A área dentro do pontilhado é o que será exibido na página do projeto. 
+              Use o zoom para ajustar o enquadramento.
             </p>
           </div>
 
@@ -417,7 +376,7 @@ export const ImageCropper = ({
             </Button>
             <Button type="button" onClick={handleConfirmCrop}>
               <Check className="w-4 h-4 mr-2" />
-              Confirmar Recorte
+              Confirmar
             </Button>
           </DialogFooter>
         </DialogContent>
