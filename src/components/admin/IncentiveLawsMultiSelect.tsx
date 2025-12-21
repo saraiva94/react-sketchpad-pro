@@ -195,8 +195,24 @@ export const IncentiveLawsMultiSelect = ({
   );
 };
 
+export const normalizeIncentiveLawValue = (raw: string): string => {
+  const v = raw.trim();
+  const lower = v.toLowerCase();
+
+  // Common legacy values / labels -> canonical option values
+  if (lower === "lei rouanet" || lower === "rouanet" || lower.includes("rouanet")) return "lei_rouanet";
+  if (lower === "lei do audiovisual" || lower === "audiovisual" || lower.includes("audiovisual")) return "lei_audiovisual";
+  if (lower === "icms rj" || lower === "icms" || lower.includes("icms")) return "icms_rj";
+  if (lower === "iss rj" || lower === "iss" || lower.includes("iss")) return "iss_rj";
+  if (lower === "proac" || lower.includes("proac")) return "proac";
+  if (lower === "outros" || lower === "outro" || lower.includes("outro")) return "outros";
+
+  return v;
+};
+
 export const getIncentiveLawLabel = (value: string): string => {
-  const law = DEFAULT_INCENTIVE_LAW_OPTIONS.find(l => l.value === value);
+  const normalized = normalizeIncentiveLawValue(value);
+  const law = DEFAULT_INCENTIVE_LAW_OPTIONS.find((l) => l.value === normalized);
   return law?.label || value;
 };
 
