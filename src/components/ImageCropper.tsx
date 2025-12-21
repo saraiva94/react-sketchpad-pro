@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Upload, X, Check, RotateCcw, ZoomIn, ZoomOut, Crop as CropIcon, Move } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useToast } from '@/hooks/use-toast';
 
 // Aspect ratios that match the actual display dimensions
 // ProjectPage hero: h-96 (384px) with full viewport width ~1200px = ~3.125:1
@@ -50,6 +51,7 @@ export const ImageCropper = ({
   allowReadjust = true,
   mode = 'both'
 }: ImageCropperProps) => {
+  const { toast } = useToast();
   const [imageSrc, setImageSrc] = useState<string>('');
   const [crop, setCrop] = useState<Crop>();
   const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
@@ -185,16 +187,22 @@ export const ImageCropper = ({
 
   const handleConfirmCrop = async () => {
     if (isProcessing) return;
-    
+
     setIsProcessing(true);
     console.log('[ImageCropper] Starting crop confirmation...', { completedCrop });
-    
+
     try {
       const result = await getCroppedImg();
-      
+
       if (result) {
         console.log('[ImageCropper] Crop successful, calling onImageCropped');
         onImageCropped(result.blob, result.url);
+
+        toast({
+          title: 'Imagem confirmada',
+          description: 'O recorte foi aplicado ao formulário.',
+        });
+
         setShowCropDialog(false);
         setImageSrc('');
         setCrop(undefined);
@@ -204,9 +212,19 @@ export const ImageCropper = ({
         }
       } else {
         console.error('[ImageCropper] getCroppedImg returned null');
+        toast({
+          variant: 'destructive',
+          title: 'Não foi possível confirmar',
+          description: 'Tente reajustar novamente ou trocar a imagem.',
+        });
       }
     } catch (error) {
       console.error('[ImageCropper] Error during crop:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Erro ao confirmar imagem',
+        description: 'Tente trocar a imagem e repetir o recorte.',
+      });
     } finally {
       setIsProcessing(false);
     }
@@ -229,46 +247,58 @@ export const ImageCropper = ({
   };
 
   const handleReadjust = async () => {
-    if (currentImage) {
-      setIsProcessing(true);
-      try {
-        // Convert external URL to base64 to avoid CORS/tainted canvas issues
-        if (currentImage.startsWith('http')) {
-          const response = await fetch(currentImage);
-          const blob = await response.blob();
-          const reader = new FileReader();
-          reader.onload = () => {
-            setImageSrc(reader.result as string);
-            setShowCropDialog(true);
-            setScale(1);
-            setRotate(0);
-            setActiveTab(mode === 'card' ? 'card' : 'hero');
-            setIsProcessing(false);
-          };
-          reader.onerror = () => {
-            console.error('[ImageCropper] Failed to convert image to base64');
-            // Fallback: use original URL with crossOrigin
-            setImageSrc(currentImage);
-            setShowCropDialog(true);
-            setScale(1);
-            setRotate(0);
-            setActiveTab(mode === 'card' ? 'card' : 'hero');
-            setIsProcessing(false);
-          };
-          reader.readAsDataURL(blob);
-        } else {
-          // Already a data URL
-          setImageSrc(currentImage);
+    if (!currentImage) return;
+
+    setIsProcessing(true);
+    try {
+      // Convert external URL to data URL to avoid CORS/tainted canvas issues.
+      // If fetch fails (CORS), we show a clear message instead of failing silently.
+      if (currentImage.startsWith('http')) {
+        const response = await fetch(currentImage, { mode: 'cors', credentials: 'omit' });
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        const blob = await response.blob();
+        const reader = new FileReader();
+
+        reader.onload = () => {
+          setImageSrc(reader.result as string);
           setShowCropDialog(true);
           setScale(1);
           setRotate(0);
           setActiveTab(mode === 'card' ? 'card' : 'hero');
           setIsProcessing(false);
-        }
-      } catch (error) {
-        console.error('[ImageCropper] Error loading image for readjust:', error);
+        };
+
+        reader.onerror = () => {
+          console.error('[ImageCropper] Failed to convert image to base64');
+          toast({
+            variant: 'destructive',
+            title: 'Não foi possível carregar para reajuste',
+            description: 'Clique em “Trocar” e envie a imagem novamente.',
+          });
+          setIsProcessing(false);
+        };
+
+        reader.readAsDataURL(blob);
+      } else {
+        // Already a data URL
+        setImageSrc(currentImage);
+        setShowCropDialog(true);
+        setScale(1);
+        setRotate(0);
+        setActiveTab(mode === 'card' ? 'card' : 'hero');
         setIsProcessing(false);
       }
+    } catch (error) {
+      console.error('[ImageCropper] Error loading image for readjust:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Não foi possível reajustar',
+        description: 'Clique em “Trocar” e envie a imagem novamente.',
+      });
+      setIsProcessing(false);
     }
   };
 
@@ -415,6 +445,7 @@ export const ImageCropper = ({
                       ref={imgRef}
                       alt="Imagem para recortar"
                       src={imageSrc}
+                      crossOrigin="anonymous"
                       style={{ 
                         transform: `scale(${scale}) rotate(${rotate}deg)`,
                         maxHeight: '400px',
