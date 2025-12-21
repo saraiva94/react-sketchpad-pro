@@ -447,7 +447,7 @@ const ProjectPage = () => {
 
       {/* Hero Section */}
       <section className="relative">
-        <div className="w-full aspect-[3/1] max-h-96 overflow-hidden">
+        <div className="w-full aspect-[21/4] max-h-96 overflow-hidden">
           {(project.hero_image_url || project.image_url) ? (
             <img 
               src={`${project.hero_image_url || project.image_url}${project.updated_at ? `?v=${encodeURIComponent(project.updated_at)}` : ''}`}
