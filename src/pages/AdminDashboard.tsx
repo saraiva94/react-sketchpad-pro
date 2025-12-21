@@ -2729,7 +2729,7 @@ const AdminDashboard = () => {
                   onImagesCropped={handleEditImagesCropped}
                   currentHeroImage={editHeroPreview}
                   currentCardImage={editCardPreview}
-                  originalImageUrl={editImageUrl || selectedProject?.image_url}
+                  originalImageUrl={editImageUrl || selectedProject?.image_url || selectedProject?.hero_image_url || selectedProject?.card_image_url}
                   onClear={handleEditClearImage}
                 />
               </div>
