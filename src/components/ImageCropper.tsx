@@ -439,6 +439,7 @@ export const ImageCropper = ({
                     onChange={handleCropChange}
                     onComplete={handleCropComplete}
                     aspect={getCurrentAspectRatio()}
+                    keepSelection={true}
                     className="max-h-[400px]"
                   >
                     <img
