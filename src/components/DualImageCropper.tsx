@@ -1,6 +1,4 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import ReactCrop, { Crop, PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
-import 'react-image-crop/dist/ReactCrop.css';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Upload, X, Check, RotateCcw, ZoomIn, ZoomOut, Crop as CropIcon, Move, Image } from 'lucide-react';
@@ -9,7 +7,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 
 // Aspect ratios that match the actual display dimensions
-const HERO_ASPECT_RATIO = 21 / 4; // 21:4 (~5.25:1) for hero banner - matches the wide cinematic header
+const HERO_ASPECT_RATIO = 21 / 4; // 21:4 (~5.25:1) for hero banner
 const CARD_ASPECT_RATIO = 16 / 9; // 16:9 for card
 
 interface CroppedImages {
@@ -18,32 +16,12 @@ interface CroppedImages {
 }
 
 interface DualImageCropperProps {
-  onImagesCropped: (heroBlob: Blob | null, heroUrl: string | null, cardBlob: Blob | null, cardUrl: string | null, originalBlob?: Blob | null) => void;
+  onImagesCropped: (heroBlob: Blob | null, heroUrl: string | null, cardBlob: Blob | null, cardUrl: string | null) => void;
   currentHeroImage?: string | null;
   currentCardImage?: string | null;
-  originalImageUrl?: string | null; // The full uncropped original image for readjustments
+  originalImageUrl?: string | null;
   onClear?: () => void;
   allowReadjust?: boolean;
-}
-
-function centerAspectCrop(
-  mediaWidth: number,
-  mediaHeight: number,
-  aspect: number,
-) {
-  return centerCrop(
-    makeAspectCrop(
-      {
-        unit: '%',
-        width: 90,
-      },
-      aspect,
-      mediaWidth,
-      mediaHeight,
-    ),
-    mediaWidth,
-    mediaHeight,
-  );
 }
 
 export const DualImageCropper = ({ 
@@ -56,31 +34,28 @@ export const DualImageCropper = ({
 }: DualImageCropperProps) => {
   const { toast } = useToast();
   const [imageSrc, setImageSrc] = useState<string>('');
-  const [crop, setCrop] = useState<Crop>();
-  const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
   const [showCropDialog, setShowCropDialog] = useState(false);
   const [scale, setScale] = useState(1);
-  const [rotate, setRotate] = useState(0);
   const [activeTab, setActiveTab] = useState<'hero' | 'card'>('hero');
   const [isProcessing, setIsProcessing] = useState(false);
   
-  // Pan state for moving the image when zoomed
-  const [panX, setPanX] = useState(0);
-  const [panY, setPanY] = useState(0);
-  const [isPanning, setIsPanning] = useState(false);
-  const [panStart, setPanStart] = useState({ x: 0, y: 0 });
+  // Position state - percentage based for the image position
+  const [posX, setPosX] = useState(50); // 0-100, 50 = center
+  const [posY, setPosY] = useState(50); // 0-100, 50 = center
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0, posX: 50, posY: 50 });
   
   // Store cropped results for both
   const [croppedImages, setCroppedImages] = useState<CroppedImages>({ hero: null, card: null });
   const [heroPreview, setHeroPreview] = useState<string | null>(currentHeroImage || null);
   const [cardPreview, setCardPreview] = useState<string | null>(currentCardImage || null);
   
-  // Store the original image for readjustments (not the cropped one)
+  // Store the original image for readjustments
   const [storedOriginalSrc, setStoredOriginalSrc] = useState<string | null>(null);
   
   const imgRef = useRef<HTMLImageElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const viewportRef = useRef<HTMLDivElement>(null);
 
   // Sync with external props
   useEffect(() => {
@@ -95,51 +70,46 @@ export const DualImageCropper = ({
     return activeTab === 'hero' ? HERO_ASPECT_RATIO : CARD_ASPECT_RATIO;
   }, [activeTab]);
 
-  // Update crop when tab changes
+  // Reset position when tab changes
   useEffect(() => {
-    if (imgRef.current && imageSrc && showCropDialog) {
-      const { width, height } = imgRef.current;
-      if (width > 0 && height > 0) {
-        const newAspect = getCurrentAspectRatio();
-        const newCrop = centerAspectCrop(width, height, newAspect);
-        setCrop(newCrop);
-        const pixelCrop: PixelCrop = {
-          x: (newCrop.x / 100) * width,
-          y: (newCrop.y / 100) * height,
-          width: (newCrop.width / 100) * width,
-          height: (newCrop.height / 100) * height,
-          unit: 'px',
-        };
-        setCompletedCrop(pixelCrop);
-      }
-    }
-  }, [activeTab, getCurrentAspectRatio, imageSrc, showCropDialog]);
+    setPosX(50);
+    setPosY(50);
+    setScale(1);
+  }, [activeTab]);
 
-  // Pan handlers for moving the image
-  const handlePanStart = useCallback((e: React.MouseEvent) => {
-    // Check if the click is on the crop handles - if so, don't start panning
-    const target = e.target as HTMLElement;
-    if (target.closest('.ReactCrop__drag-handle') || target.closest('.ReactCrop__crop-selection')) {
-      return;
-    }
+  // Drag handlers
+  const handleDragStart = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
-    setIsPanning(true);
-    setPanStart({ x: e.clientX - panX, y: e.clientY - panY });
-  }, [panX, panY]);
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+    setIsDragging(true);
+    setDragStart({ x: clientX, y: clientY, posX, posY });
+  }, [posX, posY]);
 
-  const handlePanMove = useCallback((e: React.MouseEvent) => {
-    if (!isPanning) return;
+  const handleDragMove = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    if (!isDragging || !viewportRef.current) return;
     e.preventDefault();
-    const newPanX = e.clientX - panStart.x;
-    const newPanY = e.clientY - panStart.y;
-    // Limit pan range - allow more movement
-    const maxPan = 300;
-    setPanX(Math.max(-maxPan, Math.min(maxPan, newPanX)));
-    setPanY(Math.max(-maxPan, Math.min(maxPan, newPanY)));
-  }, [isPanning, panStart]);
+    
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+    
+    const viewport = viewportRef.current;
+    const rect = viewport.getBoundingClientRect();
+    
+    // Calculate movement as percentage of viewport
+    const deltaX = ((clientX - dragStart.x) / rect.width) * 100;
+    const deltaY = ((clientY - dragStart.y) / rect.height) * 100;
+    
+    // Invert because moving mouse right should move image left (to show right side)
+    const newPosX = Math.max(0, Math.min(100, dragStart.posX - deltaX));
+    const newPosY = Math.max(0, Math.min(100, dragStart.posY - deltaY));
+    
+    setPosX(newPosX);
+    setPosY(newPosY);
+  }, [isDragging, dragStart]);
 
-  const handlePanEnd = useCallback(() => {
-    setIsPanning(false);
+  const handleDragEnd = useCallback(() => {
+    setIsDragging(false);
   }, []);
 
   const onSelectFile = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -148,77 +118,81 @@ export const DualImageCropper = ({
       reader.addEventListener('load', () => {
         const dataUrl = reader.result?.toString() || '';
         setImageSrc(dataUrl);
-        // Store the original image for future readjustments
         setStoredOriginalSrc(dataUrl);
         setShowCropDialog(true);
         setScale(1);
-        setRotate(0);
-        setPanX(0);
-        setPanY(0);
+        setPosX(50);
+        setPosY(50);
         setActiveTab('hero');
-        setCrop(undefined);
-        setCompletedCrop(undefined);
-        // Reset cropped images when starting fresh
         setCroppedImages({ hero: null, card: null });
       });
       reader.readAsDataURL(e.target.files[0]);
     }
   };
 
-  const onImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
-    const { width, height } = e.currentTarget;
-    const targetAspect = getCurrentAspectRatio();
-    const initialCrop = centerAspectCrop(width, height, targetAspect);
-    setCrop(initialCrop);
-    
-    const pixelCrop: PixelCrop = {
-      x: (initialCrop.x / 100) * width,
-      y: (initialCrop.y / 100) * height,
-      width: (initialCrop.width / 100) * width,
-      height: (initialCrop.height / 100) * height,
-      unit: 'px',
-    };
-    setCompletedCrop(pixelCrop);
-  }, [getCurrentAspectRatio]);
-
-  const getCroppedImg = async (): Promise<{ blob: Blob; url: string } | null> => {
-    if (!completedCrop || !imgRef.current) {
-      console.error('[DualImageCropper] Missing completedCrop or imgRef');
+  const captureViewport = async (): Promise<{ blob: Blob; url: string } | null> => {
+    if (!imgRef.current || !viewportRef.current) {
+      console.error('[DualImageCropper] Missing refs');
       return null;
     }
 
     const image = imgRef.current;
-    const scaleX = image.naturalWidth / image.width;
-    const scaleY = image.naturalHeight / image.height;
+    const viewport = viewportRef.current;
+    const aspectRatio = getCurrentAspectRatio();
+    
+    // Calculate output dimensions (high quality)
+    const outputWidth = 1920;
+    const outputHeight = Math.round(outputWidth / aspectRatio);
 
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     if (!ctx) return null;
 
-    const pixelRatio = window.devicePixelRatio;
+    canvas.width = outputWidth;
+    canvas.height = outputHeight;
+
+    // Calculate the source rectangle based on position and scale
+    const imgNaturalWidth = image.naturalWidth;
+    const imgNaturalHeight = image.naturalHeight;
     
-    canvas.width = Math.floor(completedCrop.width * scaleX * pixelRatio);
-    canvas.height = Math.floor(completedCrop.height * scaleY * pixelRatio);
+    // The viewport shows a portion of the image based on object-position
+    // We need to calculate what portion of the natural image is visible
+    
+    // First, figure out how the image fits in the viewport (object-fit: cover behavior)
+    const viewportAspect = aspectRatio;
+    const imageAspect = imgNaturalWidth / imgNaturalHeight;
+    
+    let sourceWidth: number, sourceHeight: number;
+    
+    if (imageAspect > viewportAspect) {
+      // Image is wider - height fits, width is cropped
+      sourceHeight = imgNaturalHeight / scale;
+      sourceWidth = sourceHeight * viewportAspect;
+    } else {
+      // Image is taller - width fits, height is cropped
+      sourceWidth = imgNaturalWidth / scale;
+      sourceHeight = sourceWidth / viewportAspect;
+    }
+    
+    // Calculate source position based on posX/posY (0-100)
+    const maxOffsetX = imgNaturalWidth - sourceWidth;
+    const maxOffsetY = imgNaturalHeight - sourceHeight;
+    
+    const sourceX = (posX / 100) * maxOffsetX;
+    const sourceY = (posY / 100) * maxOffsetY;
 
-    ctx.scale(pixelRatio, pixelRatio);
-    ctx.imageSmoothingQuality = 'high';
-
-    // Adjust crop position based on pan offset
-    const cropX = (completedCrop.x - panX / scale) * scaleX;
-    const cropY = (completedCrop.y - panY / scale) * scaleY;
-
-    const rotateRads = rotate * (Math.PI / 180);
-    const centerX = image.naturalWidth / 2;
-    const centerY = image.naturalHeight / 2;
-
-    ctx.save();
-    ctx.translate(-cropX, -cropY);
-    ctx.translate(centerX, centerY);
-    ctx.rotate(rotateRads);
-    ctx.scale(scale, scale);
-    ctx.translate(-centerX, -centerY);
-    ctx.drawImage(image, 0, 0);
-    ctx.restore();
+    // Draw the cropped portion
+    ctx.drawImage(
+      image,
+      Math.max(0, sourceX),
+      Math.max(0, sourceY),
+      Math.min(sourceWidth, imgNaturalWidth),
+      Math.min(sourceHeight, imgNaturalHeight),
+      0,
+      0,
+      outputWidth,
+      outputHeight
+    );
 
     return new Promise((resolve) => {
       canvas.toBlob(
@@ -231,7 +205,7 @@ export const DualImageCropper = ({
           }
         },
         'image/jpeg',
-        0.9
+        0.92
       );
     });
   };
@@ -241,7 +215,7 @@ export const DualImageCropper = ({
     setIsProcessing(true);
 
     try {
-      const result = await getCroppedImg();
+      const result = await captureViewport();
       
       if (result) {
         const newCroppedImages = { ...croppedImages };
@@ -281,8 +255,6 @@ export const DualImageCropper = ({
           
           setShowCropDialog(false);
           setImageSrc('');
-          setCrop(undefined);
-          setCompletedCrop(undefined);
           if (inputRef.current) {
             inputRef.current.value = '';
           }
@@ -309,8 +281,6 @@ export const DualImageCropper = ({
   const handleCancel = () => {
     setShowCropDialog(false);
     setImageSrc('');
-    setCrop(undefined);
-    setCompletedCrop(undefined);
     setCroppedImages({ hero: null, card: null });
     if (inputRef.current) {
       inputRef.current.value = '';
@@ -321,33 +291,30 @@ export const DualImageCropper = ({
     setHeroPreview(null);
     setCardPreview(null);
     setCroppedImages({ hero: null, card: null });
+    setStoredOriginalSrc(null);
     if (onClear) {
       onClear();
     }
   };
 
   const handleReadjust = async () => {
-    // Priority: stored original > prop original > hero > card
     const imageToUse = storedOriginalSrc || originalImageUrl || currentHeroImage || currentCardImage;
     if (!imageToUse) return;
 
     setIsProcessing(true);
     try {
-      // If it's a data URL (stored original), use it directly
       if (imageToUse.startsWith('data:')) {
         setImageSrc(imageToUse);
         setShowCropDialog(true);
         setScale(1);
-        setRotate(0);
-        setPanX(0);
-        setPanY(0);
+        setPosX(50);
+        setPosY(50);
         setActiveTab('hero');
         setCroppedImages({ hero: null, card: null });
         setIsProcessing(false);
         return;
       }
       
-      // If it's a URL, fetch it
       if (imageToUse.startsWith('http')) {
         const response = await fetch(imageToUse, { mode: 'cors', credentials: 'omit' });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -358,13 +325,11 @@ export const DualImageCropper = ({
         reader.onload = () => {
           const dataUrl = reader.result as string;
           setImageSrc(dataUrl);
-          // Store for future readjustments
           setStoredOriginalSrc(dataUrl);
           setShowCropDialog(true);
           setScale(1);
-          setRotate(0);
-          setPanX(0);
-          setPanY(0);
+          setPosX(50);
+          setPosY(50);
           setActiveTab('hero');
           setCroppedImages({ hero: null, card: null });
           setIsProcessing(false);
@@ -385,9 +350,8 @@ export const DualImageCropper = ({
         setStoredOriginalSrc(imageToUse);
         setShowCropDialog(true);
         setScale(1);
-        setRotate(0);
-        setPanX(0);
-        setPanY(0);
+        setPosX(50);
+        setPosY(50);
         setActiveTab('hero');
         setCroppedImages({ hero: null, card: null });
         setIsProcessing(false);
@@ -490,7 +454,7 @@ export const DualImageCropper = ({
               Clique para adicionar imagem de capa
             </p>
             <p className="text-xs text-muted-foreground">
-              Você vai ajustar o recorte para Banner (3:1) e Card (16:9)
+              Você vai ajustar o recorte para Banner e Card
             </p>
           </div>
         )}
@@ -510,7 +474,7 @@ export const DualImageCropper = ({
           <DialogHeader>
             <DialogTitle>Ajustar Imagens de Capa</DialogTitle>
             <DialogDescription>
-              Ajuste o recorte para o Banner e depois para o Card
+              Arraste a imagem para posicionar a área visível
             </DialogDescription>
           </DialogHeader>
 
@@ -535,58 +499,52 @@ export const DualImageCropper = ({
             <div className="text-center p-2 bg-muted rounded-lg">
               <p className="text-sm text-muted-foreground">
                 {activeTab === 'hero' ? (
-                  <><strong>Passo 1:</strong> Ajuste o recorte do Banner que aparece no cabeçalho da página do projeto</>
+                  <><strong>Passo 1:</strong> Arraste a imagem para posicionar o Banner do cabeçalho</>
                 ) : (
-                  <><strong>Passo 2:</strong> Ajuste o recorte do Card que aparece na listagem de projetos</>
+                  <><strong>Passo 2:</strong> Arraste a imagem para posicionar o Card da listagem</>
                 )}
               </p>
             </div>
 
-            {/* Crop Area */}
-            <div 
-              ref={containerRef}
-              className="flex justify-center bg-muted rounded-lg p-4 overflow-hidden cursor-grab active:cursor-grabbing"
-              onMouseDown={handlePanStart}
-              onMouseMove={handlePanMove}
-              onMouseUp={handlePanEnd}
-              onMouseLeave={handlePanEnd}
-            >
-              {imageSrc && (
-                <div className="relative crop-dashed-style">
-                  <ReactCrop
-                    crop={crop}
-                    onChange={(_, percentCrop) => setCrop(percentCrop)}
-                    onComplete={(c) => setCompletedCrop(c)}
-                    aspect={getCurrentAspectRatio()}
-                    keepSelection={true}
-                    className="max-h-[400px]"
-                    disabled={isPanning}
-                  >
-                    <img
-                      ref={imgRef}
-                      alt="Imagem para recortar"
-                      src={imageSrc}
-                      crossOrigin="anonymous"
-                      style={{ 
-                        transform: `translate(${panX}px, ${panY}px) scale(${scale}) rotate(${rotate}deg)`,
-                        maxHeight: '400px',
-                        width: 'auto',
-                        transition: isPanning ? 'none' : 'transform 0.1s ease-out',
-                        userSelect: 'none',
-                      }}
-                      onLoad={onImageLoad}
-                      draggable={false}
-                    />
-                  </ReactCrop>
+            {/* Fixed Viewport - User drags image behind it */}
+            <div className="flex justify-center">
+              <div 
+                ref={viewportRef}
+                className={`relative overflow-hidden rounded-lg border-4 border-dashed border-primary bg-black cursor-grab active:cursor-grabbing select-none ${
+                  activeTab === 'hero' ? 'w-full aspect-[21/4]' : 'w-full max-w-lg aspect-video'
+                }`}
+                onMouseDown={handleDragStart}
+                onMouseMove={handleDragMove}
+                onMouseUp={handleDragEnd}
+                onMouseLeave={handleDragEnd}
+                onTouchStart={handleDragStart}
+                onTouchMove={handleDragMove}
+                onTouchEnd={handleDragEnd}
+              >
+                {imageSrc && (
+                  <img
+                    ref={imgRef}
+                    alt="Imagem para ajustar"
+                    src={imageSrc}
+                    className="absolute w-full h-full pointer-events-none"
+                    style={{ 
+                      objectFit: 'cover',
+                      objectPosition: `${posX}% ${posY}%`,
+                      transform: `scale(${scale})`,
+                      transformOrigin: `${posX}% ${posY}%`,
+                    }}
+                    draggable={false}
+                  />
+                )}
+                {/* Instruction overlay */}
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <div className="bg-black/40 text-white px-3 py-1.5 rounded-full text-sm flex items-center gap-2 opacity-60">
+                    <Move className="w-4 h-4" />
+                    Arraste para posicionar
+                  </div>
                 </div>
-              )}
+              </div>
             </div>
-            
-            {/* Pan hint */}
-            <p className="text-xs text-center text-muted-foreground">
-              <Move className="w-3 h-3 inline mr-1" />
-              Arraste a imagem para posicionar • Use o pontilhado para ajustar a área
-            </p>
 
             {/* Controls */}
             <div className="space-y-4 p-4 bg-muted/50 rounded-lg">
@@ -595,7 +553,7 @@ export const DualImageCropper = ({
                 <Slider
                   value={[scale]}
                   onValueChange={(values) => setScale(values[0])}
-                  min={0.5}
+                  min={1}
                   max={3}
                   step={0.1}
                   className="flex-1"
@@ -606,30 +564,14 @@ export const DualImageCropper = ({
                 </span>
               </div>
 
-              <div className="flex items-center gap-4">
-                <RotateCcw className="w-4 h-4 text-muted-foreground" />
-                <Slider
-                  value={[rotate]}
-                  onValueChange={(values) => setRotate(values[0])}
-                  min={-180}
-                  max={180}
-                  step={1}
-                  className="flex-1"
-                />
-                <span className="text-sm text-muted-foreground w-12 text-right">
-                  {rotate}°
-                </span>
-              </div>
-
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 onClick={() => {
                   setScale(1);
-                  setRotate(0);
-                  setPanX(0);
-                  setPanY(0);
+                  setPosX(50);
+                  setPosY(50);
                 }}
               >
                 <RotateCcw className="w-4 h-4 mr-2" />
@@ -646,7 +588,7 @@ export const DualImageCropper = ({
             <Button 
               type="button" 
               onClick={handleSaveCrop} 
-              disabled={isProcessing || !completedCrop}
+              disabled={isProcessing}
             >
               <Check className="w-4 h-4 mr-2" />
               {isProcessing ? 'Processando...' : (activeTab === 'hero' ? 'Salvar e Continuar' : 'Confirmar Tudo')}
@@ -654,22 +596,6 @@ export const DualImageCropper = ({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      <style>{`
-        .crop-dashed-style .ReactCrop__crop-selection {
-          border: 2px dashed rgba(255, 255, 255, 0.9) !important;
-          box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5) !important;
-        }
-        .crop-dashed-style .ReactCrop__drag-handle {
-          background-color: white !important;
-          border: 2px solid rgba(0, 0, 0, 0.5) !important;
-          width: 12px !important;
-          height: 12px !important;
-        }
-        .crop-dashed-style .ReactCrop__drag-handle::after {
-          display: none !important;
-        }
-      `}</style>
     </>
   );
 };
