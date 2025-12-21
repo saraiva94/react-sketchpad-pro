@@ -1,10 +1,15 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import ReactCrop, { Crop, PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Upload, X, Check, RotateCcw, ZoomIn, ZoomOut, Crop as CropIcon } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
+import { Upload, X, Check, RotateCcw, ZoomIn, ZoomOut, Crop as CropIcon, Move } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
+// Aspect ratios for different views
+const HERO_ASPECT_RATIO = 21 / 9; // Very wide for hero banner
+const CARD_ASPECT_RATIO = 16 / 9; // Standard for cards
 
 interface ImageCropperProps {
   onImageCropped: (croppedImageBlob: Blob, previewUrl: string) => void;
@@ -12,6 +17,7 @@ interface ImageCropperProps {
   currentImage?: string | null;
   onClear?: () => void;
   allowReadjust?: boolean;
+  mode?: 'hero' | 'card' | 'both';
 }
 
 function centerAspectCrop(
@@ -39,7 +45,8 @@ export const ImageCropper = ({
   aspectRatio = 16 / 9, 
   currentImage,
   onClear,
-  allowReadjust = true
+  allowReadjust = true,
+  mode = 'both'
 }: ImageCropperProps) => {
   const [imageSrc, setImageSrc] = useState<string>('');
   const [crop, setCrop] = useState<Crop>();
@@ -47,8 +54,29 @@ export const ImageCropper = ({
   const [showCropDialog, setShowCropDialog] = useState(false);
   const [scale, setScale] = useState(1);
   const [rotate, setRotate] = useState(0);
+  const [activeTab, setActiveTab] = useState<'hero' | 'card'>('hero');
   const imgRef = useRef<HTMLImageElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Update crop when tab changes
+  useEffect(() => {
+    if (imgRef.current && imageSrc) {
+      const { width, height } = imgRef.current;
+      const newAspect = activeTab === 'hero' ? HERO_ASPECT_RATIO : CARD_ASPECT_RATIO;
+      const newCrop = centerAspectCrop(width, height, newAspect);
+      setCrop(newCrop);
+      if (newCrop) {
+        const pixelCrop = {
+          x: (newCrop.x / 100) * width,
+          y: (newCrop.y / 100) * height,
+          width: (newCrop.width / 100) * width,
+          height: (newCrop.height / 100) * height,
+          unit: 'px' as const,
+        };
+        setCompletedCrop(pixelCrop);
+      }
+    }
+  }, [activeTab, imageSrc]);
 
   const onSelectFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -58,6 +86,7 @@ export const ImageCropper = ({
         setShowCropDialog(true);
         setScale(1);
         setRotate(0);
+        setActiveTab(mode === 'card' ? 'card' : 'hero');
       });
       reader.readAsDataURL(e.target.files[0]);
     }
@@ -65,7 +94,10 @@ export const ImageCropper = ({
 
   const onImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
     const { width, height } = e.currentTarget;
-    const initialCrop = centerAspectCrop(width, height, aspectRatio);
+    const targetAspect = mode === 'card' ? CARD_ASPECT_RATIO : 
+                         mode === 'hero' ? HERO_ASPECT_RATIO : 
+                         (activeTab === 'hero' ? HERO_ASPECT_RATIO : CARD_ASPECT_RATIO);
+    const initialCrop = centerAspectCrop(width, height, targetAspect);
     setCrop(initialCrop);
     // Also set completed crop immediately so confirm works right away
     if (initialCrop) {
@@ -78,10 +110,11 @@ export const ImageCropper = ({
       };
       setCompletedCrop(pixelCrop);
     }
-  }, [aspectRatio]);
+  }, [mode, activeTab]);
 
   const getCroppedImg = async (): Promise<{ blob: Blob; url: string } | null> => {
     if (!completedCrop || !imgRef.current) {
+      console.error('[ImageCropper] Missing completedCrop or imgRef');
       return null;
     }
 
@@ -136,12 +169,7 @@ export const ImageCropper = ({
   };
 
   const handleConfirmCrop = async () => {
-    console.log('[ImageCropper] handleConfirmCrop called');
-    console.log('[ImageCropper] completedCrop:', completedCrop);
-    console.log('[ImageCropper] imgRef.current:', imgRef.current);
-    
     const result = await getCroppedImg();
-    console.log('[ImageCropper] getCroppedImg result:', result);
     
     if (result) {
       onImageCropped(result.blob, result.url);
@@ -150,8 +178,6 @@ export const ImageCropper = ({
       if (inputRef.current) {
         inputRef.current.value = '';
       }
-    } else {
-      console.error('[ImageCropper] Failed to crop image - result is null');
     }
   };
 
@@ -177,6 +203,10 @@ export const ImageCropper = ({
       setRotate(0);
     }
   };
+
+  const currentAspectRatio = mode === 'card' ? CARD_ASPECT_RATIO : 
+                              mode === 'hero' ? HERO_ASPECT_RATIO : 
+                              (activeTab === 'hero' ? HERO_ASPECT_RATIO : CARD_ASPECT_RATIO);
 
   return (
     <>
@@ -259,9 +289,43 @@ export const ImageCropper = ({
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Ajustar Imagem de Capa</DialogTitle>
+            <DialogDescription>
+              Posicione a área pontilhada para escolher o enquadramento
+            </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
+            {/* Tab selector for mode when mode is 'both' */}
+            {mode === 'both' && (
+              <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'hero' | 'card')} className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="hero" className="flex items-center gap-2">
+                    <Move className="w-4 h-4" />
+                    Banner (Hero)
+                  </TabsTrigger>
+                  <TabsTrigger value="card" className="flex items-center gap-2">
+                    <CropIcon className="w-4 h-4" />
+                    Card
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            )}
+
+            {/* Info about current mode */}
+            <div className="text-center p-2 bg-muted rounded-lg">
+              <p className="text-sm text-muted-foreground">
+                {(mode === 'hero' || (mode === 'both' && activeTab === 'hero')) ? (
+                  <>
+                    <strong>Banner horizontal:</strong> Esta área aparecerá no topo da página do projeto
+                  </>
+                ) : (
+                  <>
+                    <strong>Card do projeto:</strong> Esta área aparecerá no card de listagem
+                  </>
+                )}
+              </p>
+            </div>
+
             {/* Crop Area with dashed border style */}
             <div className="flex justify-center bg-muted rounded-lg p-4 overflow-hidden">
               {imageSrc && (
@@ -270,8 +334,8 @@ export const ImageCropper = ({
                     crop={crop}
                     onChange={(_, percentCrop) => setCrop(percentCrop)}
                     onComplete={(c) => setCompletedCrop(c)}
-                    aspect={aspectRatio}
-                    className="max-h-[450px]"
+                    aspect={currentAspectRatio}
+                    className="max-h-[400px]"
                   >
                     <img
                       ref={imgRef}
@@ -279,7 +343,7 @@ export const ImageCropper = ({
                       src={imageSrc}
                       style={{ 
                         transform: `scale(${scale}) rotate(${rotate}deg)`,
-                        maxHeight: '450px',
+                        maxHeight: '400px',
                         width: 'auto'
                       }}
                       onLoad={onImageLoad}
@@ -297,7 +361,9 @@ export const ImageCropper = ({
                     >
                       <div className="flex justify-center">
                         <span className="text-xs text-white bg-black/60 px-2 py-1 rounded whitespace-nowrap">
-                          Área visível na página
+                          {(mode === 'hero' || (mode === 'both' && activeTab === 'hero')) 
+                            ? 'Área do Banner' 
+                            : 'Área do Card'}
                         </span>
                       </div>
                     </div>
