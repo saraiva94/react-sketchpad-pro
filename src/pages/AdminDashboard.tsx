@@ -23,7 +23,7 @@ import ContrapartidasEditor, { Contrapartida } from "@/components/admin/Contrapa
 import { RecognitionEditor, NewsItem } from "@/components/admin/RecognitionEditor";
 import { StagesMultiSelect, getStageLabel } from "@/components/admin/StagesMultiSelect";
 import { CategoriesMultiSelect, getCategoryLabel } from "@/components/admin/CategoriesMultiSelect";
-import { IncentiveLawsMultiSelect, getIncentiveLawLabel } from "@/components/admin/IncentiveLawsMultiSelect";
+import { IncentiveLawsMultiSelect, getIncentiveLawLabel, normalizeIncentiveLawValue } from "@/components/admin/IncentiveLawsMultiSelect";
 import { TeamMemberEditor, TeamMemberData } from "@/components/admin/TeamMemberEditor";
 import { DynamicProjectTypeSelect } from "@/components/admin/DynamicProjectTypeSelect";
 import { DynamicLocationSelect } from "@/components/admin/DynamicLocationSelect";
@@ -738,11 +738,16 @@ const AdminDashboard = () => {
     setEditProjectType(project.project_type || "");
     setEditStages(project.stages || []);
     setEditCategoriasTags(project.categorias_tags || []);
-    // Parse incentive laws from comma-separated string
-    const parsedIncentiveLaws: string[] = project.incentive_law_details 
-      ? project.incentive_law_details.split(',').map(law => law.trim()).filter(Boolean)
-      : [];
-    setEditIncentiveLaws(parsedIncentiveLaws);
+    // Parse incentive laws from comma-separated string (normalize legacy values)
+    const parsedIncentiveLaws = (project.incentive_law_details
+      ? project.incentive_law_details
+          .split(",")
+          .map((law) => normalizeIncentiveLawValue(law))
+          .filter(Boolean)
+      : []) as string[];
+
+    const uniqueIncentiveLaws = Array.from(new Set(parsedIncentiveLaws));
+    setEditIncentiveLaws(uniqueIncentiveLaws);
     setEditHasIncentiveLaw(project.has_incentive_law || false);
     setEditIncentiveLawDetails(project.incentive_law_details || "");
     setEditLinkVideo(project.link_video || "");
