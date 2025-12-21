@@ -32,6 +32,7 @@ export const IncentiveLawsMultiSelect = ({
   availableOptions,
   onOptionsChange
 }: IncentiveLawsMultiSelectProps) => {
+  console.log('[IncentiveLawsMultiSelect] Rendering with value:', value);
   const [newLaw, setNewLaw] = useState("");
   const [confirmingDelete, setConfirmingDelete] = useState<string | null>(null);
   
