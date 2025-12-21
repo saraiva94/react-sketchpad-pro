@@ -738,16 +738,10 @@ const AdminDashboard = () => {
     setEditProjectType(project.project_type || "");
     setEditStages(project.stages || []);
     setEditCategoriasTags(project.categorias_tags || []);
-    // Parse incentive laws from details string
-    const parsedIncentiveLaws: string[] = [];
-    if (project.incentive_law_details) {
-      const details = project.incentive_law_details.toLowerCase();
-      if (details.includes('rouanet')) parsedIncentiveLaws.push('rouanet');
-      if (details.includes('audiovisual')) parsedIncentiveLaws.push('audiovisual');
-      if (details.includes('icms')) parsedIncentiveLaws.push('icms_rj');
-      if (details.includes('iss')) parsedIncentiveLaws.push('iss_rj');
-      if (details.includes('outro') || (project.has_incentive_law && parsedIncentiveLaws.length === 0)) parsedIncentiveLaws.push('outros');
-    }
+    // Parse incentive laws from comma-separated string
+    const parsedIncentiveLaws: string[] = project.incentive_law_details 
+      ? project.incentive_law_details.split(',').map(law => law.trim()).filter(Boolean)
+      : [];
     setEditIncentiveLaws(parsedIncentiveLaws);
     setEditHasIncentiveLaw(project.has_incentive_law || false);
     setEditIncentiveLawDetails(project.incentive_law_details || "");
