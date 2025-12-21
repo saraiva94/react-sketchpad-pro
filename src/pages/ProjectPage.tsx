@@ -54,6 +54,7 @@ interface Project {
   budget: string | null;
   location: string | null;
   created_at: string;
+  updated_at: string | null;
   categorias_tags: string[] | null;
   responsavel_primeiro_nome: string | null;
   link_video: string | null;
@@ -444,12 +445,13 @@ const ProjectPage = () => {
 
       {/* Hero Section */}
       <section className="relative">
-        <div className="w-full h-96 overflow-hidden">
+        <div className="w-full aspect-[3/1] max-h-96 overflow-hidden">
           {project.image_url ? (
             <img 
-              src={project.image_url}
+              src={`${project.image_url}${project.updated_at ? `?v=${encodeURIComponent(project.updated_at)}` : ''}`}
               alt={project.title}
               className="w-full h-full object-cover"
+              loading="lazy"
             />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-primary/20 via-accent/10 to-primary/20 flex items-center justify-center">

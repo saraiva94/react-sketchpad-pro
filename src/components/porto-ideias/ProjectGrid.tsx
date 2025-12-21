@@ -12,6 +12,7 @@ interface Project {
   synopsis: string;
   project_type: string;
   image_url: string | null;
+  updated_at?: string | null;
   location: string | null;
   categorias_tags: string[] | null;
   responsavel_nome: string | null;
@@ -93,12 +94,13 @@ function ProjectCard({
       >
         <div className="card-solid bg-card border border-border rounded-2xl overflow-hidden h-full shadow-2xl group-hover:shadow-3xl group-hover:scale-[1.02] transition-all duration-300">
           {/* Image */}
-          <div className="relative h-48 overflow-hidden">
+          <div className="relative aspect-video overflow-hidden">
             {project.image_url ? (
               <img
-                src={project.image_url}
+                src={`${project.image_url}${project.updated_at ? `?v=${encodeURIComponent(project.updated_at)}` : ''}`}
                 alt={project.title}
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                loading="lazy"
               />
             ) : (
               <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">

@@ -9,10 +9,10 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 
 // Aspect ratios that match the actual display dimensions
-// ProjectPage hero: h-96 (384px) with full viewport width ~1200px = ~3.125:1
-// ProjectGrid card: h-48 (192px) with varying width, typical card ~350px = ~1.82:1
-const HERO_ASPECT_RATIO = 3; // Wide banner (3:1 for hero section)
-const CARD_ASPECT_RATIO = 16 / 9; // Standard card ratio (1.78:1)
+// Hero: we render as aspect-[3/1]
+// Card: we render as aspect-video (16:9)
+const HERO_ASPECT_RATIO = 3;
+const CARD_ASPECT_RATIO = 16 / 9;
 
 interface ImageCropperProps {
   onImageCropped: (croppedImageBlob: Blob, previewUrl: string) => void;
@@ -415,16 +415,15 @@ export const ImageCropper = ({
               </Tabs>
             )}
 
-            {/* Info about current mode */}
             <div className="text-center p-2 bg-muted rounded-lg">
               <p className="text-sm text-muted-foreground">
                 {(mode === 'hero' || (mode === 'both' && activeTab === 'hero')) ? (
                   <>
-                    <strong>Banner horizontal (3:1):</strong> Esta área aparecerá no topo da página do projeto
+                    <strong>Banner horizontal (3:1):</strong> igual ao cabeçalho da página do projeto
                   </>
                 ) : (
                   <>
-                    <strong>Card do projeto (16:9):</strong> Esta área aparecerá no card de listagem
+                    <strong>Card do projeto (16:9):</strong> igual ao card de listagem
                   </>
                 )}
               </p>
