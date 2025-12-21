@@ -35,15 +35,18 @@ export const DualImageCropper = ({
   const { toast } = useToast();
   const [imageSrc, setImageSrc] = useState<string>('');
   const [showCropDialog, setShowCropDialog] = useState(false);
-  const [scale, setScale] = useState(1);
   const [activeTab, setActiveTab] = useState<'hero' | 'card'>('hero');
   const [isProcessing, setIsProcessing] = useState(false);
   
-  // Position state - percentage based for the image position
-  const [posX, setPosX] = useState(50); // 0-100, 50 = center
-  const [posY, setPosY] = useState(50); // 0-100, 50 = center
+  // Selection box position (as percentage of image dimensions)
+  // selectionY is where the TOP of the selection box is positioned (0 = top, 100 = would be off image)
+  const [selectionY, setSelectionY] = useState(0);
+  // selectionWidth as percentage of image width (smaller = more zoomed in)
+  const [selectionWidth, setSelectionWidth] = useState(100);
+  
   const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0, posX: 50, posY: 50 });
+  const [dragStartY, setDragStartY] = useState(0);
+  const [dragStartSelY, setDragStartSelY] = useState(0);
   
   // Store cropped results for both
   const [croppedImages, setCroppedImages] = useState<CroppedImages>({ hero: null, card: null });
@@ -53,9 +56,12 @@ export const DualImageCropper = ({
   // Store the original image for readjustments
   const [storedOriginalSrc, setStoredOriginalSrc] = useState<string | null>(null);
   
+  // Image natural dimensions
+  const [imageNaturalSize, setImageNaturalSize] = useState({ width: 0, height: 0 });
+  
   const imgRef = useRef<HTMLImageElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const viewportRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Sync with external props
   useEffect(() => {
@@ -70,43 +76,60 @@ export const DualImageCropper = ({
     return activeTab === 'hero' ? HERO_ASPECT_RATIO : CARD_ASPECT_RATIO;
   }, [activeTab]);
 
+  // Calculate selection box height based on width and aspect ratio
+  const getSelectionHeightPercent = useCallback(() => {
+    if (imageNaturalSize.width === 0 || imageNaturalSize.height === 0) return 20;
+    
+    const aspectRatio = getCurrentAspectRatio();
+    // selectionWidth is percentage of image width
+    const actualWidth = (selectionWidth / 100) * imageNaturalSize.width;
+    const actualHeight = actualWidth / aspectRatio;
+    const heightPercent = (actualHeight / imageNaturalSize.height) * 100;
+    return Math.min(heightPercent, 100);
+  }, [selectionWidth, imageNaturalSize, getCurrentAspectRatio]);
+
   // Reset position when tab changes
   useEffect(() => {
-    setPosX(50);
-    setPosY(50);
-    setScale(1);
+    setSelectionY(0);
+    setSelectionWidth(100);
   }, [activeTab]);
 
-  // Drag handlers - move the image position
+  // Handle image load to get dimensions
+  const handleImageLoad = useCallback(() => {
+    if (imgRef.current) {
+      setImageNaturalSize({
+        width: imgRef.current.naturalWidth,
+        height: imgRef.current.naturalHeight
+      });
+    }
+  }, []);
+
+  // Drag handlers - move the selection box vertically
   const handleDragStart = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
-    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
     const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
     setIsDragging(true);
-    setDragStart({ x: clientX, y: clientY, posX, posY });
-  }, [posX, posY]);
+    setDragStartY(clientY);
+    setDragStartSelY(selectionY);
+  }, [selectionY]);
 
   const handleDragMove = useCallback((e: React.MouseEvent | React.TouchEvent) => {
-    if (!isDragging) return;
+    if (!isDragging || !containerRef.current) return;
     e.preventDefault();
     
-    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
     const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+    const containerRect = containerRef.current.getBoundingClientRect();
     
-    // Direct pixel movement converted to position percentage
-    // More sensitive movement for better control
-    const sensitivity = 0.5;
-    const deltaX = (clientX - dragStart.x) * sensitivity;
-    const deltaY = (clientY - dragStart.y) * sensitivity;
+    // Calculate movement as percentage of container height
+    const deltaY = ((clientY - dragStartY) / containerRect.height) * 100;
     
-    // Moving the image: dragging right moves image right (shows left side)
-    // posX/posY represent the center of the crop window on the image (0-100)
-    const newPosX = Math.max(0, Math.min(100, dragStart.posX - deltaX / 2));
-    const newPosY = Math.max(0, Math.min(100, dragStart.posY - deltaY / 2));
+    // Calculate max Y based on selection height
+    const selectionHeight = getSelectionHeightPercent();
+    const maxY = Math.max(0, 100 - selectionHeight);
     
-    setPosX(newPosX);
-    setPosY(newPosY);
-  }, [isDragging, dragStart]);
+    const newY = Math.max(0, Math.min(maxY, dragStartSelY + deltaY));
+    setSelectionY(newY);
+  }, [isDragging, dragStartY, dragStartSelY, getSelectionHeightPercent]);
 
   const handleDragEnd = useCallback(() => {
     setIsDragging(false);
@@ -120,9 +143,8 @@ export const DualImageCropper = ({
         setImageSrc(dataUrl);
         setStoredOriginalSrc(dataUrl);
         setShowCropDialog(true);
-        setScale(1);
-        setPosX(50);
-        setPosY(50);
+        setSelectionY(0);
+        setSelectionWidth(100);
         setActiveTab('hero');
         setCroppedImages({ hero: null, card: null });
       });
@@ -153,43 +175,22 @@ export const DualImageCropper = ({
     // Get natural image dimensions
     const imgNaturalWidth = image.naturalWidth;
     const imgNaturalHeight = image.naturalHeight;
-    const imageAspect = imgNaturalWidth / imgNaturalHeight;
     
-    // Calculate the source crop area based on position and scale
-    // The crop area is centered on posX%, posY% of the image
-    // Scale determines how much of the image is visible (1 = full width/height visible, 2 = half, etc.)
+    // Calculate crop dimensions based on selection
+    const cropWidth = (selectionWidth / 100) * imgNaturalWidth;
+    const cropHeight = cropWidth / aspectRatio;
     
-    let cropWidth: number, cropHeight: number;
-    
-    if (imageAspect > aspectRatio) {
-      // Image is wider than target aspect - height determines crop
-      cropHeight = imgNaturalHeight / scale;
-      cropWidth = cropHeight * aspectRatio;
-    } else {
-      // Image is taller than target aspect - width determines crop
-      cropWidth = imgNaturalWidth / scale;
-      cropHeight = cropWidth / aspectRatio;
-    }
-    
-    // Ensure crop doesn't exceed image bounds
-    cropWidth = Math.min(cropWidth, imgNaturalWidth);
-    cropHeight = Math.min(cropHeight, imgNaturalHeight);
-    
-    // Calculate crop position based on posX/posY (0-100)
-    // posX=0 means left edge, posX=100 means right edge, posX=50 means center
-    const maxOffsetX = imgNaturalWidth - cropWidth;
-    const maxOffsetY = imgNaturalHeight - cropHeight;
-    
-    const cropX = (posX / 100) * maxOffsetX;
-    const cropY = (posY / 100) * maxOffsetY;
+    // Calculate crop position
+    const cropX = ((100 - selectionWidth) / 2 / 100) * imgNaturalWidth; // Center horizontally
+    const cropY = (selectionY / 100) * imgNaturalHeight;
 
     // Draw the cropped portion
     ctx.drawImage(
       image,
       Math.max(0, cropX),
       Math.max(0, cropY),
-      cropWidth,
-      cropHeight,
+      Math.min(cropWidth, imgNaturalWidth - cropX),
+      Math.min(cropHeight, imgNaturalHeight - cropY),
       0,
       0,
       outputWidth,
@@ -308,9 +309,8 @@ export const DualImageCropper = ({
       if (imageToUse.startsWith('data:')) {
         setImageSrc(imageToUse);
         setShowCropDialog(true);
-        setScale(1);
-        setPosX(50);
-        setPosY(50);
+        setSelectionY(0);
+        setSelectionWidth(100);
         setActiveTab('hero');
         setCroppedImages({ hero: null, card: null });
         setIsProcessing(false);
@@ -329,9 +329,8 @@ export const DualImageCropper = ({
           setImageSrc(dataUrl);
           setStoredOriginalSrc(dataUrl);
           setShowCropDialog(true);
-          setScale(1);
-          setPosX(50);
-          setPosY(50);
+          setSelectionY(0);
+          setSelectionWidth(100);
           setActiveTab('hero');
           setCroppedImages({ hero: null, card: null });
           setIsProcessing(false);
@@ -341,7 +340,7 @@ export const DualImageCropper = ({
           toast({
             variant: 'destructive',
             title: 'Não foi possível carregar',
-            description: 'Clique em "Trocar" e envie a imagem novamente.',
+            description: 'Clique em \\"Trocar\\" e envie a imagem novamente.',
           });
           setIsProcessing(false);
         };
@@ -351,9 +350,8 @@ export const DualImageCropper = ({
         setImageSrc(imageToUse);
         setStoredOriginalSrc(imageToUse);
         setShowCropDialog(true);
-        setScale(1);
-        setPosX(50);
-        setPosY(50);
+        setSelectionY(0);
+        setSelectionWidth(100);
         setActiveTab('hero');
         setCroppedImages({ hero: null, card: null });
         setIsProcessing(false);
@@ -363,13 +361,14 @@ export const DualImageCropper = ({
       toast({
         variant: 'destructive',
         title: 'Não foi possível reajustar',
-        description: 'Clique em "Trocar" e envie a imagem novamente.',
+        description: 'Clique em \\"Trocar\\" e envie a imagem novamente.',
       });
       setIsProcessing(false);
     }
   };
 
   const hasAnyImage = heroPreview || cardPreview;
+  const selectionHeight = getSelectionHeightPercent();
 
   return (
     <>
@@ -476,7 +475,7 @@ export const DualImageCropper = ({
           <DialogHeader>
             <DialogTitle>Ajustar Imagens de Capa</DialogTitle>
             <DialogDescription>
-              Arraste a imagem para posicionar a área visível
+              Arraste a caixa de seleção sobre a imagem para escolher o trecho
             </DialogDescription>
           </DialogHeader>
 
@@ -501,22 +500,70 @@ export const DualImageCropper = ({
             <div className="text-center p-2 bg-muted rounded-lg">
               <p className="text-sm text-muted-foreground">
                 {activeTab === 'hero' ? (
-                  <><strong>Passo 1:</strong> Arraste a imagem para posicionar o Banner do cabeçalho</>
+                  <><strong>Passo 1:</strong> Arraste a caixa pontilhada para selecionar o trecho do Banner</>
                 ) : (
-                  <><strong>Passo 2:</strong> Arraste a imagem para posicionar o Card da listagem</>
+                  <><strong>Passo 2:</strong> Arraste a caixa pontilhada para selecionar o trecho do Card</>
                 )}
               </p>
             </div>
 
-            {/* Image Container with Selection Window */}
-            <div className="flex justify-center">
+            {/* Image with Selection Overlay */}
+            <div 
+              ref={containerRef}
+              className="relative w-full bg-black rounded-lg overflow-hidden"
+            >
+              {/* Original Image - Full Display */}
+              {imageSrc && (
+                <img
+                  ref={imgRef}
+                  alt="Imagem original"
+                  src={imageSrc}
+                  className="w-full h-auto block"
+                  onLoad={handleImageLoad}
+                  draggable={false}
+                />
+              )}
+              
+              {/* Dark overlay for non-selected areas */}
+              <div className="absolute inset-0 pointer-events-none">
+                {/* Top dark area */}
+                <div 
+                  className="absolute left-0 right-0 top-0 bg-black/60"
+                  style={{ height: `${selectionY}%` }}
+                />
+                {/* Bottom dark area */}
+                <div 
+                  className="absolute left-0 right-0 bottom-0 bg-black/60"
+                  style={{ height: `${Math.max(0, 100 - selectionY - selectionHeight)}%` }}
+                />
+                {/* Left dark area (for zoom) */}
+                <div 
+                  className="absolute top-0 left-0 bg-black/60"
+                  style={{ 
+                    top: `${selectionY}%`,
+                    height: `${selectionHeight}%`,
+                    width: `${(100 - selectionWidth) / 2}%`
+                  }}
+                />
+                {/* Right dark area (for zoom) */}
+                <div 
+                  className="absolute top-0 right-0 bg-black/60"
+                  style={{ 
+                    top: `${selectionY}%`,
+                    height: `${selectionHeight}%`,
+                    width: `${(100 - selectionWidth) / 2}%`
+                  }}
+                />
+              </div>
+              
+              {/* Selection Box - Draggable */}
               <div 
-                ref={viewportRef}
-                className={`relative overflow-hidden rounded-lg border-4 border-dashed border-primary bg-black select-none cursor-grab active:cursor-grabbing ${
-                  activeTab === 'hero' ? 'w-full' : 'w-full max-w-lg'
-                }`}
-                style={{ 
-                  aspectRatio: activeTab === 'hero' ? '21/4' : '16/9',
+                className="absolute border-4 border-dashed border-primary cursor-grab active:cursor-grabbing"
+                style={{
+                  top: `${selectionY}%`,
+                  left: `${(100 - selectionWidth) / 2}%`,
+                  width: `${selectionWidth}%`,
+                  height: `${selectionHeight}%`,
                 }}
                 onMouseDown={handleDragStart}
                 onMouseMove={handleDragMove}
@@ -526,59 +573,48 @@ export const DualImageCropper = ({
                 onTouchMove={handleDragMove}
                 onTouchEnd={handleDragEnd}
               >
-                {imageSrc && (
-                  <img
-                    ref={imgRef}
-                    alt="Imagem para ajustar"
-                    src={imageSrc}
-                    className="absolute w-full h-full pointer-events-none"
-                    style={{ 
-                      objectFit: 'cover',
-                      objectPosition: `${posX}% ${posY}%`,
-                      transform: `scale(${scale})`,
-                      transformOrigin: `${posX}% ${posY}%`,
-                    }}
-                    draggable={false}
-                  />
-                )}
-                {/* Instruction overlay */}
+                {/* Move indicator */}
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <div className="bg-black/40 text-white px-3 py-1.5 rounded-full text-sm flex items-center gap-2 opacity-60">
+                  <div className="bg-black/50 text-white px-3 py-1.5 rounded-full text-sm flex items-center gap-2">
                     <Move className="w-4 h-4" />
-                    Arraste para posicionar
+                    Arraste
                   </div>
                 </div>
-              </div>
-            </div>
-
-            {/* Full Image Preview with crop indicator */}
-            <div className="p-3 bg-muted/30 rounded-lg">
-              <p className="text-xs text-muted-foreground mb-2 text-center">Imagem original - arraste acima para selecionar o trecho</p>
-              <div className="flex justify-center">
-                <img 
-                  src={imageSrc} 
-                  alt="Imagem original" 
-                  className="max-h-40 w-auto rounded border border-border/50 object-contain"
-                />
+                
+                {/* Corner indicators */}
+                <div className="absolute top-0 left-0 w-4 h-4 border-t-4 border-l-4 border-primary" />
+                <div className="absolute top-0 right-0 w-4 h-4 border-t-4 border-r-4 border-primary" />
+                <div className="absolute bottom-0 left-0 w-4 h-4 border-b-4 border-l-4 border-primary" />
+                <div className="absolute bottom-0 right-0 w-4 h-4 border-b-4 border-r-4 border-primary" />
               </div>
             </div>
 
             {/* Controls */}
             <div className="space-y-4 p-4 bg-muted/50 rounded-lg">
-              <div className="flex items-center gap-4">
-                <ZoomOut className="w-4 h-4 text-muted-foreground" />
-                <Slider
-                  value={[scale]}
-                  onValueChange={(values) => setScale(values[0])}
-                  min={1}
-                  max={3}
-                  step={0.1}
-                  className="flex-1"
-                />
-                <ZoomIn className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground w-12 text-right">
-                  {Math.round(scale * 100)}%
-                </span>
+              <div className="space-y-2">
+                <label className="text-sm text-muted-foreground">Tamanho da seleção</label>
+                <div className="flex items-center gap-4">
+                  <ZoomIn className="w-4 h-4 text-muted-foreground" />
+                  <Slider
+                    value={[selectionWidth]}
+                    onValueChange={(values) => {
+                      setSelectionWidth(values[0]);
+                      // Adjust Y position if needed to keep selection in bounds
+                      const newHeight = getSelectionHeightPercent();
+                      if (selectionY + newHeight > 100) {
+                        setSelectionY(Math.max(0, 100 - newHeight));
+                      }
+                    }}
+                    min={30}
+                    max={100}
+                    step={1}
+                    className="flex-1"
+                  />
+                  <ZoomOut className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground w-12 text-right">
+                    {selectionWidth}%
+                  </span>
+                </div>
               </div>
 
               <Button
@@ -586,9 +622,8 @@ export const DualImageCropper = ({
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  setScale(1);
-                  setPosX(50);
-                  setPosY(50);
+                  setSelectionY(0);
+                  setSelectionWidth(100);
                 }}
               >
                 <RotateCcw className="w-4 h-4 mr-2" />
