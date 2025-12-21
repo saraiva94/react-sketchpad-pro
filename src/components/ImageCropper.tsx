@@ -236,7 +236,7 @@ export const ImageCropper = ({
 
       {/* Crop Dialog */}
       <Dialog open={showCropDialog} onOpenChange={setShowCropDialog}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Ajustar Imagem de Capa</DialogTitle>
           </DialogHeader>
@@ -266,6 +266,94 @@ export const ImageCropper = ({
                 </ReactCrop>
               )}
             </div>
+
+            {/* Preview of how it will appear on project page */}
+            {completedCrop && imageSrc && (
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-center">Prévia: Área exibida no topo da página do projeto</p>
+                <div className="relative mx-auto border-2 border-dashed border-primary/50 rounded-lg overflow-hidden" style={{ maxWidth: '600px' }}>
+                  {/* Hero preview - shows top portion of cropped image */}
+                  <div className="relative aspect-[21/9] bg-muted overflow-hidden">
+                    <canvas
+                      ref={(canvas) => {
+                        if (canvas && imgRef.current && completedCrop) {
+                          const ctx = canvas.getContext('2d');
+                          if (!ctx) return;
+
+                          const image = imgRef.current;
+                          const scaleX = image.naturalWidth / image.width;
+                          const scaleY = image.naturalHeight / image.height;
+
+                          const cropX = completedCrop.x * scaleX;
+                          const cropY = completedCrop.y * scaleY;
+                          const cropWidth = completedCrop.width * scaleX;
+                          const cropHeight = completedCrop.height * scaleY;
+
+                          // Canvas dimensions for preview (wider aspect ratio for hero)
+                          const previewWidth = 600;
+                          const previewHeight = Math.round(previewWidth * (9 / 21));
+                          
+                          canvas.width = previewWidth;
+                          canvas.height = previewHeight;
+
+                          // Calculate source height to show (top portion of cropped area)
+                          const sourceAspect = 21 / 9;
+                          const cropAspect = cropWidth / cropHeight;
+                          
+                          let sourceX = cropX;
+                          let sourceY = cropY;
+                          let sourceWidth = cropWidth;
+                          let sourceHeight = cropHeight;
+
+                          if (cropAspect < sourceAspect) {
+                            // Crop is taller than preview - show full width, crop bottom
+                            sourceHeight = cropWidth / sourceAspect;
+                          } else {
+                            // Crop is wider than preview - show full height, crop sides
+                            sourceWidth = cropHeight * sourceAspect;
+                            sourceX = cropX + (cropWidth - sourceWidth) / 2;
+                          }
+
+                          ctx.save();
+                          const rotateRads = rotate * (Math.PI / 180);
+                          const centerX = image.naturalWidth / 2;
+                          const centerY = image.naturalHeight / 2;
+
+                          // Apply transformations
+                          ctx.translate(previewWidth / 2, previewHeight / 2);
+                          ctx.rotate(rotateRads);
+                          ctx.scale(scale, scale);
+                          
+                          const drawX = -sourceWidth / 2 - (sourceX - centerX + sourceWidth / 2);
+                          const drawY = -sourceHeight / 2 - (sourceY - centerY + sourceHeight / 2);
+                          
+                          ctx.drawImage(
+                            image,
+                            drawX,
+                            drawY,
+                            image.naturalWidth,
+                            image.naturalHeight
+                          );
+                          ctx.restore();
+                        }
+                      }}
+                      className="w-full h-full object-cover"
+                    />
+                    {/* Overlay indicators */}
+                    <div className="absolute inset-0 pointer-events-none">
+                      <div className="absolute top-2 left-2 right-2 flex items-center gap-2">
+                        <div className="h-px flex-1 border-t-2 border-dashed border-white/40" />
+                        <span className="text-xs text-white/60 bg-black/30 px-2 py-0.5 rounded">Área visível no hero</span>
+                        <div className="h-px flex-1 border-t-2 border-dashed border-white/40" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground text-center">
+                  Esta é a área que aparecerá na seção principal (hero) da página do projeto
+                </p>
+              </div>
+            )}
 
             {/* Controls */}
             <div className="space-y-4 p-4 bg-muted/50 rounded-lg">
