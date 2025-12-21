@@ -65,7 +65,19 @@ export const ImageCropper = ({
 
   const onImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
     const { width, height } = e.currentTarget;
-    setCrop(centerAspectCrop(width, height, aspectRatio));
+    const initialCrop = centerAspectCrop(width, height, aspectRatio);
+    setCrop(initialCrop);
+    // Also set completed crop immediately so confirm works right away
+    if (initialCrop) {
+      const pixelCrop = {
+        x: (initialCrop.x / 100) * width,
+        y: (initialCrop.y / 100) * height,
+        width: (initialCrop.width / 100) * width,
+        height: (initialCrop.height / 100) * height,
+        unit: 'px' as const,
+      };
+      setCompletedCrop(pixelCrop);
+    }
   }, [aspectRatio]);
 
   const getCroppedImg = async (): Promise<{ blob: Blob; url: string } | null> => {
@@ -124,7 +136,13 @@ export const ImageCropper = ({
   };
 
   const handleConfirmCrop = async () => {
+    console.log('[ImageCropper] handleConfirmCrop called');
+    console.log('[ImageCropper] completedCrop:', completedCrop);
+    console.log('[ImageCropper] imgRef.current:', imgRef.current);
+    
     const result = await getCroppedImg();
+    console.log('[ImageCropper] getCroppedImg result:', result);
+    
     if (result) {
       onImageCropped(result.blob, result.url);
       setShowCropDialog(false);
@@ -132,6 +150,8 @@ export const ImageCropper = ({
       if (inputRef.current) {
         inputRef.current.value = '';
       }
+    } else {
+      console.error('[ImageCropper] Failed to crop image - result is null');
     }
   };
 
