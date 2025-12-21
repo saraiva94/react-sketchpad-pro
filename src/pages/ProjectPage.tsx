@@ -87,6 +87,7 @@ interface ProjectMember {
     facebook?: string;
     youtube?: string;
     website?: string;
+    imdb?: string;
   } | null;
   detalhes?: string | null;
 }
@@ -611,6 +612,11 @@ const ProjectPage = () => {
                         {member.social_links?.website && (
                           <a href={member.social_links.website.startsWith('http') ? member.social_links.website : `https://${member.social_links.website}`} target="_blank" rel="noopener noreferrer" className="w-6 h-6 rounded-full bg-emerald-500/10 flex items-center justify-center hover:bg-emerald-500/20 transition-colors">
                             <Globe className="w-3 h-3 text-emerald-500" />
+                          </a>
+                        )}
+                        {member.social_links?.imdb && (
+                          <a href={member.social_links.imdb.startsWith('http') ? member.social_links.imdb : `https://www.imdb.com/name/${member.social_links.imdb}`} target="_blank" rel="noopener noreferrer" className="w-6 h-6 rounded-full bg-[#F5C518] flex items-center justify-center hover:opacity-80 transition-opacity" title="IMDb">
+                            <span className="text-black font-bold text-[6px]">IMDb</span>
                           </a>
                         )}
                         {member.curriculum_url && (

@@ -77,7 +77,7 @@ export const DualImageCropper = ({
     setScale(1);
   }, [activeTab]);
 
-  // Drag handlers
+  // Drag handlers - move the image position
   const handleDragStart = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
     const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
@@ -87,22 +87,22 @@ export const DualImageCropper = ({
   }, [posX, posY]);
 
   const handleDragMove = useCallback((e: React.MouseEvent | React.TouchEvent) => {
-    if (!isDragging || !viewportRef.current) return;
+    if (!isDragging) return;
     e.preventDefault();
     
     const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
     const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
     
-    const viewport = viewportRef.current;
-    const rect = viewport.getBoundingClientRect();
+    // Direct pixel movement converted to position percentage
+    // More sensitive movement for better control
+    const sensitivity = 0.5;
+    const deltaX = (clientX - dragStart.x) * sensitivity;
+    const deltaY = (clientY - dragStart.y) * sensitivity;
     
-    // Calculate movement as percentage of viewport
-    const deltaX = ((clientX - dragStart.x) / rect.width) * 100;
-    const deltaY = ((clientY - dragStart.y) / rect.height) * 100;
-    
-    // Invert because moving mouse right should move image left (to show right side)
-    const newPosX = Math.max(0, Math.min(100, dragStart.posX - deltaX));
-    const newPosY = Math.max(0, Math.min(100, dragStart.posY - deltaY));
+    // Moving the image: dragging right moves image right (shows left side)
+    // posX/posY represent the center of the crop window on the image (0-100)
+    const newPosX = Math.max(0, Math.min(100, dragStart.posX - deltaX / 2));
+    const newPosY = Math.max(0, Math.min(100, dragStart.posY - deltaY / 2));
     
     setPosX(newPosX);
     setPosY(newPosY);
@@ -131,13 +131,12 @@ export const DualImageCropper = ({
   };
 
   const captureViewport = async (): Promise<{ blob: Blob; url: string } | null> => {
-    if (!imgRef.current || !viewportRef.current) {
-      console.error('[DualImageCropper] Missing refs');
+    if (!imgRef.current) {
+      console.error('[DualImageCropper] Missing image ref');
       return null;
     }
 
     const image = imgRef.current;
-    const viewport = viewportRef.current;
     const aspectRatio = getCurrentAspectRatio();
     
     // Calculate output dimensions (high quality)
@@ -151,43 +150,46 @@ export const DualImageCropper = ({
     canvas.width = outputWidth;
     canvas.height = outputHeight;
 
-    // Calculate the source rectangle based on position and scale
+    // Get natural image dimensions
     const imgNaturalWidth = image.naturalWidth;
     const imgNaturalHeight = image.naturalHeight;
-    
-    // The viewport shows a portion of the image based on object-position
-    // We need to calculate what portion of the natural image is visible
-    
-    // First, figure out how the image fits in the viewport (object-fit: cover behavior)
-    const viewportAspect = aspectRatio;
     const imageAspect = imgNaturalWidth / imgNaturalHeight;
     
-    let sourceWidth: number, sourceHeight: number;
+    // Calculate the source crop area based on position and scale
+    // The crop area is centered on posX%, posY% of the image
+    // Scale determines how much of the image is visible (1 = full width/height visible, 2 = half, etc.)
     
-    if (imageAspect > viewportAspect) {
-      // Image is wider - height fits, width is cropped
-      sourceHeight = imgNaturalHeight / scale;
-      sourceWidth = sourceHeight * viewportAspect;
+    let cropWidth: number, cropHeight: number;
+    
+    if (imageAspect > aspectRatio) {
+      // Image is wider than target aspect - height determines crop
+      cropHeight = imgNaturalHeight / scale;
+      cropWidth = cropHeight * aspectRatio;
     } else {
-      // Image is taller - width fits, height is cropped
-      sourceWidth = imgNaturalWidth / scale;
-      sourceHeight = sourceWidth / viewportAspect;
+      // Image is taller than target aspect - width determines crop
+      cropWidth = imgNaturalWidth / scale;
+      cropHeight = cropWidth / aspectRatio;
     }
     
-    // Calculate source position based on posX/posY (0-100)
-    const maxOffsetX = imgNaturalWidth - sourceWidth;
-    const maxOffsetY = imgNaturalHeight - sourceHeight;
+    // Ensure crop doesn't exceed image bounds
+    cropWidth = Math.min(cropWidth, imgNaturalWidth);
+    cropHeight = Math.min(cropHeight, imgNaturalHeight);
     
-    const sourceX = (posX / 100) * maxOffsetX;
-    const sourceY = (posY / 100) * maxOffsetY;
+    // Calculate crop position based on posX/posY (0-100)
+    // posX=0 means left edge, posX=100 means right edge, posX=50 means center
+    const maxOffsetX = imgNaturalWidth - cropWidth;
+    const maxOffsetY = imgNaturalHeight - cropHeight;
+    
+    const cropX = (posX / 100) * maxOffsetX;
+    const cropY = (posY / 100) * maxOffsetY;
 
     // Draw the cropped portion
     ctx.drawImage(
       image,
-      Math.max(0, sourceX),
-      Math.max(0, sourceY),
-      Math.min(sourceWidth, imgNaturalWidth),
-      Math.min(sourceHeight, imgNaturalHeight),
+      Math.max(0, cropX),
+      Math.max(0, cropY),
+      cropWidth,
+      cropHeight,
       0,
       0,
       outputWidth,
@@ -506,13 +508,16 @@ export const DualImageCropper = ({
               </p>
             </div>
 
-            {/* Fixed Viewport - User drags image behind it */}
+            {/* Image Container with Selection Window */}
             <div className="flex justify-center">
               <div 
                 ref={viewportRef}
-                className={`relative overflow-hidden rounded-lg border-4 border-dashed border-primary bg-black cursor-grab active:cursor-grabbing select-none ${
-                  activeTab === 'hero' ? 'w-full aspect-[21/4]' : 'w-full max-w-lg aspect-video'
+                className={`relative overflow-hidden rounded-lg border-4 border-dashed border-primary bg-black select-none cursor-grab active:cursor-grabbing ${
+                  activeTab === 'hero' ? 'w-full' : 'w-full max-w-lg'
                 }`}
+                style={{ 
+                  aspectRatio: activeTab === 'hero' ? '21/4' : '16/9',
+                }}
                 onMouseDown={handleDragStart}
                 onMouseMove={handleDragMove}
                 onMouseUp={handleDragEnd}
@@ -543,6 +548,18 @@ export const DualImageCropper = ({
                     Arraste para posicionar
                   </div>
                 </div>
+              </div>
+            </div>
+
+            {/* Full Image Preview with crop indicator */}
+            <div className="p-3 bg-muted/30 rounded-lg">
+              <p className="text-xs text-muted-foreground mb-2 text-center">Imagem original - arraste acima para selecionar o trecho</p>
+              <div className="flex justify-center">
+                <img 
+                  src={imageSrc} 
+                  alt="Imagem original" 
+                  className="max-h-40 w-auto rounded border border-border/50 object-contain"
+                />
               </div>
             </div>
 
