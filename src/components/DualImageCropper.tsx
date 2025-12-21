@@ -575,22 +575,6 @@ export const DualImageCropper = ({
                       draggable={false}
                     />
                   </ReactCrop>
-                  {crop && crop.width > 0 && (
-                    <div 
-                      className="absolute pointer-events-none z-10"
-                      style={{
-                        top: `calc(${crop.y}% + 8px)`,
-                        left: `${crop.x}%`,
-                        width: `${crop.width}%`,
-                      }}
-                    >
-                      <div className="flex justify-center">
-                        <span className="text-xs text-white bg-black/60 px-2 py-1 rounded whitespace-nowrap">
-                          {activeTab === 'hero' ? 'Banner (21:4)' : 'Card (16:9)'}
-                        </span>
-                      </div>
-                    </div>
-                  )}
                 </div>
               )}
             </div>
