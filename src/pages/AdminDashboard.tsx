@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
-import { ImageCropper } from "@/components/ImageCropper";
+import { DualImageCropper } from "@/components/DualImageCropper";
 import { FeaturedProjectsManager } from "@/components/admin/FeaturedProjectsManager";
 import { PortoIdeiasCardsManager } from "@/components/admin/PortoIdeiasCardsManager";
 import { PortoIdeiasHeaderEditor } from "@/components/admin/PortoIdeiasHeaderEditor";
@@ -74,6 +74,8 @@ interface Project {
   has_incentive_law: boolean;
   incentive_law_details: string | null;
   image_url: string | null;
+  hero_image_url: string | null;
+  card_image_url: string | null;
   budget: string | null;
   location: string | null;
   admin_notes: string | null;
@@ -221,9 +223,11 @@ const AdminDashboard = () => {
   const [editTeamMembers, setEditTeamMembers] = useState<TeamMemberData[]>([]);
   const [editAdditionalInfo, setEditAdditionalInfo] = useState("");
   
-  // Image cropper states for edit
-  const [editThumbnailBlob, setEditThumbnailBlob] = useState<Blob | null>(null);
-  const [editThumbnailPreview, setEditThumbnailPreview] = useState<string | null>(null);
+  // Image cropper states for edit (dual images)
+  const [editHeroBlob, setEditHeroBlob] = useState<Blob | null>(null);
+  const [editCardBlob, setEditCardBlob] = useState<Blob | null>(null);
+  const [editHeroPreview, setEditHeroPreview] = useState<string | null>(null);
+  const [editCardPreview, setEditCardPreview] = useState<string | null>(null);
   
   // Presentation document states for edit
   const [editPresentationDocUrl, setEditPresentationDocUrl] = useState("");
@@ -681,14 +685,23 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleEditImageCropped = (blob: Blob, previewUrl: string) => {
-    setEditThumbnailBlob(blob);
-    setEditThumbnailPreview(previewUrl);
+  const handleEditImagesCropped = (
+    heroBlob: Blob | null, 
+    heroUrl: string | null, 
+    cardBlob: Blob | null, 
+    cardUrl: string | null
+  ) => {
+    setEditHeroBlob(heroBlob);
+    setEditCardBlob(cardBlob);
+    setEditHeroPreview(heroUrl);
+    setEditCardPreview(cardUrl);
   };
 
   const handleEditClearImage = () => {
-    setEditThumbnailBlob(null);
-    setEditThumbnailPreview(null);
+    setEditHeroBlob(null);
+    setEditCardBlob(null);
+    setEditHeroPreview(null);
+    setEditCardPreview(null);
     setEditImageUrl("");
   };
 
@@ -726,8 +739,10 @@ const AdminDashboard = () => {
   const openEditDialog = (project: Project) => {
     setSelectedProject(project);
     setEditImageUrl(project.image_url || "");
-    setEditThumbnailBlob(null);
-    setEditThumbnailPreview(project.image_url || null);
+    setEditHeroBlob(null);
+    setEditCardBlob(null);
+    setEditHeroPreview(project.hero_image_url || project.image_url || null);
+    setEditCardPreview(project.card_image_url || project.image_url || null);
     setEditPresentationDocUrl(project.presentation_document_url || "");
     setEditBudget(project.budget || "");
     setEditLocation(project.location || "");
@@ -822,20 +837,21 @@ const AdminDashboard = () => {
   const saveProjectEdit = async () => {
     if (!selectedProject) return;
 
-    let finalImageUrl = editImageUrl;
+    let finalHeroUrl = editHeroPreview;
+    let finalCardUrl = editCardPreview;
     
-    // Upload new image if cropped
-    if (editThumbnailBlob) {
+    // Upload hero image if new blob
+    if (editHeroBlob) {
       const timestamp = Date.now();
-      const path = `thumbnails/${timestamp}_cover.jpg`;
+      const path = `thumbnails/${timestamp}_hero.jpg`;
       
-      const { data, error: uploadError } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from("project-media")
-        .upload(path, editThumbnailBlob);
+        .upload(path, editHeroBlob);
       
       if (uploadError) {
         toast({
-          title: "Erro no upload da imagem",
+          title: "Erro no upload da imagem do banner",
           description: uploadError.message,
           variant: "destructive",
         });
@@ -846,7 +862,32 @@ const AdminDashboard = () => {
         .from("project-media")
         .getPublicUrl(path);
       
-      finalImageUrl = urlData.publicUrl;
+      finalHeroUrl = urlData.publicUrl;
+    }
+    
+    // Upload card image if new blob
+    if (editCardBlob) {
+      const timestamp = Date.now();
+      const path = `thumbnails/${timestamp}_card.jpg`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from("project-media")
+        .upload(path, editCardBlob);
+      
+      if (uploadError) {
+        toast({
+          title: "Erro no upload da imagem do card",
+          description: uploadError.message,
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      const { data: urlData } = supabase.storage
+        .from("project-media")
+        .getPublicUrl(path);
+      
+      finalCardUrl = urlData.publicUrl;
     }
 
     const { error } = await supabase
@@ -857,7 +898,9 @@ const AdminDashboard = () => {
         description: editDescription || null,
         project_type: editProjectType || null,
         stages: editStages.length > 0 ? editStages : null,
-        image_url: finalImageUrl || null,
+        image_url: finalHeroUrl || finalCardUrl || null,
+        hero_image_url: finalHeroUrl || null,
+        card_image_url: finalCardUrl || null,
         budget: editBudget || null,
         location: editLocation || null,
         admin_notes: editAdminNotes || null,
@@ -2652,14 +2695,14 @@ const AdminDashboard = () => {
             <div className="space-y-4">
               <h4 className="font-semibold text-sm border-b pb-2">Mídia e Imagens</h4>
               
-              {/* Image Cropper */}
+              {/* Dual Image Cropper */}
               <div className="space-y-2">
-                <Label>Imagem de Capa do Projeto</Label>
-                <ImageCropper
-                  onImageCropped={handleEditImageCropped}
-                  currentImage={editThumbnailPreview}
+                <Label>Imagens de Capa do Projeto</Label>
+                <DualImageCropper
+                  onImagesCropped={handleEditImagesCropped}
+                  currentHeroImage={editHeroPreview}
+                  currentCardImage={editCardPreview}
                   onClear={handleEditClearImage}
-                  mode="both"
                 />
               </div>
 

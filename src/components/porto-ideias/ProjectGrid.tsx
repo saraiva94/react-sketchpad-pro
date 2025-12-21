@@ -12,6 +12,8 @@ interface Project {
   synopsis: string;
   project_type: string;
   image_url: string | null;
+  hero_image_url?: string | null;
+  card_image_url?: string | null;
   updated_at?: string | null;
   location: string | null;
   categorias_tags: string[] | null;
@@ -74,8 +76,11 @@ function ProjectCard({
   getStageInfo: (stage: string | null) => { label: string; color: string };
   getInitials: (name: string | null) => string;
 }) {
-  const imageUrl = item.type === "real" ? (item.data as Project).image_url : null;
-  const { backgroundColor, textColor } = useDominantColor(imageUrl);
+  // Use card_image_url for cards, fallback to image_url
+  const cardImageUrl = item.type === "real" 
+    ? ((item.data as Project).card_image_url || (item.data as Project).image_url) 
+    : null;
+  const { backgroundColor, textColor } = useDominantColor(cardImageUrl);
 
   if (item.type === "real") {
     const project = item.data as Project;
@@ -95,9 +100,9 @@ function ProjectCard({
         <div className="card-solid bg-card border border-border rounded-2xl overflow-hidden h-full shadow-2xl group-hover:shadow-3xl group-hover:scale-[1.02] transition-all duration-300">
           {/* Image */}
           <div className="relative aspect-video overflow-hidden">
-            {project.image_url ? (
+            {(project.card_image_url || project.image_url) ? (
               <img
-                src={`${project.image_url}${project.updated_at ? `?v=${encodeURIComponent(project.updated_at)}` : ''}`}
+                src={`${project.card_image_url || project.image_url}${project.updated_at ? `?v=${encodeURIComponent(project.updated_at)}` : ''}`}
                 alt={project.title}
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                 loading="lazy"
