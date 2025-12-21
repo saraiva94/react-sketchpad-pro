@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
+import { getCategoryLabel } from "@/components/admin/CategoriesMultiSelect";
 import { 
   ArrowLeft, 
   MapPin, 
@@ -614,7 +615,7 @@ const ExampleProjectPage = () => {
                   <div className="flex flex-wrap gap-2">
                     {project.categorias_tags.map((tag, index) => (
                       <Badge key={index} variant="secondary" className="rounded-full">
-                        {tag}
+                        {getCategoryLabel(tag)}
                       </Badge>
                     ))}
                   </div>

@@ -7,6 +7,9 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
+import { getCategoryLabel } from "@/components/admin/CategoriesMultiSelect";
+import { getIncentiveLawLabel } from "@/components/admin/IncentiveLawsMultiSelect";
+import { getStageLabel } from "@/components/admin/StagesMultiSelect";
 import jsPDF from "jspdf";
 import { 
   ArrowLeft, 
@@ -825,22 +828,7 @@ const ProjectPage = () => {
                     <div>
                       <span className="text-sm text-muted-foreground">Estágio do Projeto</span>
                       <div className="font-medium text-foreground">
-                        {project.stages.map(stage => {
-                          const stageTranslations: Record<string, string> = {
-                            'development': 'Desenvolvimento',
-                            'production': 'Produção',
-                            'distribution': 'Distribuição',
-                            'Ideia inicial': 'Ideia inicial',
-                            'Desenvolvimento': 'Desenvolvimento',
-                            'Captação de recursos': 'Captação de recursos',
-                            'Pré-produção': 'Pré-produção',
-                            'Pós-produção': 'Pós-produção',
-                            'Finalizado': 'Finalizado',
-                            'Em exibição': 'Em exibição',
-                            'Distribuição': 'Distribuição'
-                          };
-                          return stageTranslations[stage] || stage;
-                        }).join(", ")}
+                        {project.stages.map(stage => getStageLabel(stage)).join(", ")}
                       </div>
                     </div>
                   )}
@@ -859,7 +847,7 @@ const ProjectPage = () => {
                       <div className="flex flex-wrap gap-2 mt-1">
                         {project.categorias_tags.map((tag, index) => (
                           <Badge key={index} variant="secondary" className="rounded-full">
-                            {tag}
+                            {getCategoryLabel(tag)}
                           </Badge>
                         ))}
                       </div>
@@ -884,7 +872,7 @@ const ProjectPage = () => {
                   <div className="flex flex-wrap gap-2">
                     {project.incentive_law_details.split(',').map((law, index) => (
                       <Badge key={index} variant="secondary" className="rounded-full">
-                        {law.trim()}
+                        {getIncentiveLawLabel(law.trim())}
                       </Badge>
                     ))}
                   </div>

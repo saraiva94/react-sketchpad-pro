@@ -21,7 +21,7 @@ import { LazyArtisticBackground } from "@/components/LazyArtisticBackground";
 import { ImageCropper } from "@/components/ImageCropper";
 import ContrapartidasEditor, { Contrapartida } from "@/components/admin/ContrapartidasEditor";
 import { RecognitionEditor, NewsItem } from "@/components/admin/RecognitionEditor";
-import { CategoriesMultiSelect, getCategoryLabel } from "@/components/admin/CategoriesMultiSelect";
+import { CategoriesMultiSelect } from "@/components/admin/CategoriesMultiSelect";
 import { StagesMultiSelect } from "@/components/admin/StagesMultiSelect";
 import { IncentiveLawsMultiSelect } from "@/components/admin/IncentiveLawsMultiSelect";
 import { DynamicProjectTypeSelect } from "@/components/admin/DynamicProjectTypeSelect";
@@ -188,8 +188,8 @@ const SubmitProjectPage = () => {
         mediaUrl = await uploadFile(videoFile, path);
       }
 
-      // Use categoriasTags directly (already an array)
-      const tags = categoriasTags.map(c => getCategoryLabel(c));
+      // Use categoriasTags directly - save values, not labels
+      // Labels will be formatted on display using getCategoryLabel()
 
       // Insert project
       const { data: project, error: projectError } = await supabase
@@ -198,12 +198,12 @@ const SubmitProjectPage = () => {
           title: titulo,
           synopsis: descricao.substring(0, 300),
           description: descricao,
-          project_type: projectType || tags[0] || "Cultura",
+          project_type: projectType || categoriasTags[0] || "Cultura",
           responsavel_nome: responsavelNome,
           responsavel_email: responsavelEmail,
           responsavel_telefone: responsavelTelefone,
           responsavel_genero: responsavelGenero || null,
-          categorias_tags: tags,
+          categorias_tags: categoriasTags.length > 0 ? categoriasTags : null,
           link_video: linkVideo,
           media_url: mediaUrl,
           image_url: imageUrl,

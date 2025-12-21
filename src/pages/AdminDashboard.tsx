@@ -21,7 +21,7 @@ import { NossosServicosEditor } from "@/components/admin/NossosServicosEditor";
 import { ContactButtonsEditor } from "@/components/admin/ContactButtonsEditor";
 import ContrapartidasEditor, { Contrapartida } from "@/components/admin/ContrapartidasEditor";
 import { RecognitionEditor, NewsItem } from "@/components/admin/RecognitionEditor";
-import { StagesMultiSelect } from "@/components/admin/StagesMultiSelect";
+import { StagesMultiSelect, getStageLabel } from "@/components/admin/StagesMultiSelect";
 import { CategoriesMultiSelect, getCategoryLabel } from "@/components/admin/CategoriesMultiSelect";
 import { IncentiveLawsMultiSelect, getIncentiveLawLabel } from "@/components/admin/IncentiveLawsMultiSelect";
 import { TeamMemberEditor, TeamMemberData } from "@/components/admin/TeamMemberEditor";
@@ -864,7 +864,7 @@ const AdminDashboard = () => {
         admin_notes: editAdminNotes || null,
         categorias_tags: editCategoriasTags.length > 0 ? editCategoriasTags : null,
         has_incentive_law: editIncentiveLaws.length > 0,
-        incentive_law_details: editIncentiveLaws.length > 0 ? editIncentiveLaws.map(l => getIncentiveLawLabel(l)).join(', ') : null,
+        incentive_law_details: editIncentiveLaws.length > 0 ? editIncentiveLaws.join(', ') : null,
         link_video: editLinkVideo || null,
         valor_sugerido: editValorSugerido ? parseFloat(editValorSugerido) : null,
         link_pagamento: editLinkPagamento || null,
@@ -2423,7 +2423,7 @@ const AdminDashboard = () => {
                     <h4 className="font-semibold mb-1">Categorias</h4>
                     <div className="flex flex-wrap gap-2">
                       {selectedProject.categorias_tags.map((tag, i) => (
-                        <Badge key={i} variant="outline">{tag}</Badge>
+                        <Badge key={i} variant="outline">{getCategoryLabel(tag)}</Badge>
                       ))}
                     </div>
                   </div>
@@ -2511,9 +2511,13 @@ const AdminDashboard = () => {
                     <h4 className="font-semibold mb-1">Lei de Incentivo</h4>
                     <Badge className="bg-green-600">Possui Lei de Incentivo</Badge>
                     {selectedProject.incentive_law_details && (
-                      <p className="text-sm text-muted-foreground mt-2">
-                        {selectedProject.incentive_law_details}
-                      </p>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {selectedProject.incentive_law_details.split(',').map((law, index) => (
+                          <Badge key={index} variant="secondary">
+                            {getIncentiveLawLabel(law.trim())}
+                          </Badge>
+                        ))}
+                      </div>
                     )}
                   </div>
                 )}
