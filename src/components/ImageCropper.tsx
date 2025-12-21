@@ -228,13 +228,47 @@ export const ImageCropper = ({
     }
   };
 
-  const handleReadjust = () => {
+  const handleReadjust = async () => {
     if (currentImage) {
-      setImageSrc(currentImage);
-      setShowCropDialog(true);
-      setScale(1);
-      setRotate(0);
-      setActiveTab(mode === 'card' ? 'card' : 'hero');
+      setIsProcessing(true);
+      try {
+        // Convert external URL to base64 to avoid CORS/tainted canvas issues
+        if (currentImage.startsWith('http')) {
+          const response = await fetch(currentImage);
+          const blob = await response.blob();
+          const reader = new FileReader();
+          reader.onload = () => {
+            setImageSrc(reader.result as string);
+            setShowCropDialog(true);
+            setScale(1);
+            setRotate(0);
+            setActiveTab(mode === 'card' ? 'card' : 'hero');
+            setIsProcessing(false);
+          };
+          reader.onerror = () => {
+            console.error('[ImageCropper] Failed to convert image to base64');
+            // Fallback: use original URL with crossOrigin
+            setImageSrc(currentImage);
+            setShowCropDialog(true);
+            setScale(1);
+            setRotate(0);
+            setActiveTab(mode === 'card' ? 'card' : 'hero');
+            setIsProcessing(false);
+          };
+          reader.readAsDataURL(blob);
+        } else {
+          // Already a data URL
+          setImageSrc(currentImage);
+          setShowCropDialog(true);
+          setScale(1);
+          setRotate(0);
+          setActiveTab(mode === 'card' ? 'card' : 'hero');
+          setIsProcessing(false);
+        }
+      } catch (error) {
+        console.error('[ImageCropper] Error loading image for readjust:', error);
+        setIsProcessing(false);
+      }
     }
   };
 
@@ -269,9 +303,10 @@ export const ImageCropper = ({
                       size="sm"
                       onClick={handleReadjust}
                       className="h-7 text-xs"
+                      disabled={isProcessing}
                     >
                       <CropIcon className="w-3 h-3 mr-1" />
-                      Reajustar
+                      {isProcessing ? 'Carregando...' : 'Reajustar'}
                     </Button>
                   )}
                   <Button
