@@ -739,18 +739,14 @@ const AdminDashboard = () => {
     setEditStages(project.stages || []);
     setEditCategoriasTags(project.categorias_tags || []);
     // Parse incentive laws from comma-separated string (normalize legacy values)
-    console.log('[QA Debug] project.incentive_law_details:', project.incentive_law_details);
-    console.log('[QA Debug] project.has_incentive_law:', project.has_incentive_law);
     const parsedIncentiveLaws = (project.incentive_law_details
       ? project.incentive_law_details
           .split(",")
           .map((law) => normalizeIncentiveLawValue(law))
           .filter(Boolean)
       : []) as string[];
-    console.log('[QA Debug] parsedIncentiveLaws:', parsedIncentiveLaws);
 
     const uniqueIncentiveLaws = Array.from(new Set(parsedIncentiveLaws));
-    console.log('[QA Debug] uniqueIncentiveLaws:', uniqueIncentiveLaws);
     setEditIncentiveLaws(uniqueIncentiveLaws);
     setEditHasIncentiveLaw(project.has_incentive_law || false);
     setEditIncentiveLawDetails(project.incentive_law_details || "");

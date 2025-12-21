@@ -3,7 +3,7 @@ import ReactCrop, { Crop, PixelCrop, centerCrop, makeAspectCrop } from 'react-im
 import 'react-image-crop/dist/ReactCrop.css';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Upload, X, Check, RotateCcw, ZoomIn, ZoomOut } from 'lucide-react';
+import { Upload, X, Check, RotateCcw, ZoomIn, ZoomOut, Crop as CropIcon } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 
 interface ImageCropperProps {
@@ -11,6 +11,7 @@ interface ImageCropperProps {
   aspectRatio?: number;
   currentImage?: string | null;
   onClear?: () => void;
+  allowReadjust?: boolean;
 }
 
 function centerAspectCrop(
@@ -37,7 +38,8 @@ export const ImageCropper = ({
   onImageCropped, 
   aspectRatio = 16 / 9, 
   currentImage,
-  onClear 
+  onClear,
+  allowReadjust = true
 }: ImageCropperProps) => {
   const [imageSrc, setImageSrc] = useState<string>('');
   const [crop, setCrop] = useState<Crop>();
@@ -147,6 +149,15 @@ export const ImageCropper = ({
     }
   };
 
+  const handleReadjust = () => {
+    if (currentImage) {
+      setImageSrc(currentImage);
+      setShowCropDialog(true);
+      setScale(1);
+      setRotate(0);
+    }
+  };
+
   return (
     <>
       <div className="space-y-3">
@@ -162,6 +173,18 @@ export const ImageCropper = ({
               <div className="absolute bottom-2 left-2 right-2 flex justify-between items-center">
                 <span className="text-xs text-white/80">Imagem de capa</span>
                 <div className="flex gap-2">
+                  {allowReadjust && (
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      onClick={handleReadjust}
+                      className="h-7 text-xs"
+                    >
+                      <CropIcon className="w-3 h-3 mr-1" />
+                      Reajustar
+                    </Button>
+                  )}
                   <Button
                     type="button"
                     variant="secondary"
