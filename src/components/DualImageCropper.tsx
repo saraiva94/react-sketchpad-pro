@@ -18,9 +18,10 @@ interface CroppedImages {
 }
 
 interface DualImageCropperProps {
-  onImagesCropped: (heroBlob: Blob | null, heroUrl: string | null, cardBlob: Blob | null, cardUrl: string | null) => void;
+  onImagesCropped: (heroBlob: Blob | null, heroUrl: string | null, cardBlob: Blob | null, cardUrl: string | null, originalBlob?: Blob | null) => void;
   currentHeroImage?: string | null;
   currentCardImage?: string | null;
+  originalImageUrl?: string | null; // The full uncropped original image for readjustments
   onClear?: () => void;
   allowReadjust?: boolean;
 }
@@ -49,6 +50,7 @@ export const DualImageCropper = ({
   onImagesCropped, 
   currentHeroImage,
   currentCardImage,
+  originalImageUrl,
   onClear,
   allowReadjust = true,
 }: DualImageCropperProps) => {
@@ -72,6 +74,9 @@ export const DualImageCropper = ({
   const [croppedImages, setCroppedImages] = useState<CroppedImages>({ hero: null, card: null });
   const [heroPreview, setHeroPreview] = useState<string | null>(currentHeroImage || null);
   const [cardPreview, setCardPreview] = useState<string | null>(currentCardImage || null);
+  
+  // Store the original image for readjustments (not the cropped one)
+  const [storedOriginalSrc, setStoredOriginalSrc] = useState<string | null>(null);
   
   const imgRef = useRef<HTMLImageElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -137,7 +142,10 @@ export const DualImageCropper = ({
     if (e.target.files && e.target.files.length > 0) {
       const reader = new FileReader();
       reader.addEventListener('load', () => {
-        setImageSrc(reader.result?.toString() || '');
+        const dataUrl = reader.result?.toString() || '';
+        setImageSrc(dataUrl);
+        // Store the original image for future readjustments
+        setStoredOriginalSrc(dataUrl);
         setShowCropDialog(true);
         setScale(1);
         setRotate(0);
@@ -315,11 +323,27 @@ export const DualImageCropper = ({
   };
 
   const handleReadjust = async () => {
-    const imageToUse = currentHeroImage || currentCardImage;
+    // Priority: stored original > prop original > hero > card
+    const imageToUse = storedOriginalSrc || originalImageUrl || currentHeroImage || currentCardImage;
     if (!imageToUse) return;
 
     setIsProcessing(true);
     try {
+      // If it's a data URL (stored original), use it directly
+      if (imageToUse.startsWith('data:')) {
+        setImageSrc(imageToUse);
+        setShowCropDialog(true);
+        setScale(1);
+        setRotate(0);
+        setPanX(0);
+        setPanY(0);
+        setActiveTab('hero');
+        setCroppedImages({ hero: null, card: null });
+        setIsProcessing(false);
+        return;
+      }
+      
+      // If it's a URL, fetch it
       if (imageToUse.startsWith('http')) {
         const response = await fetch(imageToUse, { mode: 'cors', credentials: 'omit' });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -328,7 +352,10 @@ export const DualImageCropper = ({
         const reader = new FileReader();
         
         reader.onload = () => {
-          setImageSrc(reader.result as string);
+          const dataUrl = reader.result as string;
+          setImageSrc(dataUrl);
+          // Store for future readjustments
+          setStoredOriginalSrc(dataUrl);
           setShowCropDialog(true);
           setScale(1);
           setRotate(0);
@@ -351,6 +378,7 @@ export const DualImageCropper = ({
         reader.readAsDataURL(blob);
       } else {
         setImageSrc(imageToUse);
+        setStoredOriginalSrc(imageToUse);
         setShowCropDialog(true);
         setScale(1);
         setRotate(0);
