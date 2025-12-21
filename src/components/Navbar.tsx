@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, X, Lightbulb } from "lucide-react";
 import portobelloLogo from "@/assets/portobello-logo.png";
+import { supabase } from "@/integrations/supabase/client";
 
 interface NavbarProps {
   showNav?: boolean;
@@ -11,15 +12,63 @@ interface NavbarProps {
   rightContent?: React.ReactNode;
 }
 
-const sections = [
-  { id: "sobre", label: "Quem Somos" },
-  { id: "porto-de-ideias", label: "Ecossistema" },
-  { id: "servicos", label: "Serviços" },
+interface SectionLabel {
+  id: string;
+  label: string;
+  settingsKey?: string;
+}
+
+const defaultSections: SectionLabel[] = [
+  { id: "sobre", label: "Quem Somos", settingsKey: "quem_somos_content" },
+  { id: "porto-de-ideias", label: "Projetos em Captação", settingsKey: "ecossistema_text" },
+  { id: "servicos", label: "Nossos Serviços", settingsKey: "nossos_servicos_content" },
 ];
 
 export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<string>("");
+  const [sections, setSections] = useState<SectionLabel[]>(defaultSections);
+
+  // Fetch dynamic section titles from settings
+  useEffect(() => {
+    const fetchSectionTitles = async () => {
+      const updatedSections = [...defaultSections];
+      
+      // Fetch ecossistema_text for "porto-de-ideias" section
+      const { data: ecossistemaData } = await supabase
+        .from("settings")
+        .select("value")
+        .eq("key", "ecossistema_text")
+        .maybeSingle();
+      
+      if (ecossistemaData?.value) {
+        const settings = ecossistemaData.value as { title?: string };
+        if (settings.title) {
+          const idx = updatedSections.findIndex(s => s.id === "porto-de-ideias");
+          if (idx !== -1) updatedSections[idx].label = settings.title;
+        }
+      }
+      
+      // Fetch nossos_servicos_content for "servicos" section
+      const { data: servicosData } = await supabase
+        .from("settings")
+        .select("value")
+        .eq("key", "nossos_servicos_content")
+        .maybeSingle();
+      
+      if (servicosData?.value) {
+        const settings = servicosData.value as { title?: string };
+        if (settings.title) {
+          const idx = updatedSections.findIndex(s => s.id === "servicos");
+          if (idx !== -1) updatedSections[idx].label = settings.title;
+        }
+      }
+      
+      setSections(updatedSections);
+    };
+    
+    fetchSectionTitles();
+  }, []);
 
   useEffect(() => {
     if (currentPage !== "home") return;
@@ -89,7 +138,7 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
               className="group flex items-center gap-2 px-4 py-2 text-lg font-semibold transition-all duration-300 rounded-xl rainbow-border-glow rainbow-text-hover"
             >
               <Lightbulb className="w-6 h-6 text-yellow-400 group-hover:fill-yellow-400 group-hover:drop-shadow-[0_0_16px_rgba(250,204,21,1)] group-hover:scale-125 transition-all duration-300" />
-              <span className="text-foreground">Projetos em Captação</span>
+              <span className="text-foreground">Projetos</span>
             </Link>
             
             {/* Section Links */}
@@ -171,7 +220,7 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
                         className="group flex items-center gap-2 px-4 py-3 text-lg font-semibold transition-all duration-300 rounded-xl rainbow-border-glow rainbow-text-hover"
                       >
                         <Lightbulb className="w-6 h-6 text-yellow-400 group-hover:fill-yellow-400 group-hover:drop-shadow-[0_0_16px_rgba(250,204,21,1)] transition-all duration-300" />
-                        <span className="text-foreground">Projetos em Captação</span>
+                        <span className="text-foreground">Projetos</span>
                       </Link>
                       
                       {sections.map((section) => (
