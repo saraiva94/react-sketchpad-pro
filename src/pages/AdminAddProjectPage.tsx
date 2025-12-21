@@ -16,8 +16,8 @@ import { StagesMultiSelect } from "@/components/admin/StagesMultiSelect";
 import ContrapartidasEditor, { Contrapartida } from "@/components/admin/ContrapartidasEditor";
 import { RecognitionEditor, NewsItem } from "@/components/admin/RecognitionEditor";
 import { ImageCropper } from "@/components/ImageCropper";
-import { CategoriesMultiSelect, getCategoryLabel } from "@/components/admin/CategoriesMultiSelect";
-import { IncentiveLawsMultiSelect, getIncentiveLawLabel } from "@/components/admin/IncentiveLawsMultiSelect";
+import { CategoriesMultiSelect } from "@/components/admin/CategoriesMultiSelect";
+import { IncentiveLawsMultiSelect } from "@/components/admin/IncentiveLawsMultiSelect";
 import { DynamicProjectTypeSelect } from "@/components/admin/DynamicProjectTypeSelect";
 import { DynamicLocationSelect } from "@/components/admin/DynamicLocationSelect";
 
@@ -144,8 +144,7 @@ const AdminAddProjectPage = () => {
     setSubmitting(true);
 
     try {
-      // Use categoriasTags directly (already an array)
-      const tags = categoriasTags.map(c => getCategoryLabel(c));
+      // Save values directly - labels will be formatted on display
       const finalProjectType = projectType === "Outro" ? customProjectType : projectType;
       
       // Upload thumbnail if provided
@@ -165,9 +164,9 @@ const AdminAddProjectPage = () => {
         }
       }
 
-      // Prepare incentive law details from multi-select
+      // Prepare incentive law details from multi-select - save values, not labels
       const hasIncentiveLaw = incentiveLaws.length > 0;
-      const incentiveLawDetails = incentiveLaws.map(l => getIncentiveLawLabel(l)).join(", ");
+      const incentiveLawDetails = incentiveLaws.join(", ");
 
       // Insert project directly as approved (admin adding)
       const { data: project, error: projectError } = await supabase
@@ -176,13 +175,13 @@ const AdminAddProjectPage = () => {
           title: titulo,
           synopsis: sinopse,
           description: descricao || null,
-          project_type: finalProjectType || tags[0] || "Cultura",
+          project_type: finalProjectType || categoriasTags[0] || "Cultura",
           stages: stages.length > 0 ? stages : ["development"],
           responsavel_nome: responsavelNome || null,
           responsavel_email: responsavelEmail || null,
           responsavel_telefone: responsavelTelefone || null,
           responsavel_genero: responsavelGenero || null,
-          categorias_tags: tags.length > 0 ? tags : null,
+          categorias_tags: categoriasTags.length > 0 ? categoriasTags : null,
           link_video: linkVideo || null,
           image_url: imageUrl,
           location: location || null,

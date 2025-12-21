@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Footer } from "@/components/Footer";
 import { LazyArtisticBackground } from "@/components/LazyArtisticBackground";
+import { getCategoryLabel } from "@/components/admin/CategoriesMultiSelect";
 import portobelloLogo from "@/assets/portobello-logo.png";
 
 interface Project {
@@ -716,7 +717,7 @@ const PendingProjectPage = () => {
                   <h4 className="font-medium mb-2">Categorias</h4>
                   <div className="flex flex-wrap gap-2">
                     {project.categorias_tags.map((tag, i) => (
-                      <Badge key={i} variant="outline">{tag}</Badge>
+                      <Badge key={i} variant="outline">{getCategoryLabel(tag)}</Badge>
                     ))}
                   </div>
                 </div>
