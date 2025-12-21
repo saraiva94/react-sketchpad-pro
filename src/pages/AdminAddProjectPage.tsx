@@ -291,7 +291,7 @@ const AdminAddProjectPage = () => {
                     onImageCropped={handleImageCropped}
                     currentImage={thumbnailPreview}
                     onClear={handleClearImage}
-                    aspectRatio={16 / 9}
+                    mode="both"
                   />
                 </div>
 

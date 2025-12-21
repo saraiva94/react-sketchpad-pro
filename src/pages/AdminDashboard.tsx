@@ -2659,7 +2659,7 @@ const AdminDashboard = () => {
                   onImageCropped={handleEditImageCropped}
                   currentImage={editThumbnailPreview}
                   onClear={handleEditClearImage}
-                  aspectRatio={16 / 9}
+                  mode="both"
                 />
               </div>
 
