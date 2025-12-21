@@ -51,6 +51,8 @@ interface Project {
   has_incentive_law: boolean;
   incentive_law_details: string | null;
   image_url: string | null;
+  hero_image_url: string | null;
+  card_image_url: string | null;
   budget: string | null;
   location: string | null;
   created_at: string;
@@ -446,9 +448,9 @@ const ProjectPage = () => {
       {/* Hero Section */}
       <section className="relative">
         <div className="w-full aspect-[3/1] max-h-96 overflow-hidden">
-          {project.image_url ? (
+          {(project.hero_image_url || project.image_url) ? (
             <img 
-              src={`${project.image_url}${project.updated_at ? `?v=${encodeURIComponent(project.updated_at)}` : ''}`}
+              src={`${project.hero_image_url || project.image_url}${project.updated_at ? `?v=${encodeURIComponent(project.updated_at)}` : ''}`}
               alt={project.title}
               className="w-full h-full object-cover"
               loading="lazy"

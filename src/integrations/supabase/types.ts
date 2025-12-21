@@ -200,12 +200,14 @@ export type Database = {
           admin_notes: string | null
           awards: string[] | null
           budget: string | null
+          card_image_url: string | null
           categorias_tags: string[] | null
           created_at: string
           description: string | null
           diferenciais: string | null
           featured_on_homepage: boolean | null
           has_incentive_law: boolean | null
+          hero_image_url: string | null
           id: string
           image_url: string | null
           impacto_cultural: string | null
@@ -238,12 +240,14 @@ export type Database = {
           admin_notes?: string | null
           awards?: string[] | null
           budget?: string | null
+          card_image_url?: string | null
           categorias_tags?: string[] | null
           created_at?: string
           description?: string | null
           diferenciais?: string | null
           featured_on_homepage?: boolean | null
           has_incentive_law?: boolean | null
+          hero_image_url?: string | null
           id?: string
           image_url?: string | null
           impacto_cultural?: string | null
@@ -276,12 +280,14 @@ export type Database = {
           admin_notes?: string | null
           awards?: string[] | null
           budget?: string | null
+          card_image_url?: string | null
           categorias_tags?: string[] | null
           created_at?: string
           description?: string | null
           diferenciais?: string | null
           featured_on_homepage?: boolean | null
           has_incentive_law?: boolean | null
+          hero_image_url?: string | null
           id?: string
           image_url?: string | null
           impacto_cultural?: string | null
@@ -359,12 +365,14 @@ export type Database = {
         Row: {
           additional_info: string | null
           budget: string | null
+          card_image_url: string | null
           categorias_tags: string[] | null
           created_at: string | null
           description: string | null
           diferenciais: string | null
           featured_on_homepage: boolean | null
           has_incentive_law: boolean | null
+          hero_image_url: string | null
           id: string | null
           image_url: string | null
           impacto_cultural: string | null
@@ -389,12 +397,14 @@ export type Database = {
         Insert: {
           additional_info?: string | null
           budget?: string | null
+          card_image_url?: string | null
           categorias_tags?: string[] | null
           created_at?: string | null
           description?: string | null
           diferenciais?: string | null
           featured_on_homepage?: boolean | null
           has_incentive_law?: boolean | null
+          hero_image_url?: string | null
           id?: string | null
           image_url?: string | null
           impacto_cultural?: string | null
@@ -419,12 +429,14 @@ export type Database = {
         Update: {
           additional_info?: string | null
           budget?: string | null
+          card_image_url?: string | null
           categorias_tags?: string[] | null
           created_at?: string | null
           description?: string | null
           diferenciais?: string | null
           featured_on_homepage?: boolean | null
           has_incentive_law?: boolean | null
+          hero_image_url?: string | null
           id?: string | null
           image_url?: string | null
           impacto_cultural?: string | null
