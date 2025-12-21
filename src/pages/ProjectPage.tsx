@@ -544,16 +544,19 @@ const ProjectPage = () => {
             {/* Team */}
             {members.length > 0 && (() => {
               // Separate members: cast (elenco) vs other roles
-              const castMembers = members.filter(m => 
-                m.funcao?.toLowerCase().includes('elenco') || 
-                m.funcao?.toLowerCase().includes('ator') || 
-                m.funcao?.toLowerCase().includes('atriz')
-              );
-              const otherMembers = members.filter(m => 
-                !m.funcao?.toLowerCase().includes('elenco') && 
-                !m.funcao?.toLowerCase().includes('ator') && 
-                !m.funcao?.toLowerCase().includes('atriz')
-              );
+              // Only match if funcao starts with "Elenco" to be more precise
+              const isCastRole = (funcao?: string) => {
+                if (!funcao) return false;
+                const lower = funcao.toLowerCase().trim();
+                return lower.startsWith('elenco') || 
+                       lower === 'ator' || 
+                       lower === 'atriz' ||
+                       lower.startsWith('ator ') ||
+                       lower.startsWith('atriz ');
+              };
+              
+              const castMembers = members.filter(m => isCastRole(m.funcao));
+              const otherMembers = members.filter(m => !isCastRole(m.funcao));
 
               const renderMemberCard = (member: ProjectMember) => (
                 <div key={member.id} className="p-4 bg-muted/50 rounded-xl border border-border/50">
