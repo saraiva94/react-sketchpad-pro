@@ -5,11 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Upload, X, Check, RotateCcw, ZoomIn, ZoomOut, Crop as CropIcon, Move } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-// Aspect ratios for different views
-const HERO_ASPECT_RATIO = 21 / 9; // Very wide for hero banner
-const CARD_ASPECT_RATIO = 16 / 9; // Standard for cards
+// Aspect ratios that match the actual display dimensions
+// ProjectPage hero: h-96 (384px) with full viewport width ~1200px = ~3.125:1
+// ProjectGrid card: h-48 (192px) with varying width, typical card ~350px = ~1.82:1
+const HERO_ASPECT_RATIO = 3; // Wide banner (3:1 for hero section)
+const CARD_ASPECT_RATIO = 16 / 9; // Standard card ratio (1.78:1)
 
 interface ImageCropperProps {
   onImageCropped: (croppedImageBlob: Blob, previewUrl: string) => void;
@@ -54,29 +56,38 @@ export const ImageCropper = ({
   const [showCropDialog, setShowCropDialog] = useState(false);
   const [scale, setScale] = useState(1);
   const [rotate, setRotate] = useState(0);
-  const [activeTab, setActiveTab] = useState<'hero' | 'card'>('hero');
+  const [activeTab, setActiveTab] = useState<'hero' | 'card'>(mode === 'card' ? 'card' : 'hero');
+  const [isProcessing, setIsProcessing] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Get the current aspect ratio based on mode/tab
+  const getCurrentAspectRatio = useCallback(() => {
+    if (mode === 'card') return CARD_ASPECT_RATIO;
+    if (mode === 'hero') return HERO_ASPECT_RATIO;
+    return activeTab === 'hero' ? HERO_ASPECT_RATIO : CARD_ASPECT_RATIO;
+  }, [mode, activeTab]);
+
   // Update crop when tab changes
   useEffect(() => {
-    if (imgRef.current && imageSrc) {
+    if (imgRef.current && imageSrc && showCropDialog) {
       const { width, height } = imgRef.current;
-      const newAspect = activeTab === 'hero' ? HERO_ASPECT_RATIO : CARD_ASPECT_RATIO;
-      const newCrop = centerAspectCrop(width, height, newAspect);
-      setCrop(newCrop);
-      if (newCrop) {
-        const pixelCrop = {
+      if (width > 0 && height > 0) {
+        const newAspect = getCurrentAspectRatio();
+        const newCrop = centerAspectCrop(width, height, newAspect);
+        setCrop(newCrop);
+        // Convert percentage crop to pixel crop
+        const pixelCrop: PixelCrop = {
           x: (newCrop.x / 100) * width,
           y: (newCrop.y / 100) * height,
           width: (newCrop.width / 100) * width,
           height: (newCrop.height / 100) * height,
-          unit: 'px' as const,
+          unit: 'px',
         };
         setCompletedCrop(pixelCrop);
       }
     }
-  }, [activeTab, imageSrc]);
+  }, [activeTab, getCurrentAspectRatio, imageSrc, showCropDialog]);
 
   const onSelectFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -87,6 +98,9 @@ export const ImageCropper = ({
         setScale(1);
         setRotate(0);
         setActiveTab(mode === 'card' ? 'card' : 'hero');
+        // Reset crop states
+        setCrop(undefined);
+        setCompletedCrop(undefined);
       });
       reader.readAsDataURL(e.target.files[0]);
     }
@@ -94,27 +108,24 @@ export const ImageCropper = ({
 
   const onImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
     const { width, height } = e.currentTarget;
-    const targetAspect = mode === 'card' ? CARD_ASPECT_RATIO : 
-                         mode === 'hero' ? HERO_ASPECT_RATIO : 
-                         (activeTab === 'hero' ? HERO_ASPECT_RATIO : CARD_ASPECT_RATIO);
+    const targetAspect = getCurrentAspectRatio();
     const initialCrop = centerAspectCrop(width, height, targetAspect);
     setCrop(initialCrop);
-    // Also set completed crop immediately so confirm works right away
-    if (initialCrop) {
-      const pixelCrop = {
-        x: (initialCrop.x / 100) * width,
-        y: (initialCrop.y / 100) * height,
-        width: (initialCrop.width / 100) * width,
-        height: (initialCrop.height / 100) * height,
-        unit: 'px' as const,
-      };
-      setCompletedCrop(pixelCrop);
-    }
-  }, [mode, activeTab]);
+    
+    // Convert percentage crop to pixel crop for completedCrop
+    const pixelCrop: PixelCrop = {
+      x: (initialCrop.x / 100) * width,
+      y: (initialCrop.y / 100) * height,
+      width: (initialCrop.width / 100) * width,
+      height: (initialCrop.height / 100) * height,
+      unit: 'px',
+    };
+    setCompletedCrop(pixelCrop);
+  }, [getCurrentAspectRatio]);
 
   const getCroppedImg = async (): Promise<{ blob: Blob; url: string } | null> => {
     if (!completedCrop || !imgRef.current) {
-      console.error('[ImageCropper] Missing completedCrop or imgRef');
+      console.error('[ImageCropper] Missing completedCrop or imgRef', { completedCrop, imgRef: imgRef.current });
       return null;
     }
 
@@ -124,7 +135,10 @@ export const ImageCropper = ({
 
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
-    if (!ctx) return null;
+    if (!ctx) {
+      console.error('[ImageCropper] Could not get canvas context');
+      return null;
+    }
 
     const pixelRatio = window.devicePixelRatio;
     
@@ -159,6 +173,7 @@ export const ImageCropper = ({
             const url = URL.createObjectURL(blob);
             resolve({ blob, url });
           } else {
+            console.error('[ImageCropper] Canvas toBlob returned null');
             resolve(null);
           }
         },
@@ -169,21 +184,39 @@ export const ImageCropper = ({
   };
 
   const handleConfirmCrop = async () => {
-    const result = await getCroppedImg();
+    if (isProcessing) return;
     
-    if (result) {
-      onImageCropped(result.blob, result.url);
-      setShowCropDialog(false);
-      setImageSrc('');
-      if (inputRef.current) {
-        inputRef.current.value = '';
+    setIsProcessing(true);
+    console.log('[ImageCropper] Starting crop confirmation...', { completedCrop });
+    
+    try {
+      const result = await getCroppedImg();
+      
+      if (result) {
+        console.log('[ImageCropper] Crop successful, calling onImageCropped');
+        onImageCropped(result.blob, result.url);
+        setShowCropDialog(false);
+        setImageSrc('');
+        setCrop(undefined);
+        setCompletedCrop(undefined);
+        if (inputRef.current) {
+          inputRef.current.value = '';
+        }
+      } else {
+        console.error('[ImageCropper] getCroppedImg returned null');
       }
+    } catch (error) {
+      console.error('[ImageCropper] Error during crop:', error);
+    } finally {
+      setIsProcessing(false);
     }
   };
 
   const handleCancel = () => {
     setShowCropDialog(false);
     setImageSrc('');
+    setCrop(undefined);
+    setCompletedCrop(undefined);
     if (inputRef.current) {
       inputRef.current.value = '';
     }
@@ -201,12 +234,18 @@ export const ImageCropper = ({
       setShowCropDialog(true);
       setScale(1);
       setRotate(0);
+      setActiveTab(mode === 'card' ? 'card' : 'hero');
     }
   };
 
-  const currentAspectRatio = mode === 'card' ? CARD_ASPECT_RATIO : 
-                              mode === 'hero' ? HERO_ASPECT_RATIO : 
-                              (activeTab === 'hero' ? HERO_ASPECT_RATIO : CARD_ASPECT_RATIO);
+  const handleCropChange = (_: Crop, percentCrop: Crop) => {
+    setCrop(percentCrop);
+  };
+
+  const handleCropComplete = (c: PixelCrop) => {
+    console.log('[ImageCropper] Crop completed:', c);
+    setCompletedCrop(c);
+  };
 
   return (
     <>
@@ -270,7 +309,7 @@ export const ImageCropper = ({
               Esta imagem aparecerá como thumbnail do seu projeto
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-              Recomendado: 16:9 (1920x1080)
+              Recomendado: 1920x640 (Banner) ou 1920x1080 (Card)
             </p>
           </div>
         )}
@@ -285,7 +324,7 @@ export const ImageCropper = ({
       </div>
 
       {/* Crop Dialog */}
-      <Dialog open={showCropDialog} onOpenChange={setShowCropDialog}>
+      <Dialog open={showCropDialog} onOpenChange={(open) => !open && handleCancel()}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Ajustar Imagem de Capa</DialogTitle>
@@ -316,11 +355,11 @@ export const ImageCropper = ({
               <p className="text-sm text-muted-foreground">
                 {(mode === 'hero' || (mode === 'both' && activeTab === 'hero')) ? (
                   <>
-                    <strong>Banner horizontal:</strong> Esta área aparecerá no topo da página do projeto
+                    <strong>Banner horizontal (3:1):</strong> Esta área aparecerá no topo da página do projeto
                   </>
                 ) : (
                   <>
-                    <strong>Card do projeto:</strong> Esta área aparecerá no card de listagem
+                    <strong>Card do projeto (16:9):</strong> Esta área aparecerá no card de listagem
                   </>
                 )}
               </p>
@@ -332,9 +371,9 @@ export const ImageCropper = ({
                 <div className="relative crop-dashed-style">
                   <ReactCrop
                     crop={crop}
-                    onChange={(_, percentCrop) => setCrop(percentCrop)}
-                    onComplete={(c) => setCompletedCrop(c)}
-                    aspect={currentAspectRatio}
+                    onChange={handleCropChange}
+                    onComplete={handleCropComplete}
+                    aspect={getCurrentAspectRatio()}
                     className="max-h-[400px]"
                   >
                     <img
@@ -350,7 +389,7 @@ export const ImageCropper = ({
                     />
                   </ReactCrop>
                   {/* Label overlay */}
-                  {crop && (
+                  {crop && crop.width > 0 && (
                     <div 
                       className="absolute pointer-events-none z-10"
                       style={{
@@ -362,8 +401,8 @@ export const ImageCropper = ({
                       <div className="flex justify-center">
                         <span className="text-xs text-white bg-black/60 px-2 py-1 rounded whitespace-nowrap">
                           {(mode === 'hero' || (mode === 'both' && activeTab === 'hero')) 
-                            ? 'Área do Banner' 
-                            : 'Área do Card'}
+                            ? 'Área do Banner (3:1)' 
+                            : 'Área do Card (16:9)'}
                         </span>
                       </div>
                     </div>
@@ -429,13 +468,17 @@ export const ImageCropper = ({
           </div>
 
           <DialogFooter className="flex gap-2">
-            <Button type="button" variant="outline" onClick={handleCancel}>
+            <Button type="button" variant="outline" onClick={handleCancel} disabled={isProcessing}>
               <X className="w-4 h-4 mr-2" />
               Cancelar
             </Button>
-            <Button type="button" onClick={handleConfirmCrop}>
+            <Button 
+              type="button" 
+              onClick={handleConfirmCrop} 
+              disabled={isProcessing || !completedCrop}
+            >
               <Check className="w-4 h-4 mr-2" />
-              Confirmar
+              {isProcessing ? 'Processando...' : 'Confirmar'}
             </Button>
           </DialogFooter>
         </DialogContent>
