@@ -117,22 +117,26 @@ export const DualImageCropper = ({
 
   // Pan handlers for moving the image
   const handlePanStart = useCallback((e: React.MouseEvent) => {
-    if (scale <= 1) return; // Only allow panning when zoomed in
+    // Check if the click is on the crop handles - if so, don't start panning
+    const target = e.target as HTMLElement;
+    if (target.closest('.ReactCrop__drag-handle') || target.closest('.ReactCrop__crop-selection')) {
+      return;
+    }
     e.preventDefault();
     setIsPanning(true);
     setPanStart({ x: e.clientX - panX, y: e.clientY - panY });
-  }, [scale, panX, panY]);
+  }, [panX, panY]);
 
   const handlePanMove = useCallback((e: React.MouseEvent) => {
-    if (!isPanning || scale <= 1) return;
+    if (!isPanning) return;
     e.preventDefault();
     const newPanX = e.clientX - panStart.x;
     const newPanY = e.clientY - panStart.y;
-    // Limit pan range based on scale
-    const maxPan = (scale - 1) * 200;
+    // Limit pan range - allow more movement
+    const maxPan = 300;
     setPanX(Math.max(-maxPan, Math.min(maxPan, newPanX)));
     setPanY(Math.max(-maxPan, Math.min(maxPan, newPanY)));
-  }, [isPanning, scale, panStart]);
+  }, [isPanning, panStart]);
 
   const handlePanEnd = useCallback(() => {
     setIsPanning(false);
@@ -541,7 +545,7 @@ export const DualImageCropper = ({
             {/* Crop Area */}
             <div 
               ref={containerRef}
-              className={`flex justify-center bg-muted rounded-lg p-4 overflow-hidden ${scale > 1 ? 'cursor-grab active:cursor-grabbing' : ''}`}
+              className="flex justify-center bg-muted rounded-lg p-4 overflow-hidden cursor-grab active:cursor-grabbing"
               onMouseDown={handlePanStart}
               onMouseMove={handlePanMove}
               onMouseUp={handlePanEnd}
@@ -569,7 +573,6 @@ export const DualImageCropper = ({
                         width: 'auto',
                         transition: isPanning ? 'none' : 'transform 0.1s ease-out',
                         userSelect: 'none',
-                        pointerEvents: scale > 1 ? 'none' : 'auto'
                       }}
                       onLoad={onImageLoad}
                       draggable={false}
@@ -579,13 +582,11 @@ export const DualImageCropper = ({
               )}
             </div>
             
-            {/* Pan hint when zoomed */}
-            {scale > 1 && (
-              <p className="text-xs text-center text-muted-foreground">
-                <Move className="w-3 h-3 inline mr-1" />
-                Arraste para mover a imagem
-              </p>
-            )}
+            {/* Pan hint */}
+            <p className="text-xs text-center text-muted-foreground">
+              <Move className="w-3 h-3 inline mr-1" />
+              Arraste a imagem para posicionar • Use o pontilhado para ajustar a área
+            </p>
 
             {/* Controls */}
             <div className="space-y-4 p-4 bg-muted/50 rounded-lg">
