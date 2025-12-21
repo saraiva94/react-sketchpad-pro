@@ -16,7 +16,14 @@ interface CroppedImages {
 }
 
 interface DualImageCropperProps {
-  onImagesCropped: (heroBlob: Blob | null, heroUrl: string | null, cardBlob: Blob | null, cardUrl: string | null) => void;
+  onImagesCropped: (
+    heroBlob: Blob | null, 
+    heroUrl: string | null, 
+    cardBlob: Blob | null, 
+    cardUrl: string | null,
+    originalBlob?: Blob | null,
+    originalUrl?: string | null
+  ) => void;
   currentHeroImage?: string | null;
   currentCardImage?: string | null;
   originalImageUrl?: string | null;
@@ -244,11 +251,24 @@ export const DualImageCropper = ({
           const heroData = newCroppedImages.hero;
           const cardData = newCroppedImages.card;
           
+          // Convert stored original image to blob for upload
+          let originalBlob: Blob | null = null;
+          if (storedOriginalSrc) {
+            try {
+              const response = await fetch(storedOriginalSrc);
+              originalBlob = await response.blob();
+            } catch (e) {
+              console.warn('[DualImageCropper] Could not convert original to blob:', e);
+            }
+          }
+          
           onImagesCropped(
             heroData?.blob || null,
             heroData?.url || heroPreview,
             cardData?.blob || null,
-            cardData?.url || cardPreview
+            cardData?.url || cardPreview,
+            originalBlob,
+            storedOriginalSrc
           );
           
           toast({

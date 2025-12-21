@@ -228,6 +228,7 @@ const AdminDashboard = () => {
   const [editCardBlob, setEditCardBlob] = useState<Blob | null>(null);
   const [editHeroPreview, setEditHeroPreview] = useState<string | null>(null);
   const [editCardPreview, setEditCardPreview] = useState<string | null>(null);
+  const [editOriginalBlob, setEditOriginalBlob] = useState<Blob | null>(null);
   
   // Presentation document states for edit
   const [editPresentationDocUrl, setEditPresentationDocUrl] = useState("");
@@ -689,12 +690,17 @@ const AdminDashboard = () => {
     heroBlob: Blob | null, 
     heroUrl: string | null, 
     cardBlob: Blob | null, 
-    cardUrl: string | null
+    cardUrl: string | null,
+    originalBlob?: Blob | null,
+    originalUrl?: string | null
   ) => {
     setEditHeroBlob(heroBlob);
     setEditCardBlob(cardBlob);
     setEditHeroPreview(heroUrl);
     setEditCardPreview(cardUrl);
+    if (originalBlob) {
+      setEditOriginalBlob(originalBlob);
+    }
   };
 
   const handleEditClearImage = () => {
@@ -702,6 +708,7 @@ const AdminDashboard = () => {
     setEditCardBlob(null);
     setEditHeroPreview(null);
     setEditCardPreview(null);
+    setEditOriginalBlob(null);
     setEditImageUrl("");
   };
 
@@ -741,6 +748,7 @@ const AdminDashboard = () => {
     setEditImageUrl(project.image_url || "");
     setEditHeroBlob(null);
     setEditCardBlob(null);
+    setEditOriginalBlob(null);
     setEditHeroPreview(project.hero_image_url || project.image_url || null);
     setEditCardPreview(project.card_image_url || project.image_url || null);
     setEditPresentationDocUrl(project.presentation_document_url || "");
@@ -839,6 +847,25 @@ const AdminDashboard = () => {
 
     let finalHeroUrl = editHeroPreview;
     let finalCardUrl = editCardPreview;
+    let finalOriginalUrl = editImageUrl; // Keep existing original URL
+    
+    // Upload original image if new blob
+    if (editOriginalBlob) {
+      const timestamp = Date.now();
+      const path = `originals/${timestamp}_original.jpg`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from("project-media")
+        .upload(path, editOriginalBlob);
+      
+      if (!uploadError) {
+        const { data: urlData } = supabase.storage
+          .from("project-media")
+          .getPublicUrl(path);
+        
+        finalOriginalUrl = urlData.publicUrl;
+      }
+    }
     
     // Upload hero image if new blob
     if (editHeroBlob) {
@@ -898,7 +925,7 @@ const AdminDashboard = () => {
         description: editDescription || null,
         project_type: editProjectType || null,
         stages: editStages.length > 0 ? editStages : null,
-        image_url: finalHeroUrl || finalCardUrl || null,
+        image_url: finalOriginalUrl || finalHeroUrl || finalCardUrl || null,
         hero_image_url: finalHeroUrl || null,
         card_image_url: finalCardUrl || null,
         budget: editBudget || null,
