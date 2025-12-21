@@ -321,8 +321,18 @@ export const DualImageCropper = ({
   };
 
   const handleReadjust = async () => {
-    const imageToUse = storedOriginalSrc || originalImageUrl || currentHeroImage || currentCardImage;
-    if (!imageToUse) return;
+    // Priority: stored original > explicitly passed original > fallback to current images
+    // originalImageUrl should ALWAYS be the full original image from image_url field
+    const imageToUse = storedOriginalSrc || originalImageUrl;
+    
+    if (!imageToUse) {
+      toast({
+        variant: 'destructive',
+        title: 'Imagem original não disponível',
+        description: 'Faça upload de uma nova imagem para ajustar.',
+      });
+      return;
+    }
 
     setIsProcessing(true);
     try {
