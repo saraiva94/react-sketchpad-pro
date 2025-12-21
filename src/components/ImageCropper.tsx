@@ -242,73 +242,46 @@ export const ImageCropper = ({
           </DialogHeader>
 
           <div className="space-y-4">
-            {/* Image with Hero Overlay */}
-            <div className="relative bg-muted rounded-lg overflow-hidden">
+            {/* Crop Area with dashed border style */}
+            <div className="flex justify-center bg-muted rounded-lg p-4 overflow-hidden">
               {imageSrc && (
-                <div className="relative">
-                  {/* Full image */}
-                  <img
-                    ref={imgRef}
-                    alt="Imagem para ajustar"
-                    src={imageSrc}
-                    style={{ 
-                      transform: `scale(${scale}) rotate(${rotate}deg)`,
-                      transformOrigin: 'center center',
-                      width: '100%',
-                      height: 'auto',
-                      display: 'block'
-                    }}
-                    onLoad={onImageLoad}
-                  />
-                  
-                  {/* Hero visible area overlay - shows center portion that will be visible */}
-                  <div className="absolute inset-0 pointer-events-none">
-                    {/* Darkened top area */}
-                    <div 
-                      className="absolute top-0 left-0 right-0 bg-black/60"
-                      style={{ height: '20%' }}
-                    />
-                    {/* Darkened bottom area */}
-                    <div 
-                      className="absolute bottom-0 left-0 right-0 bg-black/60"
-                      style={{ height: '20%' }}
-                    />
-                    {/* Left darkened area for the visible zone */}
-                    <div 
-                      className="absolute bg-black/60"
-                      style={{ top: '20%', bottom: '20%', left: 0, width: '5%' }}
-                    />
-                    {/* Right darkened area for the visible zone */}
-                    <div 
-                      className="absolute bg-black/60"
-                      style={{ top: '20%', bottom: '20%', right: 0, width: '5%' }}
-                    />
-                    
-                    {/* Dashed border for visible area */}
-                    <div 
-                      className="absolute border-2 border-dashed border-white/80"
+                <div className="relative crop-dashed-style">
+                  <ReactCrop
+                    crop={crop}
+                    onChange={(_, percentCrop) => setCrop(percentCrop)}
+                    onComplete={(c) => setCompletedCrop(c)}
+                    aspect={aspectRatio}
+                    className="max-h-[450px]"
+                  >
+                    <img
+                      ref={imgRef}
+                      alt="Imagem para recortar"
+                      src={imageSrc}
                       style={{ 
-                        top: '20%', 
-                        bottom: '20%', 
-                        left: '5%', 
-                        right: '5%',
-                        boxShadow: '0 0 0 2px rgba(0,0,0,0.3)'
+                        transform: `scale(${scale}) rotate(${rotate}deg)`,
+                        maxHeight: '450px',
+                        width: 'auto'
+                      }}
+                      onLoad={onImageLoad}
+                    />
+                  </ReactCrop>
+                  {/* Label overlay */}
+                  {crop && (
+                    <div 
+                      className="absolute pointer-events-none z-10"
+                      style={{
+                        top: `calc(${crop.y}% + 8px)`,
+                        left: `${crop.x}%`,
+                        width: `${crop.width}%`,
                       }}
                     >
-                      {/* Corner indicators */}
-                      <div className="absolute -top-1 -left-1 w-3 h-3 border-t-2 border-l-2 border-white" />
-                      <div className="absolute -top-1 -right-1 w-3 h-3 border-t-2 border-r-2 border-white" />
-                      <div className="absolute -bottom-1 -left-1 w-3 h-3 border-b-2 border-l-2 border-white" />
-                      <div className="absolute -bottom-1 -right-1 w-3 h-3 border-b-2 border-r-2 border-white" />
-                      
-                      {/* Label */}
-                      <div className="absolute top-2 left-1/2 transform -translate-x-1/2">
-                        <span className="text-xs text-white bg-black/50 px-2 py-1 rounded whitespace-nowrap">
-                          Área visível na página do projeto
+                      <div className="flex justify-center">
+                        <span className="text-xs text-white bg-black/60 px-2 py-1 rounded whitespace-nowrap">
+                          Área visível na página
                         </span>
                       </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               )}
             </div>
@@ -364,8 +337,8 @@ export const ImageCropper = ({
             </div>
 
             <p className="text-xs text-muted-foreground text-center">
-              A área dentro do pontilhado é o que será exibido na página do projeto. 
-              Use o zoom para ajustar o enquadramento.
+              Arraste a área pontilhada para escolher a melhor posição. 
+              Use os cantos para redimensionar.
             </p>
           </div>
 
@@ -381,6 +354,23 @@ export const ImageCropper = ({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Custom styles for dashed crop border */}
+      <style>{`
+        .crop-dashed-style .ReactCrop__crop-selection {
+          border: 2px dashed rgba(255, 255, 255, 0.9) !important;
+          box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5) !important;
+        }
+        .crop-dashed-style .ReactCrop__drag-handle {
+          background-color: white !important;
+          border: 2px solid rgba(0, 0, 0, 0.5) !important;
+          width: 12px !important;
+          height: 12px !important;
+        }
+        .crop-dashed-style .ReactCrop__drag-handle::after {
+          display: none !important;
+        }
+      `}</style>
     </>
   );
 };
