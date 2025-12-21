@@ -62,6 +62,12 @@ export const DualImageCropper = ({
   const [activeTab, setActiveTab] = useState<'hero' | 'card'>('hero');
   const [isProcessing, setIsProcessing] = useState(false);
   
+  // Pan state for moving the image when zoomed
+  const [panX, setPanX] = useState(0);
+  const [panY, setPanY] = useState(0);
+  const [isPanning, setIsPanning] = useState(false);
+  const [panStart, setPanStart] = useState({ x: 0, y: 0 });
+  
   // Store cropped results for both
   const [croppedImages, setCroppedImages] = useState<CroppedImages>({ hero: null, card: null });
   const [heroPreview, setHeroPreview] = useState<string | null>(currentHeroImage || null);
@@ -69,6 +75,7 @@ export const DualImageCropper = ({
   
   const imgRef = useRef<HTMLImageElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Sync with external props
   useEffect(() => {
@@ -103,6 +110,29 @@ export const DualImageCropper = ({
     }
   }, [activeTab, getCurrentAspectRatio, imageSrc, showCropDialog]);
 
+  // Pan handlers for moving the image
+  const handlePanStart = useCallback((e: React.MouseEvent) => {
+    if (scale <= 1) return; // Only allow panning when zoomed in
+    e.preventDefault();
+    setIsPanning(true);
+    setPanStart({ x: e.clientX - panX, y: e.clientY - panY });
+  }, [scale, panX, panY]);
+
+  const handlePanMove = useCallback((e: React.MouseEvent) => {
+    if (!isPanning || scale <= 1) return;
+    e.preventDefault();
+    const newPanX = e.clientX - panStart.x;
+    const newPanY = e.clientY - panStart.y;
+    // Limit pan range based on scale
+    const maxPan = (scale - 1) * 200;
+    setPanX(Math.max(-maxPan, Math.min(maxPan, newPanX)));
+    setPanY(Math.max(-maxPan, Math.min(maxPan, newPanY)));
+  }, [isPanning, scale, panStart]);
+
+  const handlePanEnd = useCallback(() => {
+    setIsPanning(false);
+  }, []);
+
   const onSelectFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const reader = new FileReader();
@@ -111,6 +141,8 @@ export const DualImageCropper = ({
         setShowCropDialog(true);
         setScale(1);
         setRotate(0);
+        setPanX(0);
+        setPanY(0);
         setActiveTab('hero');
         setCrop(undefined);
         setCompletedCrop(undefined);
@@ -159,8 +191,9 @@ export const DualImageCropper = ({
     ctx.scale(pixelRatio, pixelRatio);
     ctx.imageSmoothingQuality = 'high';
 
-    const cropX = completedCrop.x * scaleX;
-    const cropY = completedCrop.y * scaleY;
+    // Adjust crop position based on pan offset
+    const cropX = (completedCrop.x - panX / scale) * scaleX;
+    const cropY = (completedCrop.y - panY / scale) * scaleY;
 
     const rotateRads = rotate * (Math.PI / 180);
     const centerX = image.naturalWidth / 2;
@@ -299,6 +332,8 @@ export const DualImageCropper = ({
           setShowCropDialog(true);
           setScale(1);
           setRotate(0);
+          setPanX(0);
+          setPanY(0);
           setActiveTab('hero');
           setCroppedImages({ hero: null, card: null });
           setIsProcessing(false);
@@ -319,6 +354,8 @@ export const DualImageCropper = ({
         setShowCropDialog(true);
         setScale(1);
         setRotate(0);
+        setPanX(0);
+        setPanY(0);
         setActiveTab('hero');
         setCroppedImages({ hero: null, card: null });
         setIsProcessing(false);
@@ -474,7 +511,14 @@ export const DualImageCropper = ({
             </div>
 
             {/* Crop Area */}
-            <div className="flex justify-center bg-muted rounded-lg p-4 overflow-hidden">
+            <div 
+              ref={containerRef}
+              className={`flex justify-center bg-muted rounded-lg p-4 overflow-hidden ${scale > 1 ? 'cursor-grab active:cursor-grabbing' : ''}`}
+              onMouseDown={handlePanStart}
+              onMouseMove={handlePanMove}
+              onMouseUp={handlePanEnd}
+              onMouseLeave={handlePanEnd}
+            >
               {imageSrc && (
                 <div className="relative crop-dashed-style">
                   <ReactCrop
@@ -484,6 +528,7 @@ export const DualImageCropper = ({
                     aspect={getCurrentAspectRatio()}
                     keepSelection={true}
                     className="max-h-[400px]"
+                    disabled={isPanning}
                   >
                     <img
                       ref={imgRef}
@@ -491,11 +536,15 @@ export const DualImageCropper = ({
                       src={imageSrc}
                       crossOrigin="anonymous"
                       style={{ 
-                        transform: `scale(${scale}) rotate(${rotate}deg)`,
+                        transform: `translate(${panX}px, ${panY}px) scale(${scale}) rotate(${rotate}deg)`,
                         maxHeight: '400px',
-                        width: 'auto'
+                        width: 'auto',
+                        transition: isPanning ? 'none' : 'transform 0.1s ease-out',
+                        userSelect: 'none',
+                        pointerEvents: scale > 1 ? 'none' : 'auto'
                       }}
                       onLoad={onImageLoad}
+                      draggable={false}
                     />
                   </ReactCrop>
                   {crop && crop.width > 0 && (
@@ -509,7 +558,7 @@ export const DualImageCropper = ({
                     >
                       <div className="flex justify-center">
                         <span className="text-xs text-white bg-black/60 px-2 py-1 rounded whitespace-nowrap">
-                          {activeTab === 'hero' ? 'Banner (3:1)' : 'Card (16:9)'}
+                          {activeTab === 'hero' ? 'Banner (21:4)' : 'Card (16:9)'}
                         </span>
                       </div>
                     </div>
@@ -517,6 +566,14 @@ export const DualImageCropper = ({
                 </div>
               )}
             </div>
+            
+            {/* Pan hint when zoomed */}
+            {scale > 1 && (
+              <p className="text-xs text-center text-muted-foreground">
+                <Move className="w-3 h-3 inline mr-1" />
+                Arraste para mover a imagem
+              </p>
+            )}
 
             {/* Controls */}
             <div className="space-y-4 p-4 bg-muted/50 rounded-lg">
@@ -558,6 +615,8 @@ export const DualImageCropper = ({
                 onClick={() => {
                   setScale(1);
                   setRotate(0);
+                  setPanX(0);
+                  setPanY(0);
                 }}
               >
                 <RotateCcw className="w-4 h-4 mr-2" />
