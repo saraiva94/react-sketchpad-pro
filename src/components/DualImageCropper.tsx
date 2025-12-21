@@ -9,7 +9,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 
 // Aspect ratios that match the actual display dimensions
-const HERO_ASPECT_RATIO = 3; // 3:1 for hero banner
+const HERO_ASPECT_RATIO = 21 / 4; // 21:4 (~5.25:1) for hero banner - matches the wide cinematic header
 const CARD_ASPECT_RATIO = 16 / 9; // 16:9 for card
 
 interface CroppedImages {
@@ -343,8 +343,8 @@ export const DualImageCropper = ({
           <div className="space-y-3">
             {/* Hero Preview */}
             <div className="space-y-1">
-              <p className="text-xs text-muted-foreground font-medium">Banner (Hero 3:1)</p>
-              <div className="relative aspect-[3/1] rounded-lg overflow-hidden border-2 border-primary/30 bg-muted">
+              <p className="text-xs text-muted-foreground font-medium">Banner (Hero 21:4)</p>
+              <div className="relative aspect-[21/4] rounded-lg overflow-hidden border-2 border-primary/30 bg-muted">
                 {heroPreview ? (
                   <img 
                     src={heroPreview} 
@@ -451,7 +451,7 @@ export const DualImageCropper = ({
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="hero" className="flex items-center gap-2">
                   <Move className="w-4 h-4" />
-                  1. Banner (3:1)
+                  1. Banner (21:4)
                   {croppedImages.hero && <Check className="w-4 h-4 text-green-500" />}
                 </TabsTrigger>
                 <TabsTrigger value="card" className="flex items-center gap-2">
