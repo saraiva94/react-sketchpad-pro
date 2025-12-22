@@ -6,7 +6,8 @@ import {
   Instagram, 
   Linkedin,
   Youtube,
-  Globe
+  Globe,
+  Twitter
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,6 +23,7 @@ interface SocialLinksConfig {
   instagram: SocialLink;
   linkedin: SocialLink;
   youtube: SocialLink;
+  twitter: SocialLink;
   imdb: SocialLink;
   website: SocialLink;
 }
@@ -31,6 +33,7 @@ const DEFAULT_SOCIAL_LINKS: SocialLinksConfig = {
   instagram: { enabled: true, url: "https://www.instagram.com/portobellofilmes/" },
   linkedin: { enabled: false, url: "" },
   youtube: { enabled: false, url: "" },
+  twitter: { enabled: false, url: "" },
   imdb: { enabled: false, url: "" },
   website: { enabled: false, url: "" }
 };
@@ -183,9 +186,20 @@ export function Footer() {
                   <Youtube className="w-3 h-3 text-white" />
                 </a>
               )}
+              {socialLinks.twitter?.enabled && socialLinks.twitter?.url && (
+                <a 
+                  href={socialLinks.twitter.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="w-7 h-7 rounded-full bg-black flex items-center justify-center hover:opacity-80 transition-opacity"
+                  aria-label="X / Twitter"
+                >
+                  <Twitter className="w-3 h-3 text-white" />
+                </a>
+              )}
               {socialLinks.imdb?.enabled && socialLinks.imdb?.url && (
                 <a 
-                  href={socialLinks.imdb.url} 
+                  href={socialLinks.imdb.url}
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="w-7 h-7 rounded-full bg-[#F5C518] flex items-center justify-center hover:opacity-80 transition-opacity"
@@ -287,9 +301,20 @@ export function SocialLinksDisplay() {
           <Youtube className="w-5 h-5 text-white" />
         </a>
       )}
+      {socialLinks.twitter?.enabled && socialLinks.twitter?.url && (
+        <a 
+          href={socialLinks.twitter.url} 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="w-10 h-10 rounded-full bg-black flex items-center justify-center hover:scale-110 transition-transform"
+          aria-label="X / Twitter"
+        >
+          <Twitter className="w-5 h-5 text-white" />
+        </a>
+      )}
       {socialLinks.imdb?.enabled && socialLinks.imdb?.url && (
         <a 
-          href={socialLinks.imdb.url} 
+          href={socialLinks.imdb.url}
           target="_blank" 
           rel="noopener noreferrer"
           className="w-10 h-10 rounded-full bg-[#F5C518] flex items-center justify-center hover:scale-110 transition-transform"
