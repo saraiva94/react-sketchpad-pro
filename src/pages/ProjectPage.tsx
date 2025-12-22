@@ -33,7 +33,8 @@ import {
   Linkedin,
   Facebook,
   Youtube,
-  FileText
+  FileText,
+  Twitter
 } from "lucide-react";
 
 interface NewsItem {
@@ -87,6 +88,7 @@ interface ProjectMember {
     linkedin?: string;
     facebook?: string;
     youtube?: string;
+    twitter?: string;
     website?: string;
     imdb?: string;
   } | null;
@@ -606,8 +608,13 @@ const ProjectPage = () => {
                           </a>
                         )}
                         {member.social_links?.youtube && (
-                          <a href={member.social_links.youtube.startsWith('http') ? member.social_links.youtube : `https://youtube.com/${member.social_links.youtube}`} target="_blank" rel="noopener noreferrer" className="w-6 h-6 rounded-full bg-red-500/10 flex items-center justify-center hover:bg-red-500/20 transition-colors">
+                          <a href={member.social_links.youtube.startsWith('http') ? member.social_links.youtube : `https://youtube.com/${member.social_links.youtube.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="w-6 h-6 rounded-full bg-red-500/10 flex items-center justify-center hover:bg-red-500/20 transition-colors">
                             <Youtube className="w-3 h-3 text-red-500" />
+                          </a>
+                        )}
+                        {member.social_links?.twitter && (
+                          <a href={member.social_links.twitter.startsWith('http') ? member.social_links.twitter : `https://x.com/${member.social_links.twitter.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="w-6 h-6 rounded-full bg-sky-500/10 flex items-center justify-center hover:bg-sky-500/20 transition-colors">
+                            <Twitter className="w-3 h-3 text-sky-500" />
                           </a>
                         )}
                         {member.social_links?.website && (
