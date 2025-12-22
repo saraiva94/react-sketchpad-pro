@@ -591,7 +591,7 @@ const ProjectPage = () => {
                       )}
                       
                       {/* Social Links e CV */}
-                      <div className="flex items-center gap-2 mt-2">
+                      <div className="flex items-center gap-2 mt-2 relative z-10">
                         {member.social_links?.instagram && (
                           <a href={member.social_links.instagram.startsWith('http') ? member.social_links.instagram : `https://instagram.com/${member.social_links.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="w-6 h-6 rounded-full bg-pink-500/10 flex items-center justify-center hover:bg-pink-500/20 transition-colors">
                             <Instagram className="w-3 h-3 text-pink-500" />
