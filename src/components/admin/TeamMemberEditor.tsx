@@ -14,7 +14,8 @@ import {
   Facebook, 
   Youtube,
   FileText,
-  ExternalLink
+  ExternalLink,
+  Twitter
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -30,6 +31,7 @@ export interface TeamMemberData {
     linkedin?: string;
     facebook?: string;
     youtube?: string;
+    twitter?: string;
     website?: string;
   };
   curriculum_url?: string;
@@ -242,9 +244,9 @@ export const TeamMemberEditor = ({ members, onChange }: TeamMemberEditorProps) =
             {/* Social Links */}
             <div className="pt-2 border-t">
               <Label className="text-sm mb-2 block">Links e Redes Sociais <span className="text-muted-foreground text-xs">(opcional)</span></Label>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 <div className="flex items-center gap-2">
-                  <Instagram className="w-4 h-4 text-pink-500" />
+                  <Instagram className="w-4 h-4 text-pink-500 shrink-0" />
                   <Input
                     value={member.social_links?.instagram || ""}
                     onChange={(e) => updateSocialLink(index, "instagram", e.target.value)}
@@ -253,7 +255,7 @@ export const TeamMemberEditor = ({ members, onChange }: TeamMemberEditorProps) =
                   />
                 </div>
                 <div className="flex items-center gap-2">
-                  <Linkedin className="w-4 h-4 text-blue-600" />
+                  <Linkedin className="w-4 h-4 text-blue-600 shrink-0" />
                   <Input
                     value={member.social_links?.linkedin || ""}
                     onChange={(e) => updateSocialLink(index, "linkedin", e.target.value)}
@@ -262,11 +264,29 @@ export const TeamMemberEditor = ({ members, onChange }: TeamMemberEditorProps) =
                   />
                 </div>
                 <div className="flex items-center gap-2">
-                  <Globe className="w-4 h-4 text-emerald-500" />
+                  <Youtube className="w-4 h-4 text-red-500 shrink-0" />
+                  <Input
+                    value={member.social_links?.youtube || ""}
+                    onChange={(e) => updateSocialLink(index, "youtube", e.target.value)}
+                    placeholder="youtube.com/@..."
+                    className="flex-1"
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <Twitter className="w-4 h-4 text-sky-500 shrink-0" />
+                  <Input
+                    value={member.social_links?.twitter || ""}
+                    onChange={(e) => updateSocialLink(index, "twitter", e.target.value)}
+                    placeholder="@usuario ou x.com/..."
+                    className="flex-1"
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <Globe className="w-4 h-4 text-emerald-500 shrink-0" />
                   <Input
                     value={member.social_links?.website || ""}
                     onChange={(e) => updateSocialLink(index, "website", e.target.value)}
-                    placeholder="https://..."
+                    placeholder="https://... ou imdb.com/..."
                     className="flex-1"
                   />
                 </div>
