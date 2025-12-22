@@ -397,6 +397,13 @@
     inset: -6px;
   }
 
+  /* Isolate social link circles from rainbow effect */
+  .rainbow-card-glow .social-link-circle {
+    position: relative;
+    z-index: 10;
+    isolation: isolate;
+  }
+
   /* Rainbow icon glow on hover */
   .rainbow-icon-glow {
     transition: filter 0.3s ease, transform 0.3s ease, color 0.3s ease;

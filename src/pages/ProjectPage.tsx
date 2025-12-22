@@ -12,6 +12,7 @@ import { getIncentiveLawLabel } from "@/components/admin/IncentiveLawsMultiSelec
 import { getStageLabel } from "@/components/admin/StagesMultiSelect";
 import jsPDF from "jspdf";
 import imdbLogo from "@/assets/imdb-logo.png";
+import { WavesBackground } from "@/components/WavesBackground";
 import { 
   ArrowLeft, 
   MapPin, 
@@ -439,7 +440,9 @@ const ProjectPage = () => {
   const embedUrl = getVideoEmbedUrl(project.link_video);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative">
+      {/* Animated Waves Background */}
+      <WavesBackground />
       {/* Standard Navbar */}
       <Navbar showNav={false} rightContent={
         <Link to="/porto-de-ideias" className="flex items-center text-muted-foreground hover:text-primary transition-colors">
@@ -563,7 +566,7 @@ const ProjectPage = () => {
               const otherMembers = members.filter(m => !isCastRole(m.funcao));
 
               const renderMemberCard = (member: ProjectMember) => (
-                <div key={member.id} className="group p-4 bg-card rounded-xl border border-border card-project-hover">
+                <div key={member.id} className="group relative overflow-visible card-solid p-4 bg-card rounded-xl border border-border rainbow-card-glow">
                   <div className="flex items-start space-x-3">
                     {/* Foto */}
                     {member.photo_url ? (
