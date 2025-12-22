@@ -563,7 +563,7 @@ const ProjectPage = () => {
               const otherMembers = members.filter(m => !isCastRole(m.funcao));
 
               const renderMemberCard = (member: ProjectMember) => (
-                <div key={member.id} className="p-4 bg-muted/50 rounded-xl border border-border/50">
+                <div key={member.id} className="group p-4 bg-card rounded-xl border border-border rainbow-card-glow">
                   <div className="flex items-start space-x-3">
                     {/* Foto */}
                     {member.photo_url ? (
