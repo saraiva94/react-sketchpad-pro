@@ -891,7 +891,9 @@ const ProjectPage = () => {
                     <div>
                       <span className="text-sm text-muted-foreground">Estágio do Projeto</span>
                       <div className="font-medium text-foreground">
-                        {project.stages.map(stage => getStageLabel(stage)).join(", ")}
+                        {[...new Set(project.stages.map(stage => getStageLabel(stage).toLowerCase()))]
+                          .map(label => label.charAt(0).toUpperCase() + label.slice(1))
+                          .join(", ")}
                       </div>
                     </div>
                   )}
