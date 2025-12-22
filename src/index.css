@@ -199,6 +199,66 @@
       0 20px 40px -10px hsl(0 0% 0% / 0.3);
   }
 
+  /* Project page card hover - subtle glow without rainbow */
+  .card-project-hover {
+    @apply relative transition-all duration-300;
+    isolation: isolate;
+  }
+
+  .card-project-hover::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-color: hsl(var(--card));
+    border-radius: inherit;
+    z-index: -1;
+  }
+
+  .card-project-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+      0 4px 20px hsl(var(--primary) / 0.15),
+      0 8px 30px hsl(0 0% 0% / 0.2);
+    border-color: hsl(var(--primary) / 0.3);
+  }
+
+  /* Social link circles - enhanced on parent hover */
+  .social-link-circle {
+    @apply transition-all duration-300;
+  }
+
+  .group:hover .social-link-instagram {
+    @apply bg-pink-500/30 ring-2 ring-pink-500/50;
+  }
+
+  .group:hover .social-link-linkedin {
+    @apply bg-blue-600/30 ring-2 ring-blue-600/50;
+  }
+
+  .group:hover .social-link-facebook {
+    @apply bg-blue-500/30 ring-2 ring-blue-500/50;
+  }
+
+  .group:hover .social-link-youtube {
+    @apply bg-red-500/30 ring-2 ring-red-500/50;
+  }
+
+  .group:hover .social-link-twitter {
+    @apply bg-sky-500/30 ring-2 ring-sky-500/50;
+  }
+
+  .group:hover .social-link-imdb {
+    @apply bg-[#F5C518]/30 ring-2 ring-[#F5C518]/50;
+  }
+
+  .group:hover .social-link-website {
+    @apply bg-emerald-500/30 ring-2 ring-emerald-500/50;
+  }
+
+  .group:hover .social-link-cv {
+    @apply bg-orange-500/30 ring-2 ring-orange-500/50;
+  }
+
   /* Rainbow gradient card */
   .card-rainbow {
     @apply relative transition-all duration-500;

@@ -563,7 +563,7 @@ const ProjectPage = () => {
               const otherMembers = members.filter(m => !isCastRole(m.funcao));
 
               const renderMemberCard = (member: ProjectMember) => (
-                <div key={member.id} className="group relative overflow-visible card-solid p-4 bg-card rounded-xl border border-border rainbow-card-glow">
+                <div key={member.id} className="group p-4 bg-card rounded-xl border border-border card-project-hover">
                   <div className="flex items-start space-x-3">
                     {/* Foto */}
                     {member.photo_url ? (
@@ -591,50 +591,50 @@ const ProjectPage = () => {
                       )}
                       
                       {/* Social Links e CV */}
-                      <div className="flex items-center gap-2 mt-2 relative z-10">
+                      <div className="flex items-center gap-2 mt-2">
                         {member.social_links?.instagram && (
-                          <a href={member.social_links.instagram.startsWith('http') ? member.social_links.instagram : `https://instagram.com/${member.social_links.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="w-6 h-6 rounded-full bg-pink-500/10 flex items-center justify-center hover:bg-pink-500/20 transition-colors">
+                          <a href={member.social_links.instagram.startsWith('http') ? member.social_links.instagram : `https://instagram.com/${member.social_links.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="social-link-circle social-link-instagram w-6 h-6 rounded-full bg-pink-500/10 flex items-center justify-center hover:bg-pink-500/30">
                             <Instagram className="w-3 h-3 text-pink-500" />
                           </a>
                         )}
                         {member.social_links?.linkedin && (
-                          <a href={member.social_links.linkedin.startsWith('http') ? member.social_links.linkedin : `https://linkedin.com/in/${member.social_links.linkedin}`} target="_blank" rel="noopener noreferrer" className="w-6 h-6 rounded-full bg-blue-600/10 flex items-center justify-center hover:bg-blue-600/20 transition-colors">
+                          <a href={member.social_links.linkedin.startsWith('http') ? member.social_links.linkedin : `https://linkedin.com/in/${member.social_links.linkedin}`} target="_blank" rel="noopener noreferrer" className="social-link-circle social-link-linkedin w-6 h-6 rounded-full bg-blue-600/10 flex items-center justify-center hover:bg-blue-600/30">
                             <Linkedin className="w-3 h-3 text-blue-600" />
                           </a>
                         )}
                         {member.social_links?.facebook && (
-                          <a href={member.social_links.facebook.startsWith('http') ? member.social_links.facebook : `https://facebook.com/${member.social_links.facebook}`} target="_blank" rel="noopener noreferrer" className="w-6 h-6 rounded-full bg-blue-500/10 flex items-center justify-center hover:bg-blue-500/20 transition-colors">
+                          <a href={member.social_links.facebook.startsWith('http') ? member.social_links.facebook : `https://facebook.com/${member.social_links.facebook}`} target="_blank" rel="noopener noreferrer" className="social-link-circle social-link-facebook w-6 h-6 rounded-full bg-blue-500/10 flex items-center justify-center hover:bg-blue-500/30">
                             <Facebook className="w-3 h-3 text-blue-500" />
                           </a>
                         )}
                         {member.social_links?.youtube && (
-                          <a href={member.social_links.youtube.startsWith('http') ? member.social_links.youtube : `https://youtube.com/${member.social_links.youtube.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="w-6 h-6 rounded-full bg-red-500/10 flex items-center justify-center hover:bg-red-500/20 transition-colors">
+                          <a href={member.social_links.youtube.startsWith('http') ? member.social_links.youtube : `https://youtube.com/${member.social_links.youtube.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="social-link-circle social-link-youtube w-6 h-6 rounded-full bg-red-500/10 flex items-center justify-center hover:bg-red-500/30">
                             <Youtube className="w-3 h-3 text-red-500" />
                           </a>
                         )}
                         {member.social_links?.twitter && (
-                          <a href={member.social_links.twitter.startsWith('http') ? member.social_links.twitter : `https://x.com/${member.social_links.twitter.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="w-6 h-6 rounded-full bg-sky-500/10 flex items-center justify-center hover:bg-sky-500/20 transition-colors">
+                          <a href={member.social_links.twitter.startsWith('http') ? member.social_links.twitter : `https://x.com/${member.social_links.twitter.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="social-link-circle social-link-twitter w-6 h-6 rounded-full bg-sky-500/10 flex items-center justify-center hover:bg-sky-500/30">
                             <Twitter className="w-3 h-3 text-sky-500" />
                           </a>
                         )}
                         {member.social_links?.imdb && (
-                          <a href={member.social_links.imdb.startsWith('http') ? member.social_links.imdb : `https://www.imdb.com/name/${member.social_links.imdb}`} target="_blank" rel="noopener noreferrer" className="w-6 h-6 rounded-full bg-[#F5C518]/10 flex items-center justify-center hover:bg-[#F5C518]/20 transition-colors" title="IMDb">
+                          <a href={member.social_links.imdb.startsWith('http') ? member.social_links.imdb : `https://www.imdb.com/name/${member.social_links.imdb}`} target="_blank" rel="noopener noreferrer" className="social-link-circle social-link-imdb w-6 h-6 rounded-full bg-[#F5C518]/10 flex items-center justify-center hover:bg-[#F5C518]/30" title="IMDb">
                             <img src={imdbLogo} alt="IMDb" className="w-4 h-4 rounded-sm object-contain" />
                           </a>
                         )}
                         {member.social_links?.website && (
                           member.social_links.website.includes('imdb.com') ? (
-                            <a href={member.social_links.website.startsWith('http') ? member.social_links.website : `https://${member.social_links.website}`} target="_blank" rel="noopener noreferrer" className="w-6 h-6 rounded-full bg-[#F5C518]/10 flex items-center justify-center hover:bg-[#F5C518]/20 transition-colors" title="IMDb">
+                            <a href={member.social_links.website.startsWith('http') ? member.social_links.website : `https://${member.social_links.website}`} target="_blank" rel="noopener noreferrer" className="social-link-circle social-link-imdb w-6 h-6 rounded-full bg-[#F5C518]/10 flex items-center justify-center hover:bg-[#F5C518]/30" title="IMDb">
                               <img src={imdbLogo} alt="IMDb" className="w-4 h-4 rounded-sm object-contain" />
                             </a>
                           ) : (
-                            <a href={member.social_links.website.startsWith('http') ? member.social_links.website : `https://${member.social_links.website}`} target="_blank" rel="noopener noreferrer" className="w-6 h-6 rounded-full bg-emerald-500/10 flex items-center justify-center hover:bg-emerald-500/20 transition-colors" title="Site Pessoal">
+                            <a href={member.social_links.website.startsWith('http') ? member.social_links.website : `https://${member.social_links.website}`} target="_blank" rel="noopener noreferrer" className="social-link-circle social-link-website w-6 h-6 rounded-full bg-emerald-500/10 flex items-center justify-center hover:bg-emerald-500/30" title="Site Pessoal">
                               <Globe className="w-3 h-3 text-emerald-500" />
                             </a>
                           )
                         )}
                         {member.curriculum_url && (
-                          <a href={member.curriculum_url} target="_blank" rel="noopener noreferrer" className="w-6 h-6 rounded-full bg-orange-500/10 flex items-center justify-center hover:bg-orange-500/20 transition-colors" title="Baixar Currículo">
+                          <a href={member.curriculum_url} target="_blank" rel="noopener noreferrer" className="social-link-circle social-link-cv w-6 h-6 rounded-full bg-orange-500/10 flex items-center justify-center hover:bg-orange-500/30" title="Baixar Currículo">
                             <FileText className="w-3 h-3 text-orange-500" />
                           </a>
                         )}
@@ -686,7 +686,7 @@ const ProjectPage = () => {
                 </h2>
                 <div className="grid md:grid-cols-2 gap-6">
                   {project.impacto_cultural && (
-                    <div className="bg-primary/5 p-6 rounded-2xl border border-primary/10">
+                    <div className="group bg-primary/5 p-6 rounded-2xl border border-primary/10 transition-all duration-300 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1">
                       <h3 className="font-semibold text-foreground mb-3 flex items-center">
                         <Sparkles className="w-5 h-5 text-primary mr-2" />
                         Impacto Cultural
@@ -695,7 +695,7 @@ const ProjectPage = () => {
                     </div>
                   )}
                   {project.impacto_social && (
-                    <div className="bg-emerald-500/5 p-6 rounded-2xl border border-emerald-500/10">
+                    <div className="group bg-emerald-500/5 p-6 rounded-2xl border border-emerald-500/10 transition-all duration-300 hover:border-emerald-500/30 hover:shadow-lg hover:shadow-emerald-500/10 hover:-translate-y-1">
                       <h3 className="font-semibold text-foreground mb-3 flex items-center">
                         <Globe className="w-5 h-5 text-emerald-600 dark:text-emerald-400 mr-2" />
                         Impacto Social
@@ -704,7 +704,7 @@ const ProjectPage = () => {
                     </div>
                   )}
                   {project.publico_alvo && (
-                    <div className="bg-violet-500/5 p-6 rounded-2xl border border-violet-500/10">
+                    <div className="group bg-violet-500/5 p-6 rounded-2xl border border-violet-500/10 transition-all duration-300 hover:border-violet-500/30 hover:shadow-lg hover:shadow-violet-500/10 hover:-translate-y-1">
                       <h3 className="font-semibold text-foreground mb-3 flex items-center">
                         <Users className="w-5 h-5 text-violet-600 dark:text-violet-400 mr-2" />
                         Público-Alvo
@@ -713,7 +713,7 @@ const ProjectPage = () => {
                     </div>
                   )}
                   {project.diferenciais && (
-                    <div className="bg-amber-500/5 p-6 rounded-2xl border border-amber-500/10">
+                    <div className="group bg-amber-500/5 p-6 rounded-2xl border border-amber-500/10 transition-all duration-300 hover:border-amber-500/30 hover:shadow-lg hover:shadow-amber-500/10 hover:-translate-y-1">
                       <h3 className="font-semibold text-foreground mb-3 flex items-center">
                         <Star className="w-5 h-5 text-amber-600 dark:text-amber-400 mr-2" />
                         Diferenciais
@@ -769,7 +769,7 @@ const ProjectPage = () => {
                     return (
                       <div 
                         key={contrapartida.id} 
-                        className="bg-card border border-border rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300"
+                        className="group bg-card border border-border rounded-xl p-6 transition-all duration-300 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1"
                       >
                         {/* Nível label */}
                         <p className="text-sm italic text-muted-foreground mb-1">Nível</p>
