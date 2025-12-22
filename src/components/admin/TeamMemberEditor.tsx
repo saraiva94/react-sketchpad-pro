@@ -284,7 +284,7 @@ export const TeamMemberEditor = ({ members, onChange }: TeamMemberEditorProps) =
                   />
                 </div>
                 <div className="flex items-center gap-2">
-                  <img src={imdbLogo} alt="IMDb" className="w-5 h-5 shrink-0 object-contain" />
+                  <img src={imdbLogo} alt="IMDb" className="w-6 h-6 shrink-0 object-contain" />
                   <Input
                     value={member.social_links?.imdb || ""}
                     onChange={(e) => updateSocialLink(index, "imdb", e.target.value)}
