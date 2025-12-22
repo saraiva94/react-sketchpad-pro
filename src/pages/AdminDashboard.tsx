@@ -135,7 +135,7 @@ const AdminDashboard = () => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [showDetails, setShowDetails] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
-  const [activeTab, setActiveTab] = useState("pending");
+  const [activeTab, setActiveTab] = useState("all");
   const [activeSection, setActiveSection] = useState<"projects" | "requests" | "contacts" | "homepage">("homepage");
   const [statsVisible, setStatsVisible] = useState(true);
   const [loadingSettings, setLoadingSettings] = useState(true);
@@ -2250,6 +2250,7 @@ const AdminDashboard = () => {
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
                 <TabsList>
+                  <TabsTrigger value="all">Todos</TabsTrigger>
                   <TabsTrigger value="pending" className="gap-2">
                     <Clock className="w-4 h-4" />
                     Pendentes
@@ -2262,7 +2263,6 @@ const AdminDashboard = () => {
                     <XCircle className="w-4 h-4" />
                     Rejeitados
                   </TabsTrigger>
-                  <TabsTrigger value="all">Todos</TabsTrigger>
                 </TabsList>
                 
                 <Link to="/admin/add-project">
