@@ -60,7 +60,8 @@ import {
   Globe,
   Settings2,
   Save,
-  Lightbulb
+  Lightbulb,
+  Twitter
 } from "lucide-react";
 
 interface Project {
@@ -178,6 +179,7 @@ const AdminDashboard = () => {
     instagram: SocialLink;
     linkedin: SocialLink;
     youtube: SocialLink;
+    twitter: SocialLink;
     imdb: SocialLink;
     website: SocialLink;
   }
@@ -186,6 +188,7 @@ const AdminDashboard = () => {
     instagram: { enabled: true, url: "https://www.instagram.com/portobellofilmes/" },
     linkedin: { enabled: false, url: "" },
     youtube: { enabled: false, url: "" },
+    twitter: { enabled: false, url: "" },
     imdb: { enabled: false, url: "" },
     website: { enabled: false, url: "" }
   });
@@ -1805,6 +1808,33 @@ const AdminDashboard = () => {
                       value={socialLinks.youtube.url}
                       onChange={(e) => 
                         setSocialLinks(prev => ({ ...prev, youtube: { ...prev.youtube, url: e.target.value } }))
+                      }
+                    />
+                  )}
+                </div>
+
+                {/* Twitter/X */}
+                <div className="p-4 border rounded-lg space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-black flex items-center justify-center">
+                        <Twitter className="w-4 h-4 text-white" />
+                      </div>
+                      <span className="font-medium">X / Twitter</span>
+                    </div>
+                    <Switch
+                      checked={socialLinks.twitter?.enabled || false}
+                      onCheckedChange={(checked) => 
+                        setSocialLinks(prev => ({ ...prev, twitter: { ...prev.twitter, enabled: checked } }))
+                      }
+                    />
+                  </div>
+                  {socialLinks.twitter?.enabled && (
+                    <Input
+                      placeholder="https://x.com/seuusuario/"
+                      value={socialLinks.twitter?.url || ""}
+                      onChange={(e) => 
+                        setSocialLinks(prev => ({ ...prev, twitter: { ...prev.twitter, url: e.target.value } }))
                       }
                     />
                   )}
