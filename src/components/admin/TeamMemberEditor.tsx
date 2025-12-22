@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import imdbLogo from "@/assets/imdb-logo.png";
 
 export interface TeamMemberData {
   nome: string;
@@ -32,6 +33,7 @@ export interface TeamMemberData {
     facebook?: string;
     youtube?: string;
     twitter?: string;
+    imdb?: string;
     website?: string;
   };
   curriculum_url?: string;
@@ -282,11 +284,20 @@ export const TeamMemberEditor = ({ members, onChange }: TeamMemberEditorProps) =
                   />
                 </div>
                 <div className="flex items-center gap-2">
+                  <img src={imdbLogo} alt="IMDb" className="w-4 h-4 shrink-0 rounded-sm" />
+                  <Input
+                    value={member.social_links?.imdb || ""}
+                    onChange={(e) => updateSocialLink(index, "imdb", e.target.value)}
+                    placeholder="https://www.imdb.com/nam..."
+                    className="flex-1"
+                  />
+                </div>
+                <div className="flex items-center gap-2">
                   <Globe className="w-4 h-4 text-emerald-500 shrink-0" />
                   <Input
                     value={member.social_links?.website || ""}
                     onChange={(e) => updateSocialLink(index, "website", e.target.value)}
-                    placeholder="https://... ou imdb.com/..."
+                    placeholder="https://seusite.com"
                     className="flex-1"
                   />
                 </div>

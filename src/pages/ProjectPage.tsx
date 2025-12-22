@@ -11,7 +11,7 @@ import { getCategoryLabel } from "@/components/admin/CategoriesMultiSelect";
 import { getIncentiveLawLabel } from "@/components/admin/IncentiveLawsMultiSelect";
 import { getStageLabel } from "@/components/admin/StagesMultiSelect";
 import jsPDF from "jspdf";
-import imdbIcon from "@/assets/imdb-icon.png";
+import imdbLogo from "@/assets/imdb-logo.png";
 import { 
   ArrowLeft, 
   MapPin, 
@@ -617,20 +617,14 @@ const ProjectPage = () => {
                             <Twitter className="w-3 h-3 text-sky-500" />
                           </a>
                         )}
-                        {member.social_links?.website && (
-                          member.social_links.website.includes('imdb.com') ? (
-                            <a href={member.social_links.website.startsWith('http') ? member.social_links.website : `https://${member.social_links.website}`} target="_blank" rel="noopener noreferrer" className="w-6 h-6 rounded-full bg-[#F5C518]/10 flex items-center justify-center hover:bg-[#F5C518]/20 transition-colors" title="IMDb">
-                              <img src={imdbIcon} alt="IMDb" className="w-4 h-4 rounded-full object-contain" />
-                            </a>
-                          ) : (
-                            <a href={member.social_links.website.startsWith('http') ? member.social_links.website : `https://${member.social_links.website}`} target="_blank" rel="noopener noreferrer" className="w-6 h-6 rounded-full bg-emerald-500/10 flex items-center justify-center hover:bg-emerald-500/20 transition-colors">
-                              <Globe className="w-3 h-3 text-emerald-500" />
-                            </a>
-                          )
-                        )}
                         {member.social_links?.imdb && (
                           <a href={member.social_links.imdb.startsWith('http') ? member.social_links.imdb : `https://www.imdb.com/name/${member.social_links.imdb}`} target="_blank" rel="noopener noreferrer" className="w-6 h-6 rounded-full bg-[#F5C518]/10 flex items-center justify-center hover:bg-[#F5C518]/20 transition-colors" title="IMDb">
-                            <img src={imdbIcon} alt="IMDb" className="w-4 h-4 rounded-full object-contain" />
+                            <img src={imdbLogo} alt="IMDb" className="w-4 h-4 rounded-sm object-contain" />
+                          </a>
+                        )}
+                        {member.social_links?.website && (
+                          <a href={member.social_links.website.startsWith('http') ? member.social_links.website : `https://${member.social_links.website}`} target="_blank" rel="noopener noreferrer" className="w-6 h-6 rounded-full bg-emerald-500/10 flex items-center justify-center hover:bg-emerald-500/20 transition-colors" title="Site Pessoal">
+                            <Globe className="w-3 h-3 text-emerald-500" />
                           </a>
                         )}
                         {member.curriculum_url && (
