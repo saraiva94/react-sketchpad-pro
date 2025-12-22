@@ -623,9 +623,15 @@ const ProjectPage = () => {
                           </a>
                         )}
                         {member.social_links?.website && (
-                          <a href={member.social_links.website.startsWith('http') ? member.social_links.website : `https://${member.social_links.website}`} target="_blank" rel="noopener noreferrer" className="w-6 h-6 rounded-full bg-emerald-500/10 flex items-center justify-center hover:bg-emerald-500/20 transition-colors" title="Site Pessoal">
-                            <Globe className="w-3 h-3 text-emerald-500" />
-                          </a>
+                          member.social_links.website.includes('imdb.com') ? (
+                            <a href={member.social_links.website.startsWith('http') ? member.social_links.website : `https://${member.social_links.website}`} target="_blank" rel="noopener noreferrer" className="w-6 h-6 rounded-full bg-[#F5C518]/10 flex items-center justify-center hover:bg-[#F5C518]/20 transition-colors" title="IMDb">
+                              <img src={imdbLogo} alt="IMDb" className="w-4 h-4 rounded-sm object-contain" />
+                            </a>
+                          ) : (
+                            <a href={member.social_links.website.startsWith('http') ? member.social_links.website : `https://${member.social_links.website}`} target="_blank" rel="noopener noreferrer" className="w-6 h-6 rounded-full bg-emerald-500/10 flex items-center justify-center hover:bg-emerald-500/20 transition-colors" title="Site Pessoal">
+                              <Globe className="w-3 h-3 text-emerald-500" />
+                            </a>
+                          )
                         )}
                         {member.curriculum_url && (
                           <a href={member.curriculum_url} target="_blank" rel="noopener noreferrer" className="w-6 h-6 rounded-full bg-orange-500/10 flex items-center justify-center hover:bg-orange-500/20 transition-colors" title="Baixar Currículo">
