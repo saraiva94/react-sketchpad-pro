@@ -615,8 +615,11 @@ const ProjectPage = () => {
                           </a>
                         )}
                         {member.social_links?.imdb && (
-                          <a href={member.social_links.imdb.startsWith('http') ? member.social_links.imdb : `https://www.imdb.com/name/${member.social_links.imdb}`} target="_blank" rel="noopener noreferrer" className="w-6 h-6 rounded-full bg-[#F5C518] flex items-center justify-center hover:opacity-80 transition-opacity" title="IMDb">
-                            <span className="text-black font-bold text-[6px]">IMDb</span>
+                          <a href={member.social_links.imdb.startsWith('http') ? member.social_links.imdb : `https://www.imdb.com/name/${member.social_links.imdb}`} target="_blank" rel="noopener noreferrer" className="w-6 h-6 rounded-full bg-[#F5C518]/10 flex items-center justify-center hover:bg-[#F5C518]/20 transition-colors" title="IMDb">
+                            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="#F5C518">
+                              <path d="M14.31 9.588v.005c-.077-.048-.227-.07-.42-.07v4.815c.27 0 .44-.06.5-.165.062-.104.092-.405.092-.9v-2.953c0-.285-.002-.485-.012-.6-.008-.11-.04-.206-.094-.285a.328.328 0 00-.066.153zM22.416 0H1.62C.742.06.06.744 0 1.596v20.844c.058.848.744 1.5 1.59 1.56h20.826c.877-.058 1.527-.74 1.584-1.596V1.596A1.627 1.627 0 0022.416 0zM4.792 14.898H3.167v-5.9h1.625v5.9zm6.615 0H9.943v-3.28l-.478 3.28H8.333l-.504-3.18v3.18h-1.46v-5.9h2.151l.347 2.46.363-2.46h2.177v5.9zm3.357-.756c-.13.208-.322.362-.555.44-.233.08-.605.12-1.112.12H12.1v-5.9h1.176c.477 0 .81.014 1.01.04.203.03.39.094.562.2.173.102.3.26.37.46.084.2.124.52.124.96v2.453c0 .46-.03.8-.1 1.03-.04.23-.136.393-.27.6-.025.038-.05.077-.08.117zm4.9-1.43c0 .49-.04.82-.113 1.05-.073.2-.195.4-.345.5a1.11 1.11 0 01-.485.21 4.343 4.343 0 01-.822.06h-1.72v-5.9h1.68c.56 0 .958.02 1.21.07.247.05.465.15.65.29a.96.96 0 01.333.49c.063.204.095.537.095 1.02v2.21z"/>
+                              <path d="M18.916 10.16c-.06-.008-.167-.012-.327-.012v1.9c.203 0 .34-.023.406-.07.067-.046.1-.177.1-.393v-1.12c0-.14-.013-.232-.04-.275a.194.194 0 00-.14-.03zm0 2.822c-.04-.012-.14-.018-.3-.018v1.782h.27c.185 0 .305-.033.36-.096.055-.063.083-.237.083-.51v-.498c0-.27-.027-.45-.08-.53-.05-.087-.152-.13-.333-.13z"/>
+                            </svg>
                           </a>
                         )}
                         {member.curriculum_url && (
