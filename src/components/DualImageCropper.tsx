@@ -603,14 +603,6 @@ export const DualImageCropper = ({
                 onTouchMove={handleDragMove}
                 onTouchEnd={handleDragEnd}
               >
-                {/* Move indicator */}
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <div className="bg-black/50 text-white px-3 py-1.5 rounded-full text-sm flex items-center gap-2">
-                    <Move className="w-4 h-4" />
-                    Arraste
-                  </div>
-                </div>
-                
                 {/* Corner indicators */}
                 <div className="absolute top-0 left-0 w-4 h-4 border-t-4 border-l-4 border-primary" />
                 <div className="absolute top-0 right-0 w-4 h-4 border-t-4 border-r-4 border-primary" />
