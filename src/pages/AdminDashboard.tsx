@@ -1268,8 +1268,8 @@ const AdminDashboard = () => {
                 size="sm" 
                 className="rainbow-border-glow"
               >
-                <Lightbulb className="w-4 h-4 mr-2" />
-                Projetos em Captação
+              <Lightbulb className="w-4 h-4 mr-2" />
+                Projetos
               </Button>
             </Link>
             <Button variant="outline" size="sm" onClick={handleSignOut}>
