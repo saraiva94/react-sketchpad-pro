@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
+import { useLanguage } from "@/hooks/useLanguage";
 import { getCategoryLabel } from "@/components/admin/CategoriesMultiSelect";
 import { getIncentiveLawLabel } from "@/components/admin/IncentiveLawsMultiSelect";
 import { getStageLabel } from "@/components/admin/StagesMultiSelect";
@@ -115,6 +116,7 @@ interface Contrapartida {
 const ProjectPage = () => {
   const { id } = useParams();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [project, setProject] = useState<Project | null>(null);
   const [members, setMembers] = useState<ProjectMember[]>([]);
   const [loading, setLoading] = useState(true);
@@ -409,7 +411,7 @@ const ProjectPage = () => {
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Carregando projeto...</p>
+          <p className="text-muted-foreground">{t.projectDetails.loadingProject}</p>
         </div>
       </div>
     );
@@ -422,14 +424,14 @@ const ProjectPage = () => {
         <div className="h-20" />
         <main className="container mx-auto px-4 py-16 text-center">
           <Sparkles className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
-          <h1 className="text-2xl font-serif font-bold mb-2">Projeto não encontrado</h1>
+          <h1 className="text-2xl font-serif font-bold mb-2">{t.projectDetails.projectNotFound}</h1>
           <p className="text-muted-foreground mb-6">
-            Este projeto pode não existir ou não estar aprovado ainda.
+            {t.projectDetails.projectNotFoundDesc}
           </p>
           <Link to="/porto-de-ideias">
             <Button>
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Voltar aos Projetos
+              {t.projectDetails.backToProjects}
             </Button>
           </Link>
         </main>
@@ -447,7 +449,7 @@ const ProjectPage = () => {
       <Navbar showNav={false} rightContent={
         <Link to="/porto-de-ideias" className="flex items-center text-muted-foreground hover:text-primary transition-colors">
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Voltar
+          {t.common.back}
         </Link>
       } />
       <div className="h-20" />
@@ -482,7 +484,7 @@ const ProjectPage = () => {
                 )}
                 {project.has_incentive_law && (
                   <Badge className="bg-violet-500/80 hover:bg-violet-500 text-white border-0">
-                    <Shield className="w-3 h-3 mr-1" />Lei de Incentivo
+                    <Shield className="w-3 h-3 mr-1" />{t.projects.incentiveLaw}
                   </Badge>
                 )}
               </div>
@@ -494,13 +496,13 @@ const ProjectPage = () => {
                 >
                   <Button variant="secondary" className="rounded-full">
                     <Download className="w-4 h-4 mr-2" />
-                    Baixar apresentação em PDF
+                    {t.projectDetails.downloadPdf}
                   </Button>
                 </a>
               ) : (
                 <Button variant="secondary" className="rounded-full" onClick={handleDownloadPDF}>
                   <Download className="w-4 h-4 mr-2" />
-                  Baixar apresentação em PDF
+                  {t.projectDetails.generatePdf}
                 </Button>
               )}
             </div>
@@ -533,15 +535,15 @@ const ProjectPage = () => {
 
             {/* Synopsis and Description */}
             <section>
-              <h2 className="text-2xl font-serif font-bold text-foreground mb-6">Sobre o Projeto</h2>
+              <h2 className="text-2xl font-serif font-bold text-foreground mb-6">{t.projectDetails.description}</h2>
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-lg font-semibold text-foreground mb-3">Sinopse</h3>
+                  <h3 className="text-lg font-semibold text-foreground mb-3">{t.projectDetails.synopsis}</h3>
                   <p className="text-muted-foreground text-lg leading-relaxed">{project.synopsis}</p>
                 </div>
                 {project.description && (
                   <div>
-                    <h3 className="text-lg font-semibold text-foreground mb-3">Descrição Completa</h3>
+                    <h3 className="text-lg font-semibold text-foreground mb-3">{t.projectDetails.description}</h3>
                     <p className="text-muted-foreground leading-relaxed whitespace-pre-line">{project.description}</p>
                   </div>
                 )}

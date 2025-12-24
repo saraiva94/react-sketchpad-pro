@@ -12,6 +12,7 @@ import { LazyFloatingOrbs } from "@/components/LazyFloatingOrbs";
 import { ShinyText } from "@/components/ShinyText";
 import { VideoCarousel } from "@/components/VideoCarousel";
 import { useInView } from "@/hooks/useInView";
+import { useLanguage } from "@/hooks/useLanguage";
 import { 
   Users, 
   Target, 
@@ -146,6 +147,7 @@ interface VideoItem {
 }
 
 const HomePage = () => {
+  const { t } = useLanguage();
   const [featuredProjects, setFeaturedProjects] = useState<Project[]>([]);
   const [loadingProjects, setLoadingProjects] = useState(true);
   const [stats, setStats] = useState<ProjectStats>({
@@ -628,7 +630,7 @@ const HomePage = () => {
                     <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center border border-border shadow-lg animate-pulse">
                       <Play className="w-12 h-12 text-primary-foreground ml-1" />
                     </div>
-                    <p className="text-muted-foreground text-sm animate-pulse">Carregando...</p>
+                    <p className="text-muted-foreground text-sm animate-pulse">{t.common.loading}</p>
                   </div>
                   {/* Decorative corners */}
                   <div className="absolute top-4 left-4 w-12 h-12 border-l-2 border-t-2 border-primary/50 rounded-tl-lg" />
@@ -647,25 +649,25 @@ const HomePage = () => {
         <section className="relative">
           <AnimatedStats stats={[
             {
-              label: "Projetos Cadastrados",
+              label: t.home.registeredProjects,
               value: stats.totalProjects,
               icon: <Briefcase className="w-8 h-8 text-white" />,
               color: "bg-gradient-to-br from-primary to-blue-600"
             },
             {
-              label: "Criadores Culturais",
+              label: t.home.culturalCreators,
               value: stats.uniqueCreators,
               icon: <Users className="w-8 h-8 text-white" />,
               color: "bg-gradient-to-br from-emerald-500 to-emerald-600"
             },
             {
-              label: "Projetos Aprovados",
+              label: t.home.approvedProjects,
               value: stats.approvedProjects,
               icon: <Award className="w-8 h-8 text-white" />,
               color: "bg-gradient-to-br from-violet-500 to-violet-600"
             },
             {
-              label: "Taxa de Sucesso",
+              label: t.home.successRate,
               value: stats.successRate,
               suffix: "%",
               icon: <TrendingUp className="w-8 h-8 text-white" />,
@@ -690,7 +692,7 @@ const HomePage = () => {
           <div className={`text-center mb-12 transition-all duration-700 ${quemSomosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
             <ShinyText className="inline-block" delay={200}>
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif font-semibold text-foreground mb-6 decorative-line">
-                Quem Somos
+                {t.home.whoWeAre}
               </h2>
             </ShinyText>
           </div>
@@ -814,7 +816,7 @@ const HomePage = () => {
                             {project.synopsis}
                           </p>
                           <div className="flex items-center gap-2 mt-4 text-primary font-medium text-sm">
-                            <span>Conhecer projeto</span>
+                            <span>{t.home.knowProject}</span>
                             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                           </div>
                         </div>

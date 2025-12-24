@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Send, CheckCircle2, ArrowLeft, Plus, X, Upload, Image } from "lucide-react";
+import { useLanguage } from "@/hooks/useLanguage";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -37,6 +38,7 @@ interface TeamMember {
 const SubmitProjectPage = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { t } = useLanguage();
   
   // Imagem de Capa
   const [thumbnailBlob, setThumbnailBlob] = useState<Blob | null>(null);
@@ -325,19 +327,19 @@ const SubmitProjectPage = () => {
             className="inline-flex items-center text-muted-foreground hover:text-foreground mb-6"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Voltar
+            {t.common.back}
           </button>
 
           <Card className="shadow-lg">
             <CardHeader className="text-center space-y-4">
               <CardTitle className="text-3xl font-bold text-foreground">
-                Cadastrar Projeto Cultural
+                {t.submit.registerCulturalProject}
               </CardTitle>
               <CardDescription className="text-muted-foreground">
-                Preencha o formulário abaixo para submeter seu projeto para análise
+                {t.submit.fillFormBelow}
               </CardDescription>
               <div className="pt-2">
-                <p className="text-sm text-muted-foreground mb-3">Siga-nos nas redes sociais</p>
+                <p className="text-sm text-muted-foreground mb-3">{t.submit.followUs}</p>
                 <SocialLinksDisplay />
               </div>
             </CardHeader>
@@ -347,10 +349,10 @@ const SubmitProjectPage = () => {
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-foreground border-b pb-2 flex items-center gap-2">
                     <Image className="w-5 h-5" />
-                    Imagem de Capa do Projeto
+                    {t.submit.coverImage}
                   </h3>
                   <p className="text-sm text-muted-foreground">
-                    Adicione uma imagem que representará seu projeto. Você pode ajustar o enquadramento antes de salvar.
+                    {t.submit.coverImageDesc}
                   </p>
                   <ImageCropper
                     onImageCropped={handleImageCropped}
@@ -363,12 +365,12 @@ const SubmitProjectPage = () => {
                 {/* Responsável */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-foreground border-b pb-2">
-                    Informações do Responsável
+                    {t.submit.responsibleInfo}
                   </h3>
                   
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="responsavelNome">Nome Completo *</Label>
+                      <Label htmlFor="responsavelNome">{t.submit.fullName} *</Label>
                       <Input
                         id="responsavelNome"
                         value={responsavelNome}
@@ -382,7 +384,7 @@ const SubmitProjectPage = () => {
                     </div>
 
                     <div>
-                      <Label htmlFor="responsavelTelefone">Telefone *</Label>
+                      <Label htmlFor="responsavelTelefone">{t.submit.phone} *</Label>
                       <Input
                         id="responsavelTelefone"
                         value={responsavelTelefone}
@@ -397,7 +399,7 @@ const SubmitProjectPage = () => {
                   </div>
 
                   <div>
-                    <Label htmlFor="responsavelEmail">Email *</Label>
+                    <Label htmlFor="responsavelEmail">{t.submit.email} *</Label>
                     <Input
                       id="responsavelEmail"
                       type="email"
@@ -751,12 +753,12 @@ const SubmitProjectPage = () => {
                     {submitting ? (
                       <>
                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                        Enviando...
+                        {t.submit.submitting}
                       </>
                     ) : (
                       <>
                         <Send className="w-4 h-4 mr-2" />
-                        Enviar Projeto
+                        {t.submit.submit}
                       </>
                     )}
                   </Button>
@@ -774,15 +776,14 @@ const SubmitProjectPage = () => {
             <div className="mx-auto mb-4 w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
               <CheckCircle2 className="w-10 h-10 text-primary" />
             </div>
-            <DialogTitle className="text-2xl">Projeto Enviado com Sucesso!</DialogTitle>
+            <DialogTitle className="text-2xl">{t.submit.successTitle}</DialogTitle>
             <DialogDescription className="text-base pt-2">
-              Sua solicitação foi recebida e será analisada em breve. Entraremos em contato
-              através do email informado.
+              {t.submit.successMessage}
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-center pt-4">
             <Button onClick={() => setShowSuccessModal(false)} size="lg">
-              Fechar
+              {t.common.confirm}
             </Button>
           </div>
         </DialogContent>

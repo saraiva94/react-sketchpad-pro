@@ -12,6 +12,7 @@ import { ProjectGrid } from "@/components/porto-ideias/ProjectGrid";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchProjectLocations } from "@/components/admin/DynamicLocationSelect";
 import { useInView } from "@/hooks/useInView";
+import { useLanguage } from "@/hooks/useLanguage";
 import { 
   Search,
   MapPin,
@@ -103,6 +104,7 @@ const sortOptions = [
 
 
 const PortoDeIdeiasPage = () => {
+  const { t } = useLanguage();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [displaySlots, setDisplaySlots] = useState(6); // Default 6 project slots (2 rows of 3)
@@ -362,7 +364,7 @@ const PortoDeIdeiasPage = () => {
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <Input
           type="text"
-          placeholder="Buscar projetos..."
+          placeholder={t.projects.search}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="pl-9 rounded-full"
@@ -372,7 +374,7 @@ const PortoDeIdeiasPage = () => {
       {/* Project Type */}
       <Select value={selectedCategory} onValueChange={setSelectedCategory}>
         <SelectTrigger className={`rounded-full ${isMobile ? 'w-full' : 'w-fit'}`}>
-          <SelectValue placeholder="Tipo de Projeto" />
+          <SelectValue placeholder={t.projects.projectType} />
         </SelectTrigger>
         <SelectContent position="popper" sideOffset={4}>
           {projectTypes.map(type => (
@@ -385,7 +387,7 @@ const PortoDeIdeiasPage = () => {
       {/* Stage */}
       <Select value={selectedStage} onValueChange={setSelectedStage}>
         <SelectTrigger className={`rounded-full ${isMobile ? 'w-full' : 'w-fit'}`}>
-          <SelectValue placeholder="Estágio" />
+          <SelectValue placeholder={t.projects.stage} />
         </SelectTrigger>
         <SelectContent position="popper" sideOffset={4}>
           {projectStages.map(stage => (
@@ -397,7 +399,7 @@ const PortoDeIdeiasPage = () => {
       {/* Incentive Law */}
       <Select value={selectedIncentiveLaw} onValueChange={setSelectedIncentiveLaw}>
         <SelectTrigger className={`rounded-full ${isMobile ? 'w-full' : 'w-fit'}`}>
-          <SelectValue placeholder="Lei de Incentivo" />
+          <SelectValue placeholder={t.projects.incentiveLaw} />
         </SelectTrigger>
         <SelectContent position="popper" sideOffset={4}>
           {incentiveLaws.map(law => (
@@ -421,7 +423,7 @@ const PortoDeIdeiasPage = () => {
       {/* Sort */}
       <Select value={sortBy} onValueChange={setSortBy}>
         <SelectTrigger className={`rounded-full ${isMobile ? 'w-full' : 'w-fit'}`}>
-          <SelectValue placeholder="Ordenar" />
+          <SelectValue placeholder={t.projects.sortBy} />
         </SelectTrigger>
         <SelectContent position="popper" sideOffset={4}>
           {sortOptions.map(opt => (
@@ -442,7 +444,7 @@ const PortoDeIdeiasPage = () => {
           className={`rounded-full ${isMobile ? 'w-full' : ''}`}
         >
           <X className="w-4 h-4 mr-1" />
-          Limpar Filtros
+          {t.projects.clearFilters}
         </Button>
       )}
     </div>
@@ -502,7 +504,7 @@ const PortoDeIdeiasPage = () => {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 type="text"
-                placeholder="Buscar projetos..."
+                placeholder={t.projects.search}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-9 rounded-full"
@@ -523,7 +525,7 @@ const PortoDeIdeiasPage = () => {
               </SheetTrigger>
               <SheetContent side="bottom" className="h-[80vh] rounded-t-2xl">
                 <SheetHeader className="mb-6">
-                  <SheetTitle className="text-left">Filtros</SheetTitle>
+                  <SheetTitle className="text-left">{t.projects.filters}</SheetTitle>
                 </SheetHeader>
                 <div className="overflow-y-auto h-[calc(100%-80px)]">
                   <FilterControls isMobile />
