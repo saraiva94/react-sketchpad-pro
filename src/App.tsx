@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import HomePage from "./pages/HomePage";
-import AuthPage from "./pages/AuthPage";
+import LoginPage from "./pages/LoginPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminAddProjectPage from "./pages/AdminAddProjectPage";
 import SubmitProjectPage from "./pages/SubmitProjectPage";
@@ -30,7 +30,7 @@ const App = () => (
           <ScrollToTop />
           <Routes>
             <Route path="/" element={<HomePage />} />
-            <Route path="/login" element={<AuthPage />} />
+            <Route path="/login" element={<LoginPage />} />
             <Route path="/auth" element={<Navigate to="/login" replace />} />
 
             <Route path="/admin" element={<AdminDashboard />} />
