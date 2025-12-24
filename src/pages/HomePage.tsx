@@ -11,6 +11,7 @@ import { LazyArtisticBackground } from "@/components/LazyArtisticBackground";
 import { LazyFloatingOrbs } from "@/components/LazyFloatingOrbs";
 import { ShinyText } from "@/components/ShinyText";
 import { VideoCarousel } from "@/components/VideoCarousel";
+import { TranslatedProjectCard } from "@/components/TranslatedProjectCard";
 import { useInView } from "@/hooks/useInView";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useAutoTranslate } from "@/hooks/useAutoTranslate";
@@ -778,64 +779,24 @@ const HomePage = () => {
                 const project = item.data;
                 const isExample = item.type === 'example';
                 const linkUrl = isExample ? (project as typeof exampleProjects[0]).link : `/project/${project.id}`;
-                // Animação: cards da esquerda vêm da esquerda, cards da direita vêm da direita
                 const isLeftCard = index % 2 === 0;
                 
                 return (
-                  <div 
+                  <TranslatedProjectCard
                     key={project.id}
-                    className={`transition-all duration-700 ease-out ${
-                      heroReady && portoIdeiasInView 
-                        ? 'opacity-100 translate-x-0' 
-                        : `opacity-0 ${isLeftCard ? '-translate-x-20' : 'translate-x-20'}`
-                    }`}
-                    style={{ transitionDelay: heroReady && portoIdeiasInView ? `${Math.floor(index / 2) * 150}ms` : '0ms' }}
-                  >
-                    <Link
-                      to={linkUrl}
-                      className="block group h-full"
-                    >
-                      <div className="card-solid bg-card border border-border rounded-2xl overflow-hidden shadow-2xl group-hover:shadow-3xl group-hover:scale-[1.02] transition-all duration-300 h-full flex flex-col">
-                        {/* Image */}
-                        <div className="relative h-48 md:h-56 overflow-hidden">
-                          {project.image_url ? (
-                            <img
-                              src={project.image_url}
-                              alt={project.title}
-                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                            />
-                          ) : (
-                            <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-                              <span className="text-4xl font-serif font-bold text-primary/50">
-                                {getInitials(project.title)}
-                              </span>
-                            </div>
-                          )}
-                          {/* Overlay gradient */}
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                          {/* Type badge */}
-                          <div className="absolute top-3 left-3">
-                            <Badge className="bg-primary/90 text-primary-foreground backdrop-blur-sm">
-                              {project.project_type}
-                            </Badge>
-                          </div>
-                        </div>
-                        {/* Card Content */}
-                        <div className="p-5 flex-1 flex flex-col">
-                          <h4 className="text-lg font-semibold text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-1">
-                            {project.title}
-                          </h4>
-                          <p className="text-sm text-muted-foreground line-clamp-3 flex-1">
-                            {project.synopsis}
-                          </p>
-                          <div className="flex items-center gap-2 mt-4 text-primary font-medium text-sm">
-                            <span>{t.home.knowProject}</span>
-                            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                          </div>
-                        </div>
-                      </div>
-                    </Link>
-                  </div>
+                    project={{
+                      id: project.id,
+                      title: project.title,
+                      synopsis: project.synopsis,
+                      project_type: project.project_type,
+                      image_url: project.image_url,
+                    }}
+                    linkUrl={linkUrl}
+                    isLeftCard={isLeftCard}
+                    heroReady={heroReady}
+                    inView={portoIdeiasInView}
+                    index={index}
+                  />
                 );
               })}
             </div>

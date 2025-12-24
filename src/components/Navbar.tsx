@@ -188,6 +188,12 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
           </nav>
         )}
 
+        {/* Desktop Navigation for other pages (with Language Selector) */}
+        {showNav && currentPage !== "home" && (
+          <nav className="hidden md:flex items-center gap-2">
+            <LanguageSelector />
+          </nav>
+        )}
         
         {/* Right Content (for pages without nav) */}
         {!showNav && rightContent && (
@@ -239,50 +245,52 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
                   </Link>
                   
                   {/* Section Links for Mobile */}
-                  {currentPage === "home" && (
-                    <div className="flex flex-col gap-2 mt-4 border-t border-border pt-4">
-                      {/* Language Selector Mobile */}
-                       <div className="flex items-center justify-between px-3 py-2">
-                         <span className="text-sm text-muted-foreground">{t.common.language}</span>
-                         <LanguageSelector />
-                       </div>
+                  <div className="flex flex-col gap-2 mt-4 border-t border-border pt-4">
+                    {/* Language Selector Mobile */}
+                     <div className="flex items-center justify-between px-3 py-2">
+                       <span className="text-sm text-muted-foreground">{t.common.language}</span>
+                       <LanguageSelector />
+                     </div>
 
-                      {/* Projetos em Captação Link with Lightbulb - Rainbow Mobile */}
-                      <Link
-                        to="/porto-de-ideias"
-                        onClick={handleNavClick}
-                        className="group flex items-center gap-2 px-4 py-3 text-lg font-semibold transition-all duration-300 rounded-xl rainbow-border-glow rainbow-text-hover"
-                      >
-                        <Lightbulb className="w-6 h-6 text-yellow-400 group-hover:fill-yellow-400 group-hover:drop-shadow-[0_0_16px_rgba(250,204,21,1)] transition-all duration-300" />
-                        <span className="text-foreground">{t.nav.projects}</span>
-                      </Link>
-                      
-                      {sections.map((section) => (
-                        <button
-                          key={section.id}
-                          onClick={() => scrollToSection(section.id)}
-                          className={`text-left px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
-                            activeSection === section.id
-                              ? "text-foreground bg-accent/15"
-                              : "text-muted-foreground hover:text-foreground hover:bg-accent/10"
-                          }`}
-                        >
-                          {section.label}
-                        </button>
-                      ))}
-
-                      {/* Admin Button - Only visible for admins */}
-                      {isAdmin && (
+                    {currentPage === "home" && (
+                      <>
+                        {/* Projetos em Captação Link with Lightbulb - Rainbow Mobile */}
                         <Link
-                          to="/admin"
+                          to="/porto-de-ideias"
                           onClick={handleNavClick}
-                          className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent/10 rounded-lg transition-colors mt-2 border-t border-border pt-4"
+                          className="group flex items-center gap-2 px-4 py-3 text-lg font-semibold transition-all duration-300 rounded-xl rainbow-border-glow rainbow-text-hover"
                         >
-                          <Settings className="w-4 h-4" />
+                          <Lightbulb className="w-6 h-6 text-yellow-400 group-hover:fill-yellow-400 group-hover:drop-shadow-[0_0_16px_rgba(250,204,21,1)] transition-all duration-300" />
+                          <span className="text-foreground">{t.nav.projects}</span>
                         </Link>
-                      )}
-                    </div>
-                  )}
+                        
+                        {sections.map((section) => (
+                          <button
+                            key={section.id}
+                            onClick={() => scrollToSection(section.id)}
+                            className={`text-left px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                              activeSection === section.id
+                                ? "text-foreground bg-accent/15"
+                                : "text-muted-foreground hover:text-foreground hover:bg-accent/10"
+                            }`}
+                          >
+                            {section.label}
+                          </button>
+                        ))}
+                      </>
+                    )}
+
+                    {/* Admin Button - Only visible for admins */}
+                    {isAdmin && (
+                      <Link
+                        to="/admin"
+                        onClick={handleNavClick}
+                        className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent/10 rounded-lg transition-colors mt-2 border-t border-border pt-4"
+                      >
+                        <Settings className="w-4 h-4" />
+                      </Link>
+                    )}
+                  </div>
                 </nav>
               </SheetContent>
             </Sheet>
