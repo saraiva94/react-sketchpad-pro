@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -8,8 +8,23 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
+  // Verifica localStorage para login simples de admin
+  const checkLocalStorageAdmin = useCallback(() => {
+    const isLoggedIn = localStorage.getItem("isAdminLoggedIn") === "true";
+    setIsAdmin(isLoggedIn);
+    return isLoggedIn;
+  }, []);
+
   useEffect(() => {
-    // Set up auth state listener FIRST
+    // Primeiro verifica localStorage
+    const localAdmin = checkLocalStorageAdmin();
+    
+    if (localAdmin) {
+      setLoading(false);
+      return;
+    }
+
+    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setSession(session);
@@ -22,12 +37,13 @@ export function useAuth() {
             checkAdminRole(session.user.id);
           }, 0);
         } else {
-          setIsAdmin(false);
+          // Verifica localStorage novamente
+          checkLocalStorageAdmin();
         }
       }
     );
 
-    // THEN check for existing session
+    // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
@@ -38,8 +54,19 @@ export function useAuth() {
       }
     });
 
-    return () => subscription.unsubscribe();
-  }, []);
+    // Listen for localStorage changes (para sincronizar entre abas)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "isAdminLoggedIn") {
+        checkLocalStorageAdmin();
+      }
+    };
+    window.addEventListener("storage", handleStorageChange);
+
+    return () => {
+      subscription.unsubscribe();
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, [checkLocalStorageAdmin]);
 
   const checkAdminRole = async (userId: string) => {
     const { data } = await supabase
@@ -77,6 +104,11 @@ export function useAuth() {
   };
 
   const signOut = async () => {
+    // Limpa localStorage
+    localStorage.removeItem("isAdminLoggedIn");
+    setIsAdmin(false);
+    
+    // Também faz signOut do Supabase se houver sessão
     const { error } = await supabase.auth.signOut();
     return { error };
   };

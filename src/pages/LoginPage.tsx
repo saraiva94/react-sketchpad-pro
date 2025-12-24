@@ -8,15 +8,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { Navbar } from "@/components/Navbar";
 import { ArrowLeft, Eye, EyeOff, ShieldCheck } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+
+// Credenciais do admin
+const ADMIN_KEY = "Admin2025";
+const ADMIN_PASSWORD = "administradorpi2025";
 
 const schema = z.object({
-  email: z.string().email("Informe um e-mail válido"),
+  key: z.string().min(1, "Informe a chave de acesso"),
   password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
 });
 
 const AuthPage = () => {
-  const [email, setEmail] = useState("");
+  const [key, setKey] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -24,12 +27,12 @@ const AuthPage = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const canSubmit = useMemo(() => email.trim() && password.trim(), [email, password]);
+  const canSubmit = useMemo(() => key.trim() && password.trim(), [key, password]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const parsed = schema.safeParse({ email, password });
+    const parsed = schema.safeParse({ key, password });
     if (!parsed.success) {
       toast({
         title: "Verifique os dados",
@@ -41,51 +44,23 @@ const AuthPage = () => {
 
     setIsLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email: parsed.data.email,
-        password: parsed.data.password,
-      });
-
-      if (error) {
+      // Validar credenciais hardcoded
+      if (parsed.data.key === ADMIN_KEY && parsed.data.password === ADMIN_PASSWORD) {
+        // Marcar como admin logado
+        localStorage.setItem("isAdminLoggedIn", "true");
+        
         toast({
-          title: "Não foi possível entrar",
-          description: error.message,
-          variant: "destructive",
+          title: "Bem-vindo!",
+          description: "Admin autenticado com sucesso.",
         });
-        return;
-      }
-
-      const { data: userData, error: userErr } = await supabase.auth.getUser();
-      if (userErr || !userData.user) {
-        await supabase.auth.signOut();
-        toast({
-          title: "Erro de sessão",
-          description: "Não foi possível validar a sessão. Tente novamente.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const { data: isAdmin, error: roleErr } = await supabase.rpc("has_role", {
-        _user_id: userData.user.id,
-        _role: "admin",
-      });
-
-      if (roleErr || !isAdmin) {
-        await supabase.auth.signOut();
+        navigate("/admin");
+      } else {
         toast({
           title: "Acesso negado",
-          description: "Sua conta não tem permissão de administrador.",
+          description: "Chave ou senha incorretos.",
           variant: "destructive",
         });
-        return;
       }
-
-      toast({
-        title: "Bem-vindo!",
-        description: "Admin autenticado com sucesso.",
-      });
-      navigate("/");
     } finally {
       setIsLoading(false);
     }
@@ -119,14 +94,14 @@ const AuthPage = () => {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">E-mail</Label>
+                <Label htmlFor="key">Chave de Acesso</Label>
                 <Input
-                  id="email"
-                  type="email"
-                  placeholder="admin@exemplo.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  autoComplete="email"
+                  id="key"
+                  type="text"
+                  placeholder="Sua chave de admin"
+                  value={key}
+                  onChange={(e) => setKey(e.target.value)}
+                  autoComplete="username"
                   required
                 />
               </div>
