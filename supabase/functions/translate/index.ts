@@ -96,9 +96,14 @@ Deno.serve(async (req) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
+  // Fail-safe defaults (so the UI never breaks if gateway is down / rate-limited)
+  let targetLanguage: Language | undefined;
+  let value: any = null;
+
   try {
     const body = (await req.json()) as Body;
-    const targetLanguage = body?.targetLanguage;
+    targetLanguage = body?.targetLanguage;
+    value = body?.value;
 
     if (!targetLanguage || (targetLanguage !== "pt" && targetLanguage !== "en" && targetLanguage !== "es")) {
       return new Response(JSON.stringify({ error: "invalid targetLanguage" }), {
@@ -107,7 +112,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    const value = body?.value;
     if (targetLanguage === "pt") {
       return new Response(JSON.stringify({ value }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -120,8 +124,11 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
-    return new Response(JSON.stringify({ error: (e as Error).message }), {
-      status: 500,
+    const message = (e as Error)?.message ?? "Unknown error";
+    console.error("translate function error:", message);
+
+    // IMPORTANT: Always return 200 with original value to avoid crashing the frontend
+    return new Response(JSON.stringify({ value, error: message }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
