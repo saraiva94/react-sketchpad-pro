@@ -75,14 +75,36 @@ export function useAutoTranslate<T>(
           body: { targetLanguage: language, value },
         });
 
-        if (!error && data?.value) {
-          memoryCache.set(cacheKey, data.value);
-          try {
-            localStorage.setItem(cacheKey, JSON.stringify(data.value));
-          } catch {
-            // quota exceeded
+        // Validate response - must have value and be same type as input
+        if (!error && data && typeof data.value !== 'undefined') {
+          const translated = data.value;
+          // Ensure we don't return raw API objects
+          if (typeof value === 'string' && typeof translated === 'string') {
+            memoryCache.set(cacheKey, translated);
+            try {
+              localStorage.setItem(cacheKey, JSON.stringify(translated));
+            } catch {
+              // quota exceeded
+            }
+            setTranslated(translated as T);
+          } else if (typeof value === 'object' && typeof translated === 'object' && translated !== null) {
+            // Validate object doesn't have API metadata keys
+            if (!('targetLanguage' in translated) && !('json' in translated)) {
+              memoryCache.set(cacheKey, translated);
+              try {
+                localStorage.setItem(cacheKey, JSON.stringify(translated));
+              } catch {
+                // quota exceeded
+              }
+              setTranslated(translated as T);
+            } else {
+              // Invalid response, use original
+              setTranslated(value);
+            }
+          } else {
+            // Type mismatch, use original
+            setTranslated(value);
           }
-          setTranslated(data.value as T);
         } else {
           // Fallback: use original
           setTranslated(value);
