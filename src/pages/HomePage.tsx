@@ -669,7 +669,7 @@ const HomePage = () => {
           {stats.totalProjects === 0 && (
             <div className="text-center pb-8 -mt-8">
               <p className="text-sm text-muted-foreground/70 italic">
-                Estatísticas de projetos reais cadastrados na plataforma
+                {t.home.statsNote}
               </p>
             </div>
           )}
