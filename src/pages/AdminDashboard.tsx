@@ -137,7 +137,7 @@ const AdminDashboard = () => {
   const [showDetails, setShowDetails] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
-  const [activeSection, setActiveSection] = useState<"projects" | "requests" | "contacts" | "homepage">("homepage");
+  const [activeSection, setActiveSection] = useState<"projects" | "requests" | "contacts" | "homepage" | "portfolio">("homepage");
   const [statsVisible, setStatsVisible] = useState(true);
   const [loadingSettings, setLoadingSettings] = useState(true);
   const [featuredRefreshKey, setFeaturedRefreshKey] = useState(0);
@@ -1298,7 +1298,21 @@ const AdminDashboard = () => {
             className="rounded-md"
           >
             <Home className="w-4 h-4 mr-2" />
-            Editar Páginas
+            Homepage
+          </Button>
+          <Button 
+            type="button"
+            variant={activeSection === "portfolio" ? "default" : "ghost"}
+            size="sm"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setActiveSection("portfolio");
+            }}
+            className="rounded-md"
+          >
+            <Lightbulb className="w-4 h-4 mr-2" />
+            Portfólio
           </Button>
           <Button 
             type="button"
@@ -1901,8 +1915,14 @@ const AdminDashboard = () => {
               </CardContent>
             </Card>
 
+          </div>
+        )}
+
+        {/* Portfolio Section */}
+        {activeSection === "portfolio" && (
+          <div className="space-y-6">
             {/* Separador - Página de Projetos */}
-            <div className="text-lg font-semibold text-muted-foreground border-b pb-2 mb-4 mt-8">
+            <div className="text-lg font-semibold text-muted-foreground border-b pb-2 mb-4">
               📄 Página de Projetos
             </div>
 
@@ -1917,7 +1937,7 @@ const AdminDashboard = () => {
             {/* Porto de Ideias Header Editor */}
             <PortoIdeiasHeaderEditor />
 
-            {/* 7. Cards Porto de Ideias */}
+            {/* Cards Porto de Ideias */}
             <PortoIdeiasCardsManager 
               projects={projects.filter(p => p.status === "approved")}
               onFeaturedChange={() => setFeaturedRefreshKey(prev => prev + 1)}
