@@ -101,61 +101,6 @@ const sortOptions = [
   { value: "budget-desc", label: "Maior Orçamento" }
 ];
 
-// Example project data for placeholder cards
-const exampleProjects = [
-  {
-    id: "exemplo-cultura-legado",
-    title: "Sua Cultura, Seu Legado",
-    synopsis: "Cada projeto cultural conta uma história única. Seja parte dessa rede de criadores que estão transformando o cenário cultural brasileiro.",
-    emoji: "🎭",
-    badge: "Inspire",
-    badgeVariant: "secondary" as const,
-    link: "/exemplo/cultura-legado",
-    gradientClass: "from-accent to-primary",
-    emojiBgClass: "bg-accent",
-    footerContent: <span className="text-sm text-muted-foreground">Projeto exemplo</span>,
-  },
-  {
-    id: "exemplo-investidores-aguardam",
-    title: "Investidores Aguardam",
-    synopsis: "Uma rede de investidores e patrocinadores interessados em apoiar projetos culturais está esperando por você. Faça a conexão acontecer!",
-    emoji: "🤝",
-    badge: "Conecte-se",
-    badgeVariant: "outline" as const,
-    link: "/exemplo/investidores-aguardam",
-    gradientClass: "from-primary to-accent",
-    emojiBgClass: "bg-primary",
-    footerContent: <span className="text-sm text-muted-foreground">Projeto exemplo</span>,
-  },
-  {
-    id: "exemplo-historias-sucesso",
-    title: "Histórias de Sucesso",
-    synopsis: "Projetos que começaram aqui já impactaram milhares de pessoas. O próximo sucesso pode ser o seu!",
-    emoji: "🏆",
-    badge: "Sucesso",
-    badgeVariant: "default" as const,
-    badgeClass: "bg-amber-500 text-white hover:bg-amber-600",
-    link: "/exemplo/historias-sucesso",
-    borderClass: "border-amber-500",
-    gradientClass: "from-amber-400 to-orange-500",
-    emojiBgClass: "bg-gradient-to-br from-amber-400 to-orange-500 shadow-lg",
-    footerContent: <span className="text-sm text-muted-foreground">Projeto exemplo</span>,
-  },
-  {
-    id: "exemplo-recursos-disponiveis",
-    title: "Recursos Disponíveis",
-    synopsis: "Conectamos projetos a recursos via Lei Rouanet, PROAC, e investimento direto. Encontre o modelo ideal para você.",
-    emoji: "💰",
-    badge: "Financiamento",
-    badgeVariant: "default" as const,
-    badgeClass: "bg-emerald-500 text-white hover:bg-emerald-600",
-    link: "/exemplo/recursos-disponiveis",
-    borderClass: "border-emerald-500",
-    gradientClass: "from-emerald-400 to-teal-500",
-    emojiBgClass: "bg-gradient-to-br from-emerald-400 to-teal-500 shadow-lg",
-    footerContent: <span className="text-sm text-muted-foreground">Projeto exemplo</span>,
-  },
-];
 
 const PortoDeIdeiasPage = () => {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -614,7 +559,6 @@ const PortoDeIdeiasPage = () => {
           ) : (
             <ProjectGrid
               projects={sortedProjects}
-              exampleProjects={exampleProjects.filter(e => cardVisibility[e.id] !== false)}
               displaySlots={displaySlots}
               isInView={projectsInView}
               formatBudget={formatBudget}
