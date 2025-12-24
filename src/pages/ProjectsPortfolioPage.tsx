@@ -6,13 +6,14 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
-import { 
+import { useLanguage } from "@/hooks/useLanguage";
+import {
   Search,
   Users,
   Sparkles,
   ArrowLeft,
   ExternalLink,
-  MapPin
+  MapPin,
 } from "lucide-react";
 
 interface Project {
@@ -29,6 +30,7 @@ interface Project {
 }
 
 const ProjectsPortfolioPage = () => {
+  const { t } = useLanguage();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -68,16 +70,16 @@ const ProjectsPortfolioPage = () => {
         {/* Back button */}
         <Link to="/" className="inline-flex items-center text-muted-foreground hover:text-foreground mb-6">
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Voltar ao Início
+          {t.common.back}
         </Link>
 
         {/* Page Header */}
         <div className="text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Projetos Culturais
+            {t.projects.title}
           </h1>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Explore todos os projetos aprovados e encontre iniciativas culturais para apoiar.
+            {t.projects.portfolioSubtitle}
           </p>
         </div>
 
@@ -86,7 +88,7 @@ const ProjectsPortfolioPage = () => {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
-              placeholder="Buscar projetos..."
+              placeholder={t.projects.search}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -98,7 +100,7 @@ const ProjectsPortfolioPage = () => {
               size="sm"
               onClick={() => setSelectedCategory(null)}
             >
-              Todos
+              {t.common.all}
             </Button>
             {categories.slice(0, 6).map((cat) => (
               <Button
@@ -168,24 +170,24 @@ const ProjectsPortfolioPage = () => {
                       <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
                         <Users className="w-4 h-4 text-muted-foreground" />
                       </div>
-                      <span className="text-xs text-muted-foreground">
-                        {project.responsavel_primeiro_nome || "Produtor"}
-                      </span>
-                    </div>
-                    <div className="flex gap-2">
-                      <Link to={`/project/${project.id}`}>
-                        <Button variant="ghost" size="sm" className="text-primary">
-                          Detalhes
-                        </Button>
-                      </Link>
-                      {project.link_pagamento && (
-                        <a href={project.link_pagamento} target="_blank" rel="noopener noreferrer">
-                          <Button size="sm">
-                            Apoiar
-                            <ExternalLink className="w-3 h-3 ml-1" />
+                        <span className="text-xs text-muted-foreground">
+                          {project.responsavel_primeiro_nome || t.projects.responsible}
+                        </span>
+                      </div>
+                      <div className="flex gap-2">
+                        <Link to={`/project/${project.id}`}>
+                          <Button variant="ghost" size="sm" className="text-primary">
+                            {t.projects.viewDetails}
                           </Button>
-                        </a>
-                      )}
+                        </Link>
+                        {project.link_pagamento && (
+                          <a href={project.link_pagamento} target="_blank" rel="noopener noreferrer">
+                            <Button size="sm">
+                              {t.projects.support}
+                              <ExternalLink className="w-3 h-3 ml-1" />
+                            </Button>
+                          </a>
+                        )}
                     </div>
                   </div>
                 </CardContent>
@@ -195,14 +197,12 @@ const ProjectsPortfolioPage = () => {
         ) : (
           <Card className="max-w-lg mx-auto text-center p-12">
             <Sparkles className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Nenhum projeto encontrado</h3>
+            <h3 className="text-lg font-semibold mb-2">{t.projects.noResults}</h3>
             <p className="text-muted-foreground mb-6">
-              {searchTerm || selectedCategory 
-                ? "Tente ajustar seus filtros de busca."
-                : "Ainda não há projetos aprovados."}
+              {searchTerm || selectedCategory ? t.projects.adjustFilters : t.projects.noProjectsFound}
             </p>
             <Link to="/submit">
-              <Button>Cadastrar Projeto</Button>
+              <Button>{t.projects.submitNew}</Button>
             </Link>
           </Card>
         )}

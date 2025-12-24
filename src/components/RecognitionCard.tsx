@@ -1,4 +1,5 @@
 import { Award, Newspaper } from "lucide-react";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface NewsItem {
   title: string;
@@ -12,19 +13,20 @@ interface RecognitionCardProps {
 }
 
 export function RecognitionCard({ awards = [], news = [] }: RecognitionCardProps) {
+  const { t } = useLanguage();
   if (!awards.length && !news.length) return null;
 
   return (
     <section>
       <h2 className="text-2xl font-serif font-bold text-foreground mb-6">
-        Reconhecimentos e Mídia
+        {t.projectDetails.awardsRecognition}
       </h2>
       <div className="grid md:grid-cols-2 gap-6">
         {awards.length > 0 && (
           <div>
             <h3 className="font-semibold text-foreground mb-4 flex items-center">
               <Award className="w-5 h-5 text-amber-500 mr-2" />
-              Prêmios e Reconhecimentos
+              {t.projectDetails.awardsRecognition}
             </h3>
             <ul className="space-y-3">
               {awards.map((award, index) => (
@@ -41,7 +43,7 @@ export function RecognitionCard({ awards = [], news = [] }: RecognitionCardProps
           <div>
             <h3 className="font-semibold text-foreground mb-4 flex items-center">
               <Newspaper className="w-5 h-5 text-primary mr-2" />
-              Na Mídia
+              {t.projectDetails.mediaNews}
             </h3>
             <ul className="space-y-3">
               {news.map((item, index) => (

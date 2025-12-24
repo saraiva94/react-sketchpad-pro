@@ -17,75 +17,81 @@ interface NavbarProps {
 
 interface SectionLabel {
   id: string;
-  label: string;
+  translationKey: "whoWeAre" | "portoDeIdeias" | "ourServices";
   settingsKey?: string;
 }
 
 const defaultSections: SectionLabel[] = [
-  { id: "sobre", label: "Quem Somos", settingsKey: "quem_somos_content" },
-  { id: "porto-de-ideias", label: "Projetos em Captação", settingsKey: "ecossistema_text" },
-  { id: "servicos", label: "Nossos Serviços", settingsKey: "nossos_servicos_content" },
+  { id: "sobre", translationKey: "whoWeAre", settingsKey: "quem_somos_content" },
+  { id: "porto-de-ideias", translationKey: "portoDeIdeias", settingsKey: "ecossistema_text" },
+  { id: "servicos", translationKey: "ourServices", settingsKey: "nossos_servicos_content" },
 ];
 
 export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<string>("");
-  const [sections, setSections] = useState<SectionLabel[]>(defaultSections);
   const { isAdmin } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+
+  // Optional admin-configured titles (stored in PT in the backend today).
+  // We only apply them for PT to avoid overriding translated UI.
+  const [adminTitlesPt, setAdminTitlesPt] = useState<Record<string, string>>({});
+
+  const getSectionLabel = (section: SectionLabel) => {
+    if (section.translationKey === "portoDeIdeias") return t.nav.projects;
+    if (section.translationKey === "whoWeAre") return t.home.whoWeAre;
+    return t.home.ourServices;
+  };
 
   useEffect(() => {
     const fetchSectionTitles = async () => {
-      const updatedSections = [...defaultSections];
-      
-      // Fetch ecossistema_text for "porto-de-ideias" section
+      const titles: Record<string, string> = {};
+
       const { data: ecossistemaData } = await supabase
         .from("settings")
         .select("value")
         .eq("key", "ecossistema_text")
         .maybeSingle();
-      
+
       if (ecossistemaData?.value) {
         const settings = ecossistemaData.value as { title?: string };
-        if (settings.title) {
-          const idx = updatedSections.findIndex(s => s.id === "porto-de-ideias");
-          if (idx !== -1) updatedSections[idx].label = settings.title;
-        }
+        if (settings.title) titles["porto-de-ideias"] = settings.title;
       }
-      
-      // Fetch nossos_servicos_content for "servicos" section
+
       const { data: servicosData } = await supabase
         .from("settings")
         .select("value")
         .eq("key", "nossos_servicos_content")
         .maybeSingle();
-      
+
       if (servicosData?.value) {
         const settings = servicosData.value as { title?: string };
-        if (settings.title) {
-          const idx = updatedSections.findIndex(s => s.id === "servicos");
-          if (idx !== -1) updatedSections[idx].label = settings.title;
-        }
+        if (settings.title) titles["servicos"] = settings.title;
       }
-      
-      setSections(updatedSections);
+
+      setAdminTitlesPt(titles);
     };
-    
+
     fetchSectionTitles();
   }, []);
+
+  const sections = defaultSections.map((s) => ({
+    id: s.id,
+    label: language === "pt" && adminTitlesPt[s.id] ? adminTitlesPt[s.id] : getSectionLabel(s),
+  }));
 
   useEffect(() => {
     if (currentPage !== "home") return;
 
     let ticking = false;
-    
+
     const handleScroll = () => {
       if (ticking) return;
-      
+
       ticking = true;
       requestAnimationFrame(() => {
         const scrollPosition = window.scrollY + 150; // Offset for navbar height
-        
+
         // Check each section
         for (const section of [...sections].reverse()) {
           const element = document.getElementById(section.id);
@@ -105,9 +111,9 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll(); // Initial check
-    
+
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [currentPage]);
+  }, [currentPage, sections]);
 
   const handleNavClick = () => {
     setIsOpen(false);
@@ -141,7 +147,7 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
               className="px-4 py-2 text-sm font-semibold text-foreground bg-accent/15 hover:bg-accent/25 rounded-xl transition-colors flex items-center gap-2"
             >
               <Settings className="w-4 h-4" />
-              Admin
+              {t.nav.admin}
             </Link>
           </div>
         )}
@@ -201,7 +207,7 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
                   size="icon" 
                   className="w-10 h-10 relative overflow-hidden"
                 >
-                  <span className="sr-only">Abrir menu</span>
+                  <span className="sr-only">{t.common.openMenu}</span>
                   <Menu 
                     className={`h-6 w-6 absolute transition-all duration-300 ease-in-out ${
                       isOpen ? "rotate-90 opacity-0 scale-0" : "rotate-0 opacity-100 scale-100"
@@ -236,10 +242,10 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
                   {currentPage === "home" && (
                     <div className="flex flex-col gap-2 mt-4 border-t border-border pt-4">
                       {/* Language Selector Mobile */}
-                      <div className="flex items-center justify-between px-3 py-2">
-                        <span className="text-sm text-muted-foreground">Idioma</span>
-                        <LanguageSelector />
-                      </div>
+                       <div className="flex items-center justify-between px-3 py-2">
+                         <span className="text-sm text-muted-foreground">{t.common.language}</span>
+                         <LanguageSelector />
+                       </div>
 
                       {/* Projetos em Captação Link with Lightbulb - Rainbow Mobile */}
                       <Link
@@ -273,7 +279,7 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
                           className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent/10 rounded-lg transition-colors mt-2 border-t border-border pt-4"
                         >
                           <Settings className="w-4 h-4" />
-                          Painel Admin
+                          {t.nav.admin}
                         </Link>
                       )}
                     </div>
