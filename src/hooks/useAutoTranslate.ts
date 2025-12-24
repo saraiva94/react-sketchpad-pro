@@ -48,24 +48,52 @@ export function useAutoTranslate<T>(
 
     const cacheKey = makeCacheKey(namespace, language, value);
 
-    // Verifica cache em memória
-    if (memoryCache.has(cacheKey)) {
-      setTranslated(memoryCache.get(cacheKey) as T);
-      return;
-    }
+     // Verifica cache em memória
+     if (memoryCache.has(cacheKey)) {
+       const cached = memoryCache.get(cacheKey) as unknown;
+       // Safety: nunca renderizar objetos inválidos
+       if (
+         cached &&
+         typeof cached === 'object' &&
+         (('targetLanguage' in (cached as any)) || ('json' in (cached as any)))
+       ) {
+         memoryCache.delete(cacheKey);
+       } else {
+         // Se o tipo não bate com o input, descarta
+         if (typeof value === 'string' && typeof cached !== 'string') {
+           memoryCache.delete(cacheKey);
+         } else {
+           setTranslated(cached as T);
+           return;
+         }
+       }
+     }
 
-    // Verifica localStorage
-    const stored = localStorage.getItem(cacheKey);
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored) as T;
-        memoryCache.set(cacheKey, parsed);
-        setTranslated(parsed);
-        return;
-      } catch {
-        // ignore
-      }
-    }
+     // Verifica localStorage
+     const stored = localStorage.getItem(cacheKey);
+     if (stored) {
+       try {
+         const parsed = JSON.parse(stored) as unknown;
+
+         // Safety: não aceitar objetos inválidos vindos do cache
+         if (
+           parsed &&
+           typeof parsed === 'object' &&
+           (('targetLanguage' in (parsed as any)) || ('json' in (parsed as any)))
+         ) {
+           localStorage.removeItem(cacheKey);
+         } else if (typeof value === 'string' && typeof parsed !== 'string') {
+           // Cache corrompido / tipo divergente
+           localStorage.removeItem(cacheKey);
+         } else {
+           memoryCache.set(cacheKey, parsed);
+           setTranslated(parsed as T);
+           return;
+         }
+       } catch {
+         // ignore
+       }
+     }
 
     // Chama edge function para traduzir
     const doTranslate = async () => {

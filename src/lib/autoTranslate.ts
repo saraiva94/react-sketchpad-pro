@@ -44,8 +44,18 @@ export async function autoTranslateValue<T>(
   if (stored) {
     try {
       const parsed = JSON.parse(stored) as T;
-      memoryCache.set(cacheKey, parsed);
-      return parsed;
+
+      // Safety: do not reuse invalid cached objects
+      if (
+        parsed &&
+        typeof parsed === "object" &&
+        ("targetLanguage" in (parsed as any) || "json" in (parsed as any))
+      ) {
+        localStorage.removeItem(cacheKey);
+      } else {
+        memoryCache.set(cacheKey, parsed);
+        return parsed;
+      }
     } catch {
       // ignore
     }
@@ -67,6 +77,16 @@ export async function autoTranslateValue<T>(
   }
 
   const translated = (data?.value ?? value) as T;
+
+  // Safety: never allow gateway/SDK metadata objects to escape into the UI
+  if (
+    translated &&
+    typeof translated === "object" &&
+    ("targetLanguage" in (translated as any) || "json" in (translated as any))
+  ) {
+    return value;
+  }
+
   memoryCache.set(cacheKey, translated);
   try {
     localStorage.setItem(cacheKey, JSON.stringify(translated));
