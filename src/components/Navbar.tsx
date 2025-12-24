@@ -139,15 +139,15 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
           />
         </Link>
 
-        {/* Admin Button - Centered (Homepage) */}
+        {/* Admin Button - Icon only (Homepage) */}
         {isAdmin && currentPage === "home" && (
           <div className="hidden md:flex absolute left-1/2 -translate-x-1/2">
             <Link
               to="/admin"
-              className="px-4 py-2 text-sm font-semibold text-foreground bg-accent/15 hover:bg-accent/25 rounded-xl transition-colors flex items-center gap-2"
+              className="p-2 text-foreground bg-accent/15 hover:bg-accent/25 rounded-xl transition-colors"
+              title={t.nav.admin}
             >
-              <Settings className="w-4 h-4" />
-              {t.nav.admin}
+              <Settings className="w-5 h-5" />
             </Link>
           </div>
         )}
@@ -279,7 +279,6 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
                           className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent/10 rounded-lg transition-colors mt-2 border-t border-border pt-4"
                         >
                           <Settings className="w-4 h-4" />
-                          {t.nav.admin}
                         </Link>
                       )}
                     </div>

@@ -13,7 +13,8 @@ import { ShinyText } from "@/components/ShinyText";
 import { VideoCarousel } from "@/components/VideoCarousel";
 import { useInView } from "@/hooks/useInView";
 import { useLanguage } from "@/hooks/useLanguage";
-import { 
+import { useAutoTranslate } from "@/hooks/useAutoTranslate";
+import {
   Users, 
   Target, 
   Heart, 
@@ -147,7 +148,7 @@ interface VideoItem {
 }
 
 const HomePage = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [featuredProjects, setFeaturedProjects] = useState<Project[]>([]);
   const [loadingProjects, setLoadingProjects] = useState(true);
   const [stats, setStats] = useState<ProjectStats>({
@@ -215,6 +216,18 @@ const HomePage = () => {
       { icon: "HelpCircle", text: "Consultoria para formatação de projetos", hoverColor: "group-hover:text-sky-500" },
     ]
   });
+
+  // Auto-tradução de conteúdos dinâmicos (do backend) quando idioma != pt
+  const { translated: translatedQuemSomos } = useAutoTranslate('quem_somos', quemSomosContent);
+  const { translated: translatedServicos } = useAutoTranslate('nossos_servicos', servicosContent);
+  const { translated: translatedEcossistemaTitle } = useAutoTranslate('ecossistema_title', ecossistemaTitle);
+  const { translated: translatedEcossistemaSubtitle } = useAutoTranslate('ecossistema_subtitle', ecossistemaSubtitle);
+
+  // Conteúdo final que será usado na renderização
+  const displayQuemSomos = language === 'pt' ? quemSomosContent : (translatedQuemSomos || quemSomosContent);
+  const displayServicos = language === 'pt' ? servicosContent : (translatedServicos || servicosContent);
+  const displayEcossistemaTitle = language === 'pt' ? ecossistemaTitle : (translatedEcossistemaTitle || ecossistemaTitle);
+  const displayEcossistemaSubtitle = language === 'pt' ? ecossistemaSubtitle : (translatedEcossistemaSubtitle || ecossistemaSubtitle);
 
   useEffect(() => {
     fetchFeaturedProjects();
@@ -699,14 +712,14 @@ const HomePage = () => {
           
           <div className={`max-w-5xl mx-auto mb-20 transition-all duration-700 ${quemSomosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`} style={{ transitionDelay: '150ms' }}>
             <div className="text-base md:text-lg text-muted-foreground leading-relaxed space-y-6">
-              {quemSomosContent.paragraphs.map((paragraph, index) => (
+              {displayQuemSomos.paragraphs.map((paragraph, index) => (
                 <p key={index}>{paragraph}</p>
               ))}
             </div>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            {quemSomosContent.cards.map((card, index) => {
+            {displayQuemSomos.cards.map((card, index) => {
               const IconComponent = iconMap[card.icon] || Lightbulb;
               return (
                 <Card 
@@ -737,11 +750,11 @@ const HomePage = () => {
           <div className={`text-center mb-16 transition-all duration-700 ${portoIdeiasInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
             <ShinyText className="inline-block" delay={300}>
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif font-semibold text-foreground mb-4">
-                {ecossistemaTitle}
+                {displayEcossistemaTitle}
               </h2>
             </ShinyText>
             <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto mt-6">
-              {ecossistemaSubtitle}
+              {displayEcossistemaSubtitle}
             </p>
           </div>
 
@@ -838,13 +851,13 @@ const HomePage = () => {
           <div className={`text-center mb-16 transition-all duration-700 ${servicosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
             <ShinyText className="inline-block" delay={200}>
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif font-semibold text-foreground mb-4 decorative-line">
-                {servicosContent.title}
+                {displayServicos.title}
               </h2>
             </ShinyText>
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
-            {servicosContent.services.map((service, index) => {
+            {displayServicos.services.map((service, index) => {
               const ServiceIcon = iconMap[service.icon] || Star;
               return (
                 <Card 

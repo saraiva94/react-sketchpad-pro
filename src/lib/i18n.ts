@@ -55,6 +55,7 @@ export const translations = {
       applyFilters: 'Aplicar Filtros',
       noProjectsFound: 'Nenhum projeto encontrado',
       adjustFilters: 'Tente ajustar seus filtros ou faça uma busca diferente.',
+      portfolioSubtitle: 'Explore todos os projetos aprovados e encontre iniciativas culturais para apoiar.',
     },
     projectDetails: {
       synopsis: 'Sinopse',
@@ -250,6 +251,7 @@ export const translations = {
       applyFilters: 'Apply Filters',
       noProjectsFound: 'No projects found',
       adjustFilters: 'Try adjusting your filters or search for something else.',
+      portfolioSubtitle: 'Explore all approved projects and find cultural initiatives to support.',
     },
     projectDetails: {
       synopsis: 'Synopsis',
@@ -445,6 +447,7 @@ export const translations = {
       applyFilters: 'Aplicar Filtros',
       noProjectsFound: 'No se encontraron proyectos',
       adjustFilters: 'Intenta ajustar tus filtros o buscar algo diferente.',
+      portfolioSubtitle: 'Explore todos los proyectos aprobados y encuentre iniciativas culturales para apoyar.',
     },
     projectDetails: {
       synopsis: 'Sinopsis',
@@ -576,6 +579,8 @@ export const translations = {
       none: 'Ninguno',
       yes: 'Sí',
       no: 'No',
+      language: 'Idioma',
+      openMenu: 'Abrir menú',
       required: 'Obligatorio',
       optional: 'Opcional',
       or: 'o',
