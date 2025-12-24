@@ -1,18 +1,22 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Navbar } from "@/components/Navbar";
-import { ArrowLeft, Eye, EyeOff } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, ShieldCheck } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
-const ADMIN_USERNAME = "Admin2025";
-const ADMIN_PASSWORD = "administradorpi2025";
+const schema = z.object({
+  email: z.string().email("Informe um e-mail válido"),
+  password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
+});
 
 const AuthPage = () => {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -20,33 +24,77 @@ const AuthPage = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+  const canSubmit = useMemo(() => email.trim() && password.trim(), [email, password]);
 
-    setTimeout(() => {
-      if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
-        localStorage.setItem("isAdminLoggedIn", "true");
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const parsed = schema.safeParse({ email, password });
+    if (!parsed.success) {
+      toast({
+        title: "Verifique os dados",
+        description: parsed.error.issues[0]?.message ?? "Dados inválidos.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: parsed.data.email,
+        password: parsed.data.password,
+      });
+
+      if (error) {
         toast({
-          title: "Bem-vindo!",
-          description: "Login realizado com sucesso.",
-        });
-        navigate("/admin");
-      } else {
-        toast({
-          title: "Dados incorretos",
-          description: "Usuário ou senha incorretos. Tente novamente.",
+          title: "Não foi possível entrar",
+          description: error.message,
           variant: "destructive",
         });
+        return;
       }
+
+      const { data: userData, error: userErr } = await supabase.auth.getUser();
+      if (userErr || !userData.user) {
+        await supabase.auth.signOut();
+        toast({
+          title: "Erro de sessão",
+          description: "Não foi possível validar a sessão. Tente novamente.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const { data: isAdmin, error: roleErr } = await supabase.rpc("has_role", {
+        _user_id: userData.user.id,
+        _role: "admin",
+      });
+
+      if (roleErr || !isAdmin) {
+        await supabase.auth.signOut();
+        toast({
+          title: "Acesso negado",
+          description: "Sua conta não tem permissão de administrador.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      toast({
+        title: "Bem-vindo!",
+        description: "Admin autenticado com sucesso.",
+      });
+      navigate("/");
+    } finally {
       setIsLoading(false);
-    }, 500);
+    }
   };
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar 
-        showNav={false} 
+      <Navbar
+        showNav={false}
         rightContent={
           <Link to="/">
             <Button variant="ghost" size="sm">
@@ -57,27 +105,28 @@ const AuthPage = () => {
         }
       />
 
-      {/* Auth Form */}
       <main className="container mx-auto px-4 py-16 flex items-center justify-center min-h-[calc(100vh-4rem)]">
         <Card className="w-full max-w-md shadow-lg animate-in fade-in-50 slide-in-from-bottom-4 duration-500">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-serif font-bold">
+            <CardTitle className="text-2xl font-serif font-bold flex items-center justify-center gap-2">
+              <ShieldCheck className="w-5 h-5" />
               Acesso Administrativo
             </CardTitle>
             <CardDescription>
-              Entre com suas credenciais para gerenciar os projetos
+              Entre com e-mail e senha do admin para liberar o botão "Admin" na navbar
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="username">Usuário</Label>
+                <Label htmlFor="email">E-mail</Label>
                 <Input
-                  id="username"
-                  type="text"
-                  placeholder="Digite o usuário"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  id="email"
+                  type="email"
+                  placeholder="admin@exemplo.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  autoComplete="email"
                   required
                 />
               </div>
@@ -91,6 +140,7 @@ const AuthPage = () => {
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    autoComplete="current-password"
                     required
                   />
                   <Button
@@ -109,7 +159,7 @@ const AuthPage = () => {
                 </div>
               </div>
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button type="submit" className="w-full" disabled={isLoading || !canSubmit}>
                 {isLoading ? "Entrando..." : "Entrar"}
               </Button>
             </form>
