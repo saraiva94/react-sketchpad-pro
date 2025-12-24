@@ -1171,8 +1171,9 @@ const AdminDashboard = () => {
     });
   };
 
-  const handleSignOut = () => {
+  const handleSignOut = async () => {
     localStorage.removeItem("isAdminLoggedIn");
+    await supabase.auth.signOut();
     navigate("/");
   };
 
@@ -1271,13 +1272,17 @@ const AdminDashboard = () => {
                 size="sm" 
                 className="rainbow-border-glow"
               >
-              <Lightbulb className="w-4 h-4 mr-2" />
+                <Lightbulb className="w-4 h-4 mr-2" />
                 Projetos
               </Button>
             </Link>
-            <Button variant="outline" size="sm" onClick={handleSignOut}>
+            <Button 
+              variant="destructive" 
+              size="sm" 
+              onClick={handleSignOut}
+            >
               <LogOut className="w-4 h-4 mr-2" />
-              Sair
+              Logoff
             </Button>
           </div>
         }
