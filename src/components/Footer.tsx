@@ -12,6 +12,7 @@ import {
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import portobelloLogo from "@/assets/portobello-footer-logo.png";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface SocialLink {
   enabled: boolean;
@@ -53,6 +54,7 @@ const DEFAULT_FOOTER_CONTENT: FooterContent = {
 export function Footer() {
   const [socialLinks, setSocialLinks] = useState<SocialLinksConfig>(DEFAULT_SOCIAL_LINKS);
   const [footerContent, setFooterContent] = useState<FooterContent>(DEFAULT_FOOTER_CONTENT);
+  const { t } = useLanguage();
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -108,23 +110,23 @@ export function Footer() {
           </div>
           
           <div>
-            <h4 className="font-semibold text-white mb-2 text-sm">Navegação</h4>
+            <h4 className="font-semibold text-white mb-2 text-sm">{t.nav.home}</h4>
             <ul className="space-y-1 text-xs">
-              <li><Link to="/" className="text-gray-400 hover:text-primary transition-colors">Início</Link></li>
-              <li><Link to="/porto-de-ideias" className="text-gray-400 hover:text-primary transition-colors">Porto de Idéias</Link></li>
+              <li><Link to="/" className="text-gray-400 hover:text-primary transition-colors">{t.nav.home}</Link></li>
+              <li><Link to="/porto-de-ideias" className="text-gray-400 hover:text-primary transition-colors">{t.nav.portoDeIdeias}</Link></li>
             </ul>
           </div>
           
           <div>
-            <h4 className="font-semibold text-white mb-2 text-sm">Ações</h4>
+            <h4 className="font-semibold text-white mb-2 text-sm">{t.nav.projects}</h4>
             <ul className="space-y-1 text-xs">
-              <li><Link to="/submit" className="text-gray-400 hover:text-primary transition-colors">Cadastrar Projeto</Link></li>
-              <li><Link to="/porto-de-ideias" className="text-gray-400 hover:text-primary transition-colors">Explorar Projetos</Link></li>
+              <li><Link to="/submit" className="text-gray-400 hover:text-primary transition-colors">{t.nav.submit}</Link></li>
+              <li><Link to="/porto-de-ideias" className="text-gray-400 hover:text-primary transition-colors">{t.home.exploreProjects}</Link></li>
             </ul>
           </div>
           
           <div>
-            <h4 className="font-semibold text-white mb-2 text-sm">Contato</h4>
+            <h4 className="font-semibold text-white mb-2 text-sm">{t.footer.contact}</h4>
             <ul className="space-y-1 text-xs text-gray-400">
               {footerContent.emails.map((email, index) => (
                 <li key={`email-${index}`} className="flex items-center gap-2">
@@ -224,7 +226,7 @@ export function Footer() {
         </div>
         
         <div className="border-t border-gray-800 pt-4 text-center text-xs text-gray-500">
-          <p>&copy; {new Date().getFullYear()} Porto Bello. Todos os direitos reservados.</p>
+          <p>&copy; {new Date().getFullYear()} Porto Bello. {t.footer.rights}.</p>
         </div>
       </div>
     </footer>

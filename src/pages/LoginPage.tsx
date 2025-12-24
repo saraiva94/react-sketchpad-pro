@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { Navbar } from "@/components/Navbar";
 import { ArrowLeft, Eye, EyeOff, ShieldCheck } from "lucide-react";
+import { useLanguage } from "@/hooks/useLanguage";
 
 // Credenciais do admin
 const ADMIN_KEY = "Admin2025";
@@ -26,6 +27,7 @@ const AuthPage = () => {
 
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   const canSubmit = useMemo(() => key.trim() && password.trim(), [key, password]);
 
@@ -74,7 +76,7 @@ const AuthPage = () => {
           <Link to="/">
             <Button variant="ghost" size="sm">
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Voltar
+              {t.common.back}
             </Button>
           </Link>
         }
@@ -85,20 +87,20 @@ const AuthPage = () => {
           <CardHeader className="text-center">
             <CardTitle className="text-2xl font-serif font-bold flex items-center justify-center gap-2">
               <ShieldCheck className="w-5 h-5" />
-              Acesso Administrativo
+              {t.login.title}
             </CardTitle>
             <CardDescription>
-              Entre com e-mail e senha do admin para liberar o botão "Admin" na navbar
+              {t.login.accessKey}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="key">Chave de Acesso</Label>
+                <Label htmlFor="key">{t.login.accessKey}</Label>
                 <Input
                   id="key"
                   type="text"
-                  placeholder="Sua chave de admin"
+                  placeholder={t.login.accessKey}
                   value={key}
                   onChange={(e) => setKey(e.target.value)}
                   autoComplete="username"
@@ -107,7 +109,7 @@ const AuthPage = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password">Senha</Label>
+                <Label htmlFor="password">{t.login.password}</Label>
                 <div className="relative">
                   <Input
                     id="password"
@@ -135,7 +137,7 @@ const AuthPage = () => {
               </div>
 
               <Button type="submit" className="w-full" disabled={isLoading || !canSubmit}>
-                {isLoading ? "Entrando..." : "Entrar"}
+                {isLoading ? t.common.loading : t.login.enter}
               </Button>
             </form>
           </CardContent>
