@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
 import { DualImageCropper } from "@/components/DualImageCropper";
@@ -251,17 +252,21 @@ const AdminDashboard = () => {
   const [showDeleteContactsConfirm, setShowDeleteContactsConfirm] = useState(false);
   const [contactsProjectToDelete, setContactsProjectToDelete] = useState<string | null>(null);
 
+  const { user, loading: authLoading, isAdmin } = useAuth();
+
   useEffect(() => {
-    const isLoggedIn = localStorage.getItem("isAdminLoggedIn");
-    if (!isLoggedIn) {
+    if (authLoading) return;
+
+    if (!user || !isAdmin) {
       navigate("/auth");
-    } else {
-      fetchProjects();
-      fetchProjectMembers();
-      fetchAccessRequests();
-      fetchStatsVisibility();
+      return;
     }
-  }, [navigate]);
+
+    fetchProjects();
+    fetchProjectMembers();
+    fetchAccessRequests();
+    fetchStatsVisibility();
+  }, [authLoading, user, isAdmin, navigate]);
 
   const fetchStatsVisibility = async () => {
     const { data: statsData } = await supabase
@@ -1172,7 +1177,6 @@ const AdminDashboard = () => {
   };
 
   const handleSignOut = async () => {
-    localStorage.removeItem("isAdminLoggedIn");
     await supabase.auth.signOut();
     navigate("/");
   };

@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
 import { TeamMemberEditor, TeamMemberData } from "@/components/admin/TeamMemberEditor";
@@ -80,12 +81,12 @@ const AdminAddProjectPage = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
 
+  const { user, loading: authLoading, isAdmin } = useAuth();
+
   useEffect(() => {
-    const isLoggedIn = localStorage.getItem("isAdminLoggedIn");
-    if (!isLoggedIn) {
-      navigate("/auth");
-    }
-  }, [navigate]);
+    if (authLoading) return;
+    if (!user || !isAdmin) navigate("/auth");
+  }, [authLoading, user, isAdmin, navigate]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};

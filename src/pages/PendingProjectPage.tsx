@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Footer } from "@/components/Footer";
 import { LazyArtisticBackground } from "@/components/LazyArtisticBackground";
@@ -78,10 +79,12 @@ const PendingProjectPage = () => {
   const videoInputRef = useRef<HTMLInputElement>(null);
   const pdfInputRef = useRef<HTMLInputElement>(null);
 
+  const { user, loading: authLoading, isAdmin } = useAuth();
+
   useEffect(() => {
-    // Check if admin is logged in
-    const isLoggedIn = localStorage.getItem("isAdminLoggedIn");
-    if (!isLoggedIn) {
+    if (authLoading) return;
+
+    if (!user || !isAdmin) {
       navigate("/auth");
       return;
     }
@@ -90,7 +93,7 @@ const PendingProjectPage = () => {
       fetchProject();
       fetchTeamMembers();
     }
-  }, [id, navigate]);
+  }, [authLoading, user, isAdmin, id, navigate]);
 
   useEffect(() => {
     if (project) {
