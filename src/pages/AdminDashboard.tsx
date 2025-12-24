@@ -62,7 +62,8 @@ import {
   Settings2,
   Save,
   Lightbulb,
-  Twitter
+  Twitter,
+  Briefcase
 } from "lucide-react";
 
 interface Project {
@@ -1373,557 +1374,418 @@ const AdminDashboard = () => {
           </Button>
         </div>
 
-        {/* Homepage Section (formerly Settings + Featured) */}
+        {/* Homepage Section - Reorganized with sections in display order */}
         {activeSection === "homepage" && (
-          <div className="space-y-6">
-            {/* Detalhamento Geral - PRIMEIRO */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BarChart3 className="w-5 h-5" />
-                  Detalhamento Geral
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div>
-                    <h4 className="font-medium">Estatísticas Públicas</h4>
-                    <p className="text-sm text-muted-foreground">Mostrar painel de números na homepage</p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Switch 
-                      checked={statsVisible} 
-                      onCheckedChange={toggleStatsVisibility}
-                      disabled={loadingSettings}
-                    />
-                    <Badge variant={statsVisible ? "default" : "secondary"}>
-                      {statsVisible ? "Público" : "Privado"}
-                    </Badge>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Seção dividida por área */}
-            <div className="text-lg font-semibold text-muted-foreground border-b pb-2 mb-4">
-              🏠 Homepage
+          <div className="space-y-8">
+            {/* Section 1: Configurações Gerais */}
+            <div>
+              <div className="text-lg font-semibold text-foreground border-b pb-2 mb-4 flex items-center gap-2">
+                <Settings2 className="w-5 h-5" />
+                Configurações Gerais
+              </div>
+              <div className="grid md:grid-cols-2 gap-4">
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">Estatísticas Públicas</h4>
+                        <p className="text-sm text-muted-foreground">Mostrar painel de números</p>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Switch 
+                          checked={statsVisible} 
+                          onCheckedChange={toggleStatsVisibility}
+                          disabled={loadingSettings}
+                        />
+                        <Badge variant={statsVisible ? "default" : "secondary"}>
+                          {statsVisible ? "Visível" : "Oculto"}
+                        </Badge>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">Vídeos no Carrossel</h4>
+                        <p className="text-sm text-muted-foreground">Quantidade de vídeos visíveis</p>
+                      </div>
+                      <div className="flex gap-2">
+                        {([1, 3, 5] as const).map((count) => (
+                          <Button
+                            key={count}
+                            variant={carouselDisplayCount === count ? "default" : "outline"}
+                            onClick={() => updateCarouselDisplayCount(count)}
+                            size="sm"
+                            className="w-10 h-10 font-bold"
+                          >
+                            {count}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
 
-            {/* 1. Vídeos Institucionais (Carrossel) - HERO */}
-
-            {/* Vídeos Institucionais (até 5) */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Video className="w-5 h-5" />
-                  Vídeos Institucionais (Carrossel)
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <p className="text-sm text-muted-foreground">
-                  Configure os vídeos para o carrossel na seção principal da homepage.
-                </p>
-
-                {/* Carousel Display Count Selector */}
-                <div className="p-4 border rounded-lg bg-muted/30">
-                  <Label className="text-base font-medium mb-3 block">Quantidade de vídeos visíveis</Label>
-                  <div className="flex gap-3">
-                    {([1, 3, 5] as const).map((count) => (
-                      <Button
-                        key={count}
-                        variant={carouselDisplayCount === count ? "default" : "outline"}
-                        onClick={() => updateCarouselDisplayCount(count)}
-                        className="w-12 h-12 text-lg font-bold"
-                      >
-                        {count}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-                
+            {/* Section 2: Hero - Vídeos Institucionais */}
+            <div>
+              <div className="text-lg font-semibold text-foreground border-b pb-2 mb-4 flex items-center gap-2">
+                <Video className="w-5 h-5" />
+                Seção Hero - Vídeos Institucionais
+              </div>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {institutionalVideos.slice(0, carouselDisplayCount).map((video, index) => (
-                  <div key={index} className="p-4 border rounded-lg space-y-3">
-                    <div className="flex items-center justify-between">
-                      <h4 className="font-medium">Vídeo {index + 1}</h4>
+                  <Card key={index} className="overflow-hidden">
+                    <CardContent className="p-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-medium text-sm">Vídeo {index + 1}</h4>
+                        {video.url && <Badge variant="secondary" className="text-xs">Ativo</Badge>}
+                      </div>
+                      
                       {video.url && (
-                        <Badge variant="secondary" className="text-xs">Ativo</Badge>
+                        <div className="rounded-lg overflow-hidden border aspect-video">
+                          <video src={video.url} controls className="w-full h-full object-cover" />
+                        </div>
                       )}
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label>URL do Vídeo</Label>
+                      
                       <div className="flex gap-2">
                         <Input
-                          placeholder="https://exemplo.com/video.mp4"
+                          placeholder="URL do vídeo"
                           value={video.url}
                           onChange={(e) => {
                             const newVideos = [...institutionalVideos];
                             newVideos[index] = { ...newVideos[index], url: e.target.value };
                             setInstitutionalVideos(newVideos);
                           }}
-                          className="flex-1"
+                          className="flex-1 text-sm"
                         />
-                        {video.url && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => {
-                              const newVideos = [...institutionalVideos];
-                              newVideos[index] = { url: "", title: "" };
-                              setInstitutionalVideos(newVideos);
-                            }}
-                          >
-                            <X className="w-4 h-4" />
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                      <Label
-                        htmlFor={`video-upload-${index}`}
-                        className="cursor-pointer inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
-                      >
-                        <Upload className="w-4 h-4" />
-                        {uploadingVideoIndex === index ? "Enviando..." : "Upload"}
-                      </Label>
-                      <input
-                        id={`video-upload-${index}`}
-                        type="file"
-                        accept="video/*"
-                        className="hidden"
-                        disabled={uploadingVideoIndex === index}
-                        onChange={async (e) => {
-                          const file = e.target.files?.[0];
-                          if (!file) return;
-                          
-                          setUploadingVideoIndex(index);
-                          const fileName = `institutional-${index}-${Date.now()}.${file.name.split('.').pop()}`;
-                          
-                          const { data, error } = await supabase.storage
-                            .from("project-media")
-                            .upload(fileName, file);
-                          
-                          if (error) {
-                            toast({
-                              title: "Erro no upload",
-                              description: error.message,
-                              variant: "destructive",
-                            });
-                          } else {
-                            const { data: urlData } = supabase.storage
+                        <Label
+                          htmlFor={`video-upload-${index}`}
+                          className="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-3"
+                        >
+                          <Upload className="w-4 h-4" />
+                        </Label>
+                        <input
+                          id={`video-upload-${index}`}
+                          type="file"
+                          accept="video/*"
+                          className="hidden"
+                          disabled={uploadingVideoIndex === index}
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            
+                            setUploadingVideoIndex(index);
+                            const fileName = `institutional-${index}-${Date.now()}.${file.name.split('.').pop()}`;
+                            
+                            const { data, error } = await supabase.storage
                               .from("project-media")
-                              .getPublicUrl(fileName);
+                              .upload(fileName, file);
                             
-                            const newVideos = [...institutionalVideos];
-                            newVideos[index] = { ...newVideos[index], url: urlData.publicUrl };
-                            setInstitutionalVideos(newVideos);
-                            
-                            toast({
-                              title: "Upload concluído!",
-                              description: `Vídeo ${index + 1} enviado com sucesso.`,
-                            });
-                          }
-                          
-                          setUploadingVideoIndex(null);
-                        }}
+                            if (error) {
+                              toast({ title: "Erro no upload", description: error.message, variant: "destructive" });
+                            } else {
+                              const { data: urlData } = supabase.storage.from("project-media").getPublicUrl(fileName);
+                              const newVideos = [...institutionalVideos];
+                              newVideos[index] = { ...newVideos[index], url: urlData.publicUrl };
+                              setInstitutionalVideos(newVideos);
+                              toast({ title: "Upload concluído!", description: `Vídeo ${index + 1} enviado.` });
+                            }
+                            setUploadingVideoIndex(null);
+                          }}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+              <Button 
+                onClick={async () => {
+                  setSavingVideos(true);
+                  const videosToSave = institutionalVideos.filter(v => v.url);
+                  const { data: existing } = await supabase.from("settings").select("id").eq("key", "institutional_videos").maybeSingle();
+                  const jsonValue = JSON.parse(JSON.stringify({ videos: institutionalVideos }));
+                  if (existing) {
+                    await supabase.from("settings").update({ value: jsonValue }).eq("key", "institutional_videos");
+                  } else {
+                    await supabase.from("settings").insert([{ key: "institutional_videos", value: jsonValue }]);
+                  }
+                  setSavingVideos(false);
+                  toast({ title: "Salvo!", description: `${videosToSave.length} vídeo(s) configurado(s).` });
+                }}
+                disabled={savingVideos}
+                className="mt-4"
+              >
+                <Save className="w-4 h-4 mr-2" />
+                {savingVideos ? "Salvando..." : "Salvar Vídeos"}
+              </Button>
+            </div>
+
+            {/* Section 3: Quem Somos */}
+            <div>
+              <div className="text-lg font-semibold text-foreground border-b pb-2 mb-4 flex items-center gap-2">
+                <Users className="w-5 h-5" />
+                Seção Quem Somos
+              </div>
+              <QuemSomosEditor />
+            </div>
+
+            {/* Section 4: Ecossistema + Projetos em Destaque */}
+            <div>
+              <div className="text-lg font-semibold text-foreground border-b pb-2 mb-4 flex items-center gap-2">
+                <Star className="w-5 h-5" />
+                Seção Porto de Ideias (Projetos em Destaque)
+              </div>
+              <div className="space-y-4">
+                <EcossistemaTextEditor />
+                <FeaturedProjectsManager 
+                  key={`featured-${featuredRefreshKey}`}
+                  projects={projects} 
+                  onProjectUpdate={fetchProjects}
+                />
+              </div>
+            </div>
+
+            {/* Section 5: Nossos Serviços */}
+            <div>
+              <div className="text-lg font-semibold text-foreground border-b pb-2 mb-4 flex items-center gap-2">
+                <Briefcase className="w-5 h-5" />
+                Seção Nossos Serviços
+              </div>
+              <NossosServicosEditor />
+            </div>
+
+            {/* Section 6: Footer */}
+            <div>
+              <div className="text-lg font-semibold text-foreground border-b pb-2 mb-4 flex items-center gap-2">
+                <FileText className="w-5 h-5" />
+                Seção Footer
+              </div>
+              <div className="grid md:grid-cols-2 gap-4">
+                {/* Footer Content */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base">Conteúdo do Footer</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <Label className="text-sm">Tagline</Label>
+                      <Textarea
+                        value={footerTagline}
+                        onChange={(e) => setFooterTagline(e.target.value)}
+                        placeholder="Uma plataforma criada para..."
+                        rows={2}
+                        className="text-sm"
                       />
                     </div>
 
-                    {video.url && (
-                      <div className="mt-2 rounded-lg overflow-hidden border aspect-video">
-                        <video
-                          src={video.url}
-                          controls
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    )}
-                  </div>
-                ))}
-
-                <Button 
-                  onClick={async () => {
-                    setSavingVideos(true);
-                    
-                    const videosToSave = institutionalVideos.filter(v => v.url);
-                    
-                    const { data: existing } = await supabase
-                      .from("settings")
-                      .select("id")
-                      .eq("key", "institutional_videos")
-                      .maybeSingle();
-                    
-                    const jsonValue = JSON.parse(JSON.stringify({ videos: institutionalVideos }));
-                    
-                    if (existing) {
-                      await supabase
-                        .from("settings")
-                        .update({ value: jsonValue })
-                        .eq("key", "institutional_videos");
-                    } else {
-                      await supabase
-                        .from("settings")
-                        .insert([{ key: "institutional_videos", value: jsonValue }]);
-                    }
-                    
-                    setSavingVideos(false);
-                    toast({
-                      title: "Salvo!",
-                      description: `${videosToSave.length} vídeo(s) configurado(s) no carrossel.`,
-                    });
-                  }}
-                  disabled={savingVideos}
-                  className="w-full"
-                >
-                  {savingVideos ? "Salvando..." : "Salvar Todos os Vídeos"}
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* 2. Quem Somos */}
-            <QuemSomosEditor />
-
-            {/* 2.5. Ecossistema de Conexões Title */}
-            <EcossistemaTextEditor />
-
-            {/* 3. Projetos em Destaque na Homepage */}
-            <FeaturedProjectsManager 
-              key={`featured-${featuredRefreshKey}`}
-              projects={projects} 
-              onProjectUpdate={fetchProjects}
-            />
-
-            {/* 4. Nossos Serviços */}
-            <NossosServicosEditor />
-
-            {/* 5. Footer - Conteúdo */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileText className="w-5 h-5" />
-                  Controle e Edição - Conteúdo do Footer
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <p className="text-sm text-muted-foreground">
-                  Edite o texto e informações de contato exibidos no footer do site.
-                </p>
-
-                {/* Tagline */}
-                <div className="space-y-2">
-                  <Label>Tagline / Descrição</Label>
-                  <Textarea
-                    value={footerTagline}
-                    onChange={(e) => setFooterTagline(e.target.value)}
-                    placeholder="Uma plataforma criada para aproximar cultura e investimento."
-                    rows={2}
-                  />
-                </div>
-
-                {/* Emails */}
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <Label>Emails de Contato</Label>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setFooterEmails([...footerEmails, ""])}
-                    >
-                      <Plus className="w-4 h-4 mr-1" />
-                      Adicionar
-                    </Button>
-                  </div>
-                  {footerEmails.map((email, index) => (
-                    <div key={index} className="flex gap-2">
-                      <div className="flex items-center gap-2 flex-1">
-                        <Mail className="w-4 h-4 text-accent flex-shrink-0" />
-                        <Input
-                          type="email"
-                          placeholder="email@exemplo.com"
-                          value={email}
-                          onChange={(e) => {
-                            const newEmails = [...footerEmails];
-                            newEmails[index] = e.target.value;
-                            setFooterEmails(newEmails);
-                          }}
-                        />
-                      </div>
-                      {footerEmails.length > 1 && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => {
-                            const newEmails = footerEmails.filter((_, i) => i !== index);
-                            setFooterEmails(newEmails);
-                          }}
-                        >
-                          <X className="w-4 h-4" />
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-sm">Emails</Label>
+                        <Button variant="ghost" size="sm" onClick={() => setFooterEmails([...footerEmails, ""])}>
+                          <Plus className="w-3 h-3" />
                         </Button>
-                      )}
-                    </div>
-                  ))}
-                </div>
-
-                {/* Phones */}
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <Label>Telefones de Contato</Label>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setFooterPhones([...footerPhones, ""])}
-                    >
-                      <Plus className="w-4 h-4 mr-1" />
-                      Adicionar
-                    </Button>
-                  </div>
-                  {footerPhones.map((phone, index) => (
-                    <div key={index} className="flex gap-2">
-                      <div className="flex items-center gap-2 flex-1">
-                        <Phone className="w-4 h-4 text-accent flex-shrink-0" />
-                        <Input
-                          placeholder="(00) 00000-0000"
-                          value={phone}
-                          onChange={(e) => {
-                            const newPhones = [...footerPhones];
-                            newPhones[index] = e.target.value;
-                            setFooterPhones(newPhones);
-                          }}
-                        />
                       </div>
-                      {footerPhones.length > 1 && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => {
-                            const newPhones = footerPhones.filter((_, i) => i !== index);
-                            setFooterPhones(newPhones);
-                          }}
-                        >
-                          <X className="w-4 h-4" />
-                        </Button>
-                      )}
+                      {footerEmails.map((email, index) => (
+                        <div key={index} className="flex gap-2">
+                          <Input
+                            type="email"
+                            placeholder="email@exemplo.com"
+                            value={email}
+                            onChange={(e) => {
+                              const newEmails = [...footerEmails];
+                              newEmails[index] = e.target.value;
+                              setFooterEmails(newEmails);
+                            }}
+                            className="text-sm"
+                          />
+                          {footerEmails.length > 1 && (
+                            <Button variant="ghost" size="icon" onClick={() => setFooterEmails(footerEmails.filter((_, i) => i !== index))}>
+                              <X className="w-4 h-4" />
+                            </Button>
+                          )}
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
 
-                <Button onClick={saveFooterContent} disabled={savingFooterContent} className="w-full">
-                  <Save className="w-4 h-4 mr-2" />
-                  {savingFooterContent ? "Salvando..." : "Salvar Conteúdo do Footer"}
-                </Button>
-              </CardContent>
-            </Card>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-sm">Telefones</Label>
+                        <Button variant="ghost" size="sm" onClick={() => setFooterPhones([...footerPhones, ""])}>
+                          <Plus className="w-3 h-3" />
+                        </Button>
+                      </div>
+                      {footerPhones.map((phone, index) => (
+                        <div key={index} className="flex gap-2">
+                          <Input
+                            placeholder="(00) 00000-0000"
+                            value={phone}
+                            onChange={(e) => {
+                              const newPhones = [...footerPhones];
+                              newPhones[index] = e.target.value;
+                              setFooterPhones(newPhones);
+                            }}
+                            className="text-sm"
+                          />
+                          {footerPhones.length > 1 && (
+                            <Button variant="ghost" size="icon" onClick={() => setFooterPhones(footerPhones.filter((_, i) => i !== index))}>
+                              <X className="w-4 h-4" />
+                            </Button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
 
-            {/* Controle e Edição - Links Sociais */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Settings2 className="w-5 h-5" />
-                  Controle e Edição - Links do Footer
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  Gerencie os links das redes sociais exibidos no footer do site.
-                </p>
+                    <Button onClick={saveFooterContent} disabled={savingFooterContent} className="w-full" size="sm">
+                      <Save className="w-4 h-4 mr-2" />
+                      {savingFooterContent ? "Salvando..." : "Salvar Conteúdo"}
+                    </Button>
+                  </CardContent>
+                </Card>
 
-                {/* Instagram */}
-                <div className="p-4 border rounded-lg space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#833AB4] via-[#FD1D1D] to-[#F77737] flex items-center justify-center">
+                {/* Social Links */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base">Redes Sociais</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {/* Instagram */}
+                    <div className="flex items-center gap-3 p-2 border rounded-lg">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#833AB4] via-[#FD1D1D] to-[#F77737] flex items-center justify-center flex-shrink-0">
                         <Instagram className="w-4 h-4 text-white" />
                       </div>
-                      <span className="font-medium">Instagram</span>
+                      <Input
+                        placeholder="URL do Instagram"
+                        value={socialLinks.instagram.url}
+                        onChange={(e) => setSocialLinks(prev => ({ ...prev, instagram: { ...prev.instagram, url: e.target.value } }))}
+                        className="flex-1 text-sm"
+                        disabled={!socialLinks.instagram.enabled}
+                      />
+                      <Switch
+                        checked={socialLinks.instagram.enabled}
+                        onCheckedChange={(checked) => setSocialLinks(prev => ({ ...prev, instagram: { ...prev.instagram, enabled: checked } }))}
+                      />
                     </div>
-                    <Switch
-                      checked={socialLinks.instagram.enabled}
-                      onCheckedChange={(checked) => 
-                        setSocialLinks(prev => ({ ...prev, instagram: { ...prev.instagram, enabled: checked } }))
-                      }
-                    />
-                  </div>
-                  {socialLinks.instagram.enabled && (
-                    <Input
-                      placeholder="https://www.instagram.com/seuusuario/"
-                      value={socialLinks.instagram.url}
-                      onChange={(e) => 
-                        setSocialLinks(prev => ({ ...prev, instagram: { ...prev.instagram, url: e.target.value } }))
-                      }
-                    />
-                  )}
-                </div>
 
-                {/* Facebook */}
-                <div className="p-4 border rounded-lg space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-[#1877F2] flex items-center justify-center">
+                    {/* Facebook */}
+                    <div className="flex items-center gap-3 p-2 border rounded-lg">
+                      <div className="w-8 h-8 rounded-full bg-[#1877F2] flex items-center justify-center flex-shrink-0">
                         <Facebook className="w-4 h-4 text-white" />
                       </div>
-                      <span className="font-medium">Facebook</span>
+                      <Input
+                        placeholder="URL do Facebook"
+                        value={socialLinks.facebook.url}
+                        onChange={(e) => setSocialLinks(prev => ({ ...prev, facebook: { ...prev.facebook, url: e.target.value } }))}
+                        className="flex-1 text-sm"
+                        disabled={!socialLinks.facebook.enabled}
+                      />
+                      <Switch
+                        checked={socialLinks.facebook.enabled}
+                        onCheckedChange={(checked) => setSocialLinks(prev => ({ ...prev, facebook: { ...prev.facebook, enabled: checked } }))}
+                      />
                     </div>
-                    <Switch
-                      checked={socialLinks.facebook.enabled}
-                      onCheckedChange={(checked) => 
-                        setSocialLinks(prev => ({ ...prev, facebook: { ...prev.facebook, enabled: checked } }))
-                      }
-                    />
-                  </div>
-                  {socialLinks.facebook.enabled && (
-                    <Input
-                      placeholder="https://www.facebook.com/suapagina/"
-                      value={socialLinks.facebook.url}
-                      onChange={(e) => 
-                        setSocialLinks(prev => ({ ...prev, facebook: { ...prev.facebook, url: e.target.value } }))
-                      }
-                    />
-                  )}
-                </div>
 
-                {/* LinkedIn */}
-                <div className="p-4 border rounded-lg space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-[#0A66C2] flex items-center justify-center">
+                    {/* LinkedIn */}
+                    <div className="flex items-center gap-3 p-2 border rounded-lg">
+                      <div className="w-8 h-8 rounded-full bg-[#0A66C2] flex items-center justify-center flex-shrink-0">
                         <Linkedin className="w-4 h-4 text-white" />
                       </div>
-                      <span className="font-medium">LinkedIn</span>
+                      <Input
+                        placeholder="URL do LinkedIn"
+                        value={socialLinks.linkedin.url}
+                        onChange={(e) => setSocialLinks(prev => ({ ...prev, linkedin: { ...prev.linkedin, url: e.target.value } }))}
+                        className="flex-1 text-sm"
+                        disabled={!socialLinks.linkedin.enabled}
+                      />
+                      <Switch
+                        checked={socialLinks.linkedin.enabled}
+                        onCheckedChange={(checked) => setSocialLinks(prev => ({ ...prev, linkedin: { ...prev.linkedin, enabled: checked } }))}
+                      />
                     </div>
-                    <Switch
-                      checked={socialLinks.linkedin.enabled}
-                      onCheckedChange={(checked) => 
-                        setSocialLinks(prev => ({ ...prev, linkedin: { ...prev.linkedin, enabled: checked } }))
-                      }
-                    />
-                  </div>
-                  {socialLinks.linkedin.enabled && (
-                    <Input
-                      placeholder="https://www.linkedin.com/company/suaempresa/"
-                      value={socialLinks.linkedin.url}
-                      onChange={(e) => 
-                        setSocialLinks(prev => ({ ...prev, linkedin: { ...prev.linkedin, url: e.target.value } }))
-                      }
-                    />
-                  )}
-                </div>
 
-                {/* YouTube */}
-                <div className="p-4 border rounded-lg space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-[#FF0000] flex items-center justify-center">
+                    {/* YouTube */}
+                    <div className="flex items-center gap-3 p-2 border rounded-lg">
+                      <div className="w-8 h-8 rounded-full bg-[#FF0000] flex items-center justify-center flex-shrink-0">
                         <Youtube className="w-4 h-4 text-white" />
                       </div>
-                      <span className="font-medium">YouTube</span>
+                      <Input
+                        placeholder="URL do YouTube"
+                        value={socialLinks.youtube.url}
+                        onChange={(e) => setSocialLinks(prev => ({ ...prev, youtube: { ...prev.youtube, url: e.target.value } }))}
+                        className="flex-1 text-sm"
+                        disabled={!socialLinks.youtube.enabled}
+                      />
+                      <Switch
+                        checked={socialLinks.youtube.enabled}
+                        onCheckedChange={(checked) => setSocialLinks(prev => ({ ...prev, youtube: { ...prev.youtube, enabled: checked } }))}
+                      />
                     </div>
-                    <Switch
-                      checked={socialLinks.youtube.enabled}
-                      onCheckedChange={(checked) => 
-                        setSocialLinks(prev => ({ ...prev, youtube: { ...prev.youtube, enabled: checked } }))
-                      }
-                    />
-                  </div>
-                  {socialLinks.youtube.enabled && (
-                    <Input
-                      placeholder="https://www.youtube.com/@seucanal/"
-                      value={socialLinks.youtube.url}
-                      onChange={(e) => 
-                        setSocialLinks(prev => ({ ...prev, youtube: { ...prev.youtube, url: e.target.value } }))
-                      }
-                    />
-                  )}
-                </div>
 
-                {/* Twitter/X */}
-                <div className="p-4 border rounded-lg space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-black flex items-center justify-center">
+                    {/* Twitter/X */}
+                    <div className="flex items-center gap-3 p-2 border rounded-lg">
+                      <div className="w-8 h-8 rounded-full bg-black flex items-center justify-center flex-shrink-0">
                         <Twitter className="w-4 h-4 text-white" />
                       </div>
-                      <span className="font-medium">X / Twitter</span>
+                      <Input
+                        placeholder="URL do X/Twitter"
+                        value={socialLinks.twitter?.url || ""}
+                        onChange={(e) => setSocialLinks(prev => ({ ...prev, twitter: { ...prev.twitter, url: e.target.value } }))}
+                        className="flex-1 text-sm"
+                        disabled={!socialLinks.twitter?.enabled}
+                      />
+                      <Switch
+                        checked={socialLinks.twitter?.enabled || false}
+                        onCheckedChange={(checked) => setSocialLinks(prev => ({ ...prev, twitter: { ...prev.twitter, enabled: checked } }))}
+                      />
                     </div>
-                    <Switch
-                      checked={socialLinks.twitter?.enabled || false}
-                      onCheckedChange={(checked) => 
-                        setSocialLinks(prev => ({ ...prev, twitter: { ...prev.twitter, enabled: checked } }))
-                      }
-                    />
-                  </div>
-                  {socialLinks.twitter?.enabled && (
-                    <Input
-                      placeholder="https://x.com/seuusuario/"
-                      value={socialLinks.twitter?.url || ""}
-                      onChange={(e) => 
-                        setSocialLinks(prev => ({ ...prev, twitter: { ...prev.twitter, url: e.target.value } }))
-                      }
-                    />
-                  )}
-                </div>
 
-                {/* IMDB */}
-                <div className="p-4 border rounded-lg space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-[#F5C518] flex items-center justify-center">
+                    {/* IMDB */}
+                    <div className="flex items-center gap-3 p-2 border rounded-lg">
+                      <div className="w-8 h-8 rounded-full bg-[#F5C518] flex items-center justify-center flex-shrink-0">
                         <span className="text-black font-bold text-xs">IMDb</span>
                       </div>
-                      <span className="font-medium">IMDb</span>
+                      <Input
+                        placeholder="URL do IMDb"
+                        value={socialLinks.imdb?.url || ""}
+                        onChange={(e) => setSocialLinks(prev => ({ ...prev, imdb: { ...prev.imdb, url: e.target.value } }))}
+                        className="flex-1 text-sm"
+                        disabled={!socialLinks.imdb?.enabled}
+                      />
+                      <Switch
+                        checked={socialLinks.imdb?.enabled || false}
+                        onCheckedChange={(checked) => setSocialLinks(prev => ({ ...prev, imdb: { ...prev.imdb, enabled: checked } }))}
+                      />
                     </div>
-                    <Switch
-                      checked={socialLinks.imdb?.enabled || false}
-                      onCheckedChange={(checked) => 
-                        setSocialLinks(prev => ({ ...prev, imdb: { ...prev.imdb, enabled: checked } }))
-                      }
-                    />
-                  </div>
-                  {socialLinks.imdb?.enabled && (
-                    <Input
-                      placeholder="https://www.imdb.com/name/nm0000000/"
-                      value={socialLinks.imdb?.url || ""}
-                      onChange={(e) => 
-                        setSocialLinks(prev => ({ ...prev, imdb: { ...prev.imdb, url: e.target.value } }))
-                      }
-                    />
-                  )}
-                </div>
 
-                {/* Site Pessoal */}
-                <div className="p-4 border rounded-lg space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center">
+                    {/* Website */}
+                    <div className="flex items-center gap-3 p-2 border rounded-lg">
+                      <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0">
                         <Globe className="w-4 h-4 text-white" />
                       </div>
-                      <span className="font-medium">Site Pessoal</span>
+                      <Input
+                        placeholder="URL do Site"
+                        value={socialLinks.website.url}
+                        onChange={(e) => setSocialLinks(prev => ({ ...prev, website: { ...prev.website, url: e.target.value } }))}
+                        className="flex-1 text-sm"
+                        disabled={!socialLinks.website.enabled}
+                      />
+                      <Switch
+                        checked={socialLinks.website.enabled}
+                        onCheckedChange={(checked) => setSocialLinks(prev => ({ ...prev, website: { ...prev.website, enabled: checked } }))}
+                      />
                     </div>
-                    <Switch
-                      checked={socialLinks.website.enabled}
-                      onCheckedChange={(checked) => 
-                        setSocialLinks(prev => ({ ...prev, website: { ...prev.website, enabled: checked } }))
-                      }
-                    />
-                  </div>
-                  {socialLinks.website.enabled && (
-                    <Input
-                      placeholder="https://www.seusite.com/"
-                      value={socialLinks.website.url}
-                      onChange={(e) => 
-                        setSocialLinks(prev => ({ ...prev, website: { ...prev.website, url: e.target.value } }))
-                      }
-                    />
-                  )}
-                </div>
 
-                <Button onClick={saveSocialLinks} disabled={savingSocialLinks} className="w-full">
-                  <Save className="w-4 h-4 mr-2" />
-                  {savingSocialLinks ? "Salvando..." : "Salvar Alterações"}
-                </Button>
-              </CardContent>
-            </Card>
-
+                    <Button onClick={saveSocialLinks} disabled={savingSocialLinks} className="w-full" size="sm">
+                      <Save className="w-4 h-4 mr-2" />
+                      {savingSocialLinks ? "Salvando..." : "Salvar Redes Sociais"}
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
           </div>
         )}
 
