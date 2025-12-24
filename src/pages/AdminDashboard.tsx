@@ -258,7 +258,7 @@ const AdminDashboard = () => {
     if (authLoading) return;
 
     if (!user || !isAdmin) {
-      navigate("/auth");
+      navigate("/login");
       return;
     }
 

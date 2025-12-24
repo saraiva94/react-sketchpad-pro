@@ -85,7 +85,7 @@ const AdminAddProjectPage = () => {
 
   useEffect(() => {
     if (authLoading) return;
-    if (!user || !isAdmin) navigate("/auth");
+    if (!user || !isAdmin) navigate("/login");
   }, [authLoading, user, isAdmin, navigate]);
 
   const validateForm = () => {
