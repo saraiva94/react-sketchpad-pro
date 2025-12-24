@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { fetchProjectLocations } from "@/components/admin/DynamicLocationSelect";
 import { useInView } from "@/hooks/useInView";
 import { useLanguage } from "@/hooks/useLanguage";
+import { useAutoTranslate } from "@/hooks/useAutoTranslate";
 import { 
   Search,
   MapPin,
@@ -76,44 +77,55 @@ const DEFAULT_LOCATIONS = [
   "Curitiba",
 ];
 // budgetRanges removed - feature discontinued
-const projectStages = [
-  { value: "all", label: "Estágio" },
-  { value: "ideia", label: "Ideia inicial" },
-  { value: "development", label: "Desenvolvimento" },
-  { value: "captacao", label: "Captação de recursos" },
-  { value: "pre_producao", label: "Pré-produção" },
-  { value: "producao", label: "Produção" },
-  { value: "pos_producao", label: "Pós-produção" },
-  { value: "finalizado", label: "Finalizado" },
-  { value: "em_exibicao", label: "Em exibição" },
-  { value: "distribution", label: "Distribuição" }
-];
-const incentiveLaws = [
-  { value: "all", label: "Lei de Incentivo" },
-  { value: "rouanet", label: "Lei Rouanet" },
-  { value: "audiovisual", label: "Lei do Audiovisual" },
-  { value: "proac", label: "PROAC" },
-  { value: "none", label: "Sem Lei de Incentivo" }
-];
-const sortOptions = [
-  { value: "recent", label: "Ordenar" },
-  { value: "name", label: "Nome A-Z" },
-  { value: "budget-asc", label: "Menor Orçamento" },
-  { value: "budget-desc", label: "Maior Orçamento" }
-];
+// Stage labels will be mapped from i18n
+const stageValueMap = {
+  all: 'stageAll',
+  ideia: 'stageIdea',
+  development: 'stageDevelopment',
+  captacao: 'stageFundraising',
+  pre_producao: 'stagePreProduction',
+  producao: 'stageProduction',
+  pos_producao: 'stagePostProduction',
+  finalizado: 'stageFinished',
+  em_exibicao: 'stageExhibition',
+  distribution: 'stageDistribution'
+} as const;
+
+const lawValueMap = {
+  all: 'lawAll',
+  rouanet: 'lawRouanet',
+  audiovisual: 'lawAudiovisual',
+  proac: 'lawProac',
+  none: 'lawNone'
+} as const;
+
+const sortValueMap = {
+  recent: 'sortRecent',
+  name: 'sortByName',
+  'budget-asc': 'sortByBudgetAsc',
+  'budget-desc': 'sortByBudgetDesc'
+} as const;
 
 
 const PortoDeIdeiasPage = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [displaySlots, setDisplaySlots] = useState(6); // Default 6 project slots (2 rows of 3)
   const [cardVisibility, setCardVisibility] = useState<{ [key: string]: boolean }>({});
   const [filtersOpen, setFiltersOpen] = useState(false);
   
-  // Header content from settings
-  const [headerTitle, setHeaderTitle] = useState("Conheça os Projetos da Porto de Ideias");
-  const [headerDescription, setHeaderDescription] = useState("Selecionamos projetos com potencial de impacto. Conheça as ideias que já fazem parte da nossa rede.");
+  // Header content from settings (PT source)
+  const [headerTitlePt, setHeaderTitlePt] = useState<string>(t.portoDeIdeias.knowProjects);
+  const [headerDescriptionPt, setHeaderDescriptionPt] = useState<string>(t.portoDeIdeias.selectedProjects);
+  
+  // Auto-translate header content
+  const { translated: translatedTitle } = useAutoTranslate('porto_ideias_header_title', headerTitlePt);
+  const { translated: translatedDescription } = useAutoTranslate('porto_ideias_header_desc', headerDescriptionPt);
+  
+  // Display content based on language
+  const headerTitle = language === 'pt' ? headerTitlePt : (translatedTitle || headerTitlePt);
+  const headerDescription = language === 'pt' ? headerDescriptionPt : (translatedDescription || headerDescriptionPt);
   
   // Filters
   const [searchTerm, setSearchTerm] = useState("");
@@ -217,8 +229,8 @@ const PortoDeIdeiasPage = () => {
     
     if (data) {
       const content = data.value as { title?: string; description?: string };
-      if (content.title) setHeaderTitle(content.title);
-      if (content.description) setHeaderDescription(content.description);
+      if (content.title) setHeaderTitlePt(content.title);
+      if (content.description) setHeaderDescriptionPt(content.description);
     }
     
     // Extract unique locations from projects for autocomplete
@@ -245,21 +257,21 @@ const PortoDeIdeiasPage = () => {
 
   const getBudgetRange = (value: number | null): { label: string; color: string } => {
     if (!value) return { label: "", color: "" };
-    if (value < 100000) return { label: "Pequeno", color: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400" };
-    if (value < 500000) return { label: "Médio", color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400" };
-    return { label: "Grande", color: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400" };
+    if (value < 100000) return { label: t.projects.budgetSmall, color: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400" };
+    if (value < 500000) return { label: t.projects.budgetMedium, color: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400" };
+    return { label: t.projects.budgetLarge, color: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400" };
   };
 
   const getStageInfo = (stage: string | null): { label: string; color: string } => {
     switch (stage) {
       case 'development':
-        return { label: "Desenvolvimento", color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400" };
+        return { label: t.projects.stageDevelopment, color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400" };
       case 'production':
-        return { label: "Produção", color: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400" };
+        return { label: t.projects.stageProduction, color: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400" };
       case 'distribution':
-        return { label: "Difusão", color: "bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-400" };
+        return { label: t.projects.stageDistribution, color: "bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-400" };
       default:
-        return { label: "Desenvolvimento", color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400" };
+        return { label: t.projects.stageDevelopment, color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400" };
     }
   };
 
@@ -357,80 +369,110 @@ const PortoDeIdeiasPage = () => {
     selectedIncentiveLaw !== "all"
   ].filter(Boolean).length;
 
-  const FilterControls = ({ isMobile = false }: { isMobile?: boolean }) => (
-    <div className={isMobile ? "space-y-4" : "flex flex-wrap gap-3 items-center justify-center"}>
-      {/* Search */}
-      <div className={`relative ${isMobile ? 'w-full' : 'flex-1 min-w-[200px] max-w-xs'}`}>
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-        <Input
-          type="text"
-          placeholder={t.projects.search}
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-9 rounded-full"
-        />
-      </div>
+  const FilterControls = ({ isMobile = false }: { isMobile?: boolean }) => {
+    // Build translated options from i18n
+    const projectStages = [
+      { value: "all", label: t.projects.stageAll },
+      { value: "ideia", label: t.projects.stageIdea },
+      { value: "development", label: t.projects.stageDevelopment },
+      { value: "captacao", label: t.projects.stageFundraising },
+      { value: "pre_producao", label: t.projects.stagePreProduction },
+      { value: "producao", label: t.projects.stageProduction },
+      { value: "pos_producao", label: t.projects.stagePostProduction },
+      { value: "finalizado", label: t.projects.stageFinished },
+      { value: "em_exibicao", label: t.projects.stageExhibition },
+      { value: "distribution", label: t.projects.stageDistribution }
+    ];
 
-      {/* Project Type */}
-      <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-        <SelectTrigger className={`rounded-full ${isMobile ? 'w-full' : 'w-fit'}`}>
-          <SelectValue placeholder={t.projects.projectType} />
-        </SelectTrigger>
-        <SelectContent position="popper" sideOffset={4}>
-          {projectTypes.map(type => (
-            <SelectItem key={type} value={type}>{type}</SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+    const incentiveLaws = [
+      { value: "all", label: t.projects.lawAll },
+      { value: "rouanet", label: t.projects.lawRouanet },
+      { value: "audiovisual", label: t.projects.lawAudiovisual },
+      { value: "proac", label: t.projects.lawProac },
+      { value: "none", label: t.projects.lawNone }
+    ];
 
-      {/* Budget Range filter removed - feature discontinued */}
-      {/* Stage */}
-      <Select value={selectedStage} onValueChange={setSelectedStage}>
-        <SelectTrigger className={`rounded-full ${isMobile ? 'w-full' : 'w-fit'}`}>
-          <SelectValue placeholder={t.projects.stage} />
-        </SelectTrigger>
-        <SelectContent position="popper" sideOffset={4}>
-          {projectStages.map(stage => (
-            <SelectItem key={stage.value} value={stage.value}>{stage.label}</SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+    const sortOptions = [
+      { value: "recent", label: t.projects.sortRecent },
+      { value: "name", label: t.projects.sortByName },
+      { value: "budget-asc", label: t.projects.sortByBudgetAsc },
+      { value: "budget-desc", label: t.projects.sortByBudgetDesc }
+    ];
 
-      {/* Incentive Law */}
-      <Select value={selectedIncentiveLaw} onValueChange={setSelectedIncentiveLaw}>
-        <SelectTrigger className={`rounded-full ${isMobile ? 'w-full' : 'w-fit'}`}>
-          <SelectValue placeholder={t.projects.incentiveLaw} />
-        </SelectTrigger>
-        <SelectContent position="popper" sideOffset={4}>
-          {incentiveLaws.map(law => (
-            <SelectItem key={law.value} value={law.value}>{law.label}</SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+    return (
+      <div className={isMobile ? "space-y-4" : "flex flex-wrap gap-3 items-center justify-center"}>
+        {/* Search */}
+        <div className={`relative ${isMobile ? 'w-full' : 'flex-1 min-w-[200px] max-w-xs'}`}>
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            type="text"
+            placeholder={t.projects.search}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-9 rounded-full"
+          />
+        </div>
 
-      {/* Location */}
-      <Select value={selectedLocation} onValueChange={setSelectedLocation}>
-        <SelectTrigger className={`rounded-full ${isMobile ? 'w-full' : 'w-fit'}`}>
-          <SelectValue placeholder="Local" />
-        </SelectTrigger>
-        <SelectContent position="popper" sideOffset={4}>
-          {locations.map(loc => (
-            <SelectItem key={loc} value={loc}>{loc}</SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+        {/* Project Type */}
+        <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+          <SelectTrigger className={`rounded-full ${isMobile ? 'w-full' : 'w-fit'}`}>
+            <SelectValue placeholder={t.projects.projectType} />
+          </SelectTrigger>
+          <SelectContent position="popper" sideOffset={4}>
+            {projectTypes.map(type => (
+              <SelectItem key={type} value={type}>{type}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
-      {/* Sort */}
-      <Select value={sortBy} onValueChange={setSortBy}>
-        <SelectTrigger className={`rounded-full ${isMobile ? 'w-full' : 'w-fit'}`}>
-          <SelectValue placeholder={t.projects.sortBy} />
-        </SelectTrigger>
-        <SelectContent position="popper" sideOffset={4}>
-          {sortOptions.map(opt => (
-            <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+        {/* Budget Range filter removed - feature discontinued */}
+        {/* Stage */}
+        <Select value={selectedStage} onValueChange={setSelectedStage}>
+          <SelectTrigger className={`rounded-full ${isMobile ? 'w-full' : 'w-fit'}`}>
+            <SelectValue placeholder={t.projects.stage} />
+          </SelectTrigger>
+          <SelectContent position="popper" sideOffset={4}>
+            {projectStages.map(stage => (
+              <SelectItem key={stage.value} value={stage.value}>{stage.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        {/* Incentive Law */}
+        <Select value={selectedIncentiveLaw} onValueChange={setSelectedIncentiveLaw}>
+          <SelectTrigger className={`rounded-full ${isMobile ? 'w-full' : 'w-fit'}`}>
+            <SelectValue placeholder={t.projects.incentiveLaw} />
+          </SelectTrigger>
+          <SelectContent position="popper" sideOffset={4}>
+            {incentiveLaws.map(law => (
+              <SelectItem key={law.value} value={law.value}>{law.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        {/* Location */}
+        <Select value={selectedLocation} onValueChange={setSelectedLocation}>
+          <SelectTrigger className={`rounded-full ${isMobile ? 'w-full' : 'w-fit'}`}>
+            <SelectValue placeholder={t.projects.city} />
+          </SelectTrigger>
+          <SelectContent position="popper" sideOffset={4}>
+            {locations.map(loc => (
+              <SelectItem key={loc} value={loc}>{loc}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        {/* Sort */}
+        <Select value={sortBy} onValueChange={setSortBy}>
+          <SelectTrigger className={`rounded-full ${isMobile ? 'w-full' : 'w-fit'}`}>
+            <SelectValue placeholder={t.projects.sortBy} />
+          </SelectTrigger>
+          <SelectContent position="popper" sideOffset={4}>
+            {sortOptions.map(opt => (
+              <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
       {/* Clear Filters */}
       {hasActiveFilters && (
@@ -447,8 +489,9 @@ const PortoDeIdeiasPage = () => {
           {t.projects.clearFilters}
         </Button>
       )}
-    </div>
-  );
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-background relative">
@@ -532,7 +575,7 @@ const PortoDeIdeiasPage = () => {
                 </div>
                 <div className="pt-4 border-t mt-4">
                   <Button className="w-full rounded-full" onClick={() => setFiltersOpen(false)}>
-                    Ver {sortedProjects.length} Projeto{sortedProjects.length !== 1 ? 's' : ''}
+                    {t.projects.viewProjects.replace('{count}', String(sortedProjects.length))}
                   </Button>
                 </div>
               </SheetContent>

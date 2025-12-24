@@ -59,6 +59,33 @@ export const translations = {
       noProjectsFound: 'Nenhum projeto encontrado',
       adjustFilters: 'Tente ajustar seus filtros ou faça uma busca diferente.',
       portfolioSubtitle: 'Explore todos os projetos aprovados e encontre iniciativas culturais para apoiar.',
+      viewProjects: 'Ver {count} Projeto(s)',
+      // Stage labels
+      stageAll: 'Estágio',
+      stageIdea: 'Ideia inicial',
+      stageDevelopment: 'Desenvolvimento',
+      stageFundraising: 'Captação de recursos',
+      stagePreProduction: 'Pré-produção',
+      stageProduction: 'Produção',
+      stagePostProduction: 'Pós-produção',
+      stageFinished: 'Finalizado',
+      stageExhibition: 'Em exibição',
+      stageDistribution: 'Distribuição',
+      // Incentive Law labels
+      lawAll: 'Lei de Incentivo',
+      lawRouanet: 'Lei Rouanet',
+      lawAudiovisual: 'Lei do Audiovisual',
+      lawProac: 'PROAC',
+      lawNone: 'Sem Lei de Incentivo',
+      // Sort labels
+      sortRecent: 'Ordenar',
+      // Budget labels  
+      budgetSmall: 'Pequeno',
+      budgetMedium: 'Médio',
+      budgetLarge: 'Grande',
+      // Other
+      otherCity: 'Outra cidade',
+      other: 'Outro',
     },
     projectDetails: {
       synopsis: 'Sinopse',
@@ -258,6 +285,33 @@ export const translations = {
       noProjectsFound: 'No projects found',
       adjustFilters: 'Try adjusting your filters or search for something else.',
       portfolioSubtitle: 'Explore all approved projects and find cultural initiatives to support.',
+      viewProjects: 'View {count} Project(s)',
+      // Stage labels
+      stageAll: 'Stage',
+      stageIdea: 'Initial Idea',
+      stageDevelopment: 'Development',
+      stageFundraising: 'Fundraising',
+      stagePreProduction: 'Pre-production',
+      stageProduction: 'Production',
+      stagePostProduction: 'Post-production',
+      stageFinished: 'Finished',
+      stageExhibition: 'Screening',
+      stageDistribution: 'Distribution',
+      // Incentive Law labels
+      lawAll: 'Incentive Law',
+      lawRouanet: 'Rouanet Law',
+      lawAudiovisual: 'Audiovisual Law',
+      lawProac: 'PROAC',
+      lawNone: 'No Incentive Law',
+      // Sort labels
+      sortRecent: 'Sort by',
+      // Budget labels
+      budgetSmall: 'Small',
+      budgetMedium: 'Medium',
+      budgetLarge: 'Large',
+      // Other
+      otherCity: 'Other city',
+      other: 'Other',
     },
     projectDetails: {
       synopsis: 'Synopsis',
@@ -457,6 +511,33 @@ export const translations = {
       noProjectsFound: 'No se encontraron proyectos',
       adjustFilters: 'Intenta ajustar tus filtros o buscar algo diferente.',
       portfolioSubtitle: 'Explore todos los proyectos aprobados y encuentre iniciativas culturales para apoyar.',
+      viewProjects: 'Ver {count} Proyecto(s)',
+      // Stage labels
+      stageAll: 'Etapa',
+      stageIdea: 'Idea inicial',
+      stageDevelopment: 'Desarrollo',
+      stageFundraising: 'Captación de recursos',
+      stagePreProduction: 'Preproducción',
+      stageProduction: 'Producción',
+      stagePostProduction: 'Posproducción',
+      stageFinished: 'Finalizado',
+      stageExhibition: 'En exhibición',
+      stageDistribution: 'Distribución',
+      // Incentive Law labels
+      lawAll: 'Ley de Incentivo',
+      lawRouanet: 'Ley Rouanet',
+      lawAudiovisual: 'Ley del Audiovisual',
+      lawProac: 'PROAC',
+      lawNone: 'Sin Ley de Incentivo',
+      // Sort labels
+      sortRecent: 'Ordenar por',
+      // Budget labels
+      budgetSmall: 'Pequeño',
+      budgetMedium: 'Mediano',
+      budgetLarge: 'Grande',
+      // Other
+      otherCity: 'Otra ciudad',
+      other: 'Otro',
     },
     projectDetails: {
       synopsis: 'Sinopsis',
