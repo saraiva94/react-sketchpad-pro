@@ -85,8 +85,8 @@ const AdminAddProjectPage = () => {
 
   useEffect(() => {
     if (authLoading) return;
-    if (!user || !isAdmin) navigate("/login");
-  }, [authLoading, user, isAdmin, navigate]);
+    if (!isAdmin) navigate("/login");
+  }, [authLoading, isAdmin, navigate]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};

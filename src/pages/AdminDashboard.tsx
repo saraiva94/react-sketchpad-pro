@@ -257,7 +257,7 @@ const AdminDashboard = () => {
   useEffect(() => {
     if (authLoading) return;
 
-    if (!user || !isAdmin) {
+    if (!isAdmin) {
       navigate("/login");
       return;
     }
@@ -266,7 +266,7 @@ const AdminDashboard = () => {
     fetchProjectMembers();
     fetchAccessRequests();
     fetchStatsVisibility();
-  }, [authLoading, user, isAdmin, navigate]);
+  }, [authLoading, isAdmin, navigate]);
 
   const fetchStatsVisibility = async () => {
     const { data: statsData } = await supabase

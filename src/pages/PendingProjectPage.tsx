@@ -84,7 +84,7 @@ const PendingProjectPage = () => {
   useEffect(() => {
     if (authLoading) return;
 
-    if (!user || !isAdmin) {
+    if (!isAdmin) {
       navigate("/login");
       return;
     }
@@ -93,7 +93,7 @@ const PendingProjectPage = () => {
       fetchProject();
       fetchTeamMembers();
     }
-  }, [authLoading, user, isAdmin, id, navigate]);
+  }, [authLoading, isAdmin, id, navigate]);
 
   useEffect(() => {
     if (project) {
