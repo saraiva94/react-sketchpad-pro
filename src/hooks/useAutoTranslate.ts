@@ -95,54 +95,65 @@ export function useAutoTranslate<T>(
        }
      }
 
-    // Chama edge function para traduzir
-    const doTranslate = async () => {
-      setIsTranslating(true);
-      try {
-        const { data, error } = await supabase.functions.invoke('translate', {
-          body: { targetLanguage: language, value },
-        });
+     // Chama edge function para traduzir
+     const doTranslate = async () => {
+       setIsTranslating(true);
+       try {
+         let data: any = null;
+         let error: any = null;
 
-        // Validate response - must have value and be same type as input
-        if (!error && data && typeof data.value !== 'undefined') {
-          const translated = data.value;
-          // Ensure we don't return raw API objects
-          if (typeof value === 'string' && typeof translated === 'string') {
-            memoryCache.set(cacheKey, translated);
-            try {
-              localStorage.setItem(cacheKey, JSON.stringify(translated));
-            } catch {
-              // quota exceeded
-            }
-            setTranslated(translated as T);
-          } else if (typeof value === 'object' && typeof translated === 'object' && translated !== null) {
-            // Validate object doesn't have API metadata keys
-            if (!('targetLanguage' in translated) && !('json' in translated)) {
-              memoryCache.set(cacheKey, translated);
-              try {
-                localStorage.setItem(cacheKey, JSON.stringify(translated));
-              } catch {
-                // quota exceeded
-              }
-              setTranslated(translated as T);
-            } else {
-              // Invalid response, use original
-              setTranslated(value);
-            }
-          } else {
-            // Type mismatch, use original
-            setTranslated(value);
-          }
-        } else {
-          // Fallback: use original
-          setTranslated(value);
-        }
-      } catch {
-        setTranslated(value);
-      } finally {
-        setIsTranslating(false);
-      }
-    };
+         try {
+           const res = await supabase.functions.invoke('translate', {
+             body: { targetLanguage: language, value },
+           });
+           data = res.data;
+           error = res.error;
+         } catch {
+           // Falha de rede/runtime (ex: 500). Fail-safe: usa original.
+           setTranslated(value);
+           return;
+         }
+
+         // Validate response - must have value and be same type as input
+         if (!error && data && typeof data.value !== 'undefined') {
+           const translated = data.value;
+           // Ensure we don't return raw API objects
+           if (typeof value === 'string' && typeof translated === 'string') {
+             memoryCache.set(cacheKey, translated);
+             try {
+               localStorage.setItem(cacheKey, JSON.stringify(translated));
+             } catch {
+               // quota exceeded
+             }
+             setTranslated(translated as T);
+           } else if (typeof value === 'object' && typeof translated === 'object' && translated !== null) {
+             // Validate object doesn't have API metadata keys
+             if (!('targetLanguage' in translated) && !('json' in translated)) {
+               memoryCache.set(cacheKey, translated);
+               try {
+                 localStorage.setItem(cacheKey, JSON.stringify(translated));
+               } catch {
+                 // quota exceeded
+               }
+               setTranslated(translated as T);
+             } else {
+               // Invalid response, use original
+               setTranslated(value);
+             }
+           } else {
+             // Type mismatch, use original
+             setTranslated(value);
+           }
+         } else {
+           // Fallback: use original
+           setTranslated(value);
+         }
+       } catch {
+         setTranslated(value);
+       } finally {
+         setIsTranslating(false);
+       }
+     };
 
     doTranslate();
   }, [namespace, value, language]);

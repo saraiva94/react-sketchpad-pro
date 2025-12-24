@@ -64,19 +64,29 @@ export async function autoTranslateValue<T>(
   // Avoid calling translation for plain URLs
   if (typeof value === "string" && isProbablyUrl(value)) return value;
 
-  const { data, error } = await supabase.functions.invoke("translate", {
-    body: {
-      targetLanguage: language,
-      value,
-    },
-  });
+  let functionData: any = null;
+  let functionError: any = null;
 
-  if (error) {
+  try {
+    const res = await supabase.functions.invoke("translate", {
+      body: {
+        targetLanguage: language,
+        value,
+      },
+    });
+    functionData = res.data;
+    functionError = res.error;
+  } catch (e) {
+    // Network/runtime failure (e.g., 500). Fail-safe: return original.
+    return value;
+  }
+
+  if (functionError) {
     // Fail-safe: return original
     return value;
   }
 
-  const translated = (data?.value ?? value) as T;
+  const translated = (functionData?.value ?? value) as T;
 
   // Safety: never allow gateway/SDK metadata objects to escape into the UI
   if (
