@@ -167,8 +167,6 @@ const HomePage = () => {
   const [featuredVisibility, setFeaturedVisibility] = useState<Record<string, boolean>>({});
   const [featuredOrder, setFeaturedOrder] = useState<string[]>([]);
   const [featuredExampleCards, setFeaturedExampleCards] = useState<Record<string, boolean>>({});
-  const [ecossistemaTitle, setEcossistemaTitle] = useState("Um Ecossistema de Conexões");
-  const [ecossistemaSubtitle, setEcossistemaSubtitle] = useState("Mais que uma vitrine, somos um porto seguro onde as ideias atracam, ganham força e partem para o mundo.");
   
   // Quem Somos content
   interface QuemSomosCard {
@@ -221,14 +219,10 @@ const HomePage = () => {
   // Auto-tradução de conteúdos dinâmicos (do backend) quando idioma != pt
   const { translated: translatedQuemSomos } = useAutoTranslate('quem_somos', quemSomosContent);
   const { translated: translatedServicos } = useAutoTranslate('nossos_servicos', servicosContent);
-  const { translated: translatedEcossistemaTitle } = useAutoTranslate('ecossistema_title', ecossistemaTitle);
-  const { translated: translatedEcossistemaSubtitle } = useAutoTranslate('ecossistema_subtitle', ecossistemaSubtitle);
 
   // Conteúdo final que será usado na renderização
   const displayQuemSomos = language === 'pt' ? quemSomosContent : (translatedQuemSomos || quemSomosContent);
   const displayServicos = language === 'pt' ? servicosContent : (translatedServicos || servicosContent);
-  const displayEcossistemaTitle = language === 'pt' ? ecossistemaTitle : (translatedEcossistemaTitle || ecossistemaTitle);
-  const displayEcossistemaSubtitle = language === 'pt' ? ecossistemaSubtitle : (translatedEcossistemaSubtitle || ecossistemaSubtitle);
 
   useEffect(() => {
     fetchFeaturedProjects();
@@ -237,7 +231,6 @@ const HomePage = () => {
     fetchInstitutionalVideo();
     fetchQuemSomosContent();
     fetchServicosContent();
-    fetchEcossistemaTitle();
 
     // Subscribe to settings changes for real-time sync
     const channel = supabase
@@ -368,21 +361,6 @@ const HomePage = () => {
       setServicosContent(data.value as unknown as ServicosContent);
     }
   };
-
-  const fetchEcossistemaTitle = async () => {
-    const { data } = await supabase
-      .from("settings")
-      .select("value")
-      .eq("key", "ecossistema_text")
-      .maybeSingle();
-    
-    if (data && data.value) {
-      const settings = data.value as { title?: string; subtitle?: string };
-      if (settings.title) setEcossistemaTitle(settings.title);
-      if (settings.subtitle) setEcossistemaSubtitle(settings.subtitle);
-    }
-  };
-
   const fetchStats = async () => {
     // Use projects_public for count (only approved projects)
     const { count: approvedCount } = await supabase
@@ -751,11 +729,11 @@ const HomePage = () => {
           <div className={`text-center mb-16 transition-all duration-700 ${portoIdeiasInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
             <ShinyText className="inline-block" delay={300}>
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif font-semibold text-foreground mb-4">
-                {displayEcossistemaTitle}
+                {t.home.ecosystemTitle}
               </h2>
             </ShinyText>
             <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto mt-6">
-              {displayEcossistemaSubtitle}
+              {t.home.ecosystemSubtitle}
             </p>
           </div>
 
