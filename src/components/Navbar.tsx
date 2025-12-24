@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, X, Lightbulb } from "lucide-react";
+import { Menu, X, Lightbulb, Settings } from "lucide-react";
 import portobelloLogo from "@/assets/portobello-logo.png";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -28,6 +28,36 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
   const [isOpen, setIsOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<string>("");
   const [sections, setSections] = useState<SectionLabel[]>(defaultSections);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  // Check if user is admin
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user) {
+        const { data: roleData } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", user.id)
+          .eq("role", "admin")
+          .maybeSingle();
+        
+        setIsAdmin(!!roleData);
+      } else {
+        setIsAdmin(false);
+      }
+    };
+
+    checkAdminStatus();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+      checkAdminStatus();
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   // Fetch dynamic section titles from settings
   useEffect(() => {
@@ -159,6 +189,17 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
                 )}
               </button>
             ))}
+
+            {/* Admin Button - Only visible for admins */}
+            {isAdmin && (
+              <Link
+                to="/admin"
+                className="ml-2 px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent/10 rounded-lg transition-all duration-200 flex items-center gap-1.5"
+              >
+                <Settings className="w-4 h-4" />
+                Admin
+              </Link>
+            )}
           </nav>
         )}
         
@@ -236,6 +277,18 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
                           {section.label}
                         </button>
                       ))}
+
+                      {/* Admin Button - Only visible for admins */}
+                      {isAdmin && (
+                        <Link
+                          to="/admin"
+                          onClick={handleNavClick}
+                          className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent/10 rounded-lg transition-colors mt-2 border-t border-border pt-4"
+                        >
+                          <Settings className="w-4 h-4" />
+                          Painel Admin
+                        </Link>
+                      )}
                     </div>
                   )}
                 </nav>
