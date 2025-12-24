@@ -5,16 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { LayoutGrid, Eye, EyeOff, Save, GripVertical, Star, Lock } from "lucide-react";
-
-// Example card IDs matching PortoDeIdeiasPage
-const EXAMPLE_CARDS = [
-  { id: "exemplo-cultura-legado", title: "Sua Cultura, Seu Legado", emoji: "🎭", subtitle: "Audiovisual • Rio de Janeiro", canFeature: true, isExample: true },
-  { id: "exemplo-investidores-aguardam", title: "Investidores Aguardam", emoji: "🤝", subtitle: "Produção Cultural • São Paulo", canFeature: true, isExample: true },
-  { id: "exemplo-historias-sucesso", title: "Histórias de Sucesso", emoji: "🏆", subtitle: "Teatro • São Paulo", canFeature: true, isExample: true },
-  { id: "exemplo-recursos-disponiveis", title: "Recursos Disponíveis", emoji: "💰", subtitle: "Música • Belo Horizonte", canFeature: true, isExample: true },
-  { id: "exemplo-novo-projeto", title: "Adicione seu Projeto", emoji: "✨", subtitle: "Seu projeto aqui", canFeature: false, isExample: true },
-];
+import { LayoutGrid, Eye, EyeOff, Save, GripVertical, Star } from "lucide-react";
 
 interface Project {
   id: string;
@@ -64,13 +55,6 @@ export function PortoIdeiasCardsManager({ projects, onFeaturedChange }: PortoIde
     
     if (visibilityData) {
       setCardVisibility(visibilityData.value as CardVisibility);
-    } else {
-      // Default: all cards visible
-      const defaultVisibility: CardVisibility = {};
-      EXAMPLE_CARDS.forEach(card => {
-        defaultVisibility[card.id] = true;
-      });
-      setCardVisibility(defaultVisibility);
     }
 
     // Fetch featured cards settings
@@ -82,13 +66,6 @@ export function PortoIdeiasCardsManager({ projects, onFeaturedChange }: PortoIde
     
     if (featuredData) {
       setFeaturedCards(featuredData.value as FeaturedCards);
-    } else {
-      // Default: first 3 examples are featured
-      const defaultFeatured: FeaturedCards = {};
-      EXAMPLE_CARDS.slice(0, 3).filter(c => c.canFeature).forEach(card => {
-        defaultFeatured[card.id] = true;
-      });
-      setFeaturedCards(defaultFeatured);
     }
 
     // Fetch card order
@@ -108,27 +85,14 @@ export function PortoIdeiasCardsManager({ projects, onFeaturedChange }: PortoIde
   // Filter only approved projects
   const approvedProjects = projects.filter((p) => p.status === "approved" || !p.status);
 
-  // Build combined list of all cards (real projects + examples)
-  const allCards = [
-    ...approvedProjects.map(p => ({
-      id: p.id,
-      title: p.title,
-      subtitle: `${p.project_type || 'Projeto'} • ${p.location || 'Brasil'}`,
-      image_url: p.image_url,
-      canFeature: true,
-      isExample: false,
-      emoji: null as string | null,
-    })),
-    ...EXAMPLE_CARDS.map(c => ({
-      id: c.id,
-      title: c.title,
-      subtitle: c.subtitle,
-      image_url: null as string | null,
-      canFeature: c.canFeature,
-      isExample: true,
-      emoji: c.emoji,
-    }))
-  ];
+  // Build list of all project cards
+  const allCards = approvedProjects.map(p => ({
+    id: p.id,
+    title: p.title,
+    subtitle: `${p.project_type || 'Projeto'} • ${p.location || 'Brasil'}`,
+    image_url: p.image_url,
+    canFeature: true,
+  }));
 
   // Sort by order if available
   const sortedCards = [...allCards].sort((a, b) => {
@@ -222,10 +186,6 @@ export function PortoIdeiasCardsManager({ projects, onFeaturedChange }: PortoIde
     );
   }
 
-  // Separate real projects and example cards for organized display
-  const realProjectCards = sortedCards.filter(c => !c.isExample);
-  const exampleCards = sortedCards.filter(c => c.isExample);
-
   return (
     <Card>
       <CardHeader>
@@ -236,7 +196,7 @@ export function PortoIdeiasCardsManager({ projects, onFeaturedChange }: PortoIde
       </CardHeader>
       <CardContent className="space-y-6">
         <p className="text-sm text-muted-foreground">
-          Gerencie a visibilidade, destaque e ordem dos cards na página Porto de Ideias. Projetos reais aprovados e cards de exemplo podem ser ocultados, destacados na homepage (máx. 3) e reordenados.
+          Gerencie a visibilidade e destaque dos projetos na página Porto de Ideias. Projetos aprovados podem ser ocultados ou destacados na homepage (máx. 3).
         </p>
 
         {/* Featured Count Indicator */}
@@ -252,18 +212,18 @@ export function PortoIdeiasCardsManager({ projects, onFeaturedChange }: PortoIde
           )}
         </div>
 
-        {/* Real Approved Projects */}
-        {realProjectCards.length > 0 && (
+        {/* Approved Projects */}
+        {sortedCards.length > 0 ? (
           <div className="space-y-3">
             <h4 className="font-medium flex items-center gap-2">
-              Projetos Reais Aprovados
-              <Badge variant="secondary">{realProjectCards.length}</Badge>
+              Projetos Aprovados
+              <Badge variant="secondary">{sortedCards.length}</Badge>
             </h4>
             <p className="text-sm text-muted-foreground">
               Clique na estrela para destacar na homepage. Use o toggle para controlar visibilidade no Porto de Ideias.
             </p>
             <div className="space-y-2">
-              {realProjectCards.map((card) => {
+              {sortedCards.map((card) => {
                 const isVisible = cardVisibility[card.id] !== false;
                 const isFeatured = featuredCards[card.id] === true;
                 
@@ -332,107 +292,13 @@ export function PortoIdeiasCardsManager({ projects, onFeaturedChange }: PortoIde
               })}
             </div>
           </div>
-        )}
-
-        {realProjectCards.length === 0 && (
+        ) : (
           <div className="p-4 bg-muted/30 rounded-lg border border-dashed border-muted-foreground/30 text-center">
             <p className="text-sm text-muted-foreground">
-              Nenhum projeto aprovado ainda. Projetos aprovados aparecerão aqui com as mesmas opções de controle.
+              Nenhum projeto aprovado ainda. Projetos aprovados aparecerão aqui com opções de controle.
             </p>
           </div>
         )}
-
-        {/* Example Cards Visibility */}
-        <div className="space-y-3">
-          <h4 className="font-medium flex items-center gap-2">
-            Cards de Exemplo (Placeholder)
-            <Badge variant="outline">
-              {exampleCards.filter(c => cardVisibility[c.id] !== false).length} visíveis
-            </Badge>
-          </h4>
-          <p className="text-sm text-muted-foreground">
-            Cards de demonstração. O card "Adicione seu Projeto" permanece fixo no final da página.
-          </p>
-          <div className="space-y-2">
-            {exampleCards.map((card) => {
-              const isVisible = cardVisibility[card.id] !== false;
-              const isFeatured = featuredCards[card.id] === true;
-              const canFeature = card.canFeature;
-              
-              return (
-                <div 
-                  key={card.id} 
-                  className={`flex items-center justify-between p-3 border rounded-lg transition-colors ${
-                    isVisible ? 'bg-card' : 'bg-muted/50 opacity-60'
-                  } ${isFeatured ? 'border-yellow-500/50 bg-yellow-500/5' : ''}`}
-                >
-                  <div className="flex items-center gap-3">
-                    {canFeature ? (
-                      <GripVertical className="w-4 h-4 text-muted-foreground cursor-grab" />
-                    ) : (
-                      <Lock className="w-4 h-4 text-muted-foreground/50" />
-                    )}
-                    
-                    {/* Star for Featured - only show for featurable cards */}
-                    {canFeature ? (
-                      <button
-                        onClick={() => toggleFeatured(card.id)}
-                        className={`p-1.5 rounded-full transition-all ${
-                          isFeatured 
-                            ? 'bg-yellow-500/20 text-yellow-500 hover:bg-yellow-500/30' 
-                            : 'bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground'
-                        }`}
-                        title={isFeatured ? "Remover dos destaques" : "Adicionar aos destaques da homepage"}
-                      >
-                        <Star className={`w-5 h-5 ${isFeatured ? 'fill-yellow-500' : ''}`} />
-                      </button>
-                    ) : (
-                      <div className="p-1.5 rounded-full bg-muted/30 text-muted-foreground/50" title="Este card não pode ser destacado">
-                        <Star className="w-5 h-5" />
-                      </div>
-                    )}
-                    
-                    <div className="w-10 h-10 rounded bg-gradient-to-br from-accent to-primary flex items-center justify-center">
-                      <span className="text-lg">{card.emoji}</span>
-                    </div>
-                    <div>
-                      <span className="font-medium">{card.title}</span>
-                      <p className="text-xs text-muted-foreground">{card.subtitle}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    {isFeatured && canFeature && (
-                      <Badge variant="default" className="bg-yellow-600">
-                        <Star className="w-3 h-3 mr-1 fill-current" />
-                        Destaque
-                      </Badge>
-                    )}
-                    {!canFeature && (
-                      <Badge variant="outline" className="text-muted-foreground text-xs">
-                        Fixo no final
-                      </Badge>
-                    )}
-                    {isVisible ? (
-                      <Badge variant="secondary" className="text-green-600">
-                        <Eye className="w-3 h-3 mr-1" />
-                        Visível
-                      </Badge>
-                    ) : (
-                      <Badge variant="outline" className="text-muted-foreground">
-                        <EyeOff className="w-3 h-3 mr-1" />
-                        Oculto
-                      </Badge>
-                    )}
-                    <Switch
-                      checked={isVisible}
-                      onCheckedChange={() => toggleCardVisibility(card.id)}
-                    />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
 
         <Button onClick={saveVisibility} disabled={saving} className="w-full">
           <Save className="w-4 h-4 mr-2" />

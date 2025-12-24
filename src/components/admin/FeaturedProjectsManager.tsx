@@ -38,7 +38,7 @@ interface Project {
 
 interface FeaturedItem {
   id: string;
-  type: "real" | "example";
+  type: "real";
   title: string;
   subtitle: string;
   image_url?: string | null;
@@ -46,19 +46,10 @@ interface FeaturedItem {
   visible: boolean;
 }
 
-// Example projects data - IDs must match PortoIdeiasCardsManager
-const EXAMPLE_PROJECTS = [
-  { id: "exemplo-cultura-legado", title: "Sua Cultura, Seu Legado", subtitle: "Audiovisual • Rio de Janeiro" },
-  { id: "exemplo-investidores-aguardam", title: "Investidores Aguardam", subtitle: "Produção Cultural • São Paulo" },
-  { id: "exemplo-historias-sucesso", title: "Histórias de Sucesso", subtitle: "Teatro • São Paulo" },
-  { id: "exemplo-recursos-disponiveis", title: "Recursos Disponíveis", subtitle: "Música • Belo Horizonte" },
-  { id: "exemplo-novo-projeto", title: "Adicione seu Projeto", subtitle: "Seu projeto aqui" },
-];
-
 interface SortableItemProps {
   item: FeaturedItem;
   index: number;
-  onRemove: (id: string, type: "real" | "example") => void;
+  onRemove: (id: string) => void;
   onToggleVisibility: (id: string) => void;
 }
 
@@ -104,7 +95,7 @@ function SortableItem({ item, index, onRemove, onToggleVisibility }: SortableIte
           {item.visible ? index + 1 + "." : "-"}
         </span>
         
-        {item.type === "real" && item.image_url ? (
+        {item.image_url ? (
           <img 
             src={item.image_url} 
             alt={item.title}
@@ -120,10 +111,6 @@ function SortableItem({ item, index, onRemove, onToggleVisibility }: SortableIte
           <h4 className="font-medium">{item.title}</h4>
           <p className="text-sm text-muted-foreground">{item.subtitle}</p>
         </div>
-        
-        <Badge variant={item.type === "real" ? "default" : "secondary"} className="ml-2">
-          {item.type === "real" ? "Real" : "Exemplo"}
-        </Badge>
         
         {!item.visible && (
           <Badge variant="outline" className="text-xs">Oculto</Badge>
@@ -148,7 +135,7 @@ function SortableItem({ item, index, onRemove, onToggleVisibility }: SortableIte
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => onRemove(item.id, item.type)}
+          onClick={() => onRemove(item.id)}
           className="text-destructive hover:text-destructive hover:bg-destructive/10 opacity-60 group-hover:opacity-100 transition-opacity"
           title="Remover da lista"
         >
@@ -165,7 +152,7 @@ function DragOverlayItem({ item }: { item: FeaturedItem }) {
       <div className="flex items-center gap-4">
         <GripVertical className="w-5 h-5 text-primary" />
         <span className="text-sm font-medium w-6 text-primary">•</span>
-        {item.type === "real" && item.image_url ? (
+        {item.image_url ? (
           <img 
             src={item.image_url} 
             alt={item.title}
@@ -180,9 +167,6 @@ function DragOverlayItem({ item }: { item: FeaturedItem }) {
           <h4 className="font-medium">{item.title}</h4>
           <p className="text-sm text-muted-foreground">{item.subtitle}</p>
         </div>
-        <Badge variant={item.type === "real" ? "default" : "secondary"}>
-          {item.type === "real" ? "Real" : "Exemplo"}
-        </Badge>
       </div>
     </div>
   );
@@ -244,15 +228,6 @@ export function FeaturedProjectsManager({ projects, onProjectUpdate }: FeaturedP
         Object.assign(savedVisibility, visibilityData.value);
       }
 
-      // Get featured cards settings from PortoIdeiasCardsManager
-      const { data: featuredCardsData } = await supabase
-        .from("settings")
-        .select("value")
-        .eq("key", "porto_ideias_featured_cards")
-        .maybeSingle();
-      
-      const featuredCards: Record<string, boolean> = featuredCardsData?.value as Record<string, boolean> || {};
-
       // Create items from real featured projects
       const realProjects = projects.filter(p => p.featured_on_homepage && p.status === "approved");
       const realItems: FeaturedItem[] = realProjects.map(p => ({
@@ -262,26 +237,12 @@ export function FeaturedProjectsManager({ projects, onProjectUpdate }: FeaturedP
         subtitle: `${p.project_type} • ${p.location || "Sem localização"}`,
         image_url: p.image_url,
         projectId: p.id,
-        visible: savedVisibility[`real-${p.id}`] !== false, // Default to visible
+        visible: savedVisibility[`real-${p.id}`] !== false,
       }));
-
-      // Create items ONLY from example projects that are featured (starred)
-      const exampleItems: FeaturedItem[] = EXAMPLE_PROJECTS
-        .filter(ex => featuredCards[ex.id] === true)
-        .map(ex => ({
-          id: ex.id,
-          type: "example",
-          title: ex.title,
-          subtitle: ex.subtitle,
-          visible: savedVisibility[ex.id] !== false, // Default to visible
-        }));
-
-      // Combine all items
-      let allItems = [...realItems, ...exampleItems];
 
       // Sort by saved order if exists
       if (savedOrder.length > 0) {
-        allItems.sort((a, b) => {
+        realItems.sort((a, b) => {
           const indexA = savedOrder.indexOf(a.id);
           const indexB = savedOrder.indexOf(b.id);
           if (indexA === -1 && indexB === -1) return 0;
@@ -291,10 +252,9 @@ export function FeaturedProjectsManager({ projects, onProjectUpdate }: FeaturedP
         });
       }
 
-      setItems(allItems);
+      setItems(realItems);
     } catch (error) {
       console.error("Error loading featured items:", error);
-      // Fallback to empty
       setItems([]);
     }
   };
@@ -371,47 +331,30 @@ export function FeaturedProjectsManager({ projects, onProjectUpdate }: FeaturedP
     });
   };
 
-  const handleRemove = async (id: string, type: "real" | "example") => {
-    if (type === "real") {
-      // Remove from featured in database
-      const projectId = id.replace("real-", "");
-      try {
-        await supabase
-          .from("projects")
-          .update({ featured_on_homepage: false })
-          .eq("id", projectId);
-        
-        onProjectUpdate();
-        toast({
-          title: "Projeto removido",
-          description: "O projeto foi removido dos destaques.",
-        });
-      } catch (error) {
-        toast({
-          title: "Erro",
-          description: "Não foi possível remover o projeto.",
-          variant: "destructive",
-        });
-      }
-    } else {
-      // Just hide the example project
-      handleToggleVisibility(id);
+  const handleRemove = async (id: string) => {
+    const projectId = id.replace("real-", "");
+    try {
+      await supabase
+        .from("projects")
+        .update({ featured_on_homepage: false })
+        .eq("id", projectId);
+      
+      onProjectUpdate();
+      toast({
+        title: "Projeto removido",
+        description: "O projeto foi removido dos destaques.",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível remover o projeto.",
+        variant: "destructive",
+      });
     }
-  };
-
-  const handleAddExample = (exampleId: string) => {
-    setItems((items) => {
-      const newItems = items.map(item => 
-        item.id === exampleId ? { ...item, visible: true } : item
-      );
-      saveOrder(newItems);
-      return newItems;
-    });
   };
 
   const activeItem = items.find((item) => item.id === activeId);
   const visibleItems = items.filter(item => item.visible);
-  const hiddenExamples = items.filter(item => item.type === "example" && !item.visible);
   const availableProjects = projects.filter(p => p.status === "approved" && !p.featured_on_homepage);
 
   const handleAddRealProject = async (projectId: string) => {
@@ -462,97 +405,60 @@ export function FeaturedProjectsManager({ projects, onProjectUpdate }: FeaturedP
         </div>
 
         {/* Sortable list */}
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-        >
-          <SortableContext items={items.map(i => i.id)} strategy={verticalListSortingStrategy}>
-            <div className="space-y-2">
-              {items.map((item, index) => (
-                <SortableItem
-                  key={item.id}
-                  item={item}
-                  index={visibleItems.findIndex(vi => vi.id === item.id)}
-                  onRemove={handleRemove}
-                  onToggleVisibility={handleToggleVisibility}
-                />
-              ))}
-            </div>
-          </SortableContext>
+        {items.length > 0 ? (
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext items={items.map(i => i.id)} strategy={verticalListSortingStrategy}>
+              <div className="space-y-2">
+                {items.map((item, index) => (
+                  <SortableItem
+                    key={item.id}
+                    item={item}
+                    index={visibleItems.findIndex(vi => vi.id === item.id)}
+                    onRemove={handleRemove}
+                    onToggleVisibility={handleToggleVisibility}
+                  />
+                ))}
+              </div>
+            </SortableContext>
 
-          <DragOverlay>
-            {activeItem ? <DragOverlayItem item={activeItem} /> : null}
-          </DragOverlay>
-        </DndContext>
+            <DragOverlay>
+              {activeItem ? <DragOverlayItem item={activeItem} /> : null}
+            </DragOverlay>
+          </DndContext>
+        ) : (
+          <div className="p-4 bg-muted/30 rounded-lg border border-dashed border-muted-foreground/30 text-center">
+            <p className="text-sm text-muted-foreground">
+              Nenhum projeto em destaque. Adicione projetos aprovados abaixo.
+            </p>
+          </div>
+        )}
 
-        {/* Hidden examples that can be re-added */}
-        {hiddenExamples.length > 0 && (
+        {/* Available projects to add */}
+        {availableProjects.length > 0 && (
           <div className="pt-4 border-t">
             <h4 className="font-medium text-sm text-muted-foreground mb-2">
-              Projetos de exemplo ocultos
+              Projetos disponíveis para adicionar
             </h4>
             <div className="flex flex-wrap gap-2">
-              {hiddenExamples.map((item) => (
+              {availableProjects.map((project) => (
                 <Button
-                  key={item.id}
+                  key={project.id}
                   variant="outline"
                   size="sm"
-                  onClick={() => handleAddExample(item.id)}
-                  className="opacity-70 hover:opacity-100"
+                  onClick={() => handleAddRealProject(project.id)}
+                  className="flex items-center gap-1"
                 >
-                  <Plus className="w-4 h-4 mr-1" />
-                  {item.title}
+                  <Plus className="w-3 h-3" />
+                  {project.title}
                 </Button>
               ))}
             </div>
           </div>
-        )}
-
-        {/* Available real projects to add */}
-        {availableProjects.length > 0 && (
-          <div className="pt-4 border-t">
-            <h4 className="font-medium text-sm text-muted-foreground mb-2">
-              Projetos aprovados disponíveis para destacar
-            </h4>
-            <div className="space-y-2">
-              {availableProjects.map((project) => (
-                <div key={project.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors group">
-                  <div className="flex items-center gap-4">
-                    {project.image_url && (
-                      <img 
-                        src={project.image_url} 
-                        alt={project.title}
-                        className="w-12 h-12 rounded object-cover"
-                      />
-                    )}
-                    <div>
-                      <h4 className="font-medium">{project.title}</h4>
-                      <p className="text-sm text-muted-foreground">
-                        {project.project_type} • {project.location || "Sem localização"}
-                      </p>
-                    </div>
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleAddRealProject(project.id)}
-                    className="opacity-60 group-hover:opacity-100 transition-opacity"
-                  >
-                    <Plus className="w-4 h-4 mr-1" />
-                    Adicionar
-                  </Button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {saving && (
-          <p className="text-xs text-muted-foreground text-center animate-pulse">
-            Salvando...
-          </p>
         )}
       </CardContent>
     </Card>
