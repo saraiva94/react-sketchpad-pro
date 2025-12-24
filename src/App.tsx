@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "@/hooks/useTheme";
+import { LanguageProvider } from "@/hooks/useLanguage";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
@@ -22,32 +23,34 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <ThemeProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <ScrollToTop />
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/auth" element={<Navigate to="/login" replace />} />
+    <LanguageProvider>
+      <ThemeProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <ScrollToTop />
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/auth" element={<Navigate to="/login" replace />} />
 
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/admin/add-project" element={<AdminAddProjectPage />} />
-            <Route path="/admin/pending/:id" element={<PendingProjectPage />} />
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/admin/add-project" element={<AdminAddProjectPage />} />
+              <Route path="/admin/pending/:id" element={<PendingProjectPage />} />
 
-            <Route path="/submit" element={<SubmitProjectPage />} />
-            <Route path="/projetos" element={<ProjectsPortfolioPage />} />
-            <Route path="/porto-de-ideias" element={<PortoDeIdeiasPage />} />
-            <Route path="/project/:id" element={<ProjectPage />} />
-            <Route path="/exemplo/:exampleId" element={<ExampleProjectPage />} />
-            <Route path="/dev" element={<DevMenu />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </ThemeProvider>
+              <Route path="/submit" element={<SubmitProjectPage />} />
+              <Route path="/projetos" element={<ProjectsPortfolioPage />} />
+              <Route path="/porto-de-ideias" element={<PortoDeIdeiasPage />} />
+              <Route path="/project/:id" element={<ProjectPage />} />
+              <Route path="/exemplo/:exampleId" element={<ExampleProjectPage />} />
+              <Route path="/dev" element={<DevMenu />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </ThemeProvider>
+    </LanguageProvider>
   </QueryClientProvider>
 );
 
