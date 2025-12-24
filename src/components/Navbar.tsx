@@ -5,6 +5,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, X, Lightbulb, Settings } from "lucide-react";
 import portobelloLogo from "@/assets/portobello-logo.png";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 interface NavbarProps {
   showNav?: boolean;
@@ -28,38 +29,8 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
   const [isOpen, setIsOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<string>("");
   const [sections, setSections] = useState<SectionLabel[]>(defaultSections);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const { isAdmin } = useAuth();
 
-  // Check if user is admin
-  useEffect(() => {
-    const checkAdminStatus = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (user) {
-        const { data: roleData } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", user.id)
-          .eq("role", "admin")
-          .maybeSingle();
-        
-        setIsAdmin(!!roleData);
-      } else {
-        setIsAdmin(false);
-      }
-    };
-
-    checkAdminStatus();
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
-      checkAdminStatus();
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  // Fetch dynamic section titles from settings
   useEffect(() => {
     const fetchSectionTitles = async () => {
       const updatedSections = [...defaultSections];
@@ -149,7 +120,7 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
 
   return (
     <header className="border-b border-border/50 bg-card/80 backdrop-blur-md fixed top-0 left-0 right-0 z-50 shadow-soft overflow-hidden">
-      <div className="container mx-auto px-2 sm:px-4 h-20 flex items-center justify-between">
+      <div className="container mx-auto px-2 sm:px-4 h-20 flex items-center justify-between relative">
         {/* Logo - Homepage - clipped to navbar bounds */}
         <Link to="/" className="flex items-center group -ml-6 sm:-ml-12 h-20 overflow-hidden">
           <img 
@@ -158,6 +129,19 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
             className="h-32 sm:h-44 md:h-52 w-auto group-hover:scale-105 transition-transform duration-300 object-contain object-left pointer-events-none"
           />
         </Link>
+
+        {/* Admin Button - Centered (Homepage) */}
+        {isAdmin && currentPage === "home" && (
+          <div className="hidden md:flex absolute left-1/2 -translate-x-1/2">
+            <Link
+              to="/admin"
+              className="px-4 py-2 text-sm font-semibold text-foreground bg-accent/15 hover:bg-accent/25 rounded-xl transition-colors flex items-center gap-2"
+            >
+              <Settings className="w-4 h-4" />
+              Admin
+            </Link>
+          </div>
+        )}
 
         {/* Desktop Navigation - Section Links */}
         {showNav && currentPage === "home" && (
@@ -170,7 +154,7 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
               <Lightbulb className="w-6 h-6 text-yellow-400 group-hover:fill-yellow-400 group-hover:drop-shadow-[0_0_16px_rgba(250,204,21,1)] group-hover:scale-125 transition-all duration-300" />
               <span className="text-foreground">Projetos</span>
             </Link>
-            
+
             {/* Section Links */}
             {sections.map((section) => (
               <button
@@ -189,19 +173,9 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
                 )}
               </button>
             ))}
-
-            {/* Admin Button - Only visible for admins */}
-            {isAdmin && (
-              <Link
-                to="/admin"
-                className="ml-2 px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent/10 rounded-lg transition-all duration-200 flex items-center gap-1.5"
-              >
-                <Settings className="w-4 h-4" />
-                Admin
-              </Link>
-            )}
           </nav>
         )}
+
         
         {/* Right Content (for pages without nav) */}
         {!showNav && rightContent && (
