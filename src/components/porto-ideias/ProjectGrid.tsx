@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowRight, Anchor, Shield, MapPin } from "lucide-react";
 import { useDominantColor } from "@/hooks/useDominantColor";
@@ -67,13 +68,18 @@ function ProjectCard({
   const project = item.data;
   const stageInfo = getStageInfo(project.stage);
 
-  const { translated: translatedTitle } = useAutoTranslate(`grid_title_${project.id}`, project.title);
-  const { translated: translatedSynopsis } = useAutoTranslate(`grid_synopsis_${project.id}`, project.synopsis);
-  const { translated: translatedType } = useAutoTranslate(`grid_type_${project.id}`, project.project_type);
+  const { translated: translatedTitle, isTranslating: isTranslatingTitle } = useAutoTranslate(`grid_title_${project.id}`, project.title);
+  const { translated: translatedSynopsis, isTranslating: isTranslatingSynopsis } = useAutoTranslate(`grid_synopsis_${project.id}`, project.synopsis);
+  const { translated: translatedType, isTranslating: isTranslatingType } = useAutoTranslate(`grid_type_${project.id}`, project.project_type);
 
   const displayTitle = language === "pt" ? project.title : (translatedTitle || project.title);
   const displaySynopsis = language === "pt" ? project.synopsis : (translatedSynopsis || project.synopsis);
   const displayType = language === "pt" ? project.project_type : (translatedType || project.project_type);
+
+  // Show skeleton only during first translation (no cache)
+  const showTitleSkeleton = language !== 'pt' && isTranslatingTitle && !translatedTitle;
+  const showSynopsisSkeleton = language !== 'pt' && isTranslatingSynopsis && !translatedSynopsis;
+  const showTypeSkeleton = language !== 'pt' && isTranslatingType && !translatedType;
 
   // Incentive law label is stored in PT; translate when needed
   const matchedLaw = (() => {
@@ -123,16 +129,20 @@ function ProjectCard({
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
           {/* Type badge - with dominant color */}
           <div className="absolute top-3 left-3">
-            <Badge
-              className="text-xs font-semibold shadow-lg"
-              style={{
-                backgroundColor,
-                color: textColor,
-                borderColor: "transparent",
-              }}
-            >
-              {displayType}
-            </Badge>
+            {showTypeSkeleton ? (
+              <Skeleton className="h-5 w-20 rounded-full" />
+            ) : (
+              <Badge
+                className="text-xs font-semibold shadow-lg"
+                style={{
+                  backgroundColor,
+                  color: textColor,
+                  borderColor: "transparent",
+                }}
+              >
+                {displayType}
+              </Badge>
+            )}
           </div>
 
           {/* Incentive Law badge - only shows if a valid law from the form options was chosen */}
@@ -151,12 +161,23 @@ function ProjectCard({
 
         {/* Content */}
         <div className="p-5">
-          <h3 className="text-lg font-serif font-bold text-foreground mb-2 line-clamp-1 group-hover:text-primary transition-colors">
-            {displayTitle}
-          </h3>
-          <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
-            {displaySynopsis}
-          </p>
+          {showTitleSkeleton ? (
+            <Skeleton className="h-6 w-3/4 mb-2" />
+          ) : (
+            <h3 className="text-lg font-serif font-bold text-foreground mb-2 line-clamp-1 group-hover:text-primary transition-colors">
+              {displayTitle}
+            </h3>
+          )}
+          {showSynopsisSkeleton ? (
+            <div className="space-y-2 mb-4">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-5/6" />
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
+              {displaySynopsis}
+            </p>
+          )}
 
           {/* Meta info */}
           <div className="flex flex-wrap gap-2 mb-4">

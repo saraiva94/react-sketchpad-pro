@@ -9,6 +9,7 @@ import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
 import { LazyArtisticBackground } from "@/components/LazyArtisticBackground";
 import { ProjectGrid } from "@/components/porto-ideias/ProjectGrid";
+import { TranslatedSelectItem } from "@/components/TranslatedSelectItem";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchProjectLocations } from "@/components/admin/DynamicLocationSelect";
 import { useInView } from "@/hooks/useInView";
@@ -425,7 +426,7 @@ const PortoDeIdeiasPage = () => {
           </SelectTrigger>
           <SelectContent position="popper" sideOffset={4}>
             {projectTypes.map(type => (
-              <SelectItem key={type} value={type}>{type}</SelectItem>
+              <TranslatedSelectItem key={type} value={type} namespace={`filter_type_${type}`} />
             ))}
           </SelectContent>
         </Select>
@@ -462,7 +463,7 @@ const PortoDeIdeiasPage = () => {
           </SelectTrigger>
           <SelectContent position="popper" sideOffset={4}>
             {locations.map(loc => (
-              <SelectItem key={loc} value={loc}>{loc}</SelectItem>
+              <TranslatedSelectItem key={loc} value={loc} namespace={`filter_loc_${loc}`} />
             ))}
           </SelectContent>
         </Select>
