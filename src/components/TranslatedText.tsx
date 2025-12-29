@@ -11,8 +11,8 @@ type Props = {
 };
 
 /**
- * Small helper to ensure any backend-provided string (stored in PT) is displayed
- * translated according to the current language.
+ * Componente para exibir texto traduzido automaticamente.
+ * Usa cache local para evitar chamadas repetidas à API.
  */
 export function TranslatedText({
   namespace,
@@ -30,7 +30,11 @@ export function TranslatedText({
   if (!display) return <>{fallback}</>;
 
   return (
-    <Tag className={className} data-i18n-auto={language !== "pt" ? "1" : undefined} data-i18n-pending={isTranslating ? "1" : undefined}>
+    <Tag
+      className={className}
+      data-i18n-auto={language !== "pt" ? "1" : undefined}
+      data-i18n-pending={isTranslating ? "1" : undefined}
+    >
       {display}
     </Tag>
   );
