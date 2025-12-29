@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowRight } from "lucide-react";
 import { useAutoTranslate } from "@/hooks/useAutoTranslate";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -32,14 +33,19 @@ export function TranslatedProjectCard({
   const { t, language } = useLanguage();
 
   // Auto-translate title, synopsis, and project_type when not PT
-  const { translated: translatedTitle } = useAutoTranslate(`project_title_${project.id}`, project.title);
-  const { translated: translatedSynopsis } = useAutoTranslate(`project_synopsis_${project.id}`, project.synopsis);
-  const { translated: translatedType } = useAutoTranslate(`project_type_${project.id}`, project.project_type);
+  const { translated: translatedTitle, isTranslating: isTranslatingTitle } = useAutoTranslate(`project_title_${project.id}`, project.title);
+  const { translated: translatedSynopsis, isTranslating: isTranslatingSynopsis } = useAutoTranslate(`project_synopsis_${project.id}`, project.synopsis);
+  const { translated: translatedType, isTranslating: isTranslatingType } = useAutoTranslate(`project_type_${project.id}`, project.project_type);
 
   // Use translated versions when language is not PT
   const displayTitle = language === 'pt' ? project.title : (translatedTitle || project.title);
   const displaySynopsis = language === 'pt' ? project.synopsis : (translatedSynopsis || project.synopsis);
   const displayType = language === 'pt' ? project.project_type : (translatedType || project.project_type);
+
+  // Show skeleton only during first translation (no cache)
+  const showTitleSkeleton = language !== 'pt' && isTranslatingTitle && !translatedTitle;
+  const showSynopsisSkeleton = language !== 'pt' && isTranslatingSynopsis && !translatedSynopsis;
+  const showTypeSkeleton = language !== 'pt' && isTranslatingType && !translatedType;
 
   const getInitials = (name: string | null): string => {
     if (!name) return "PC";
@@ -79,19 +85,35 @@ export function TranslatedProjectCard({
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
             {/* Type badge */}
             <div className="absolute top-3 left-3">
-              <Badge className="bg-primary/90 text-primary-foreground backdrop-blur-sm">
-                {displayType}
-              </Badge>
+              {showTypeSkeleton ? (
+                <Skeleton className="h-5 w-20 rounded-full" />
+              ) : (
+                <Badge className="bg-primary/90 text-primary-foreground backdrop-blur-sm">
+                  {displayType}
+                </Badge>
+              )}
             </div>
           </div>
           {/* Card Content */}
           <div className="p-5 flex-1 flex flex-col">
-            <h4 className="text-lg font-semibold text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-1">
-              {displayTitle}
-            </h4>
-            <p className="text-sm text-muted-foreground line-clamp-3 flex-1">
-              {displaySynopsis}
-            </p>
+            {showTitleSkeleton ? (
+              <Skeleton className="h-6 w-3/4 mb-2" />
+            ) : (
+              <h4 className="text-lg font-semibold text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-1">
+                {displayTitle}
+              </h4>
+            )}
+            {showSynopsisSkeleton ? (
+              <div className="space-y-2 flex-1">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-5/6" />
+                <Skeleton className="h-4 w-4/6" />
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground line-clamp-3 flex-1">
+                {displaySynopsis}
+              </p>
+            )}
             <div className="flex items-center gap-2 mt-4 text-primary font-medium text-sm">
               <span>{t.home.knowProject}</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />

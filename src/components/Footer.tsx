@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import portobelloLogo from "@/assets/portobello-footer-logo.png";
 import { useLanguage } from "@/hooks/useLanguage";
+import { useAutoTranslate } from "@/hooks/useAutoTranslate";
 
 interface SocialLink {
   enabled: boolean;
@@ -54,7 +55,11 @@ const DEFAULT_FOOTER_CONTENT: FooterContent = {
 export function Footer() {
   const [socialLinks, setSocialLinks] = useState<SocialLinksConfig>(DEFAULT_SOCIAL_LINKS);
   const [footerContent, setFooterContent] = useState<FooterContent>(DEFAULT_FOOTER_CONTENT);
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+
+  // Traduzir tagline dinâmica quando idioma não é PT
+  const { translated: translatedTagline } = useAutoTranslate('footer_tagline', footerContent.tagline);
+  const displayTagline = language === 'pt' ? footerContent.tagline : (translatedTagline || footerContent.tagline);
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -105,7 +110,7 @@ export function Footer() {
               />
             </Link>
             <p className="text-xs text-gray-400 leading-relaxed text-left whitespace-pre-line">
-              {footerContent.tagline}
+              {displayTagline}
             </p>
           </div>
           
