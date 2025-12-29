@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useAutoTranslate } from "@/hooks/useAutoTranslate";
+import { usePreloadTranslations, createTranslationItems } from "@/hooks/usePreloadTranslations";
 import {
   Search,
   Users,
@@ -73,6 +74,10 @@ const ProjectsPortfolioPage = () => {
     setProjects((data || []) as Project[]);
     setLoading(false);
   };
+
+  // Preload de traduções quando dados carregarem
+  const preloadItems = createTranslationItems.forProjectList(projects);
+  usePreloadTranslations(preloadItems, !loading);
 
   const categories = [...new Set(projects.flatMap((p) => p.categorias_tags || [p.project_type]))];
 
