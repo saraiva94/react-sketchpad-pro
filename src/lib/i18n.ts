@@ -251,6 +251,9 @@ export const translations = {
       optional: 'Opcional',
       or: 'ou',
       and: 'e',
+      notAvailable: 'Não disponível',
+      generatedOn: 'Gerado em',
+      downloadStarted: 'Download iniciado',
     },
   },
   en: {
@@ -503,6 +506,9 @@ export const translations = {
       optional: 'Optional',
       or: 'or',
       and: 'and',
+      notAvailable: 'Not available',
+      generatedOn: 'Generated on',
+      downloadStarted: 'Download started',
     },
   },
   es: {
@@ -755,6 +761,9 @@ export const translations = {
       optional: 'Opcional',
       or: 'o',
       and: 'y',
+      notAvailable: 'No disponible',
+      generatedOn: 'Generado el',
+      downloadStarted: 'Descarga iniciada',
     },
   },
 } as const;
