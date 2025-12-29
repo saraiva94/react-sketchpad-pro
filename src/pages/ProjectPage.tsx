@@ -519,7 +519,7 @@ const ProjectPage = () => {
               <section>
                 <h2 className="text-2xl font-serif font-bold text-foreground mb-6 flex items-center gap-2">
                   <Play className="w-6 h-6 text-primary" />
-                  Vídeo de Apresentação
+                  {t.projectDetails.presentationVideo}
                 </h2>
                 <div className="relative w-full h-0 pb-[56.25%] rounded-2xl overflow-hidden shadow-lg">
                   <iframe
@@ -527,7 +527,7 @@ const ProjectPage = () => {
                     className="absolute top-0 left-0 w-full h-full"
                     frameBorder="0"
                     allowFullScreen
-                    title="Vídeo de apresentação do projeto"
+                    title={t.projectDetails.presentationVideo}
                   ></iframe>
                 </div>
               </section>
@@ -653,7 +653,7 @@ const ProjectPage = () => {
                 <section>
                   <h2 className="text-2xl font-serif font-bold text-foreground mb-6 flex items-center gap-2">
                     <Users className="w-6 h-6 text-primary" />
-                    Ficha Técnica
+                    {t.projectDetails.technicalSheet}
                   </h2>
                   
                   {/* Other roles (equipe técnica) */}
@@ -667,7 +667,7 @@ const ProjectPage = () => {
                   {otherMembers.length > 0 && castMembers.length > 0 && (
                     <div className="my-8 flex items-center gap-4">
                       <div className="flex-1 h-px bg-border/50" />
-                      <span className="text-sm text-muted-foreground font-medium">Elenco</span>
+                      <span className="text-sm text-muted-foreground font-medium">{t.projectDetails.cast}</span>
                       <div className="flex-1 h-px bg-border/50" />
                     </div>
                   )}
@@ -687,14 +687,14 @@ const ProjectPage = () => {
               <section>
                 <h2 className="text-2xl font-serif font-bold text-foreground mb-6 flex items-center gap-2">
                   <Target className="w-6 h-6 text-primary" />
-                  Impacto do Projeto
+                  {t.projectDetails.projectImpact}
                 </h2>
                 <div className="grid md:grid-cols-2 gap-6">
                   {project.impacto_cultural && (
                     <div className="group bg-primary/5 p-6 rounded-2xl border border-primary/10 transition-all duration-300 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1">
                       <h3 className="font-semibold text-foreground mb-3 flex items-center">
                         <Sparkles className="w-5 h-5 text-primary mr-2" />
-                        Impacto Cultural
+                        {t.projectDetails.culturalImpact}
                       </h3>
                       <p className="text-muted-foreground">{project.impacto_cultural}</p>
                     </div>
@@ -703,7 +703,7 @@ const ProjectPage = () => {
                     <div className="group bg-emerald-500/5 p-6 rounded-2xl border border-emerald-500/10 transition-all duration-300 hover:border-emerald-500/30 hover:shadow-lg hover:shadow-emerald-500/10 hover:-translate-y-1">
                       <h3 className="font-semibold text-foreground mb-3 flex items-center">
                         <Globe className="w-5 h-5 text-emerald-600 dark:text-emerald-400 mr-2" />
-                        Impacto Social
+                        {t.projectDetails.socialImpact}
                       </h3>
                       <p className="text-muted-foreground">{project.impacto_social}</p>
                     </div>
@@ -712,7 +712,7 @@ const ProjectPage = () => {
                     <div className="group bg-violet-500/5 p-6 rounded-2xl border border-violet-500/10 transition-all duration-300 hover:border-violet-500/30 hover:shadow-lg hover:shadow-violet-500/10 hover:-translate-y-1">
                       <h3 className="font-semibold text-foreground mb-3 flex items-center">
                         <Users className="w-5 h-5 text-violet-600 dark:text-violet-400 mr-2" />
-                        Público-Alvo
+                        {t.projectDetails.targetAudience}
                       </h3>
                       <p className="text-muted-foreground">{project.publico_alvo}</p>
                     </div>
@@ -721,7 +721,7 @@ const ProjectPage = () => {
                     <div className="group bg-amber-500/5 p-6 rounded-2xl border border-amber-500/10 transition-all duration-300 hover:border-amber-500/30 hover:shadow-lg hover:shadow-amber-500/10 hover:-translate-y-1">
                       <h3 className="font-semibold text-foreground mb-3 flex items-center">
                         <Star className="w-5 h-5 text-amber-600 dark:text-amber-400 mr-2" />
-                        Diferenciais
+                        {t.projectDetails.differentials}
                       </h3>
                       <p className="text-muted-foreground">{project.diferenciais}</p>
                     </div>
@@ -735,7 +735,7 @@ const ProjectPage = () => {
               <section>
                 <h2 className="text-2xl font-serif font-bold text-foreground mb-6 flex items-center gap-2">
                   <Gift className="w-6 h-6 text-primary" />
-                  Contrapartidas para Investidores
+                  {t.projectDetails.investorRewards}
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {contrapartidas.map((contrapartida) => {
@@ -777,7 +777,7 @@ const ProjectPage = () => {
                         className="group bg-card border border-border rounded-xl p-6 transition-all duration-300 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1"
                       >
                         {/* Nível label */}
-                        <p className="text-sm italic text-muted-foreground mb-1">Nível</p>
+                        <p className="text-sm italic text-muted-foreground mb-1">{t.projectDetails.level}</p>
                         
                         {/* Título do nível (se existir) */}
                         {contrapartida.titulo && (
@@ -799,7 +799,7 @@ const ProjectPage = () => {
                         {/* Benefits section */}
                         <div>
                           <p className="text-sm font-medium text-foreground border-b border-foreground/30 pb-1 mb-3">
-                            Benefícios
+                            {t.projectDetails.benefits}
                           </p>
                           <ul className="space-y-2">
                             {contrapartida.beneficios.map((beneficio, index) => (
@@ -821,14 +821,14 @@ const ProjectPage = () => {
             {((project.awards && project.awards.length > 0) || (project.news && project.news.length > 0)) && (
               <section>
                 <h2 className="text-2xl font-serif font-bold text-foreground mb-6">
-                  Reconhecimentos e Mídia
+                  {t.projectDetails.recognitionMedia}
                 </h2>
                 <div className="grid md:grid-cols-2 gap-6">
                   {project.awards && project.awards.length > 0 && (
                     <div>
                       <h3 className="font-semibold text-foreground mb-4 flex items-center">
                         <Award className="w-5 h-5 text-amber-500 mr-2" />
-                        Prêmios e Reconhecimentos
+                        {t.projectDetails.awardsTitle}
                       </h3>
                       <ul className="space-y-3">
                         {project.awards.map((award, index) => (
@@ -845,7 +845,7 @@ const ProjectPage = () => {
                     <div>
                       <h3 className="font-semibold text-foreground mb-4 flex items-center">
                         <Newspaper className="w-5 h-5 text-primary mr-2" />
-                        Na Mídia
+                        {t.projectDetails.inTheMedia}
                       </h3>
                       <ul className="space-y-3">
                         {project.news.map((item, index) => (
@@ -882,19 +882,19 @@ const ProjectPage = () => {
             <div className="sticky top-24 space-y-6">
               {/* Project Info */}
               <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
-                <h3 className="font-serif font-bold text-xl text-foreground mb-4">Informações do Projeto</h3>
+                <h3 className="font-serif font-bold text-xl text-foreground mb-4">{t.projectDetails.projectInfo}</h3>
                 <div className="space-y-4">
                   <div>
-                    <span className="text-sm text-muted-foreground">Título</span>
+                    <span className="text-sm text-muted-foreground">{t.projectDetails.titleLabel}</span>
                     <div className="font-semibold text-foreground">{project.title}</div>
                   </div>
                   <div>
-                    <span className="text-sm text-muted-foreground">Tipo do Projeto</span>
+                    <span className="text-sm text-muted-foreground">{t.projectDetails.projectTypeLabel}</span>
                     <div className="font-medium text-foreground">{project.project_type}</div>
                   </div>
                   {project.stages && project.stages.length > 0 && (
                     <div>
-                      <span className="text-sm text-muted-foreground">Estágio do Projeto</span>
+                      <span className="text-sm text-muted-foreground">{t.projectDetails.projectStage}</span>
                       <div className="font-medium text-foreground">
                         {[...new Set(project.stages.map(stage => getStageLabel(stage).toLowerCase()))]
                           .map(label => label.charAt(0).toUpperCase() + label.slice(1))
@@ -904,7 +904,7 @@ const ProjectPage = () => {
                   )}
                   {project.location && (
                     <div>
-                      <span className="text-sm text-muted-foreground">Localização</span>
+                      <span className="text-sm text-muted-foreground">{t.projectDetails.locationLabel}</span>
                       <div className="font-medium text-foreground flex items-center gap-1">
                         <MapPin className="w-4 h-4" />
                         {project.location}
@@ -913,7 +913,7 @@ const ProjectPage = () => {
                   )}
                   {project.categorias_tags && project.categorias_tags.length > 0 && (
                     <div>
-                      <span className="text-sm text-muted-foreground">Categorias</span>
+                      <span className="text-sm text-muted-foreground">{t.projectDetails.categoriesLabel}</span>
                       <div className="flex flex-wrap gap-2 mt-1">
                         {project.categorias_tags.map((tag, index) => (
                           <Badge key={index} variant="secondary" className="rounded-full">
@@ -925,7 +925,7 @@ const ProjectPage = () => {
                   )}
                   {project.additional_info && (
                     <div>
-                      <span className="text-sm text-muted-foreground">Informações Adicionais</span>
+                      <span className="text-sm text-muted-foreground">{t.projectDetails.additionalInfo}</span>
                       <p className="font-medium text-foreground text-sm mt-1">{project.additional_info}</p>
                     </div>
                   )}
@@ -937,7 +937,7 @@ const ProjectPage = () => {
                 <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
                   <h3 className="font-serif font-bold text-lg text-foreground mb-4 flex items-center gap-2">
                     <Shield className="w-5 h-5 text-violet-500" />
-                    Lei de Incentivo
+                    {t.projectDetails.incentiveLawTitle}
                   </h3>
                   <div className="flex flex-wrap gap-2">
                     {project.incentive_law_details.split(',').map((law, index) => (
@@ -951,10 +951,10 @@ const ProjectPage = () => {
 
               {/* Contact Button */}
               <div className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-4">
-                <h3 className="font-serif font-bold text-lg text-foreground mb-4">Contato</h3>
+                <h3 className="font-serif font-bold text-lg text-foreground mb-4">{t.projectDetails.contact}</h3>
                 <Button className="w-full rounded-full" size="lg" onClick={handleContactClick}>
                   <MessageCircle className="w-4 h-4 mr-2" />
-                  Fale conosco
+                  {t.projectDetails.contactUs}
                 </Button>
               </div>
             </div>
@@ -966,7 +966,7 @@ const ProjectPage = () => {
       <Dialog open={showContactPopup} onOpenChange={setShowContactPopup}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="font-serif">Escolha um contato</DialogTitle>
+            <DialogTitle className="font-serif">{t.projectDetails.chooseContact}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
             {contactButtons.map((contact) => (

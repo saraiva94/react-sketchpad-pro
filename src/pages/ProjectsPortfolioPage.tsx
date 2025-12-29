@@ -17,6 +17,27 @@ import {
   MapPin,
 } from "lucide-react";
 
+// Simple component to display translated category
+function TranslatedCategoryButton({
+  value,
+  selected,
+  onSelect,
+}: {
+  value: string;
+  selected: boolean;
+  onSelect: () => void;
+}) {
+  return (
+    <Button
+      variant={selected ? "default" : "outline"}
+      size="sm"
+      onClick={onSelect}
+    >
+      {value}
+    </Button>
+  );
+}
+
 interface Project {
   id: string;
   title: string;
