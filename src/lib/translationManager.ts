@@ -211,7 +211,8 @@ export class TranslationManager {
 
       if (error) throw error;
 
-      const translated = data?.translated ?? data;
+      // A edge function retorna { value: traduzido }
+      const translated = data?.value ?? value;
 
       // Salvar em todos os caches
       this.memoryCache.set(cacheKey, translated);
