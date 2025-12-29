@@ -341,6 +341,48 @@ export type Database = {
         }
         Relationships: []
       }
+      translations: {
+        Row: {
+          created_at: string | null
+          id: string
+          namespace: string
+          quality_score: number | null
+          source_hash: string
+          source_language: string
+          source_value: Json
+          target_language: string
+          translated_value: Json
+          translation_method: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          namespace: string
+          quality_score?: number | null
+          source_hash: string
+          source_language?: string
+          source_value: Json
+          target_language: string
+          translated_value: Json
+          translation_method?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          namespace?: string
+          quality_score?: number | null
+          source_hash?: string
+          source_language?: string
+          source_value?: Json
+          target_language?: string
+          translated_value?: Json
+          translation_method?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string
