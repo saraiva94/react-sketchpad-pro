@@ -8,6 +8,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
 import { useLanguage } from "@/hooks/useLanguage";
+import { useAutoTranslate } from "@/hooks/useAutoTranslate";
+import { TranslatedText } from "@/components/TranslatedText";
 import { getCategoryLabel } from "@/components/admin/CategoriesMultiSelect";
 import { getIncentiveLawLabel } from "@/components/admin/IncentiveLawsMultiSelect";
 import { getStageLabel } from "@/components/admin/StagesMultiSelect";
@@ -116,7 +118,7 @@ interface Contrapartida {
 const ProjectPage = () => {
   const { id } = useParams();
   const { toast } = useToast();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [project, setProject] = useState<Project | null>(null);
   const [members, setMembers] = useState<ProjectMember[]>([]);
   const [loading, setLoading] = useState(true);
@@ -124,6 +126,13 @@ const ProjectPage = () => {
   const [contactButtons, setContactButtons] = useState<ContactButton[]>([]);
   const [showContactPopup, setShowContactPopup] = useState(false);
   const [contrapartidas, setContrapartidas] = useState<Contrapartida[]>([]);
+
+  // Auto-tradução do conteúdo do projeto (strings do banco estão em PT)
+  const { translated: translatedProject } = useAutoTranslate(
+    `project_full_${id ?? "unknown"}`,
+    project
+  );
+  const displayProject = language === "pt" ? project : (translatedProject || project);
 
   useEffect(() => {
     if (id) {
@@ -216,8 +225,8 @@ const ProjectPage = () => {
   };
 
   const handleDownloadPDF = () => {
-    if (!project) return;
-    
+    if (!project || !displayProject) return;
+
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
     const margin = 20;
@@ -227,7 +236,7 @@ const ProjectPage = () => {
     // Title
     doc.setFontSize(22);
     doc.setFont("helvetica", "bold");
-    const titleLines = doc.splitTextToSize(project.title, contentWidth);
+    const titleLines = doc.splitTextToSize(displayProject.title, contentWidth);
     doc.text(titleLines, margin, yPos);
     yPos += titleLines.length * 10 + 5;
 
@@ -235,15 +244,15 @@ const ProjectPage = () => {
     doc.setFontSize(11);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(100);
-    let subInfo = project.project_type;
-    if (project.location) subInfo += ` | ${project.location}`;
+    let subInfo = displayProject.project_type;
+    if (displayProject.location) subInfo += ` | ${displayProject.location}`;
     doc.text(subInfo, margin, yPos);
     yPos += 10;
 
     // Incentive law badge
-    if (project.has_incentive_law) {
+    if (displayProject.has_incentive_law) {
       doc.setTextColor(128, 0, 128);
-      doc.text("✓ Projeto com Lei de Incentivo", margin, yPos);
+      doc.text(`✓ ${t.projectDetails.incentiveLawTitle}`, margin, yPos);
       yPos += 8;
     }
 
@@ -253,26 +262,32 @@ const ProjectPage = () => {
     // Synopsis
     doc.setFontSize(14);
     doc.setFont("helvetica", "bold");
-    doc.text("Sinopse", margin, yPos);
+    doc.text(t.projectDetails.synopsis, margin, yPos);
     yPos += 8;
     doc.setFontSize(11);
     doc.setFont("helvetica", "normal");
-    const synopsisLines = doc.splitTextToSize(project.synopsis, contentWidth);
+    const synopsisLines = doc.splitTextToSize(displayProject.synopsis, contentWidth);
     doc.text(synopsisLines, margin, yPos);
     yPos += synopsisLines.length * 6 + 10;
 
     // Description
-    if (project.description) {
-      if (yPos > 250) { doc.addPage(); yPos = 20; }
+    if (displayProject.description) {
+      if (yPos > 250) {
+        doc.addPage();
+        yPos = 20;
+      }
       doc.setFontSize(14);
       doc.setFont("helvetica", "bold");
-      doc.text("Descrição Completa", margin, yPos);
+      doc.text(t.projectDetails.description, margin, yPos);
       yPos += 8;
       doc.setFontSize(11);
       doc.setFont("helvetica", "normal");
-      const descLines = doc.splitTextToSize(project.description, contentWidth);
+      const descLines = doc.splitTextToSize(displayProject.description, contentWidth);
       descLines.forEach((line: string) => {
-        if (yPos > 280) { doc.addPage(); yPos = 20; }
+        if (yPos > 280) {
+          doc.addPage();
+          yPos = 20;
+        }
         doc.text(line, margin, yPos);
         yPos += 6;
       });
@@ -280,31 +295,37 @@ const ProjectPage = () => {
     }
 
     // Budget
-    if (project.valor_sugerido || project.budget) {
-      if (yPos > 260) { doc.addPage(); yPos = 20; }
+    if (displayProject.valor_sugerido || displayProject.budget) {
+      if (yPos > 260) {
+        doc.addPage();
+        yPos = 20;
+      }
       doc.setFontSize(14);
       doc.setFont("helvetica", "bold");
-      doc.text("Orçamento", margin, yPos);
+      doc.text(t.projectDetails.budget, margin, yPos);
       yPos += 8;
       doc.setFontSize(11);
       doc.setFont("helvetica", "normal");
-      const budgetText = project.valor_sugerido 
-        ? formatBudget(project.valor_sugerido) 
-        : (project.budget || "Não informado");
-      doc.text(budgetText, margin, yPos);
+      const budgetText = displayProject.valor_sugerido
+        ? formatBudget(displayProject.valor_sugerido)
+        : (displayProject.budget || "");
+      doc.text(budgetText || t.common.notAvailable, margin, yPos);
       yPos += 12;
     }
 
     // Impact sections
     const impacts = [
-      { title: "Impacto Cultural", content: project.impacto_cultural },
-      { title: "Impacto Social", content: project.impacto_social },
-      { title: "Público-Alvo", content: project.publico_alvo },
-      { title: "Diferenciais", content: project.diferenciais },
-    ].filter(i => i.content);
+      { title: t.projectDetails.culturalImpact, content: displayProject.impacto_cultural },
+      { title: t.projectDetails.socialImpact, content: displayProject.impacto_social },
+      { title: t.projectDetails.targetAudience, content: displayProject.publico_alvo },
+      { title: t.projectDetails.differentials, content: displayProject.diferenciais },
+    ].filter((i) => i.content);
 
     impacts.forEach(({ title, content }) => {
-      if (yPos > 250) { doc.addPage(); yPos = 20; }
+      if (yPos > 250) {
+        doc.addPage();
+        yPos = 20;
+      }
       doc.setFontSize(14);
       doc.setFont("helvetica", "bold");
       doc.text(title, margin, yPos);
@@ -313,7 +334,10 @@ const ProjectPage = () => {
       doc.setFont("helvetica", "normal");
       const lines = doc.splitTextToSize(content!, contentWidth);
       lines.forEach((line: string) => {
-        if (yPos > 280) { doc.addPage(); yPos = 20; }
+        if (yPos > 280) {
+          doc.addPage();
+          yPos = 20;
+        }
         doc.text(line, margin, yPos);
         yPos += 6;
       });
@@ -321,17 +345,23 @@ const ProjectPage = () => {
     });
 
     // Incentive law details
-    if (project.has_incentive_law && project.incentive_law_details) {
-      if (yPos > 250) { doc.addPage(); yPos = 20; }
+    if (displayProject.has_incentive_law && displayProject.incentive_law_details) {
+      if (yPos > 250) {
+        doc.addPage();
+        yPos = 20;
+      }
       doc.setFontSize(14);
       doc.setFont("helvetica", "bold");
-      doc.text("Detalhes da Lei de Incentivo", margin, yPos);
+      doc.text(t.projectDetails.incentiveLawDetails, margin, yPos);
       yPos += 8;
       doc.setFontSize(11);
       doc.setFont("helvetica", "normal");
-      const lawLines = doc.splitTextToSize(project.incentive_law_details, contentWidth);
+      const lawLines = doc.splitTextToSize(displayProject.incentive_law_details, contentWidth);
       lawLines.forEach((line: string) => {
-        if (yPos > 280) { doc.addPage(); yPos = 20; }
+        if (yPos > 280) {
+          doc.addPage();
+          yPos = 20;
+        }
         doc.text(line, margin, yPos);
         yPos += 6;
       });
@@ -362,17 +392,21 @@ const ProjectPage = () => {
     // Footer
     doc.setFontSize(9);
     doc.setTextColor(150);
-    doc.text(`Gerado em ${new Date().toLocaleDateString("pt-BR")} | Porto Bello Filmes`, margin, 285);
+    doc.text(
+      `${t.common.generatedOn} ${new Date().toLocaleDateString("pt-BR")} | Porto Bello Filmes`,
+      margin,
+      285
+    );
 
     // Download
-    const fileName = `${project.title.replace(/[^a-zA-Z0-9]/g, '_')}_apresentacao.pdf`;
+    const fileName = `${displayProject.title.replace(/[^a-zA-Z0-9]/g, "_")}_apresentacao.pdf`;
     doc.save(fileName);
-    
+
     toast({
-      title: "PDF gerado com sucesso",
-      description: "O download foi iniciado automaticamente.",
+      title: t.projectDetails.generatePdf,
+      description: t.common.downloadStarted,
     });
-  };
+  }; 
 
   const formatBudget = (value: number | null): string => {
     if (!value) return "";

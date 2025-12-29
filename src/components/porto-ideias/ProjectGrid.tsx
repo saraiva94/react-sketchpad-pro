@@ -7,6 +7,7 @@ import { useDominantColor } from "@/hooks/useDominantColor";
 import { INCENTIVE_LAWS } from "@/components/admin/IncentiveLawsMultiSelect";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useAutoTranslate } from "@/hooks/useAutoTranslate";
+import { TranslatedText } from "@/components/TranslatedText";
 
 interface Project {
   id: string;
@@ -162,7 +163,7 @@ function ProjectCard({
             {project.location && (
               <Badge variant="outline" className="text-xs flex items-center gap-1">
                 <MapPin className="w-3 h-3" />
-                {project.location}
+                <TranslatedText namespace={`grid_loc_${project.id}`} value={project.location} />
               </Badge>
             )}
             {project.stage && (
