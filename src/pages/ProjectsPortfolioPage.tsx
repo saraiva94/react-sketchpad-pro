@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
 import { useLanguage } from "@/hooks/useLanguage";
+import { useAutoTranslate } from "@/hooks/useAutoTranslate";
 import {
   Search,
   Users,
@@ -30,7 +31,7 @@ interface Project {
 }
 
 const ProjectsPortfolioPage = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -46,19 +47,21 @@ const ProjectsPortfolioPage = () => {
       .from("projects_public")
       .select("id, title, synopsis, project_type, image_url, location, categorias_tags, responsavel_primeiro_nome, link_pagamento, valor_sugerido")
       .order("created_at", { ascending: false });
-    
+
     setProjects((data || []) as Project[]);
     setLoading(false);
   };
 
-  const categories = [...new Set(projects.flatMap(p => p.categorias_tags || [p.project_type]))];
+  const categories = [...new Set(projects.flatMap((p) => p.categorias_tags || [p.project_type]))];
 
-  const filteredProjects = projects.filter(project => {
-    const matchesSearch = project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         project.synopsis.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = !selectedCategory || 
-                           project.categorias_tags?.includes(selectedCategory) ||
-                           project.project_type === selectedCategory;
+  const filteredProjects = projects.filter((project) => {
+    const matchesSearch =
+      project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      project.synopsis.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory =
+      !selectedCategory ||
+      project.categorias_tags?.includes(selectedCategory) ||
+      project.project_type === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
@@ -103,14 +106,12 @@ const ProjectsPortfolioPage = () => {
               {t.common.all}
             </Button>
             {categories.slice(0, 6).map((cat) => (
-              <Button
+              <TranslatedCategoryButton
                 key={cat}
-                variant={selectedCategory === cat ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSelectedCategory(cat)}
-              >
-                {cat}
-              </Button>
+                value={cat}
+                selected={selectedCategory === cat}
+                onSelect={() => setSelectedCategory(cat)}
+              />
             ))}
           </div>
         </div>
