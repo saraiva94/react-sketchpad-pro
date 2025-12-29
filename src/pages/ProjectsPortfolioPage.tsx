@@ -16,6 +16,7 @@ import {
   ExternalLink,
   MapPin,
 } from "lucide-react";
+import { TranslatedText } from "@/components/TranslatedText";
 
 // Simple component to display translated category
 function TranslatedCategoryButton({
@@ -33,7 +34,7 @@ function TranslatedCategoryButton({
       size="sm"
       onClick={onSelect}
     >
-      {value}
+      <TranslatedText namespace={`portfolio_cat_${value}`} value={value} />
     </Button>
   );
 }
@@ -161,6 +162,7 @@ const ProjectsPortfolioPage = () => {
                       src={project.image_url}
                       alt={project.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      loading="lazy"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-accent/10">
@@ -171,20 +173,23 @@ const ProjectsPortfolioPage = () => {
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-3">
                     <Badge variant="outline" className="text-xs">
-                      {project.categorias_tags?.[0] || project.project_type}
+                      <TranslatedText
+                        namespace={`portfolio_badge_cat_${project.id}`}
+                        value={project.categorias_tags?.[0] || project.project_type}
+                      />
                     </Badge>
                     {project.location && (
                       <span className="text-xs text-muted-foreground flex items-center gap-1">
                         <MapPin className="w-3 h-3" />
-                        {project.location}
+                        <TranslatedText namespace={`portfolio_loc_${project.id}`} value={project.location} />
                       </span>
                     )}
                   </div>
                   <h3 className="text-lg font-bold text-foreground mb-2">
-                    {project.title}
+                    <TranslatedText namespace={`portfolio_title_${project.id}`} value={project.title} as="span" />
                   </h3>
                   <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
-                    {project.synopsis}
+                    <TranslatedText namespace={`portfolio_synopsis_${project.id}`} value={project.synopsis} as="span" />
                   </p>
                   
                   <div className="flex items-center justify-between pt-4 border-t">
@@ -192,24 +197,24 @@ const ProjectsPortfolioPage = () => {
                       <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
                         <Users className="w-4 h-4 text-muted-foreground" />
                       </div>
-                        <span className="text-xs text-muted-foreground">
-                          {project.responsavel_primeiro_nome || t.projects.responsible}
-                        </span>
-                      </div>
-                      <div className="flex gap-2">
-                        <Link to={`/project/${project.id}`}>
-                          <Button variant="ghost" size="sm" className="text-primary">
-                            {t.projects.viewDetails}
+                      <span className="text-xs text-muted-foreground">
+                        {project.responsavel_primeiro_nome || t.projects.responsible}
+                      </span>
+                    </div>
+                    <div className="flex gap-2">
+                      <Link to={`/project/${project.id}`}>
+                        <Button variant="ghost" size="sm" className="text-primary">
+                          {t.projects.viewDetails}
+                        </Button>
+                      </Link>
+                      {project.link_pagamento && (
+                        <a href={project.link_pagamento} target="_blank" rel="noopener noreferrer">
+                          <Button size="sm">
+                            {t.projects.support}
+                            <ExternalLink className="w-3 h-3 ml-1" />
                           </Button>
-                        </Link>
-                        {project.link_pagamento && (
-                          <a href={project.link_pagamento} target="_blank" rel="noopener noreferrer">
-                            <Button size="sm">
-                              {t.projects.support}
-                              <ExternalLink className="w-3 h-3 ml-1" />
-                            </Button>
-                          </a>
-                        )}
+                        </a>
+                      )}
                     </div>
                   </div>
                 </CardContent>
