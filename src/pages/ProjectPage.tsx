@@ -494,13 +494,13 @@ const ProjectPage = () => {
           {(project.hero_image_url || project.image_url) ? (
             <img 
               src={`${project.hero_image_url || project.image_url}${project.updated_at ? `?v=${encodeURIComponent(project.updated_at)}` : ''}`}
-              alt={project.title}
+              alt={displayProject?.title || project.title}
               className="w-full h-full object-cover"
               loading="lazy"
             />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-primary/20 via-accent/10 to-primary/20 flex items-center justify-center">
-              <span className="text-8xl font-handwritten text-primary/30">{project.title.charAt(0)}</span>
+              <span className="text-8xl font-handwritten text-primary/30">{displayProject?.title?.charAt(0) || project.title.charAt(0)}</span>
             </div>
           )}
         </div>
@@ -508,12 +508,12 @@ const ProjectPage = () => {
         <div className="absolute bottom-0 left-0 right-0 p-8">
           <div className="container mx-auto">
             <div className="max-w-4xl">
-              <h1 className="text-4xl md:text-5xl font-serif font-bold text-white mb-4">{project.title}</h1>
+              <h1 className="text-4xl md:text-5xl font-serif font-bold text-white mb-4">{displayProject?.title}</h1>
               <div className="flex flex-wrap items-center gap-3 text-white/90 mb-6">
-                <Badge className="bg-white/20 hover:bg-white/30 text-white border-0">{project.project_type}</Badge>
-                {project.location && (
+                <Badge className="bg-white/20 hover:bg-white/30 text-white border-0">{displayProject?.project_type}</Badge>
+                {displayProject?.location && (
                   <span className="flex items-center text-sm">
-                    <MapPin className="w-4 h-4 mr-1" />{project.location}
+                    <MapPin className="w-4 h-4 mr-1" />{displayProject.location}
                   </span>
                 )}
                 {project.has_incentive_law && (
@@ -573,12 +573,12 @@ const ProjectPage = () => {
               <div className="space-y-6">
                 <div>
                   <h3 className="text-lg font-semibold text-foreground mb-3">{t.projectDetails.synopsis}</h3>
-                  <p className="text-muted-foreground text-lg leading-relaxed">{project.synopsis}</p>
+                  <p className="text-muted-foreground text-lg leading-relaxed">{displayProject?.synopsis}</p>
                 </div>
-                {project.description && (
+                {displayProject?.description && (
                   <div>
                     <h3 className="text-lg font-semibold text-foreground mb-3">{t.projectDetails.description}</h3>
-                    <p className="text-muted-foreground leading-relaxed whitespace-pre-line">{project.description}</p>
+                    <p className="text-muted-foreground leading-relaxed whitespace-pre-line">{displayProject.description}</p>
                   </div>
                 )}
               </div>
@@ -717,47 +717,47 @@ const ProjectPage = () => {
             })()}
 
             {/* Impact */}
-            {(project.impacto_cultural || project.impacto_social || project.publico_alvo || project.diferenciais) && (
+            {(displayProject?.impacto_cultural || displayProject?.impacto_social || displayProject?.publico_alvo || displayProject?.diferenciais) && (
               <section>
                 <h2 className="text-2xl font-serif font-bold text-foreground mb-6 flex items-center gap-2">
                   <Target className="w-6 h-6 text-primary" />
                   {t.projectDetails.projectImpact}
                 </h2>
                 <div className="grid md:grid-cols-2 gap-6">
-                  {project.impacto_cultural && (
+                  {displayProject?.impacto_cultural && (
                     <div className="group bg-primary/5 p-6 rounded-2xl border border-primary/10 transition-all duration-300 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1">
                       <h3 className="font-semibold text-foreground mb-3 flex items-center">
                         <Sparkles className="w-5 h-5 text-primary mr-2" />
                         {t.projectDetails.culturalImpact}
                       </h3>
-                      <p className="text-muted-foreground">{project.impacto_cultural}</p>
+                      <p className="text-muted-foreground">{displayProject.impacto_cultural}</p>
                     </div>
                   )}
-                  {project.impacto_social && (
+                  {displayProject?.impacto_social && (
                     <div className="group bg-emerald-500/5 p-6 rounded-2xl border border-emerald-500/10 transition-all duration-300 hover:border-emerald-500/30 hover:shadow-lg hover:shadow-emerald-500/10 hover:-translate-y-1">
                       <h3 className="font-semibold text-foreground mb-3 flex items-center">
                         <Globe className="w-5 h-5 text-emerald-600 dark:text-emerald-400 mr-2" />
                         {t.projectDetails.socialImpact}
                       </h3>
-                      <p className="text-muted-foreground">{project.impacto_social}</p>
+                      <p className="text-muted-foreground">{displayProject.impacto_social}</p>
                     </div>
                   )}
-                  {project.publico_alvo && (
+                  {displayProject?.publico_alvo && (
                     <div className="group bg-violet-500/5 p-6 rounded-2xl border border-violet-500/10 transition-all duration-300 hover:border-violet-500/30 hover:shadow-lg hover:shadow-violet-500/10 hover:-translate-y-1">
                       <h3 className="font-semibold text-foreground mb-3 flex items-center">
                         <Users className="w-5 h-5 text-violet-600 dark:text-violet-400 mr-2" />
                         {t.projectDetails.targetAudience}
                       </h3>
-                      <p className="text-muted-foreground">{project.publico_alvo}</p>
+                      <p className="text-muted-foreground">{displayProject.publico_alvo}</p>
                     </div>
                   )}
-                  {project.diferenciais && (
+                  {displayProject?.diferenciais && (
                     <div className="group bg-amber-500/5 p-6 rounded-2xl border border-amber-500/10 transition-all duration-300 hover:border-amber-500/30 hover:shadow-lg hover:shadow-amber-500/10 hover:-translate-y-1">
                       <h3 className="font-semibold text-foreground mb-3 flex items-center">
                         <Star className="w-5 h-5 text-amber-600 dark:text-amber-400 mr-2" />
                         {t.projectDetails.differentials}
                       </h3>
-                      <p className="text-muted-foreground">{project.diferenciais}</p>
+                      <p className="text-muted-foreground">{displayProject.diferenciais}</p>
                     </div>
                   )}
                 </div>
@@ -852,20 +852,20 @@ const ProjectPage = () => {
             )}
 
             {/* Recognition and Media */}
-            {((project.awards && project.awards.length > 0) || (project.news && project.news.length > 0)) && (
+            {((displayProject?.awards && displayProject.awards.length > 0) || (displayProject?.news && displayProject.news.length > 0)) && (
               <section>
                 <h2 className="text-2xl font-serif font-bold text-foreground mb-6">
                   {t.projectDetails.recognitionMedia}
                 </h2>
                 <div className="grid md:grid-cols-2 gap-6">
-                  {project.awards && project.awards.length > 0 && (
+                  {displayProject?.awards && displayProject.awards.length > 0 && (
                     <div>
                       <h3 className="font-semibold text-foreground mb-4 flex items-center">
                         <Award className="w-5 h-5 text-amber-500 mr-2" />
                         {t.projectDetails.awardsTitle}
                       </h3>
                       <ul className="space-y-3">
-                        {project.awards.map((award, index) => (
+                        {displayProject.awards.map((award, index) => (
                           <li key={index}>
                             <div className="block p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors">
                               <h4 className="font-medium text-foreground">{award}</h4>
@@ -875,14 +875,14 @@ const ProjectPage = () => {
                       </ul>
                     </div>
                   )}
-                  {project.news && project.news.length > 0 && (
+                  {displayProject?.news && displayProject.news.length > 0 && (
                     <div>
                       <h3 className="font-semibold text-foreground mb-4 flex items-center">
                         <Newspaper className="w-5 h-5 text-primary mr-2" />
                         {t.projectDetails.inTheMedia}
                       </h3>
                       <ul className="space-y-3">
-                        {project.news.map((item, index) => (
+                        {displayProject.news.map((item, index) => (
                           <li key={index}>
                             {item.url ? (
                               <a 
@@ -920,36 +920,36 @@ const ProjectPage = () => {
                 <div className="space-y-4">
                   <div>
                     <span className="text-sm text-muted-foreground">{t.projectDetails.titleLabel}</span>
-                    <div className="font-semibold text-foreground">{project.title}</div>
+                    <div className="font-semibold text-foreground">{displayProject?.title}</div>
                   </div>
                   <div>
                     <span className="text-sm text-muted-foreground">{t.projectDetails.projectTypeLabel}</span>
-                    <div className="font-medium text-foreground">{project.project_type}</div>
+                    <div className="font-medium text-foreground">{displayProject?.project_type}</div>
                   </div>
-                  {project.stages && project.stages.length > 0 && (
+                  {displayProject?.stages && displayProject.stages.length > 0 && (
                     <div>
                       <span className="text-sm text-muted-foreground">{t.projectDetails.projectStage}</span>
                       <div className="font-medium text-foreground">
-                        {[...new Set(project.stages.map(stage => getStageLabel(stage).toLowerCase()))]
+                        {[...new Set(displayProject.stages.map(stage => getStageLabel(stage).toLowerCase()))]
                           .map(label => label.charAt(0).toUpperCase() + label.slice(1))
                           .join(", ")}
                       </div>
                     </div>
                   )}
-                  {project.location && (
+                  {displayProject?.location && (
                     <div>
                       <span className="text-sm text-muted-foreground">{t.projectDetails.locationLabel}</span>
                       <div className="font-medium text-foreground flex items-center gap-1">
                         <MapPin className="w-4 h-4" />
-                        {project.location}
+                        {displayProject.location}
                       </div>
                     </div>
                   )}
-                  {project.categorias_tags && project.categorias_tags.length > 0 && (
+                  {displayProject?.categorias_tags && displayProject.categorias_tags.length > 0 && (
                     <div>
                       <span className="text-sm text-muted-foreground">{t.projectDetails.categoriesLabel}</span>
                       <div className="flex flex-wrap gap-2 mt-1">
-                        {project.categorias_tags.map((tag, index) => (
+                        {displayProject.categorias_tags.map((tag, index) => (
                           <Badge key={index} variant="secondary" className="rounded-full">
                             {getCategoryLabel(tag)}
                           </Badge>
@@ -957,24 +957,24 @@ const ProjectPage = () => {
                       </div>
                     </div>
                   )}
-                  {project.additional_info && (
+                  {displayProject?.additional_info && (
                     <div>
                       <span className="text-sm text-muted-foreground">{t.projectDetails.additionalInfo}</span>
-                      <p className="font-medium text-foreground text-sm mt-1">{project.additional_info}</p>
+                      <p className="font-medium text-foreground text-sm mt-1">{displayProject.additional_info}</p>
                     </div>
                   )}
                 </div>
               </div>
 
               {/* Incentive Law Card */}
-              {project.has_incentive_law && project.incentive_law_details && (
+              {displayProject?.has_incentive_law && displayProject?.incentive_law_details && (
                 <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
                   <h3 className="font-serif font-bold text-lg text-foreground mb-4 flex items-center gap-2">
                     <Shield className="w-5 h-5 text-violet-500" />
                     {t.projectDetails.incentiveLawTitle}
                   </h3>
                   <div className="flex flex-wrap gap-2">
-                    {project.incentive_law_details.split(',').map((law, index) => (
+                    {displayProject.incentive_law_details.split(',').map((law, index) => (
                       <Badge key={index} variant="secondary" className="rounded-full">
                         {getIncentiveLawLabel(law.trim())}
                       </Badge>
