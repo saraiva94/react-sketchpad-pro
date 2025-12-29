@@ -15,6 +15,7 @@ import { TranslatedProjectCard } from "@/components/TranslatedProjectCard";
 import { useInView } from "@/hooks/useInView";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useAutoTranslate } from "@/hooks/useAutoTranslate";
+import { usePreloadTranslations, createTranslationItems } from "@/hooks/usePreloadTranslations";
 import {
   Users, 
   Target, 
@@ -223,6 +224,14 @@ const HomePage = () => {
   // Conteúdo final que será usado na renderização
   const displayQuemSomos = language === 'pt' ? quemSomosContent : (translatedQuemSomos || quemSomosContent);
   const displayServicos = language === 'pt' ? servicosContent : (translatedServicos || servicosContent);
+
+  // Preload de traduções quando dados carregarem
+  const preloadItems = [
+    ...createTranslationItems.forProjectList(featuredProjects),
+    ...createTranslationItems.forSettings('quem_somos', quemSomosContent),
+    ...createTranslationItems.forSettings('nossos_servicos', servicosContent),
+  ];
+  usePreloadTranslations(preloadItems, !loadingProjects);
 
   useEffect(() => {
     fetchFeaturedProjects();

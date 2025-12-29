@@ -9,6 +9,7 @@ import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useAutoTranslate } from "@/hooks/useAutoTranslate";
+import { usePreloadTranslations, createTranslationItems } from "@/hooks/usePreloadTranslations";
 import { TranslatedText } from "@/components/TranslatedText";
 import { getCategoryLabel } from "@/components/admin/CategoriesMultiSelect";
 import { getIncentiveLawLabel } from "@/components/admin/IncentiveLawsMultiSelect";
@@ -135,6 +136,14 @@ const ProjectPage = () => {
     project
   );
   const displayProject = language === "pt" ? project : (translatedProject || project);
+
+  // Preload de traduções quando dados carregarem
+  const preloadItems = [
+    ...createTranslationItems.forProject(id ?? "", project),
+    ...createTranslationItems.forMembers(id ?? "", members),
+    ...createTranslationItems.forContrapartidas(contrapartidas),
+  ];
+  usePreloadTranslations(preloadItems, !loading && !!project);
 
   useEffect(() => {
     if (id) {
