@@ -1,11 +1,13 @@
 /**
  * Sistema de cache centralizado para traduções automáticas.
- * Evita chamadas duplicadas à API, armazena em memória + localStorage,
- * e implementa deduplicação de requisições pendentes.
+ * 3 camadas: memória -> localStorage -> banco de dados (Supabase)
+ * Evita chamadas duplicadas à API e implementa deduplicação de requisições pendentes.
  */
 
 import { supabase } from "@/integrations/supabase/client";
+import type { Json } from "@/integrations/supabase/types";
 import type { Language } from "@/lib/i18n";
+
 
 // Cache em memória (rápido, volátil)
 const memoryCache = new Map<string, unknown>();
@@ -136,7 +138,85 @@ function clearOldCache(): void {
 }
 
 /**
+ * Busca tradução no banco de dados (3ª camada de cache).
+ */
+async function getFromDatabase<T>(
+  namespace: string,
+  sourceHash: string,
+  targetLanguage: string,
+  originalValue: T
+): Promise<T | null> {
+  try {
+    const { data, error } = await supabase
+      .from("translations")
+      .select("translated_value")
+      .eq("namespace", namespace)
+      .eq("target_language", targetLanguage)
+      .eq("source_hash", sourceHash)
+      .maybeSingle();
+
+    if (error || !data) {
+      return null;
+    }
+
+    const translated = data.translated_value;
+    
+    // Validar tipo
+    const originalType = typeof originalValue;
+    if (originalType === "string" && typeof translated !== "string") {
+      return null;
+    }
+
+    return translated as T;
+  } catch (error) {
+    console.warn("Error fetching from translations table:", error);
+    return null;
+  }
+}
+
+/**
+ * Salva tradução no banco de dados.
+ */
+async function saveToDatabase(
+  namespace: string,
+  sourceHash: string,
+  targetLanguage: string,
+  sourceValue: unknown,
+  translatedValue: unknown
+): Promise<void> {
+  try {
+    await supabase.from("translations").upsert(
+      [
+        {
+          namespace,
+          source_language: "pt",
+          target_language: targetLanguage,
+          source_hash: sourceHash,
+          source_value: sourceValue as Json,
+          translated_value: translatedValue as Json,
+          translation_method: "auto",
+        },
+      ],
+      { onConflict: "namespace,target_language,source_hash" }
+    );
+  } catch (error) {
+    console.warn("Error saving to translations table:", error);
+  }
+}
+
+/**
+ * Extrai namespace e hash do cacheKey para uso no banco.
+ */
+function parseCacheKey(cacheKey: string): { namespace: string; lang: string; hash: string } | null {
+  // Formato: i18n:v2:namespace:lang:hash
+  const match = cacheKey.match(/^i18n:v2:([^:]+):([^:]+):(.+)$/);
+  if (!match) return null;
+  return { namespace: match[1], lang: match[2], hash: match[3] };
+}
+
+/**
  * Traduz um valor usando a edge function, com deduplicação de requisições.
+ * Salva no cache local e no banco de dados.
  */
 export async function translateValue<T>(
   cacheKey: string,
@@ -148,9 +228,23 @@ export async function translateValue<T>(
     return pendingRequests.get(cacheKey) as Promise<T>;
   }
 
+  // Extrair info do cacheKey para salvar no banco
+  const keyInfo = parseCacheKey(cacheKey);
+
   // Criar nova requisição
   const request = (async (): Promise<T> => {
     try {
+      // Verificar banco de dados primeiro (3ª camada)
+      if (keyInfo) {
+        const fromDb = await getFromDatabase(keyInfo.namespace, keyInfo.hash, language, value);
+        if (fromDb !== null) {
+          // Promover para cache local
+          saveToCache(cacheKey, fromDb);
+          return fromDb;
+        }
+      }
+
+      // Chamar edge function para traduzir
       const res = await supabase.functions.invoke("translate", {
         body: { targetLanguage: language, value },
       });
@@ -180,8 +274,13 @@ export async function translateValue<T>(
         }
       }
 
-      // Salvar no cache
+      // Salvar no cache local
       saveToCache(cacheKey, translated);
+      
+      // Salvar no banco de dados (async, não bloqueia)
+      if (keyInfo) {
+        saveToDatabase(keyInfo.namespace, keyInfo.hash, language, value, translated);
+      }
       
       return translated as T;
     } catch (error) {
