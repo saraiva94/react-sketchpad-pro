@@ -60,6 +60,16 @@ export const translations = {
       adjustFilters: 'Tente ajustar seus filtros ou faça uma busca diferente.',
       portfolioSubtitle: 'Explore todos os projetos aprovados e encontre iniciativas culturais para apoiar.',
       viewProjects: 'Ver {count} Projeto(s)',
+
+      // Porto de Ideias grid
+      viewProject: 'Ver projeto',
+      ctaQuestion: 'Quer enviar seu projeto?',
+      ctaHeadline: 'Faça Parte da Nossa Rede',
+      ctaBody: 'Se você tem uma ideia potente e bem estruturada, envie para nossa curadoria.',
+      ctaFree: '✨ Gratuito',
+      ctaAction: 'Enviar projeto',
+      slotAvailable: 'Slot disponível para novos projetos',
+
       // Stage labels
       stageAll: 'Estágio',
       stageIdea: 'Ideia inicial',

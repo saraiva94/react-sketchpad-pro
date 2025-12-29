@@ -78,17 +78,44 @@ async function translateWithGateway(value: any, targetLanguage: Exclude<Language
   const content = data?.choices?.[0]?.message?.content;
   if (!content || typeof content !== "string") throw new Error("Invalid gateway response");
 
-  try {
-    return JSON.parse(content);
-  } catch {
-    // Sometimes models wrap JSON; attempt a safe extraction.
-    const first = content.indexOf("{");
-    const last = content.lastIndexOf("}");
-    if (first !== -1 && last !== -1 && last > first) {
-      return JSON.parse(content.slice(first, last + 1));
+  // The model should return JSON only. We support two valid shapes:
+  // 1) the translated JSON directly (string/object/array/etc)
+  // 2) a wrapper object: { targetLanguage, json: "..." }
+  // In case (2), we must parse the `json` field to get the real translated value.
+  const parseModelJson = (raw: string): any => {
+    try {
+      return JSON.parse(raw);
+    } catch {
+      // Sometimes models wrap JSON; attempt a safe extraction.
+      const firstObj = raw.indexOf("{");
+      const lastObj = raw.lastIndexOf("}");
+      if (firstObj !== -1 && lastObj !== -1 && lastObj > firstObj) {
+        return JSON.parse(raw.slice(firstObj, lastObj + 1));
+      }
+
+      const firstArr = raw.indexOf("[");
+      const lastArr = raw.lastIndexOf("]");
+      if (firstArr !== -1 && lastArr !== -1 && lastArr > firstArr) {
+        return JSON.parse(raw.slice(firstArr, lastArr + 1));
+      }
+
+      throw new Error("Could not parse JSON from model");
     }
-    throw new Error("Could not parse JSON from model");
+  };
+
+  const parsed = parseModelJson(content);
+
+  // Unwrap wrapper responses
+  if (
+    parsed &&
+    typeof parsed === "object" &&
+    !Array.isArray(parsed) &&
+    typeof (parsed as any).json === "string"
+  ) {
+    return parseModelJson((parsed as any).json);
   }
+
+  return parsed;
 }
 
 Deno.serve(async (req) => {

@@ -5,6 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { ArrowRight, Anchor, Shield, MapPin } from "lucide-react";
 import { useDominantColor } from "@/hooks/useDominantColor";
 import { INCENTIVE_LAWS } from "@/components/admin/IncentiveLawsMultiSelect";
+import { useLanguage } from "@/hooks/useLanguage";
+import { useAutoTranslate } from "@/hooks/useAutoTranslate";
 
 interface Project {
   id: string;
@@ -56,11 +58,38 @@ function ProjectCard({
   getStageInfo: (stage: string | null) => { label: string; color: string };
   getInitials: (name: string | null) => string;
 }) {
+  const { t, language } = useLanguage();
+
   const cardImageUrl = item.data.card_image_url || item.data.image_url;
   const { backgroundColor, textColor } = useDominantColor(cardImageUrl);
 
   const project = item.data;
   const stageInfo = getStageInfo(project.stage);
+
+  const { translated: translatedTitle } = useAutoTranslate(`grid_title_${project.id}`, project.title);
+  const { translated: translatedSynopsis } = useAutoTranslate(`grid_synopsis_${project.id}`, project.synopsis);
+  const { translated: translatedType } = useAutoTranslate(`grid_type_${project.id}`, project.project_type);
+
+  const displayTitle = language === "pt" ? project.title : (translatedTitle || project.title);
+  const displaySynopsis = language === "pt" ? project.synopsis : (translatedSynopsis || project.synopsis);
+  const displayType = language === "pt" ? project.project_type : (translatedType || project.project_type);
+
+  // Incentive law label is stored in PT; translate when needed
+  const matchedLaw = (() => {
+    if (!project.has_incentive_law || !project.incentive_law_details) return null;
+    const storedValue = project.incentive_law_details.trim().toLowerCase();
+    return INCENTIVE_LAWS.find(
+      (l) => l.value.toLowerCase() === storedValue || l.label.toLowerCase() === storedValue
+    );
+  })();
+
+  const { translated: translatedLawLabel } = useAutoTranslate(
+    matchedLaw ? `grid_law_${project.id}` : `grid_law_${project.id}_none`,
+    matchedLaw?.label
+  );
+
+  const displayLawLabel =
+    language === "pt" ? matchedLaw?.label : (translatedLawLabel || matchedLaw?.label);
 
   return (
     <Link
@@ -78,14 +107,14 @@ function ProjectCard({
           {(project.card_image_url || project.image_url) ? (
             <img
               src={`${project.card_image_url || project.image_url}${project.updated_at ? `?v=${encodeURIComponent(project.updated_at)}` : ''}`}
-              alt={project.title}
+              alt={displayTitle}
               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
               loading="lazy"
             />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
               <span className="text-4xl font-serif font-bold text-primary/50">
-                {getInitials(project.title)}
+                {getInitials(displayTitle)}
               </span>
             </div>
           )}
@@ -93,61 +122,45 @@ function ProjectCard({
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
           {/* Type badge - with dominant color */}
           <div className="absolute top-3 left-3">
-            <Badge 
+            <Badge
               className="text-xs font-semibold shadow-lg"
-              style={{ 
-                backgroundColor, 
+              style={{
+                backgroundColor,
                 color: textColor,
-                borderColor: 'transparent'
+                borderColor: "transparent",
               }}
             >
-              {project.project_type}
+              {displayType}
             </Badge>
           </div>
+
           {/* Incentive Law badge - only shows if a valid law from the form options was chosen */}
-          {(() => {
-            if (!project.has_incentive_law || !project.incentive_law_details) return null;
-            
-            // Get valid law values from the form options
-            const storedValue = project.incentive_law_details.trim().toLowerCase();
-            const matchedLaw = INCENTIVE_LAWS.find(l => 
-              l.value.toLowerCase() === storedValue || 
-              l.label.toLowerCase() === storedValue
-            );
-            
-            // Only show badge if it's a valid law from form options
-            if (!matchedLaw) return null;
-            
-            return (
-              <div className="absolute top-3 right-3">
-                <Badge
-                  variant="outline"
-                  className="bg-emerald-500/90 border-emerald-400 text-white text-xs flex items-center gap-1"
-                >
-                  <Shield className="w-3 h-3" />
-                  {matchedLaw.label}
-                </Badge>
-              </div>
-            );
-          })()}
+          {matchedLaw && displayLawLabel && (
+            <div className="absolute top-3 right-3">
+              <Badge
+                variant="outline"
+                className="bg-emerald-500/90 border-emerald-400 text-white text-xs flex items-center gap-1"
+              >
+                <Shield className="w-3 h-3" />
+                {displayLawLabel}
+              </Badge>
+            </div>
+          )}
         </div>
 
         {/* Content */}
         <div className="p-5">
           <h3 className="text-lg font-serif font-bold text-foreground mb-2 line-clamp-1 group-hover:text-primary transition-colors">
-            {project.title}
+            {displayTitle}
           </h3>
           <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
-            {project.synopsis}
+            {displaySynopsis}
           </p>
 
           {/* Meta info */}
           <div className="flex flex-wrap gap-2 mb-4">
             {project.location && (
-              <Badge
-                variant="outline"
-                className="text-xs flex items-center gap-1"
-              >
+              <Badge variant="outline" className="text-xs flex items-center gap-1">
                 <MapPin className="w-3 h-3" />
                 {project.location}
               </Badge>
@@ -162,7 +175,7 @@ function ProjectCard({
           {/* Footer */}
           <div className="flex items-center justify-end pt-4 border-t border-border">
             <span className="text-sm font-bold flex items-center gap-2 group-hover:translate-x-2 transition-transform text-foreground">
-              Ver projeto
+              {t.home.knowProject}
               <ArrowRight className="w-4 h-4" />
             </span>
           </div>
@@ -263,25 +276,16 @@ export function ProjectGrid({
               <div className="w-20 h-20 rounded-full bg-white/30 backdrop-blur-sm flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:rotate-12 transition-all duration-500 shadow-lg">
                 <Anchor className="w-10 h-10 drop-shadow-lg" />
               </div>
-              <div className="text-xl font-semibold drop-shadow-lg">
-                Quer enviar seu projeto?
-              </div>
+              <div className="text-xl font-semibold drop-shadow-lg">{t.projects.ctaQuestion}</div>
             </div>
           </div>
           <div className="p-6 bg-black/20 backdrop-blur-sm">
-            <h3 className="text-xl font-serif font-bold mb-3 text-white drop-shadow">
-              Faça Parte da Nossa Rede
-            </h3>
-            <p className="text-sm text-white/90 line-clamp-3 mb-4">
-              Se você tem uma ideia potente e bem estruturada, envie para nossa
-              curadoria.
-            </p>
+            <h3 className="text-xl font-serif font-bold mb-3 text-white drop-shadow">{t.projects.ctaHeadline}</h3>
+            <p className="text-sm text-white/90 line-clamp-3 mb-4">{t.projects.ctaBody}</p>
             <div className="flex items-center justify-between pt-4 border-t border-white/30">
-              <span className="text-sm text-white/80 font-medium">
-                ✨ Gratuito
-              </span>
+              <span className="text-sm text-white/80 font-medium">{t.projects.ctaFree}</span>
               <span className="text-sm font-bold flex items-center gap-2 group-hover:translate-x-2 transition-transform text-white">
-                Enviar projeto
+                {t.projects.ctaAction}
                 <ArrowRight className="w-5 h-5" />
               </span>
             </div>
@@ -311,9 +315,7 @@ export function ProjectGrid({
               <div className="w-20 h-20 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center mb-4 border border-white/20">
                 <span className="text-4xl text-white/40">+</span>
               </div>
-              <p className="text-sm text-white/50 text-center px-6">
-                Slot disponível para novos projetos
-              </p>
+              <p className="text-sm text-white/50 text-center px-6">{t.projects.slotAvailable}</p>
             </div>
           </div>
         ));
