@@ -221,9 +221,21 @@ const HomePage = () => {
   const { translated: translatedQuemSomos } = useAutoTranslate('quem_somos', quemSomosContent);
   const { translated: translatedServicos } = useAutoTranslate('nossos_servicos', servicosContent);
 
-  // Conteúdo final que será usado na renderização
-  const displayQuemSomos = language === 'pt' ? quemSomosContent : (translatedQuemSomos || quemSomosContent);
-  const displayServicos = language === 'pt' ? servicosContent : (translatedServicos || servicosContent);
+  // Conteúdo final que será usado na renderização (com validação de estrutura)
+  const displayQuemSomos = language === 'pt' 
+    ? quemSomosContent 
+    : (translatedQuemSomos && 
+       Array.isArray(translatedQuemSomos.paragraphs) && 
+       Array.isArray(translatedQuemSomos.cards) 
+         ? translatedQuemSomos 
+         : quemSomosContent);
+  
+  const displayServicos = language === 'pt' 
+    ? servicosContent 
+    : (translatedServicos && 
+       Array.isArray(translatedServicos.services) 
+         ? translatedServicos 
+         : servicosContent);
 
   // Preload de traduções quando dados carregarem
   const preloadItems = [
@@ -553,12 +565,16 @@ const HomePage = () => {
   // Construir lista de projetos combinando reais + exemplos respeitando a ordem global
   const buildDisplayProjects = () => {
     // Criar lista de todos os itens com seu tipo
-    type DisplayItem = { type: 'real'; data: Project } | { type: 'example'; data: typeof exampleProjects[0] };
+    type DisplayItem = { type: 'real'; data: Project } | { type: 'example'; data: typeof exampleProjectsPt[0] };
     
-    const realItems: DisplayItem[] = featuredProjects.map(p => ({ type: 'real', data: p }));
+    // Garantir que featuredProjects seja um array
+    const safeProjects = Array.isArray(featuredProjects) ? featuredProjects : [];
+    const safeExamples = Array.isArray(exampleProjects) ? exampleProjects : exampleProjectsPt;
+    
+    const realItems: DisplayItem[] = safeProjects.map(p => ({ type: 'real', data: p }));
     
     // Apenas incluir exemplos que estão marcados como destaque (estrela)
-    const exampleItems: DisplayItem[] = exampleProjects
+    const exampleItems: DisplayItem[] = safeExamples
       .filter(e => featuredExampleCards[e.id] === true)
       .map(e => ({ type: 'example', data: e }));
     
@@ -768,7 +784,7 @@ const HomePage = () => {
             </div>
           ) : (
             <div className="grid md:grid-cols-2 gap-6 md:gap-8">
-              {displayItems.map((item, index) => {
+              {(Array.isArray(displayItems) ? displayItems : []).map((item, index) => {
                 const project = item.data;
                 const isExample = item.type === 'example';
                 const linkUrl = isExample ? (project as typeof exampleProjects[0]).link : `/project/${project.id}`;
