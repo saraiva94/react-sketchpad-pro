@@ -472,7 +472,7 @@ const HomePage = () => {
   };
 
   // Projetos de exemplo para exibir quando não há projetos reais em destaque
-  const exampleProjects = [
+  const exampleProjectsPt = [
     {
       id: "exemplo-cultura-legado",
       title: "Sua Cultura, Seu Legado",
@@ -534,6 +534,10 @@ const HomePage = () => {
       link: "/exemplo/recursos-disponiveis",
     },
   ];
+
+  // Auto-tradução dos projetos de exemplo
+  const { translated: translatedExampleProjects } = useAutoTranslate('example_projects', exampleProjectsPt);
+  const exampleProjects = language === 'pt' ? exampleProjectsPt : (translatedExampleProjects || exampleProjectsPt);
 
   // Construir lista de projetos combinando reais + exemplos respeitando a ordem global
   const buildDisplayProjects = () => {
