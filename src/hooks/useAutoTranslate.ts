@@ -1,53 +1,46 @@
 /**
  * Hook para traduzir automaticamente conteúdo do backend quando o idioma não for PT.
- * Usa sistema de cache centralizado para evitar chamadas duplicadas à API.
+ * Usa o TranslationManager com sistema de fila e rate limiting.
  */
 import { useState, useEffect, useRef } from "react";
 import { useLanguage } from "./useLanguage";
-import {
-  makeCacheKey,
-  getFromCache,
-  translateValue,
-} from "@/lib/translationCache";
-import type { Language } from "@/lib/i18n";
+import { translationManager } from "@/lib/translationManager";
 
-const stableStringify = (value: unknown): string => {
-  try {
-    return JSON.stringify(value);
-  } catch {
-    return String(value);
-  }
-};
+interface UseAutoTranslateOptions {
+  enabled?: boolean;
+  fallback?: unknown;
+  onTranslationComplete?: (translated: unknown) => void;
+}
 
-export function useAutoTranslate<T>(
+export function useAutoTranslate<T = unknown>(
   namespace: string,
-  value: T | null | undefined
-): { translated: T | null | undefined; isTranslating: boolean } {
+  value: T | null | undefined,
+  options: UseAutoTranslateOptions = {}
+): {
+  translated: T | null | undefined;
+  isTranslating: boolean;
+  error: Error | null;
+} {
   const { language } = useLanguage();
   const [translated, setTranslated] = useState<T | null | undefined>(value);
   const [isTranslating, setIsTranslating] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
   const lastValueRef = useRef<string>("");
-  const lastLangRef = useRef<Language>(language);
-  const mountedRef = useRef(true);
+  const lastLangRef = useRef<string>(language);
+
+  const { enabled = true, fallback = null, onTranslationComplete } = options;
 
   useEffect(() => {
-    mountedRef.current = true;
-    return () => {
-      mountedRef.current = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    // PT é o idioma original - não traduz
-    if (language === "pt" || value === null || value === undefined) {
+    // Se idioma é PT, desabilitado, ou valor nulo, não traduz
+    if (!enabled || language === "pt" || value === null || value === undefined) {
       setTranslated(value);
       setIsTranslating(false);
       return;
     }
 
-    const valueKey = stableStringify(value);
-
-    // Se não mudou, não refaz
+    // Verificar se valor ou idioma mudou
+    const valueKey = typeof value === "string" ? value : JSON.stringify(value);
     if (valueKey === lastValueRef.current && language === lastLangRef.current) {
       return;
     }
@@ -55,41 +48,47 @@ export function useAutoTranslate<T>(
     lastValueRef.current = valueKey;
     lastLangRef.current = language;
 
-    const cacheKey = makeCacheKey(namespace, language, value);
-
-    // Verificar cache primeiro (síncrono)
-    const cached = getFromCache(cacheKey, value);
-    if (cached !== null) {
-      setTranslated(cached);
-      setIsTranslating(false);
-      return;
+    // Cancelar requisição anterior se houver
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
     }
 
-    // Precisa buscar tradução
-    const doTranslate = async () => {
+    abortControllerRef.current = new AbortController();
+
+    const loadTranslation = async () => {
       setIsTranslating(true);
+      setError(null);
+
       try {
-        const result = await translateValue(
-          cacheKey,
+        const result = await translationManager.getTranslation(
+          namespace,
           value,
-          language as Exclude<Language, "pt">
+          language
         );
-        if (mountedRef.current) {
+
+        // Verificar se não foi abortado
+        if (!abortControllerRef.current?.signal.aborted) {
           setTranslated(result);
+          onTranslationComplete?.(result);
         }
-      } catch {
-        if (mountedRef.current) {
-          setTranslated(value);
+      } catch (err) {
+        if (!abortControllerRef.current?.signal.aborted) {
+          setError(err as Error);
+          setTranslated((fallback as T) || value);
         }
       } finally {
-        if (mountedRef.current) {
+        if (!abortControllerRef.current?.signal.aborted) {
           setIsTranslating(false);
         }
       }
     };
 
-    doTranslate();
-  }, [namespace, value, language]);
+    loadTranslation();
 
-  return { translated, isTranslating };
+    return () => {
+      abortControllerRef.current?.abort();
+    };
+  }, [namespace, value, language, enabled, fallback, onTranslationComplete]);
+
+  return { translated, isTranslating, error };
 }
