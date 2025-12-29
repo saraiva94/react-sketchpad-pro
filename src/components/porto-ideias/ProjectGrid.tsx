@@ -194,6 +194,7 @@ export function ProjectGrid({
   getStageInfo,
   getInitials,
 }: ProjectGridProps) {
+  const { t } = useLanguage();
   const [sortableItems, setSortableItems] = useState<SortableItem[]>([]);
 
   useEffect(() => {
