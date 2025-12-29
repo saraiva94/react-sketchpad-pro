@@ -222,20 +222,43 @@ const HomePage = () => {
   const { translated: translatedServicos } = useAutoTranslate('nossos_servicos', servicosContent);
 
   // Conteúdo final que será usado na renderização (com validação de estrutura)
-  const displayQuemSomos = language === 'pt' 
-    ? quemSomosContent 
-    : (translatedQuemSomos && 
-       Array.isArray(translatedQuemSomos.paragraphs) && 
-       Array.isArray(translatedQuemSomos.cards) 
-         ? translatedQuemSomos 
-         : quemSomosContent);
-  
-  const displayServicos = language === 'pt' 
-    ? servicosContent 
-    : (translatedServicos && 
-       Array.isArray(translatedServicos.services) 
-         ? translatedServicos 
-         : servicosContent);
+  const isValidQuemSomos = (input: any): input is typeof quemSomosContent => {
+    return (
+      input &&
+      Array.isArray(input.paragraphs) &&
+      input.paragraphs.every((p: any) => typeof p === "string") &&
+      Array.isArray(input.cards) &&
+      input.cards.every(
+        (c: any) =>
+          c &&
+          typeof c.icon === "string" &&
+          typeof c.title === "string" &&
+          typeof c.description === "string"
+      )
+    );
+  };
+
+  const isValidServicos = (input: any): input is typeof servicosContent => {
+    return (
+      input &&
+      Array.isArray(input.services) &&
+      input.services.every(
+        (s: any) =>
+          s &&
+          typeof s.icon === "string" &&
+          typeof s.text === "string" &&
+          typeof s.hoverColor === "string"
+      )
+    );
+  };
+
+  const displayQuemSomos = language === "pt"
+    ? quemSomosContent
+    : (isValidQuemSomos(translatedQuemSomos) ? translatedQuemSomos : quemSomosContent);
+
+  const displayServicos = language === "pt"
+    ? servicosContent
+    : (isValidServicos(translatedServicos) ? translatedServicos : servicosContent);
 
   // Preload de traduções quando dados carregarem
   const preloadItems = [

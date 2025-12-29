@@ -56,6 +56,40 @@ export class TranslationManager {
     return `i18n:v3:${namespace}:${targetLang}:${hash}`;
   }
 
+  /**
+   * Normaliza respostas antigas/erradas (ex: { value: "..." }) e valida tipo,
+   * evitando crashes do React ao tentar renderizar objetos.
+   */
+  private normalizeTranslated<T>(original: T, candidate: unknown): T {
+    let next: any = candidate;
+
+    // Unwrap de respostas antigas que salvaram { value: ... }
+    if (
+      next &&
+      typeof next === "object" &&
+      !Array.isArray(next) &&
+      (next as any).value !== undefined &&
+      Object.keys(next as any).length === 1
+    ) {
+      next = (next as any).value;
+    }
+
+    // Validação por tipo do valor original
+    if (typeof original === "string") {
+      return (typeof next === "string" ? next : original) as T;
+    }
+
+    if (Array.isArray(original)) {
+      return (Array.isArray(next) ? next : original) as T;
+    }
+
+    if (original && typeof original === "object") {
+      return (next && typeof next === "object" ? next : original) as T;
+    }
+
+    return (next ?? original) as T;
+  }
+
   async getTranslation<T>(
     namespace: string,
     value: T,
@@ -72,7 +106,8 @@ export class TranslationManager {
     // 1. Memória (mais rápido)
     if (this.memoryCache.has(cacheKey)) {
       console.log("[i18n] Cache hit (memória):", namespace);
-      return this.memoryCache.get(cacheKey) as T;
+      const cached = this.memoryCache.get(cacheKey);
+      return this.normalizeTranslated(value, cached);
     }
 
     // 2. localStorage
@@ -80,15 +115,16 @@ export class TranslationManager {
       const cached = localStorage.getItem(cacheKey);
       if (cached) {
         const parsed = JSON.parse(cached);
-        this.memoryCache.set(cacheKey, parsed);
+        const normalized = this.normalizeTranslated(value, parsed);
+        this.memoryCache.set(cacheKey, normalized);
         console.log("[i18n] Cache hit (localStorage):", namespace);
-        return parsed as T;
+        return normalized;
       }
     } catch (err) {
       console.warn("[i18n] localStorage read error:", err);
     }
 
-    // 3. Supabase
+    // 3. Banco de dados
     try {
       const { data: dbTranslation } = await supabase
         .from("translations")
@@ -99,17 +135,21 @@ export class TranslationManager {
         .maybeSingle();
 
       if (dbTranslation) {
-        const translated = dbTranslation.translated_value as T;
-        this.memoryCache.set(cacheKey, translated);
+        const normalized = this.normalizeTranslated(
+          value,
+          (dbTranslation as any).translated_value
+        );
+
+        this.memoryCache.set(cacheKey, normalized);
 
         try {
-          localStorage.setItem(cacheKey, JSON.stringify(translated));
+          localStorage.setItem(cacheKey, JSON.stringify(normalized));
         } catch (err) {
           console.warn("[i18n] localStorage write error:", err);
         }
 
         console.log("[i18n] Cache hit (banco):", namespace);
-        return translated;
+        return normalized;
       }
     } catch (err) {
       console.error("[i18n] Supabase lookup error:", err);
@@ -212,7 +252,8 @@ export class TranslationManager {
       if (error) throw error;
 
       // A edge function retorna { value: traduzido }
-      const translated = data?.value ?? value;
+      const raw = (data as any)?.value ?? value;
+      const translated = this.normalizeTranslated(value, raw);
 
       // Salvar em todos os caches
       this.memoryCache.set(cacheKey, translated);
