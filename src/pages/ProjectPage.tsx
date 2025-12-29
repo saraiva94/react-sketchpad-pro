@@ -15,6 +15,8 @@ import { getIncentiveLawLabel } from "@/components/admin/IncentiveLawsMultiSelec
 import { getStageLabel } from "@/components/admin/StagesMultiSelect";
 import jsPDF from "jspdf";
 import imdbLogo from "@/assets/imdb-logo.png";
+import { TranslatedMemberCard } from "@/components/TranslatedMemberCard";
+import { TranslatedContrapartidaCard } from "@/components/TranslatedContrapartidaCard";
 import { WavesBackground } from "@/components/WavesBackground";
 import { 
   ArrowLeft, 
@@ -602,85 +604,7 @@ const ProjectPage = () => {
               const otherMembers = members.filter(m => !isCastRole(m.funcao));
 
               const renderMemberCard = (member: ProjectMember) => (
-                <div key={member.id} className="group relative overflow-visible card-solid p-4 bg-card rounded-xl border border-border rainbow-card-glow">
-                  <div className="flex items-start space-x-3">
-                    {/* Foto */}
-                    {member.photo_url ? (
-                      <img 
-                        src={member.photo_url} 
-                        alt={member.nome}
-                        className="w-14 h-14 rounded-full object-cover flex-shrink-0 border-2 border-primary/20"
-                      />
-                    ) : (
-                      <div className="w-14 h-14 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center flex-shrink-0">
-                        <span className="text-primary-foreground text-sm font-semibold">
-                          {getInitials(member.nome)}
-                        </span>
-                      </div>
-                    )}
-                    <div className="min-w-0 flex-1">
-                      <h4 className="font-semibold text-foreground text-sm">{member.nome}</h4>
-                      {member.funcao && (
-                        <p className="text-xs text-muted-foreground">{member.funcao}</p>
-                      )}
-                      
-                      {/* Detalhes */}
-                      {member.detalhes && (
-                        <p className="text-xs text-muted-foreground mt-1">{member.detalhes}</p>
-                      )}
-                      
-                      {/* Social Links e CV */}
-                      <div className="flex items-center gap-2 mt-2">
-                        {member.social_links?.instagram && (
-                          <a href={member.social_links.instagram.startsWith('http') ? member.social_links.instagram : `https://instagram.com/${member.social_links.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="social-link-circle social-link-instagram w-6 h-6 rounded-full bg-pink-500/10 flex items-center justify-center hover:bg-pink-500/30">
-                            <Instagram className="w-3 h-3 text-pink-500" />
-                          </a>
-                        )}
-                        {member.social_links?.linkedin && (
-                          <a href={member.social_links.linkedin.startsWith('http') ? member.social_links.linkedin : `https://linkedin.com/in/${member.social_links.linkedin}`} target="_blank" rel="noopener noreferrer" className="social-link-circle social-link-linkedin w-6 h-6 rounded-full bg-blue-600/10 flex items-center justify-center hover:bg-blue-600/30">
-                            <Linkedin className="w-3 h-3 text-blue-600" />
-                          </a>
-                        )}
-                        {member.social_links?.facebook && (
-                          <a href={member.social_links.facebook.startsWith('http') ? member.social_links.facebook : `https://facebook.com/${member.social_links.facebook}`} target="_blank" rel="noopener noreferrer" className="social-link-circle social-link-facebook w-6 h-6 rounded-full bg-blue-500/10 flex items-center justify-center hover:bg-blue-500/30">
-                            <Facebook className="w-3 h-3 text-blue-500" />
-                          </a>
-                        )}
-                        {member.social_links?.youtube && (
-                          <a href={member.social_links.youtube.startsWith('http') ? member.social_links.youtube : `https://youtube.com/${member.social_links.youtube.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="social-link-circle social-link-youtube w-6 h-6 rounded-full bg-red-500/10 flex items-center justify-center hover:bg-red-500/30">
-                            <Youtube className="w-3 h-3 text-red-500" />
-                          </a>
-                        )}
-                        {member.social_links?.twitter && (
-                          <a href={member.social_links.twitter.startsWith('http') ? member.social_links.twitter : `https://x.com/${member.social_links.twitter.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="social-link-circle social-link-twitter w-6 h-6 rounded-full bg-sky-500/10 flex items-center justify-center hover:bg-sky-500/30">
-                            <Twitter className="w-3 h-3 text-sky-500" />
-                          </a>
-                        )}
-                        {member.social_links?.imdb && (
-                          <a href={member.social_links.imdb.startsWith('http') ? member.social_links.imdb : `https://www.imdb.com/name/${member.social_links.imdb}`} target="_blank" rel="noopener noreferrer" className="social-link-circle social-link-imdb w-6 h-6 rounded-full bg-[#F5C518]/10 flex items-center justify-center hover:bg-[#F5C518]/30" title="IMDb">
-                            <img src={imdbLogo} alt="IMDb" className="w-4 h-4 rounded-sm object-contain" />
-                          </a>
-                        )}
-                        {member.social_links?.website && (
-                          member.social_links.website.includes('imdb.com') ? (
-                            <a href={member.social_links.website.startsWith('http') ? member.social_links.website : `https://${member.social_links.website}`} target="_blank" rel="noopener noreferrer" className="social-link-circle social-link-imdb w-6 h-6 rounded-full bg-[#F5C518]/10 flex items-center justify-center hover:bg-[#F5C518]/30" title="IMDb">
-                              <img src={imdbLogo} alt="IMDb" className="w-4 h-4 rounded-sm object-contain" />
-                            </a>
-                          ) : (
-                            <a href={member.social_links.website.startsWith('http') ? member.social_links.website : `https://${member.social_links.website}`} target="_blank" rel="noopener noreferrer" className="social-link-circle social-link-website w-6 h-6 rounded-full bg-emerald-500/10 flex items-center justify-center hover:bg-emerald-500/30" title="Site Pessoal">
-                              <Globe className="w-3 h-3 text-emerald-500" />
-                            </a>
-                          )
-                        )}
-                        {member.curriculum_url && (
-                          <a href={member.curriculum_url} target="_blank" rel="noopener noreferrer" className="social-link-circle social-link-cv w-6 h-6 rounded-full bg-orange-500/10 flex items-center justify-center hover:bg-orange-500/30" title="Baixar Currículo">
-                            <FileText className="w-3 h-3 text-orange-500" />
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <TranslatedMemberCard key={member.id} member={member} getInitials={getInitials} />
               );
 
               return (
@@ -772,81 +696,14 @@ const ProjectPage = () => {
                   {t.projectDetails.investorRewards}
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {contrapartidas.map((contrapartida) => {
-                    // Format value as Brazilian currency
-                    const formatCurrency = (value: string) => {
-                      const numericValue = value.replace(/[^\d,.-]/g, '').replace(',', '.');
-                      const number = parseFloat(numericValue);
-                      
-                      if (isNaN(number)) {
-                        return value.startsWith('R$') ? value : `R$ ${value}`;
-                      }
-                      
-                      return new Intl.NumberFormat('pt-BR', {
-                        style: 'currency',
-                        currency: 'BRL',
-                        minimumFractionDigits: 0,
-                        maximumFractionDigits: 2,
-                      }).format(number);
-                    };
-
-                    // Map indice to display label
-                    const getIndiceLabel = (indice?: string) => {
-                      const labels: Record<string, string> = {
-                        'por_episodio': 'por episódio',
-                        'por_temporada': 'por temporada',
-                        'por_projeto': 'por projeto',
-                        'por_evento': 'por evento',
-                        'por_mes': 'por mês',
-                        'por_ano': 'por ano',
-                      };
-                      return indice && indice !== 'none' ? labels[indice] : null;
-                    };
-
-                    const indiceLabel = getIndiceLabel(contrapartida.indice);
-
-                    return (
-                      <div 
-                        key={contrapartida.id} 
-                        className="group bg-card border border-border rounded-xl p-6 transition-all duration-300 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1"
-                      >
-                        {/* Nível label */}
-                        <p className="text-sm italic text-muted-foreground mb-1">{t.projectDetails.level}</p>
-                        
-                        {/* Título do nível (se existir) */}
-                        {contrapartida.titulo && (
-                          <p className="text-lg font-semibold text-foreground mb-2">{contrapartida.titulo}</p>
-                        )}
-                        
-                        {/* Value with index */}
-                        <div className="mb-4">
-                          <span className="text-2xl font-bold text-foreground">
-                            {formatCurrency(contrapartida.valor)}
-                          </span>
-                          {indiceLabel && (
-                            <span className="text-lg text-foreground ml-2">
-                              {indiceLabel}
-                            </span>
-                          )}
-                        </div>
-                        
-                        {/* Benefits section */}
-                        <div>
-                          <p className="text-sm font-medium text-foreground border-b border-foreground/30 pb-1 mb-3">
-                            {t.projectDetails.benefits}
-                          </p>
-                          <ul className="space-y-2">
-                            {contrapartida.beneficios.map((beneficio, index) => (
-                              <li key={index} className="flex items-start gap-2">
-                                <Check className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
-                                <span className="text-sm text-muted-foreground leading-relaxed">{beneficio}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      </div>
-                    );
-                  })}
+                  {contrapartidas.map((contrapartida) => (
+                    <TranslatedContrapartidaCard
+                      key={contrapartida.id}
+                      contrapartida={contrapartida}
+                      levelLabel={t.projectDetails.level}
+                      benefitsLabel={t.projectDetails.benefits}
+                    />
+                  ))}
                 </div>
               </section>
             )}
