@@ -546,7 +546,9 @@ const HomePage = () => {
 
   // Auto-tradução dos projetos de exemplo
   const { translated: translatedExampleProjects } = useAutoTranslate('example_projects', exampleProjectsPt);
-  const exampleProjects = language === 'pt' ? exampleProjectsPt : (translatedExampleProjects || exampleProjectsPt);
+  const exampleProjects = language === 'pt' 
+    ? exampleProjectsPt 
+    : (Array.isArray(translatedExampleProjects) ? translatedExampleProjects : exampleProjectsPt);
 
   // Construir lista de projetos combinando reais + exemplos respeitando a ordem global
   const buildDisplayProjects = () => {
