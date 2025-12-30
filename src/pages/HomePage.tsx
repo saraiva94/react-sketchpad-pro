@@ -261,11 +261,19 @@ const HomePage = () => {
     ? servicosContent
     : (isValidServicos(translatedServicos) ? translatedServicos : servicosContent);
 
-  // Preload de traduções quando dados carregarem
+  // Preload de traduções quando dados carregarem (usa o mesmo motor do useAutoTranslate)
   const preloadItems = [
     ...createTranslationItems.forProjectList(featuredProjects),
+
+    // Tradução estruturada (Quem Somos / Nossos Serviços) - mantém compatibilidade
     ...createTranslationItems.forSettings('quem_somos', quemSomosContent),
     ...createTranslationItems.forSettings('nossos_servicos', servicosContent),
+
+    // Tradução por-card dos serviços (para evitar "um a um" lento)
+    ...servicosContent.services.map((s, i) => ({
+      namespace: `service_${i}`,
+      value: s.text,
+    })),
   ];
   usePreloadTranslations(preloadItems, !loadingProjects);
 
@@ -850,22 +858,22 @@ const HomePage = () => {
             </ShinyText>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
-            {servicosContent.services.map((service, index) => {
-              const ServiceIcon = iconMap[service.icon] || Star;
-              return (
-                <TranslatedServiceCard
-                  key={index}
-                  serviceId={`${index}`}
-                  text={service.text}
-                  icon={ServiceIcon}
-                  hoverColor={service.hoverColor}
-                  index={index}
-                  inView={servicosInView}
-                />
-              );
-            })}
-          </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+              {displayServicos.services.map((service, index) => {
+                const ServiceIcon = iconMap[service.icon] || Star;
+                return (
+                  <TranslatedServiceCard
+                    key={index}
+                    serviceId={`${index}`}
+                    text={service.text}
+                    icon={ServiceIcon}
+                    hoverColor={service.hoverColor}
+                    index={index}
+                    inView={servicosInView}
+                  />
+                );
+              })}
+            </div>
         </div>
       </section>
 
