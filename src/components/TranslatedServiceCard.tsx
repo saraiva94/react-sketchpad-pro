@@ -11,6 +11,8 @@ interface TranslatedServiceCardProps {
   hoverColor: string;
   index: number;
   inView: boolean;
+  /** quando true, não tenta traduzir (texto já vem traduzido do pai) */
+  skipTranslation?: boolean;
 }
 
 export function TranslatedServiceCard({
@@ -20,17 +22,18 @@ export function TranslatedServiceCard({
   hoverColor,
   index,
   inView,
+  skipTranslation,
 }: TranslatedServiceCardProps) {
   const { language } = useLanguage();
-  
-  // Traduzir o texto do serviço
+
+  // Traduzir o texto do serviço (opcional)
   const { translated: translatedText, isTranslating } = useAutoTranslate(
     `service_${serviceId}`,
-    text
+    skipTranslation ? null : text
   );
 
-  const displayText = language === "pt" ? text : (translatedText || text);
-  const showSkeleton = language !== "pt" && isTranslating && !translatedText;
+  const displayText = language === "pt" ? text : (skipTranslation ? text : (translatedText || text));
+  const showSkeleton = !skipTranslation && language !== "pt" && isTranslating && !translatedText;
 
   return (
     <Card 
