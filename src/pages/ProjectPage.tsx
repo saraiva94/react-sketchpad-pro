@@ -11,6 +11,7 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { useAutoTranslate } from "@/hooks/useAutoTranslate";
 import { usePreloadTranslations, createTranslationItems } from "@/hooks/usePreloadTranslations";
 import { TranslatedText } from "@/components/TranslatedText";
+import { TranslatedBadge } from "@/components/TranslatedBadge";
 import { getCategoryLabel } from "@/components/admin/CategoriesMultiSelect";
 import { getIncentiveLawLabel } from "@/components/admin/IncentiveLawsMultiSelect";
 import { getStageLabel } from "@/components/admin/StagesMultiSelect";
@@ -734,7 +735,13 @@ const ProjectPage = () => {
                         {displayProject.awards.map((award, index) => (
                           <li key={index}>
                             <div className="block p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors">
-                              <h4 className="font-medium text-foreground">{award}</h4>
+                              <TranslatedText 
+                                namespace={`award_${id}_${index}`}
+                                value={award}
+                                as="h4"
+                                className="font-medium text-foreground"
+                                showSkeleton={false}
+                              />
                             </div>
                           </li>
                         ))}
@@ -757,12 +764,24 @@ const ProjectPage = () => {
                                 rel="noopener noreferrer"
                                 className="block p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
                               >
-                                <h4 className="font-medium text-foreground mb-1">{item.title}</h4>
+                                <TranslatedText 
+                                  namespace={`news_${id}_${index}`}
+                                  value={item.title}
+                                  as="h4"
+                                  className="font-medium text-foreground mb-1"
+                                  showSkeleton={false}
+                                />
                                 {item.date && <p className="text-sm text-muted-foreground">{item.date}</p>}
                               </a>
                             ) : (
                               <div className="block p-3 bg-muted/50 rounded-lg">
-                                <h4 className="font-medium text-foreground mb-1">{item.title}</h4>
+                                <TranslatedText 
+                                  namespace={`news_${id}_${index}`}
+                                  value={item.title}
+                                  as="h4"
+                                  className="font-medium text-foreground mb-1"
+                                  showSkeleton={false}
+                                />
                                 {item.date && <p className="text-sm text-muted-foreground">{item.date}</p>}
                               </div>
                             )}
@@ -795,10 +814,15 @@ const ProjectPage = () => {
                   {displayProject?.stages && displayProject.stages.length > 0 && (
                     <div>
                       <span className="text-sm text-muted-foreground">{t.projectDetails.projectStage}</span>
-                      <div className="font-medium text-foreground">
-                        {[...new Set(displayProject.stages.map(stage => getStageLabel(stage).toLowerCase()))]
-                          .map(label => label.charAt(0).toUpperCase() + label.slice(1))
-                          .join(", ")}
+                      <div className="flex flex-wrap gap-2 mt-1">
+                        {[...new Set(displayProject.stages)].map((stage, index) => (
+                          <TranslatedBadge 
+                            key={index} 
+                            namespace={`stage_${stage}`}
+                            value={getStageLabel(stage)}
+                            variant="outline"
+                          />
+                        ))}
                       </div>
                     </div>
                   )}
@@ -816,9 +840,12 @@ const ProjectPage = () => {
                       <span className="text-sm text-muted-foreground">{t.projectDetails.categoriesLabel}</span>
                       <div className="flex flex-wrap gap-2 mt-1">
                         {displayProject.categorias_tags.map((tag, index) => (
-                          <Badge key={index} variant="secondary" className="rounded-full">
-                            {getCategoryLabel(tag)}
-                          </Badge>
+                          <TranslatedBadge 
+                            key={index} 
+                            namespace={`category_${tag}`}
+                            value={getCategoryLabel(tag)}
+                            variant="secondary"
+                          />
                         ))}
                       </div>
                     </div>
@@ -841,9 +868,12 @@ const ProjectPage = () => {
                   </h3>
                   <div className="flex flex-wrap gap-2">
                     {displayProject.incentive_law_details.split(',').map((law, index) => (
-                      <Badge key={index} variant="secondary" className="rounded-full">
-                        {getIncentiveLawLabel(law.trim())}
-                      </Badge>
+                      <TranslatedBadge 
+                        key={index} 
+                        namespace={`law_${law.trim()}`}
+                        value={getIncentiveLawLabel(law.trim())}
+                        variant="secondary"
+                      />
                     ))}
                   </div>
                 </div>
