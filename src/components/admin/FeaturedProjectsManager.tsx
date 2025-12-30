@@ -24,6 +24,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Star, Trash2, Plus, GripVertical, Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { translationManager } from "@/lib/translationManager";
 import { useToast } from "@/hooks/use-toast";
 
 interface Project {
@@ -357,13 +358,49 @@ export function FeaturedProjectsManager({ projects, onProjectUpdate }: FeaturedP
   const visibleItems = items.filter(item => item.visible);
   const availableProjects = projects.filter(p => p.status === "approved" && !p.featured_on_homepage);
 
+  const warmProjectTranslations = async (projectId: string) => {
+    const { data, error } = await supabase
+      .from("projects")
+      .select("id, title, synopsis, project_type")
+      .eq("id", projectId)
+      .maybeSingle();
+
+    if (error || !data) {
+      throw new Error("Não foi possível carregar o projeto para aquecer traduções.");
+    }
+
+    // Aquece EN/ES por-campo (isso popula o banco/cache e evita que 1 card fique diferente por rate-limit)
+    await translationManager.getTranslation(`project_title_${data.id}`, data.title, "en");
+    await translationManager.getTranslation(`project_synopsis_${data.id}`, data.synopsis, "en");
+    await translationManager.getTranslation(`project_type_${data.id}`, data.project_type, "en");
+    await translationManager.getTranslation(`project_title_${data.id}`, data.title, "es");
+    await translationManager.getTranslation(`project_synopsis_${data.id}`, data.synopsis, "es");
+    await translationManager.getTranslation(`project_type_${data.id}`, data.project_type, "es");
+  };
+
   const handleAddRealProject = async (projectId: string) => {
     try {
       await supabase
         .from("projects")
         .update({ featured_on_homepage: true })
         .eq("id", projectId);
-      
+
+      toast({
+        title: "Preparando traduções",
+        description: "Aquecendo EN/ES para este destaque (pode levar alguns segundos).",
+      });
+
+      try {
+        await warmProjectTranslations(projectId);
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : "Não foi possível aquecer traduções agora.";
+        toast({
+          title: "Tradução pendente",
+          description: msg + " (se houver limite de requisições, tente novamente em instantes).",
+          variant: "destructive",
+        });
+      }
+
       onProjectUpdate();
       toast({
         title: "Projeto adicionado",
