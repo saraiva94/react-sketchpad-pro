@@ -103,17 +103,18 @@ export const createTranslationItems = {
     const items: TranslationItem[] = [];
     const prefix = `project_full_${projectId}`;
 
+    // Manter alinhado com ProjectPage (campos individuais)
     if (project.title) items.push({ namespace: `${prefix}_title`, value: project.title });
     if (project.synopsis) items.push({ namespace: `${prefix}_synopsis`, value: project.synopsis });
-    if (project.description) items.push({ namespace: `${prefix}_desc`, value: project.description });
-    if (project.project_type) items.push({ namespace: `${prefix}_type`, value: project.project_type });
-    if (project.location) items.push({ namespace: `${prefix}_loc`, value: project.location });
-    if (project.impacto_cultural) items.push({ namespace: `${prefix}_cultural`, value: project.impacto_cultural });
-    if (project.impacto_social) items.push({ namespace: `${prefix}_social`, value: project.impacto_social });
-    if (project.publico_alvo) items.push({ namespace: `${prefix}_audience`, value: project.publico_alvo });
-    if (project.diferenciais) items.push({ namespace: `${prefix}_diff`, value: project.diferenciais });
-    if (project.additional_info) items.push({ namespace: `${prefix}_addinfo`, value: project.additional_info });
-    if (project.incentive_law_details) items.push({ namespace: `${prefix}_law`, value: project.incentive_law_details });
+    if (project.description) items.push({ namespace: `${prefix}_description`, value: project.description });
+    if (project.project_type) items.push({ namespace: `project_type`, value: project.project_type });
+    if (project.location) items.push({ namespace: `${prefix}_location`, value: project.location });
+    if (project.impacto_cultural) items.push({ namespace: `${prefix}_impacto_cultural`, value: project.impacto_cultural });
+    if (project.impacto_social) items.push({ namespace: `${prefix}_impacto_social`, value: project.impacto_social });
+    if (project.publico_alvo) items.push({ namespace: `${prefix}_publico_alvo`, value: project.publico_alvo });
+    if (project.diferenciais) items.push({ namespace: `${prefix}_diferenciais`, value: project.diferenciais });
+    if (project.additional_info) items.push({ namespace: `${prefix}_additional_info`, value: project.additional_info });
+    if (project.incentive_law_details) items.push({ namespace: `${prefix}_incentive_law_details`, value: project.incentive_law_details });
 
     if (project.categorias_tags?.length) {
       project.categorias_tags.forEach((tag, i) => {
@@ -148,11 +149,12 @@ export const createTranslationItems = {
     const items: TranslationItem[] = [];
 
     members.forEach((member) => {
+      // namespaces globais (hash diferencia por conteúdo) — alinhado com TranslatedMemberCard
       if (member.funcao) {
-        items.push({ namespace: `member_funcao_${member.id}`, value: member.funcao });
+        items.push({ namespace: `member_funcao`, value: member.funcao });
       }
       if (member.detalhes) {
-        items.push({ namespace: `member_detalhes_${member.id}`, value: member.detalhes });
+        items.push({ namespace: `member_detalhes`, value: member.detalhes });
       }
     });
 
