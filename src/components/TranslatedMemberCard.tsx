@@ -39,13 +39,13 @@ interface TranslatedMemberCardProps {
 export function TranslatedMemberCard({ member, getInitials }: TranslatedMemberCardProps) {
   const { language } = useLanguage();
 
-  // Auto-translate funcao and detalhes
+  // Auto-translate funcao and detalhes - use content-based namespace for global reuse
   const { translated: translatedFuncao } = useAutoTranslate(
-    `member_funcao_${member.id}`,
+    `member_funcao`,
     member.funcao
   );
   const { translated: translatedDetalhes } = useAutoTranslate(
-    `member_detalhes_${member.id}`,
+    `member_detalhes`,
     member.detalhes
   );
 
