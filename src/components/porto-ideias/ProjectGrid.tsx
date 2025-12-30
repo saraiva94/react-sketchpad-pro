@@ -8,7 +8,6 @@ import { useDominantColor } from "@/hooks/useDominantColor";
 import { INCENTIVE_LAWS } from "@/components/admin/IncentiveLawsMultiSelect";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useAutoTranslate } from "@/hooks/useAutoTranslate";
-import { TranslatedText } from "@/components/TranslatedText";
 
 interface Project {
   id: string;
@@ -68,18 +67,22 @@ function ProjectCard({
   const project = item.data;
   const stageInfo = getStageInfo(project.stage);
 
+  // Auto-translate all card fields - works automatically for new projects
   const { translated: translatedTitle, isTranslating: isTranslatingTitle } = useAutoTranslate(`grid_title_${project.id}`, project.title);
   const { translated: translatedSynopsis, isTranslating: isTranslatingSynopsis } = useAutoTranslate(`grid_synopsis_${project.id}`, project.synopsis);
   const { translated: translatedType, isTranslating: isTranslatingType } = useAutoTranslate(`grid_type_${project.id}`, project.project_type);
+  const { translated: translatedLocation, isTranslating: isTranslatingLocation } = useAutoTranslate(`grid_loc_${project.id}`, project.location);
 
   const displayTitle = language === "pt" ? project.title : (translatedTitle || project.title);
   const displaySynopsis = language === "pt" ? project.synopsis : (translatedSynopsis || project.synopsis);
   const displayType = language === "pt" ? project.project_type : (translatedType || project.project_type);
+  const displayLocation = language === "pt" ? project.location : (translatedLocation || project.location);
 
   // Show skeleton only during first translation (no cache)
   const showTitleSkeleton = language !== 'pt' && isTranslatingTitle && !translatedTitle;
   const showSynopsisSkeleton = language !== 'pt' && isTranslatingSynopsis && !translatedSynopsis;
   const showTypeSkeleton = language !== 'pt' && isTranslatingType && !translatedType;
+  const showLocationSkeleton = language !== 'pt' && isTranslatingLocation && !translatedLocation;
 
   // Incentive law label is stored in PT; translate when needed
   const matchedLaw = (() => {
@@ -182,10 +185,14 @@ function ProjectCard({
           {/* Meta info */}
           <div className="flex flex-wrap gap-2 mb-4">
             {project.location && (
-              <Badge variant="outline" className="text-xs flex items-center gap-1">
-                <MapPin className="w-3 h-3" />
-                <TranslatedText namespace={`grid_loc_${project.id}`} value={project.location} />
-              </Badge>
+              showLocationSkeleton ? (
+                <Skeleton className="h-5 w-24 rounded-full" />
+              ) : (
+                <Badge variant="outline" className="text-xs flex items-center gap-1">
+                  <MapPin className="w-3 h-3" />
+                  {displayLocation}
+                </Badge>
+              )
             )}
             {project.stage && (
               <Badge variant="outline" className={`text-xs ${stageInfo.color}`}>
