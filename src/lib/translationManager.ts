@@ -14,11 +14,11 @@ interface TranslationConfig {
 }
 
 const DEFAULT_CONFIG: TranslationConfig = {
-  // Config mais conservadora para evitar 429 quando muitas traduções disparam ao mesmo tempo
-  maxRetries: 5,
-  retryDelay: 2500,
-  batchSize: 1,
-  batchDelay: 2500,
+  // Config balanceada: evita 429 mas ainda permite progresso razoável
+  maxRetries: 4,
+  retryDelay: 1500,
+  batchSize: 2,
+  batchDelay: 800,
 };
 
 interface QueueItem {

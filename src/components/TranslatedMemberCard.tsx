@@ -53,8 +53,8 @@ export function TranslatedMemberCard({ member, getInitials }: TranslatedMemberCa
   const displayDetalhes = language === "pt" ? member.detalhes : (translatedDetalhes || member.detalhes);
 
   return (
-    <div className="group relative overflow-visible card-solid p-5 bg-card rounded-xl border border-border rainbow-card-glow">
-      <div className="flex items-start space-x-4">
+    <div className="group relative overflow-visible card-solid p-6 bg-card rounded-xl border border-border rainbow-card-glow">
+      <div className="flex items-start gap-4">
         {/* Foto */}
         {member.photo_url ? (
           <img 
@@ -70,14 +70,14 @@ export function TranslatedMemberCard({ member, getInitials }: TranslatedMemberCa
           </div>
         )}
         <div className="min-w-0 flex-1">
-          <h4 className="font-semibold text-foreground text-base">{member.nome}</h4>
+          <h4 className="font-semibold text-foreground text-lg leading-tight tracking-normal antialiased">{member.nome}</h4>
           {displayFuncao && (
-            <p className="text-sm text-muted-foreground">{displayFuncao}</p>
+            <p className="text-sm text-primary/80 font-medium mt-0.5 antialiased">{displayFuncao}</p>
           )}
           
           {/* Detalhes */}
           {displayDetalhes && (
-            <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">{displayDetalhes}</p>
+            <p className="text-sm text-muted-foreground mt-2 leading-relaxed antialiased">{displayDetalhes}</p>
           )}
           
           {/* Social Links e CV */}

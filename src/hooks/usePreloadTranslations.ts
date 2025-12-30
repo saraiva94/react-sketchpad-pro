@@ -42,9 +42,9 @@ export function usePreloadTranslations(
     let cancelled = false;
 
     const run = async () => {
-      // Batching simples para reduzir risco de rate-limit
-      const BATCH_SIZE = 2;
-      const BATCH_DELAY_MS = 900;
+      // Batching alinhado com translationManager para progresso mais rápido
+      const BATCH_SIZE = 3;
+      const BATCH_DELAY_MS = 600;
 
       for (let i = 0; i < validItems.length; i += BATCH_SIZE) {
         if (cancelled) return;
