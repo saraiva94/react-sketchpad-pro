@@ -83,23 +83,109 @@ async function translateWithGateway(value: any, targetLanguage: Exclude<Language
   // 2) a wrapper object: { targetLanguage, json: "..." }
   // In case (2), we must parse the `json` field to get the real translated value.
   const parseModelJson = (raw: string): any => {
+    const input = raw.trim();
+
+    // Parse ONLY the first JSON value from a string that may contain trailing text.
+    const extractFirstJsonValue = (s: string): string => {
+      const t = s.trimStart();
+      if (!t) throw new Error("Empty model response");
+
+      const start = s.indexOf(t[0]);
+      const first = t[0];
+
+      // JSON string
+      if (first === '"') {
+        let i = start + 1;
+        let escaped = false;
+        while (i < s.length) {
+          const ch = s[i];
+          if (escaped) {
+            escaped = false;
+          } else if (ch === "\\") {
+            escaped = true;
+          } else if (ch === '"') {
+            return s.slice(start, i + 1);
+          }
+          i++;
+        }
+        throw new Error("Unterminated JSON string");
+      }
+
+      // JSON object/array
+      if (first === "{" || first === "[") {
+        const stack: string[] = [first];
+        let i = start + 1;
+        let inString = false;
+        let escaped = false;
+
+        while (i < s.length) {
+          const ch = s[i];
+
+          if (inString) {
+            if (escaped) {
+              escaped = false;
+            } else if (ch === "\\") {
+              escaped = true;
+            } else if (ch === '"') {
+              inString = false;
+            }
+            i++;
+            continue;
+          }
+
+          if (ch === '"') {
+            inString = true;
+            i++;
+            continue;
+          }
+
+          if (ch === "{" || ch === "[") {
+            stack.push(ch);
+          } else if (ch === "}" || ch === "]") {
+            const open = stack.pop();
+            const ok =
+              (open === "{" && ch === "}") ||
+              (open === "[" && ch === "]");
+            if (!ok) throw new Error("Mismatched JSON brackets");
+            if (stack.length === 0) {
+              return s.slice(start, i + 1);
+            }
+          }
+
+          i++;
+        }
+
+        throw new Error("Unterminated JSON object/array");
+      }
+
+      // JSON primitives: number | true | false | null
+      // Take until first whitespace (good enough for our gateway responses)
+      const end = start + t.search(/\s/) ;
+      if (end > start) return s.slice(start, end);
+      return s.slice(start);
+    };
+
     try {
-      return JSON.parse(raw);
+      return JSON.parse(input);
     } catch {
-      // Sometimes models wrap JSON; attempt a safe extraction.
-      const firstObj = raw.indexOf("{");
-      const lastObj = raw.lastIndexOf("}");
-      if (firstObj !== -1 && lastObj !== -1 && lastObj > firstObj) {
-        return JSON.parse(raw.slice(firstObj, lastObj + 1));
-      }
+      try {
+        return JSON.parse(extractFirstJsonValue(raw));
+      } catch {
+        // Sometimes models wrap JSON; attempt a safe extraction.
+        const firstObj = raw.indexOf("{");
+        const lastObj = raw.lastIndexOf("}");
+        if (firstObj !== -1 && lastObj !== -1 && lastObj > firstObj) {
+          return JSON.parse(raw.slice(firstObj, lastObj + 1));
+        }
 
-      const firstArr = raw.indexOf("[");
-      const lastArr = raw.lastIndexOf("]");
-      if (firstArr !== -1 && lastArr !== -1 && lastArr > firstArr) {
-        return JSON.parse(raw.slice(firstArr, lastArr + 1));
-      }
+        const firstArr = raw.indexOf("[");
+        const lastArr = raw.lastIndexOf("]");
+        if (firstArr !== -1 && lastArr !== -1 && lastArr > firstArr) {
+          return JSON.parse(raw.slice(firstArr, lastArr + 1));
+        }
 
-      throw new Error("Could not parse JSON from model");
+        throw new Error("Could not parse JSON from model");
+      }
     }
   };
 
