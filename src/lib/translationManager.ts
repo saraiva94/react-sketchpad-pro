@@ -353,6 +353,31 @@ export class TranslationManager {
     keysToRemove.forEach((key) => localStorage.removeItem(key));
     console.log("[i18n] Cache limpo!");
   }
+
+  /**
+   * Limpa cache apenas para um idioma específico
+   */
+  clearCacheForLanguage(lang: string): void {
+    const keysToRemove: string[] = [];
+    
+    // Limpar memória
+    for (const key of this.memoryCache.keys()) {
+      if (key.includes(`:${lang}:`)) {
+        this.memoryCache.delete(key);
+      }
+    }
+
+    // Limpar localStorage
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key?.startsWith("i18n:v3:") && key.includes(`:${lang}:`)) {
+        keysToRemove.push(key);
+      }
+    }
+
+    keysToRemove.forEach((key) => localStorage.removeItem(key));
+    console.log(`[i18n] Cache limpo para idioma: ${lang}`);
+  }
 }
 
 export const translationManager = new TranslationManager();
