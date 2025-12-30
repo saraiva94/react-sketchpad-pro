@@ -14,7 +14,9 @@ export function useAutoTranslate<T = unknown>(
   isTranslating: boolean;
 } {
   const { language } = useLanguage();
-  const [translated, setTranslated] = useState<T | null | undefined>(value);
+  // Importante: não inicializar com o valor original quando o idioma não é PT,
+  // senão os componentes nunca entram em estado "pending" (skeleton) e parecem "não traduzir".
+  const [translated, setTranslated] = useState<T | null | undefined>(undefined);
   const [isTranslating, setIsTranslating] = useState(false);
   const [retryTick, setRetryTick] = useState(0);
   const retryTimeoutRef = useRef<number | null>(null);
@@ -72,6 +74,8 @@ export function useAutoTranslate<T = unknown>(
     const loadTranslation = async () => {
       if (!mountedRef.current) return;
 
+      // Marca como "pendente" para permitir skeleton enquanto busca tradução.
+      setTranslated(undefined);
       setIsTranslating(true);
 
       try {
@@ -112,9 +116,8 @@ export function useAutoTranslate<T = unknown>(
     };
   }, [namespace, value, language, getValueKey, retryTick]);
 
-  // Sempre retorna um valor válido (nunca null quando value existe)
   return {
-    translated: translated ?? value,
+    translated,
     isTranslating,
   };
 }
