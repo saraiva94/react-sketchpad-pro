@@ -40,9 +40,11 @@ export function TranslatedProjectCard({
 
   // Auto-translate title, synopsis, and project_type when not PT (mantém ordem de hooks estável)
   const shouldTranslate = language !== "pt" && !skipTranslation;
-  const titleValue = shouldTranslate ? project.title : null;
-  const synopsisValue = shouldTranslate ? project.synopsis : null;
-  const typeValue = shouldTranslate ? project.project_type : null;
+
+  // Se já recebemos alguma parte traduzida do pai, evitamos refazer chamadas para aquele campo
+  const titleValue = shouldTranslate && !translatedProject?.title ? project.title : null;
+  const synopsisValue = shouldTranslate && !translatedProject?.synopsis ? project.synopsis : null;
+  const typeValue = shouldTranslate && !translatedProject?.project_type ? project.project_type : null;
 
   const { translated: translatedTitle, isTranslating: isTranslatingTitle } = useAutoTranslate(
     `project_title_${project.id}`,
@@ -65,9 +67,9 @@ export function TranslatedProjectCard({
     language === "pt" ? project.project_type : (translatedProject?.project_type ?? translatedType ?? project.project_type);
 
   // Skeleton apenas quando estamos efetivamente traduzindo
-  const showTitleSkeleton = shouldTranslate && isTranslatingTitle && !translatedTitle && !translatedProject?.title;
-  const showSynopsisSkeleton = shouldTranslate && isTranslatingSynopsis && !translatedSynopsis && !translatedProject?.synopsis;
-  const showTypeSkeleton = shouldTranslate && isTranslatingType && !translatedType && !translatedProject?.project_type;
+  const showTitleSkeleton = shouldTranslate && !!titleValue && isTranslatingTitle && !translatedTitle;
+  const showSynopsisSkeleton = shouldTranslate && !!synopsisValue && isTranslatingSynopsis && !translatedSynopsis;
+  const showTypeSkeleton = shouldTranslate && !!typeValue && isTranslatingType && !translatedType;
 
   const getInitials = (name: string | null): string => {
     if (!name) return "PC";
