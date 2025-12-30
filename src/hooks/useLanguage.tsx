@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { translations, Language, Translations } from '@/lib/i18n';
 
-
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
@@ -34,7 +33,6 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     setLanguageState(lang);
     localStorage.setItem(STORAGE_KEY, lang);
   }, []);
-
 
   useEffect(() => {
     document.documentElement.lang = language;
