@@ -193,14 +193,21 @@ export const createTranslationItems = {
       title?: string | null;
       synopsis?: string | null;
       project_type?: string | null;
-    }>
+      location?: string | null;
+      categorias_tags?: string[] | null;
+    }>,
+    namespacePrefix: string = "project"
   ): TranslationItem[] => {
     const items: TranslationItem[] = [];
 
     projects.forEach((project) => {
-      if (project.title) items.push({ namespace: `project_title_${project.id}`, value: project.title });
-      if (project.synopsis) items.push({ namespace: `project_synopsis_${project.id}`, value: project.synopsis });
-      if (project.project_type) items.push({ namespace: `project_type_${project.id}`, value: project.project_type });
+      if (project.title) items.push({ namespace: `${namespacePrefix}_title_${project.id}`, value: project.title });
+      if (project.synopsis) items.push({ namespace: `${namespacePrefix}_synopsis_${project.id}`, value: project.synopsis });
+      if (project.project_type) items.push({ namespace: `${namespacePrefix}_type_${project.id}`, value: project.project_type });
+      if (project.location) items.push({ namespace: `${namespacePrefix}_loc_${project.id}`, value: project.location });
+      // Traduzir a primeira categoria/tag também
+      const firstCat = project.categorias_tags?.[0] || project.project_type;
+      if (firstCat) items.push({ namespace: `${namespacePrefix}_badge_cat_${project.id}`, value: firstCat });
     });
 
     return items;
