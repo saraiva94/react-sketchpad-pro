@@ -17,6 +17,7 @@ export function useAutoTranslate<T = unknown>(
   const [translated, setTranslated] = useState<T | null | undefined>(value);
   const [isTranslating, setIsTranslating] = useState(false);
   const [retryTick, setRetryTick] = useState(0);
+  const retryTimeoutRef = useRef<number | null>(null);
   const mountedRef = useRef(true);
   const lastValueRef = useRef<string>("");
   const lastLangRef = useRef<string>(language);
@@ -31,6 +32,10 @@ export function useAutoTranslate<T = unknown>(
     mountedRef.current = true;
     return () => {
       mountedRef.current = false;
+      if (retryTimeoutRef.current) {
+        window.clearTimeout(retryTimeoutRef.current);
+        retryTimeoutRef.current = null;
+      }
     };
   }, []);
 
@@ -78,7 +83,8 @@ export function useAutoTranslate<T = unknown>(
         // Se foi rate limit, agendar retry automático (sem exigir interação do usuário)
         if (msg.includes("rate_limited") || msg.includes("rate limit") || msg.includes("429")) {
           const retryDelayMs = 2500;
-          window.setTimeout(() => {
+          if (retryTimeoutRef.current) window.clearTimeout(retryTimeoutRef.current);
+          retryTimeoutRef.current = window.setTimeout(() => {
             if (!mountedRef.current) return;
             setRetryTick((t) => t + 1);
           }, retryDelayMs);

@@ -265,12 +265,7 @@ const HomePage = () => {
     ? servicosContent
     : (isValidServicos(translatedServicos) ? translatedServicos : servicosContent);
 
-  // Preload de traduções quando dados carregarem (prioriza conteúdos de seção para UX)
-  const preloadItems = [
-    ...createTranslationItems.forSettings('quem_somos', quemSomosContent),
-    ...createTranslationItems.forSettings('nossos_servicos', servicosContent),
-  ];
-  usePreloadTranslations(preloadItems, !loadingProjects);
+
 
   useEffect(() => {
     fetchFeaturedProjects();
@@ -665,6 +660,14 @@ const HomePage = () => {
     translatedFeaturedCards.forEach((c) => featuredCardsMap.set(c.id, c));
   }
 
+  // Preload de traduções quando dados carregarem (inclui cards de destaque em lote)
+  const preloadItems = [
+    ...createTranslationItems.forSettings('quem_somos', quemSomosContent),
+    ...createTranslationItems.forSettings('nossos_servicos', servicosContent),
+    { namespace: 'homepage_featured_cards', value: featuredCardsPayload },
+  ];
+  usePreloadTranslations(preloadItems, !loadingProjects);
+
   // Intersection observers for animations - each section only animates when entering viewport
   const { ref: heroRef, isInView: heroInView } = useInView<HTMLElement>({ threshold: 0.1 });
   const { ref: quemSomosRef, isInView: quemSomosInView } = useInView<HTMLElement>({ threshold: 0.1, rootMargin: '-50px 0px' });
@@ -863,7 +866,7 @@ const HomePage = () => {
                       image_url: project.image_url,
                     }}
                     translatedProject={translatedCard}
-                    skipTranslation={language !== 'pt' && !!translatedCard}
+                    skipTranslation={language !== 'pt'}
                     linkUrl={linkUrl}
                     isLeftCard={isLeftCard}
                     heroReady={heroReady}
