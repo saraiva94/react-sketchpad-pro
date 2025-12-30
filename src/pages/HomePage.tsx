@@ -866,7 +866,7 @@ const HomePage = () => {
                       image_url: project.image_url,
                     }}
                     translatedProject={translatedCard}
-                    skipTranslation={language !== 'pt'}
+                    skipTranslation={!!translatedCard}
                     linkUrl={linkUrl}
                     isLeftCard={isLeftCard}
                     heroReady={heroReady}
