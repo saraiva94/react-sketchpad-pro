@@ -98,8 +98,8 @@ export function WavesBackground() {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 w-full h-full pointer-events-none"
-      style={{ opacity: 1, zIndex: 0 }}
+      className="fixed inset-0 w-full h-full pointer-events-none -z-10"
+      style={{ opacity: 1 }}
     />
   );
 }
