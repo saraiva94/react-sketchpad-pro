@@ -11,12 +11,10 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 
 const STORAGE_KEY = 'preferred-language';
 
-const detectBrowserLanguage = (): Language => {
-  const browserLang = navigator.language.split('-')[0];
-  if (browserLang === 'pt') return 'pt';
-  if (browserLang === 'es') return 'es';
-  if (browserLang === 'en') return 'en';
-  return 'pt'; // default
+// O idioma padrão é SEMPRE português.
+// Usuários podem escolher inglês ou espanhol manualmente.
+const getDefaultLanguage = (): Language => {
+  return 'pt';
 };
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
@@ -25,7 +23,7 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     if (stored && (stored === 'pt' || stored === 'en' || stored === 'es')) {
       return stored as Language;
     }
-    return detectBrowserLanguage();
+    return getDefaultLanguage();
   });
 
   const setLanguage = useCallback((lang: Language) => {
