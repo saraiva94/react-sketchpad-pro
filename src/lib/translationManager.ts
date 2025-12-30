@@ -14,10 +14,10 @@ interface TranslationConfig {
 }
 
 const DEFAULT_CONFIG: TranslationConfig = {
-  maxRetries: 3,
-  retryDelay: 1000,
-  batchSize: 3,
-  batchDelay: 500,
+  maxRetries: 4,
+  retryDelay: 2000,
+  batchSize: 2,
+  batchDelay: 1500,
 };
 
 interface QueueItem {
@@ -278,6 +278,11 @@ export class TranslationManager {
 
       if (error) throw error;
 
+      // Verificar se o gateway retornou erro no body (rate limit, etc)
+      if ((data as any)?.error) {
+        throw new Error((data as any).error);
+      }
+
       // A edge function retorna { value: traduzido }
       const raw = (data as any)?.value ?? value;
       const translated = this.normalizeTranslated(value, raw);
@@ -314,12 +319,16 @@ export class TranslationManager {
       resolve(translated);
     } catch (error: unknown) {
       const err = error as { status?: number; message?: string };
+      const errorMsg = err.message || String(error);
 
       // Rate limit (429) ou erro de rede - retry com backoff
-      if (
-        (err.status === 429 || err.message?.includes("429")) &&
-        retryCount < this.config.maxRetries
-      ) {
+      const isRateLimit = 
+        err.status === 429 || 
+        errorMsg.includes("429") || 
+        errorMsg.includes("rate_limited") ||
+        errorMsg.includes("rate limit");
+
+      if (isRateLimit && retryCount < this.config.maxRetries) {
         const delay = this.config.retryDelay * Math.pow(2, retryCount);
         console.warn(
           `[i18n] Rate limited! Retry em ${delay}ms (tentativa ${retryCount + 2}/${this.config.maxRetries + 1})`
