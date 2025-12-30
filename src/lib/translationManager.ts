@@ -184,34 +184,51 @@ export class TranslationManager {
     }
 
 
-    // 3. Banco de dados
+    // 3. Banco de dados - busca primeiro por hash, depois por namespace apenas
     try {
-      const { data: dbTranslation } = await supabase
+      // Primeira tentativa: busca por hash
+      let dbTranslation = await supabase
         .from("translations")
-        .select("translated_value")
+        .select("translated_value, source_value")
         .eq("namespace", namespace)
         .eq("target_language", targetLang)
         .eq("source_hash", hash)
         .maybeSingle();
 
-      if (dbTranslation) {
-        const normalized = this.normalizeTranslated(
-          value,
-          (dbTranslation as any).translated_value
-        );
+      // Segunda tentativa: busca apenas por namespace (para traduções com hash diferente)
+      if (!dbTranslation.data) {
+        dbTranslation = await supabase
+          .from("translations")
+          .select("translated_value, source_value")
+          .eq("namespace", namespace)
+          .eq("target_language", targetLang)
+          .maybeSingle();
+      }
 
-        // Se estiver poluído (tradução == original), tratar como cache miss
-        if (!this.isSameValue(value, normalized)) {
-          this.memoryCache.set(cacheKey, normalized);
+      if (dbTranslation.data) {
+        // Verificar se o source_value bate (para evitar usar tradução de texto diferente)
+        const dbSourceValue = (dbTranslation.data as any).source_value;
+        const sourceMatches = this.isSameValue(value, dbSourceValue);
+        
+        if (sourceMatches) {
+          const normalized = this.normalizeTranslated(
+            value,
+            (dbTranslation.data as any).translated_value
+          );
 
-          try {
-            localStorage.setItem(cacheKey, JSON.stringify(normalized));
-          } catch (err) {
-            console.warn("[i18n] localStorage write error:", err);
+          // Se estiver poluído (tradução == original), tratar como cache miss
+          if (!this.isSameValue(value, normalized)) {
+            this.memoryCache.set(cacheKey, normalized);
+
+            try {
+              localStorage.setItem(cacheKey, JSON.stringify(normalized));
+            } catch (err) {
+              console.warn("[i18n] localStorage write error:", err);
+            }
+
+            console.log("[i18n] Cache hit (banco):", namespace);
+            return normalized;
           }
-
-          console.log("[i18n] Cache hit (banco):", namespace);
-          return normalized;
         }
       }
     } catch (err) {
