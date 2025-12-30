@@ -44,19 +44,28 @@ export function useAutoTranslate<T = unknown>(
     if (language === "pt" || value === null || value === undefined) {
       setTranslated(value);
       setIsTranslating(false);
+      lastLangRef.current = language;
       return;
     }
 
     const valueKey = getValueKey(value);
+    const languageChanged = language !== lastLangRef.current;
+    const valueChanged = valueKey !== lastValueRef.current;
+    const isRetry = retryTick > 0;
 
-    // Se nada mudou (e não é uma tentativa de retry), não faz nada
-    if (valueKey === lastValueRef.current && language === lastLangRef.current && retryTick === 0) {
+    // Sempre atualiza refs imediatamente
+    lastValueRef.current = valueKey;
+    lastLangRef.current = language;
+
+    // Se nada mudou e não é retry, não refaz a tradução
+    if (!languageChanged && !valueChanged && !isRetry) {
       return;
     }
 
-    // Atualiza refs sempre que rodar de fato
-    lastValueRef.current = valueKey;
-    lastLangRef.current = language;
+    // Reset retryTick após usar
+    if (isRetry) {
+      setRetryTick(0);
+    }
 
     let cancelled = false;
 
@@ -80,7 +89,7 @@ export function useAutoTranslate<T = unknown>(
           setTranslated(value);
         }
 
-        // Se foi rate limit, agendar retry automático (sem exigir interação do usuário)
+        // Se foi rate limit, agendar retry automático
         if (msg.includes("rate_limited") || msg.includes("rate limit") || msg.includes("429")) {
           const retryDelayMs = 2500;
           if (retryTimeoutRef.current) window.clearTimeout(retryTimeoutRef.current);
@@ -101,7 +110,6 @@ export function useAutoTranslate<T = unknown>(
     return () => {
       cancelled = true;
     };
-    // retryTick força nova tentativa quando houve rate-limit
   }, [namespace, value, language, getValueKey, retryTick]);
 
   // Sempre retorna um valor válido (nunca null quando value existe)
