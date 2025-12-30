@@ -75,8 +75,8 @@ const ProjectsPortfolioPage = () => {
     setLoading(false);
   };
 
-  // Preload de traduções quando dados carregarem
-  const preloadItems = createTranslationItems.forProjectList(projects);
+  // Preload de traduções usando o prefixo "portfolio" que corresponde aos TranslatedText abaixo
+  const preloadItems = createTranslationItems.forProjectList(projects, "portfolio");
   usePreloadTranslations(preloadItems, !loading);
 
   const categories = [...new Set(projects.flatMap((p) => p.categorias_tags || [p.project_type]))];
