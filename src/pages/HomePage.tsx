@@ -655,9 +655,33 @@ const HomePage = () => {
     );
   };
 
-  const featuredCardsMap = new Map<string, FeaturedCardPayload>();
+  // Evita “travamento” quando a tradução em lote volta parcialmente em PT.
+  // Ex.: se só o synopsis não traduziu, passamos apenas os campos realmente traduzidos
+  // e deixamos o card completar o resto com tradução por-campo.
+  const isSameText = (a: string, b: string) => a.trim() === b.trim();
+  const originalsById = new Map(featuredCardsPayload.map((p) => [p.id, p] as const));
+
+  const featuredCardsMap = new Map<
+    string,
+    { partial: Partial<Pick<FeaturedCardPayload, "title" | "synopsis" | "project_type">>; complete: boolean }
+  >();
+
   if (language !== "pt" && isValidFeaturedCards(translatedFeaturedCards)) {
-    translatedFeaturedCards.forEach((c) => featuredCardsMap.set(c.id, c));
+    translatedFeaturedCards.forEach((c) => {
+      const original = originalsById.get(c.id);
+      if (!original) return;
+
+      const partial: Partial<Pick<FeaturedCardPayload, "title" | "synopsis" | "project_type">> = {};
+
+      if (!isSameText(c.title, original.title)) partial.title = c.title;
+      if (!isSameText(c.synopsis, original.synopsis)) partial.synopsis = c.synopsis;
+      if (!isSameText(c.project_type, original.project_type)) partial.project_type = c.project_type;
+
+      const complete = !!partial.title && !!partial.synopsis && !!partial.project_type;
+      if (Object.keys(partial).length > 0) {
+        featuredCardsMap.set(c.id, { partial, complete });
+      }
+    });
   }
 
   // Preload de traduções quando dados carregarem (inclui cards de destaque em lote)
@@ -853,7 +877,9 @@ const HomePage = () => {
                 const linkUrl = isExample ? (project as typeof exampleProjects[0]).link : `/project/${project.id}`;
                 const isLeftCard = index % 2 === 0;
 
-                const translatedCard = featuredCardsMap.get(project.id);
+                const translatedEntry = featuredCardsMap.get(project.id);
+                const translatedCard = translatedEntry?.partial;
+                const canSkipTranslation = translatedEntry?.complete === true;
 
                 return (
                   <TranslatedProjectCard
@@ -866,7 +892,7 @@ const HomePage = () => {
                       image_url: project.image_url,
                     }}
                     translatedProject={translatedCard}
-                    skipTranslation={!!translatedCard}
+                    skipTranslation={canSkipTranslation}
                     linkUrl={linkUrl}
                     isLeftCard={isLeftCard}
                     heroReady={heroReady}
