@@ -131,12 +131,58 @@ const ProjectPage = () => {
   const [showContactPopup, setShowContactPopup] = useState(false);
   const [contrapartidas, setContrapartidas] = useState<Contrapartida[]>([]);
 
-  // Auto-tradução do conteúdo do projeto (strings do banco estão em PT)
-  const { translated: translatedProject } = useAutoTranslate(
-    `project_full_${id ?? "unknown"}`,
-    project
+  // Auto-tradução de campos individuais do projeto (strings do banco estão em PT)
+  // Traduzir campos individuais ao invés do objeto completo para melhor cache e reuso
+  const { translated: translatedTitle } = useAutoTranslate(
+    `project_full_${id ?? "unknown"}_title`,
+    project?.title
   );
-  const displayProject = language === "pt" ? project : (translatedProject || project);
+  const { translated: translatedSynopsis } = useAutoTranslate(
+    `project_full_${id ?? "unknown"}_synopsis`,
+    project?.synopsis
+  );
+  const { translated: translatedDescription } = useAutoTranslate(
+    `project_full_${id ?? "unknown"}_description`,
+    project?.description
+  );
+  const { translated: translatedProjectType } = useAutoTranslate(
+    `project_type`,
+    project?.project_type
+  );
+  const { translated: translatedImpactoCultural } = useAutoTranslate(
+    `project_full_${id ?? "unknown"}_impacto_cultural`,
+    project?.impacto_cultural
+  );
+  const { translated: translatedImpactoSocial } = useAutoTranslate(
+    `project_full_${id ?? "unknown"}_impacto_social`,
+    project?.impacto_social
+  );
+  const { translated: translatedPublicoAlvo } = useAutoTranslate(
+    `project_full_${id ?? "unknown"}_publico_alvo`,
+    project?.publico_alvo
+  );
+  const { translated: translatedDiferenciais } = useAutoTranslate(
+    `project_full_${id ?? "unknown"}_diferenciais`,
+    project?.diferenciais
+  );
+  const { translated: translatedAdditionalInfo } = useAutoTranslate(
+    `project_full_${id ?? "unknown"}_additional_info`,
+    project?.additional_info
+  );
+
+  // Construir displayProject com campos traduzidos individualmente
+  const displayProject = project ? {
+    ...project,
+    title: language === "pt" ? project.title : (translatedTitle || project.title),
+    synopsis: language === "pt" ? project.synopsis : (translatedSynopsis || project.synopsis),
+    description: language === "pt" ? project.description : (translatedDescription || project.description),
+    project_type: language === "pt" ? project.project_type : (translatedProjectType || project.project_type),
+    impacto_cultural: language === "pt" ? project.impacto_cultural : (translatedImpactoCultural || project.impacto_cultural),
+    impacto_social: language === "pt" ? project.impacto_social : (translatedImpactoSocial || project.impacto_social),
+    publico_alvo: language === "pt" ? project.publico_alvo : (translatedPublicoAlvo || project.publico_alvo),
+    diferenciais: language === "pt" ? project.diferenciais : (translatedDiferenciais || project.diferenciais),
+    additional_info: language === "pt" ? project.additional_info : (translatedAdditionalInfo || project.additional_info),
+  } : null;
 
   // Preload de traduções quando dados carregarem
   const preloadItems = [
