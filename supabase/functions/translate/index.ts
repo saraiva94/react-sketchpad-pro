@@ -103,16 +103,30 @@ async function translateWithGateway(value: any, targetLanguage: Exclude<Language
     }
   };
 
-  const parsed = parseModelJson(content);
+  let parsed = parseModelJson(content);
 
-  // Unwrap wrapper responses
+  // Unwrap wrapper responses { targetLanguage: ..., json: "..." }
   if (
     parsed &&
     typeof parsed === "object" &&
     !Array.isArray(parsed) &&
     typeof (parsed as any).json === "string"
   ) {
-    return parseModelJson((parsed as any).json);
+    try {
+      parsed = parseModelJson((parsed as any).json);
+    } catch {
+      // Se falhar, usar o json diretamente
+      parsed = (parsed as any).json;
+    }
+  }
+
+  // Se for string com aspas escapadas, fazer parse novamente
+  if (typeof parsed === "string" && parsed.startsWith('"') && parsed.endsWith('"')) {
+    try {
+      parsed = JSON.parse(parsed);
+    } catch {
+      // Manter como está
+    }
   }
 
   return parsed;

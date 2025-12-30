@@ -57,21 +57,48 @@ export class TranslationManager {
   }
 
   /**
-   * Normaliza respostas antigas/erradas (ex: { value: "..." }) e valida tipo,
-   * evitando crashes do React ao tentar renderizar objetos.
+   * Normaliza respostas antigas/erradas e extrai valor traduzido.
+   * Trata formatos como:
+   * - { value: "..." }
+   * - { json: "\"...\"" }
+   * - { value: { json: "\"...\"" } }
    */
   private normalizeTranslated<T>(original: T, candidate: unknown): T {
     let next: any = candidate;
 
-    // Unwrap de respostas antigas que salvaram { value: ... }
+    // Unwrap de respostas com { value: ... }
     if (
       next &&
       typeof next === "object" &&
       !Array.isArray(next) &&
       (next as any).value !== undefined &&
-      Object.keys(next as any).length === 1
+      Object.keys(next as any).length <= 2
     ) {
       next = (next as any).value;
+    }
+
+    // Unwrap de respostas com { json: "\"...\"" } (formato da AI gateway)
+    if (
+      next &&
+      typeof next === "object" &&
+      !Array.isArray(next) &&
+      typeof (next as any).json === "string"
+    ) {
+      try {
+        next = JSON.parse((next as any).json);
+      } catch {
+        // Se não conseguir parsear, usar o json como string
+        next = (next as any).json;
+      }
+    }
+
+    // Se ainda for string com aspas extras, remover
+    if (typeof next === "string" && next.startsWith('"') && next.endsWith('"')) {
+      try {
+        next = JSON.parse(next);
+      } catch {
+        // Manter como está
+      }
     }
 
     // Validação por tipo do valor original
