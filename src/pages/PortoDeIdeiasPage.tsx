@@ -9,7 +9,7 @@ import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
 import { LazyArtisticBackground } from "@/components/LazyArtisticBackground";
 import { ProjectGrid } from "@/components/porto-ideias/ProjectGrid";
-import { TranslatedSelectItem } from "@/components/TranslatedSelectItem";
+import { TranslatedSelect } from "@/components/TranslatedSelect";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchProjectLocations } from "@/components/admin/DynamicLocationSelect";
 import { useInView } from "@/hooks/useInView";
@@ -18,12 +18,8 @@ import { useAutoTranslate } from "@/hooks/useAutoTranslate";
 import { usePreloadTranslations, createTranslationItems } from "@/hooks/usePreloadTranslations";
 import { 
   Search,
-  MapPin,
-  ArrowRight,
   X,
-  Shield,
   SlidersHorizontal,
-  Anchor,
   Compass
 } from "lucide-react";
 
@@ -420,16 +416,15 @@ const PortoDeIdeiasPage = () => {
         </div>
 
         {/* Project Type */}
-        <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-          <SelectTrigger className={`rounded-full ${isMobile ? 'w-full' : 'w-fit'}`}>
-            <SelectValue placeholder={t.projects.projectType} />
-          </SelectTrigger>
-          <SelectContent position="popper" sideOffset={4}>
-            {projectTypes.map(type => (
-              <TranslatedSelectItem key={type} value={type} namespace={`filter_type_${type}`} />
-            ))}
-          </SelectContent>
-        </Select>
+        <TranslatedSelect
+          value={selectedCategory}
+          onValueChange={setSelectedCategory}
+          placeholder={t.projects.projectType}
+          options={projectTypes.map(type => ({ value: type, label: type }))}
+          namespacePrefix="filter_type"
+          isMobile={isMobile}
+          translateLabels={true}
+        />
 
         {/* Budget Range filter removed - feature discontinued */}
         {/* Stage */}
@@ -457,16 +452,15 @@ const PortoDeIdeiasPage = () => {
         </Select>
 
         {/* Location */}
-        <Select value={selectedLocation} onValueChange={setSelectedLocation}>
-          <SelectTrigger className={`rounded-full ${isMobile ? 'w-full' : 'w-fit'}`}>
-            <SelectValue placeholder={t.projects.city} />
-          </SelectTrigger>
-          <SelectContent position="popper" sideOffset={4}>
-            {locations.map(loc => (
-              <TranslatedSelectItem key={loc} value={loc} namespace={`filter_loc_${loc}`} />
-            ))}
-          </SelectContent>
-        </Select>
+        <TranslatedSelect
+          value={selectedLocation}
+          onValueChange={setSelectedLocation}
+          placeholder={t.projects.city}
+          options={locations.map(loc => ({ value: loc, label: loc }))}
+          namespacePrefix="filter_loc"
+          isMobile={isMobile}
+          translateLabels={true}
+        />
 
         {/* Sort */}
         <Select value={sortBy} onValueChange={setSortBy}>
