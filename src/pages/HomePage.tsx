@@ -12,6 +12,7 @@ import { LazyFloatingOrbs } from "@/components/LazyFloatingOrbs";
 import { ShinyText } from "@/components/ShinyText";
 import { VideoCarousel } from "@/components/VideoCarousel";
 import { TranslatedProjectCard } from "@/components/TranslatedProjectCard";
+import { TranslatedServiceCard } from "@/components/TranslatedServiceCard";
 import { useInView } from "@/hooks/useInView";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useAutoTranslate } from "@/hooks/useAutoTranslate";
@@ -844,34 +845,24 @@ const HomePage = () => {
           <div className={`text-center mb-16 transition-all duration-700 ${servicosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
             <ShinyText className="inline-block" delay={200}>
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif font-semibold text-foreground mb-4 decorative-line">
-                {displayServicos.title}
+                {t.home.ourServices}
               </h2>
             </ShinyText>
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
-            {displayServicos.services.map((service, index) => {
+            {servicosContent.services.map((service, index) => {
               const ServiceIcon = iconMap[service.icon] || Star;
               return (
-                <Card 
-                  key={index} 
-                  className={`group relative overflow-visible card-solid bg-card border-border rainbow-card-glow ${servicosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
-                  style={{ 
-                    transition: 'opacity 300ms ease-out, transform 300ms ease-out',
-                    transitionDelay: servicosInView ? `${(index + 1) * 50}ms` : '0ms',
-                  }}
-                >
-                  <div className="relative p-6 flex flex-col items-center text-center gap-4">
-                    <div className="relative">
-                      <div className="relative w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 border border-border shadow-lg" style={{ transition: 'transform 0ms' }}>
-                        <ServiceIcon className={`w-8 h-8 text-black rainbow-icon-glow ${service.hoverColor}`} style={{ transition: 'color 0ms' }} />
-                      </div>
-                    </div>
-                    <p className="text-sm text-muted-foreground leading-relaxed font-medium rainbow-text-glow">
-                      {service.text}
-                    </p>
-                  </div>
-                </Card>
+                <TranslatedServiceCard
+                  key={index}
+                  serviceId={`${index}`}
+                  text={service.text}
+                  icon={ServiceIcon}
+                  hoverColor={service.hoverColor}
+                  index={index}
+                  inView={servicosInView}
+                />
               );
             })}
           </div>
