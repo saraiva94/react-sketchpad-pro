@@ -54,6 +54,12 @@ export function useAutoTranslate<T = unknown>(
     const valueChanged = valueKey !== lastValueRef.current;
     const isRetry = retryTick > 0;
 
+    // IMPORTANTE: Quando o idioma muda, resetar o estado de tradução para o valor original
+    // Isso evita mostrar tradução do idioma anterior enquanto busca a nova
+    if (languageChanged) {
+      setTranslated(value);
+    }
+
     // Sempre atualiza refs imediatamente
     lastValueRef.current = valueKey;
     lastLangRef.current = language;
