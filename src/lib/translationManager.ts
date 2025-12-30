@@ -297,7 +297,7 @@ export class TranslationManager {
     request: QueueItem,
     retryCount = 0
   ): Promise<void> {
-    const { namespace, value, targetLang, cacheKey, resolve } = request;
+    const { namespace, value, targetLang, cacheKey, resolve, reject } = request;
     const hash = this.generateHash(value);
 
     try {
@@ -364,9 +364,9 @@ export class TranslationManager {
       const errorMsg = err.message || String(error);
 
       // Rate limit (429) ou erro de rede - retry com backoff
-      const isRateLimit = 
-        err.status === 429 || 
-        errorMsg.includes("429") || 
+      const isRateLimit =
+        err.status === 429 ||
+        errorMsg.includes("429") ||
         errorMsg.includes("rate_limited") ||
         errorMsg.includes("rate limit");
 
@@ -380,7 +380,14 @@ export class TranslationManager {
         return this.translateWithRetry(request, retryCount + 1);
       }
 
-      // Falhou após todas as tentativas - retornar original
+      // Se foi rate-limit e esgotou tentativas, rejeitar para o hook poder re-tentar depois
+      if (isRateLimit) {
+        console.error("[i18n] Rate limit esgotado:", error);
+        reject(new Error(`rate_limited_exhausted:${targetLang}`));
+        return;
+      }
+
+      // Outros erros: fallback para original
       console.error("[i18n] Falha após retries:", error);
       resolve(value);
     }

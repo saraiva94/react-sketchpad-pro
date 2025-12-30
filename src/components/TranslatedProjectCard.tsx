@@ -20,6 +20,10 @@ interface TranslatedProjectCardProps {
   heroReady: boolean;
   inView: boolean;
   index: number;
+  /** Quando fornecido, usa estes textos (já traduzidos) para renderizar */
+  translatedProject?: Partial<Pick<ProjectData, "title" | "synopsis" | "project_type">>;
+  /** Quando true, evita chamadas de tradução (textos já vêm prontos) */
+  skipTranslation?: boolean;
 }
 
 export function TranslatedProjectCard({
@@ -29,23 +33,41 @@ export function TranslatedProjectCard({
   heroReady,
   inView,
   index,
+  translatedProject,
+  skipTranslation,
 }: TranslatedProjectCardProps) {
   const { t, language } = useLanguage();
 
-  // Auto-translate title, synopsis, and project_type when not PT
-  const { translated: translatedTitle, isTranslating: isTranslatingTitle } = useAutoTranslate(`project_title_${project.id}`, project.title);
-  const { translated: translatedSynopsis, isTranslating: isTranslatingSynopsis } = useAutoTranslate(`project_synopsis_${project.id}`, project.synopsis);
-  const { translated: translatedType, isTranslating: isTranslatingType } = useAutoTranslate(`project_type_${project.id}`, project.project_type);
+  // Auto-translate title, synopsis, and project_type when not PT (mantém ordem de hooks estável)
+  const shouldTranslate = language !== "pt" && !skipTranslation;
+  const titleValue = shouldTranslate ? project.title : null;
+  const synopsisValue = shouldTranslate ? project.synopsis : null;
+  const typeValue = shouldTranslate ? project.project_type : null;
 
-  // Use translated versions when language is not PT
-  const displayTitle = language === 'pt' ? project.title : (translatedTitle || project.title);
-  const displaySynopsis = language === 'pt' ? project.synopsis : (translatedSynopsis || project.synopsis);
-  const displayType = language === 'pt' ? project.project_type : (translatedType || project.project_type);
+  const { translated: translatedTitle, isTranslating: isTranslatingTitle } = useAutoTranslate(
+    `project_title_${project.id}`,
+    titleValue
+  );
+  const { translated: translatedSynopsis, isTranslating: isTranslatingSynopsis } = useAutoTranslate(
+    `project_synopsis_${project.id}`,
+    synopsisValue
+  );
+  const { translated: translatedType, isTranslating: isTranslatingType } = useAutoTranslate(
+    `project_type_${project.id}`,
+    typeValue
+  );
 
-  // Show skeleton only during first translation (no cache)
-  const showTitleSkeleton = language !== 'pt' && isTranslatingTitle && !translatedTitle;
-  const showSynopsisSkeleton = language !== 'pt' && isTranslatingSynopsis && !translatedSynopsis;
-  const showTypeSkeleton = language !== 'pt' && isTranslatingType && !translatedType;
+  const displayTitle =
+    language === "pt" ? project.title : (translatedProject?.title ?? translatedTitle ?? project.title);
+  const displaySynopsis =
+    language === "pt" ? project.synopsis : (translatedProject?.synopsis ?? translatedSynopsis ?? project.synopsis);
+  const displayType =
+    language === "pt" ? project.project_type : (translatedProject?.project_type ?? translatedType ?? project.project_type);
+
+  // Skeleton apenas quando estamos efetivamente traduzindo
+  const showTitleSkeleton = shouldTranslate && isTranslatingTitle && !translatedTitle && !translatedProject?.title;
+  const showSynopsisSkeleton = shouldTranslate && isTranslatingSynopsis && !translatedSynopsis && !translatedProject?.synopsis;
+  const showTypeSkeleton = shouldTranslate && isTranslatingType && !translatedType && !translatedProject?.project_type;
 
   const getInitials = (name: string | null): string => {
     if (!name) return "PC";
