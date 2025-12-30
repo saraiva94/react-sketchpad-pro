@@ -52,6 +52,27 @@ export class TranslationManager {
     return Math.abs(hash).toString(36);
   }
 
+  private isSameValue(a: unknown, b: unknown): boolean {
+    if (a === b) return true;
+    if (typeof a !== typeof b) return false;
+
+    // Strings são o caso mais comum
+    if (typeof a === "string" && typeof b === "string") {
+      return a.trim() === b.trim();
+    }
+
+    // Para objetos/arrays, comparação simples via JSON
+    if (a && b && typeof a === "object" && typeof b === "object") {
+      try {
+        return JSON.stringify(a) === JSON.stringify(b);
+      } catch {
+        return false;
+      }
+    }
+
+    return false;
+  }
+
   private getCacheKey(namespace: string, targetLang: string, hash: string): string {
     return `i18n:v3:${namespace}:${targetLang}:${hash}`;
   }
@@ -167,16 +188,19 @@ export class TranslationManager {
           (dbTranslation as any).translated_value
         );
 
-        this.memoryCache.set(cacheKey, normalized);
+        // Se estiver poluído (tradução == original), tratar como cache miss
+        if (!this.isSameValue(value, normalized)) {
+          this.memoryCache.set(cacheKey, normalized);
 
-        try {
-          localStorage.setItem(cacheKey, JSON.stringify(normalized));
-        } catch (err) {
-          console.warn("[i18n] localStorage write error:", err);
+          try {
+            localStorage.setItem(cacheKey, JSON.stringify(normalized));
+          } catch (err) {
+            console.warn("[i18n] localStorage write error:", err);
+          }
+
+          console.log("[i18n] Cache hit (banco):", namespace);
+          return normalized;
         }
-
-        console.log("[i18n] Cache hit (banco):", namespace);
-        return normalized;
       }
     } catch (err) {
       console.error("[i18n] Supabase lookup error:", err);
@@ -286,6 +310,12 @@ export class TranslationManager {
       // A edge function retorna { value: traduzido }
       const raw = (data as any)?.value ?? value;
       const translated = this.normalizeTranslated(value, raw);
+
+      // Se "traduziu" mas permaneceu igual (resposta degradada), não poluir cache/banco
+      if (this.isSameValue(value, translated)) {
+        resolve(value);
+        return;
+      }
 
       // Salvar em todos os caches
       this.memoryCache.set(cacheKey, translated);
