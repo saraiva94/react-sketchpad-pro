@@ -220,6 +220,7 @@ const HomePage = () => {
 
   // Auto-tradução de conteúdos dinâmicos (do backend) quando idioma != pt
   const { translated: translatedQuemSomos } = useAutoTranslate('quem_somos', quemSomosContent);
+  const { translated: translatedServicos } = useAutoTranslate('nossos_servicos', servicosContent);
 
   // Conteúdo final que será usado na renderização (com validação de estrutura)
   const isValidQuemSomos = (input: any): input is typeof quemSomosContent => {
@@ -238,22 +239,33 @@ const HomePage = () => {
     );
   };
 
+  const isValidServicos = (input: any): input is typeof servicosContent => {
+    return (
+      input &&
+      Array.isArray(input.services) &&
+      input.services.every(
+        (s: any) =>
+          s &&
+          typeof s.icon === "string" &&
+          typeof s.text === "string" &&
+          typeof s.hoverColor === "string"
+      )
+    );
+  };
+
   const displayQuemSomos = language === "pt"
     ? quemSomosContent
     : (isValidQuemSomos(translatedQuemSomos) ? translatedQuemSomos : quemSomosContent);
 
-  // Preload de traduções quando dados carregarem (usa o mesmo motor do useAutoTranslate)
+  const displayServicos = language === "pt"
+    ? servicosContent
+    : (isValidServicos(translatedServicos) ? translatedServicos : servicosContent);
+
+  // Preload de traduções quando dados carregarem (prioriza conteúdos de seção para UX)
   const preloadItems = [
-    ...createTranslationItems.forProjectList(featuredProjects),
-
-    // Tradução estruturada (Quem Somos) - mantém compatibilidade
     ...createTranslationItems.forSettings('quem_somos', quemSomosContent),
-
-    // Tradução por-card dos serviços (para evitar "um a um" lento)
-    ...servicosContent.services.map((s, i) => ({
-      namespace: `service_${i}`,
-      value: s.text,
-    })),
+    ...createTranslationItems.forSettings('nossos_servicos', servicosContent),
+    ...createTranslationItems.forProjectList(featuredProjects),
   ];
   usePreloadTranslations(preloadItems, !loadingProjects);
 
@@ -839,7 +851,7 @@ const HomePage = () => {
           </div>
 
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
-              {servicosContent.services.map((service, index) => {
+              {displayServicos.services.map((service, index) => {
                 const ServiceIcon = iconMap[service.icon] || Star;
                 return (
                   <TranslatedServiceCard
@@ -850,6 +862,7 @@ const HomePage = () => {
                     hoverColor={service.hoverColor}
                     index={index}
                     inView={servicosInView}
+                    skipTranslation
                   />
                 );
               })}

@@ -155,7 +155,13 @@ export class TranslationManager {
     if (this.memoryCache.has(cacheKey)) {
       console.log("[i18n] Cache hit (memória):", namespace);
       const cached = this.memoryCache.get(cacheKey);
-      return this.normalizeTranslated(value, cached);
+      const normalized = this.normalizeTranslated(value, cached);
+
+      // Se cache estiver poluído (== original), invalidar e tratar como miss
+      if (!this.isSameValue(value, normalized)) {
+        return normalized;
+      }
+      this.memoryCache.delete(cacheKey);
     }
 
     // 2. localStorage
@@ -164,13 +170,19 @@ export class TranslationManager {
       if (cached) {
         const parsed = JSON.parse(cached);
         const normalized = this.normalizeTranslated(value, parsed);
-        this.memoryCache.set(cacheKey, normalized);
-        console.log("[i18n] Cache hit (localStorage):", namespace);
-        return normalized;
+
+        // Se cache estiver poluído (== original), invalidar e tratar como miss
+        if (!this.isSameValue(value, normalized)) {
+          this.memoryCache.set(cacheKey, normalized);
+          console.log("[i18n] Cache hit (localStorage):", namespace);
+          return normalized;
+        }
+        localStorage.removeItem(cacheKey);
       }
     } catch (err) {
       console.warn("[i18n] localStorage read error:", err);
     }
+
 
     // 3. Banco de dados
     try {
