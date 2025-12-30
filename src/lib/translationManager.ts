@@ -398,10 +398,11 @@ export class TranslationManager {
         return this.translateWithRetry(request, retryCount + 1);
       }
 
-      // Se foi rate-limit e esgotou tentativas, rejeitar para o hook poder re-tentar depois
+      // Se foi rate-limit e esgotou tentativas: NÃO rejeitar (evita unhandled rejection)
+      // Mantém o conteúdo original e deixa o usuário seguir navegando.
       if (isRateLimit) {
-        console.error("[i18n] Rate limit esgotado:", error);
-        reject(new Error(`rate_limited_exhausted:${targetLang}`));
+        console.warn("[i18n] Rate limit esgotado (fallback p/ original):", namespace);
+        resolve(value);
         return;
       }
 
