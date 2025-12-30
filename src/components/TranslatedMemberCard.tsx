@@ -53,31 +53,31 @@ export function TranslatedMemberCard({ member, getInitials }: TranslatedMemberCa
   const displayDetalhes = language === "pt" ? member.detalhes : (translatedDetalhes || member.detalhes);
 
   return (
-    <div className="group relative overflow-visible card-solid p-4 bg-card rounded-xl border border-border rainbow-card-glow">
-      <div className="flex items-start space-x-3">
+    <div className="group relative overflow-visible card-solid p-5 bg-card rounded-xl border border-border rainbow-card-glow">
+      <div className="flex items-start space-x-4">
         {/* Foto */}
         {member.photo_url ? (
           <img 
             src={member.photo_url} 
             alt={member.nome}
-            className="w-14 h-14 rounded-full object-cover flex-shrink-0 border-2 border-primary/20"
+            className="w-16 h-16 rounded-full object-cover flex-shrink-0 border-2 border-primary/20"
           />
         ) : (
-          <div className="w-14 h-14 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center flex-shrink-0">
-            <span className="text-primary-foreground text-sm font-semibold">
+          <div className="w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center flex-shrink-0">
+            <span className="text-primary-foreground text-base font-semibold">
               {getInitials(member.nome)}
             </span>
           </div>
         )}
         <div className="min-w-0 flex-1">
-          <h4 className="font-semibold text-foreground text-sm">{member.nome}</h4>
+          <h4 className="font-semibold text-foreground text-base">{member.nome}</h4>
           {displayFuncao && (
-            <p className="text-xs text-muted-foreground">{displayFuncao}</p>
+            <p className="text-sm text-muted-foreground">{displayFuncao}</p>
           )}
           
           {/* Detalhes */}
           {displayDetalhes && (
-            <p className="text-xs text-muted-foreground mt-1">{displayDetalhes}</p>
+            <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">{displayDetalhes}</p>
           )}
           
           {/* Social Links e CV */}
