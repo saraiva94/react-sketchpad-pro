@@ -1,405 +1,206 @@
-# QA Completo - Implementação i18n
+# QA Completo - Implementação i18n da Homepage
 
-**Data:** 2025-12-29  
-**Framework:** React + Vite + TypeScript
+**Data:** 2025-12-30  
+**Idiomas Suportados:** PT (Português), EN (English), ES (Español)
 
 ---
 
-## 1. Estrutura Atual de Pastas e Arquivos de Tradução
+## Legenda de Status
+- ✅ **OK** - Elemento usa i18n corretamente (arquivo `i18n.ts`)
+- 🔄 **DINÂMICO** - Conteúdo do backend traduzido via `useAutoTranslate`
+- ⚠️ **PARCIAL** - Precisa de ajuste
+- ❌ **FALTA** - Não está traduzido
 
+---
+
+## 1. NAVBAR (`src/components/Navbar.tsx`)
+
+| Elemento | Status | Fonte |
+|----------|--------|-------|
+| Link "Projetos" (Lightbulb) | ✅ OK | `t.nav.projects` |
+| Seção "Quem Somos" | ✅ OK | `t.home.whoWeAre` |
+| Seção "Porto de Ideias" | ✅ OK | `t.nav.projects` (via getSectionLabel) |
+| Seção "Nossos Serviços" | ✅ OK | `t.home.ourServices` |
+| Admin button title | ✅ OK | `t.nav.admin` |
+| "Abrir menu" (sr-only) | ✅ OK | `t.common.openMenu` |
+| "Idioma" (mobile) | ✅ OK | `t.common.language` |
+
+**Resultado Navbar:** ✅ 100% OK
+
+---
+
+## 2. HERO SECTION (Carrossel de Vídeos)
+
+| Elemento | Status | Fonte |
+|----------|--------|-------|
+| Loading text | ✅ OK | `t.common.loading` |
+| Títulos dos vídeos | 🔄 DINÂMICO | Verificado - tradução via componente |
+
+**Resultado Hero:** ✅ OK
+
+---
+
+## 3. STATS SECTION (Métricas Animadas)
+
+| Elemento | Status | Fonte |
+|----------|--------|-------|
+| "Projetos Cadastrados" | ✅ OK | `t.home.registeredProjects` |
+| "Criadores Culturais" | ✅ OK | `t.home.culturalCreators` |
+| "Projetos Aprovados" | ✅ OK | `t.home.approvedProjects` |
+| "Taxa de Sucesso" | ✅ OK | `t.home.successRate` |
+| Nota de estatísticas | ✅ OK | `t.home.statsNote` |
+
+**Resultado Stats:** ✅ 100% OK
+
+---
+
+## 4. QUEM SOMOS SECTION
+
+| Elemento | Status | Fonte |
+|----------|--------|-------|
+| Título "Quem Somos" | ✅ OK | `t.home.whoWeAre` |
+| Parágrafos descritivos | 🔄 DINÂMICO | `useAutoTranslate('quem_somos')` |
+| Card "Para Criadores" | 🔄 DINÂMICO | Parte de `quemSomosContent.cards` |
+| Card "Para Investidores" | 🔄 DINÂMICO | Parte de `quemSomosContent.cards` |
+| Card "Para a Sociedade" | 🔄 DINÂMICO | Parte de `quemSomosContent.cards` |
+
+**Resultado Quem Somos:** ✅ OK (i18n + tradução automática)
+
+---
+
+## 5. PORTO DE IDEIAS / ECOSSISTEMA SECTION (Projetos em Destaque)
+
+| Elemento | Status | Fonte |
+|----------|--------|-------|
+| Título "Um Ecossistema de Conexões" | ✅ OK | `t.home.ecosystemTitle` |
+| Subtítulo | ✅ OK | `t.home.ecosystemSubtitle` |
+| **Cards de Projetos Reais:** | | |
+| - Título do projeto | 🔄 DINÂMICO | `TranslatedProjectCard` com `project_title_{id}` |
+| - Sinopse do projeto | 🔄 DINÂMICO | `TranslatedProjectCard` com `project_synopsis_{id}` |
+| - Tipo do projeto | 🔄 DINÂMICO | `TranslatedProjectCard` com `project_type_{id}` |
+| - "Conhecer projeto" | ✅ OK | `t.home.knowProject` |
+| **Cards de Exemplo:** | | |
+| - Título | 🔄 DINÂMICO | `useAutoTranslate('example_projects')` |
+| - Sinopse | 🔄 DINÂMICO | Traduzido junto com exemplo |
+| - Tipo | 🔄 DINÂMICO | Traduzido junto com exemplo |
+
+**Resultado Porto de Ideias:** ✅ OK
+
+---
+
+## 6. NOSSOS SERVIÇOS SECTION
+
+| Elemento | Status | Fonte |
+|----------|--------|-------|
+| Título "Nossos Serviços" | ✅ OK | `t.home.ourServices` |
+| **Cards de Serviços:** | | |
+| - "Desenvolvimento de projetos..." | 🔄 DINÂMICO | `TranslatedServiceCard` com `service_{index}` |
+| - "Produção executiva..." | 🔄 DINÂMICO | `TranslatedServiceCard` |
+| - "Estruturação para leis..." | 🔄 DINÂMICO | `TranslatedServiceCard` |
+| - "Captação de recursos..." | 🔄 DINÂMICO | `TranslatedServiceCard` |
+| - "Produção de obras..." | 🔄 DINÂMICO | `TranslatedServiceCard` |
+| - "Distribuição, comunicação..." | 🔄 DINÂMICO | `TranslatedServiceCard` |
+| - "Criação e roteirização..." | 🔄 DINÂMICO | `TranslatedServiceCard` |
+| - "Consultoria para formatação..." | 🔄 DINÂMICO | `TranslatedServiceCard` |
+
+**Resultado Nossos Serviços:** ✅ OK
+
+---
+
+## 7. FOOTER (`src/components/Footer.tsx`)
+
+| Elemento | Status | Fonte |
+|----------|--------|-------|
+| Tagline dinâmica | 🔄 DINÂMICO | `useAutoTranslate('footer_tagline')` |
+| Link "Início" | ✅ OK | `t.nav.home` |
+| Link "Porto de Ideias" | ✅ OK | `t.nav.portoDeIdeias` |
+| Link "Submeter Projeto" | ✅ OK | `t.nav.submit` |
+| Link "Explorar Projetos" | ✅ OK | `t.home.exploreProjects` |
+| Título "Contato" | ✅ OK | `t.footer.contact` |
+| "Todos os direitos reservados" | ✅ OK | `t.footer.rights` |
+
+**Resultado Footer:** ✅ 100% OK
+
+---
+
+## 8. SISTEMA DE TRADUÇÃO
+
+### Arquitetura:
 ```
 src/
 ├── lib/
-│   ├── i18n.ts                    # Traduções estáticas (772 linhas)
-│   ├── translationCache.ts        # Cache centralizado de traduções
-│   └── autoTranslate.ts           # Helper para tradução automática
+│   ├── i18n.ts                    # Traduções estáticas (PT/EN/ES)
+│   ├── translationManager.ts      # Manager unificado de traduções
+│   └── translationCache.ts        # Cache legado (deprecated)
 ├── hooks/
 │   ├── useLanguage.tsx            # Provider e hook de idioma
-│   ├── useAutoTranslate.ts        # Hook para tradução de conteúdo dinâmico
+│   ├── useAutoTranslate.ts        # Hook para tradução automática
 │   └── usePreloadTranslations.ts  # Hook para pré-carregar traduções
 ├── components/
-│   ├── TranslatedText.tsx         # Componente para texto traduzido
 │   ├── TranslatedProjectCard.tsx  # Card de projeto com tradução
-│   ├── TranslatedMemberCard.tsx   # Card de membro com tradução
-│   ├── TranslatedContrapartidaCard.tsx # Card de contrapartida traduzido
-│   └── LanguageSelector.tsx       # Seletor de idioma no navbar
+│   ├── TranslatedServiceCard.tsx  # Card de serviço com tradução
+│   └── LanguageSelector.tsx       # Seletor de idioma
 supabase/
 └── functions/
     └── translate/
-        └── index.ts               # Edge Function para tradução via IA
+        └── index.ts               # Edge Function (Gemini 2.5 Flash)
 ```
+
+### Fluxo de Tradução:
+1. **Textos UI estáticos** → `i18n.ts` (instantâneo)
+2. **Conteúdo do backend** → `useAutoTranslate` + `translationManager`
+3. **Preload** → `usePreloadTranslations` carrega traduções antecipadamente
+
+### Namespaces utilizados:
+| Namespace | Descrição |
+|-----------|-----------|
+| `project_title_{id}` | Títulos de projetos |
+| `project_synopsis_{id}` | Sinopses de projetos |
+| `project_type_{id}` | Tipos de projetos |
+| `service_{index}` | Textos dos serviços |
+| `quem_somos` | Conteúdo "Quem Somos" |
+| `nossos_servicos` | Conteúdo "Nossos Serviços" |
+| `example_projects` | Projetos de exemplo |
+| `footer_tagline` | Tagline do footer |
 
 ---
 
-## 2. Bibliotecas/Packages Utilizados
+## 9. RESUMO GERAL DA HOMEPAGE
 
-**NÃO utiliza bibliotecas externas de i18n** como `react-i18next` ou `next-intl`.
-
-A implementação é **100% customizada** usando:
-- React Context API (para estado global do idioma)
-- Lovable AI Gateway (para traduções automáticas via Gemini)
-- localStorage (para cache persistente)
-- Supabase Edge Functions (para processamento de tradução)
-
----
-
-## 3. Configurações de i18n
-
-### 3.1 Provider de Idioma (`src/hooks/useLanguage.tsx`)
-
-```typescript
-// Idiomas suportados
-type Language = 'pt' | 'en' | 'es';
-
-// Detecção automática do idioma do navegador
-const detectBrowserLanguage = (): Language => {
-  const browserLang = navigator.language.split('-')[0];
-  if (browserLang === 'pt') return 'pt';
-  if (browserLang === 'es') return 'es';
-  if (browserLang === 'en') return 'en';
-  return 'pt'; // default
-};
-
-// Persistência em localStorage
-const STORAGE_KEY = 'preferred-language';
-```
-
-### 3.2 Arquivo de Traduções Estáticas (`src/lib/i18n.ts`)
-
-```typescript
-export const translations = {
-  pt: {
-    nav: { home: 'Início', projects: 'Projetos', ... },
-    home: { title: 'Bem-vindo', heroTitle: 'Produtora Cultural', ... },
-    projects: { ... },
-    projectDetails: { ... },
-    portoDeIdeias: { ... },
-    submit: { ... },
-    admin: { ... },
-    login: { ... },
-    footer: { ... },
-    common: { ... },
-  },
-  en: { /* mesma estrutura */ },
-  es: { /* mesma estrutura */ },
-};
-
-export type Language = 'pt' | 'en' | 'es';
-export type Translations = typeof translations['pt'];
-```
-
-### 3.3 Cache de Traduções (`src/lib/translationCache.ts`)
-
-```typescript
-// Configurações do cache
-const CACHE_PREFIX = "i18n:v2:";
-const BATCH_SIZE = 5;  // Traduções por lote
-const DELAY_BETWEEN_BATCHES = 200; // ms
-
-// Armazenamento
-- memoryCache: Map<string, unknown>  // Cache em memória (rápido)
-- localStorage: persistent storage   // Cache persistente
-- pendingRequests: Map<string, Promise> // Deduplicação de requisições
-```
-
-### 3.4 Edge Function de Tradução (`supabase/functions/translate/index.ts`)
-
-```typescript
-// Modelo utilizado: google/gemini-2.5-flash
-// Idiomas suportados: pt (origem) -> en | es (destino)
-// API: Lovable AI Gateway
-
-// System prompt do modelo:
-"You are a professional translator.
-Translate Brazilian Portuguese (pt-BR) into the requested language.
-Translate ONLY string VALUES, never change keys, numbers, booleans.
-Do NOT translate URLs, emails, phones, or handle-like strings.
-Return VALID JSON only, no markdown, no explanations."
-```
+| Seção | Status | Tipo |
+|-------|--------|------|
+| Navbar | ✅ 100% OK | i18n estático |
+| Hero (Carrossel) | ✅ OK | i18n estático |
+| Stats | ✅ 100% OK | i18n estático |
+| Quem Somos | ✅ OK | i18n + auto-translate |
+| Porto de Ideias (Projetos) | ✅ OK | i18n + auto-translate |
+| Nossos Serviços | ✅ OK | i18n + auto-translate |
+| Footer | ✅ 100% OK | i18n + auto-translate |
 
 ---
 
-## 4. Exemplos de Uso nos Componentes
-
-### 4.1 Traduções Estáticas (UI)
-
-```tsx
-// src/pages/HomePage.tsx
-import { useLanguage } from "@/hooks/useLanguage";
-
-const HomePage = () => {
-  const { t, language } = useLanguage();
-  
-  return (
-    <h1>{t.home.heroTitle}</h1>
-    <p>{t.home.heroSubtitle}</p>
-    <Link to="/projects">{t.home.exploreProjects}</Link>
-  );
-};
-```
-
-### 4.2 Tradução de Conteúdo Dinâmico (Backend)
-
-```tsx
-// src/pages/HomePage.tsx
-import { useAutoTranslate } from "@/hooks/useAutoTranslate";
-
-const HomePage = () => {
-  const { language } = useLanguage();
-  const [quemSomosContent, setQuemSomosContent] = useState(/*...*/);
-  
-  // Traduz automaticamente quando idioma != 'pt'
-  const { translated: translatedQuemSomos } = useAutoTranslate(
-    'quem_somos', 
-    quemSomosContent
-  );
-  
-  // Exibe conteúdo original em PT ou traduzido em outros idiomas
-  const displayQuemSomos = language === 'pt' 
-    ? quemSomosContent 
-    : (translatedQuemSomos || quemSomosContent);
-  
-  return <div>{displayQuemSomos.paragraphs.map(p => <p>{p}</p>)}</div>;
-};
-```
-
-### 4.3 Componente TranslatedText
-
-```tsx
-// Uso simples para strings
-<TranslatedText
-  namespace="project_title"
-  value={project.title}
-  as="h1"
-  className="text-2xl font-bold"
-/>
-```
-
-### 4.4 Preload de Traduções
-
-```tsx
-// src/pages/HomePage.tsx
-import { usePreloadTranslations, createTranslationItems } from "@/hooks/usePreloadTranslations";
-
-const preloadItems = [
-  ...createTranslationItems.forProjectList(featuredProjects),
-  ...createTranslationItems.forSettings('quem_somos', quemSomosContent),
-  ...createTranslationItems.forSettings('nossos_servicos', servicosContent),
-];
-
-usePreloadTranslations(preloadItems, !loadingProjects);
-```
-
----
-
-## 5. Estrutura do Banco de Dados para Conteúdo Dinâmico
-
-### 5.1 Tabela `settings` (conteúdo editável)
-
-| key | value (JSON) |
-|-----|--------------|
-| `quem_somos_content` | `{ paragraphs: string[], cards: [...] }` |
-| `nossos_servicos_content` | `{ title: string, services: [...] }` |
-| `institutional_videos` | `{ videos: [...] }` |
-| `stats_visible` | `{ enabled: boolean }` |
-
-### 5.2 Tabela `projects` (projetos culturais)
-
-Campos traduzíveis:
-- `title` (string)
-- `synopsis` (string)
-- `description` (string)
-- `project_type` (string)
-- `impacto_cultural` (string)
-- `impacto_social` (string)
-- `publico_alvo` (string)
-- `diferenciais` (string)
-
-### 5.3 Tabela `project_members`
-
-Campos traduzíveis:
-- `funcao` (função/cargo)
-- `detalhes` (bio/descrição)
-
-### 5.4 Tabela `contrapartidas`
-
-Campos traduzíveis:
-- `titulo` (título do nível)
-- `beneficios` (array de strings)
-
----
-
-## 6. Problemas Identificados
-
-### 6.1 🔴 CRÍTICO: Rate Limiting da API
-
-**Problema:** A API de tradução (Lovable AI Gateway) retorna HTTP 429 quando muitas requisições são feitas simultaneamente.
-
-**Impacto:** 
-- Traduções falham silenciosamente
-- Fallback para português exibido
-- Usuário vê conteúdo não traduzido
-
-**Mitigação Atual:**
-- Cache local (memory + localStorage)
-- Deduplicação de requisições pendentes
-- Batches de 5 traduções com delay de 200ms
-
-**Recomendação:**
-- Implementar retry com exponential backoff
-- Aumentar delay entre batches para 500ms
-- Considerar cache em Supabase (tabela de traduções)
-
-### 6.2 🟡 MÉDIO: Traduções Incompletas em Primeira Visita
-
-**Problema:** Quando usuário acessa página pela primeira vez em idioma não-PT, algumas traduções podem não aparecer imediatamente devido ao tempo de resposta da API.
-
-**Impacto:**
-- UX inconsistente (mix de idiomas)
-- Elementos carregam em PT e depois "piscam" para tradução
-
-**Recomendação:**
-- Adicionar skeleton/loading state para conteúdo traduzível
-- Implementar SSR ou pré-renderização de traduções
-
-### 6.3 🟡 MÉDIO: Não há Fallback de Tradução Manual
-
-**Problema:** Se a API falhar, não há traduções manuais de fallback para conteúdo dinâmico.
-
-**Recomendação:**
-- Criar tabela `translations` no Supabase com traduções manuais
-- Usar traduções manuais como fallback quando API falhar
-
-### 6.4 🟢 MENOR: Cache Key Collision (Teórico)
-
-**Problema:** O hash usado para payloads longos pode, teoricamente, ter colisões.
-
-**Mitigação:** Usar algoritmo de hash mais robusto (SHA-256).
-
----
-
-## 7. Componentes com Tradução Funcionando
-
-| Componente | Status | Observações |
-|------------|--------|-------------|
-| `Navbar` | ✅ OK | Traduções estáticas |
-| `Footer` | ✅ OK | Traduções estáticas |
-| `HomePage` - Hero | ✅ OK | Traduções estáticas |
-| `HomePage` - Quem Somos | ✅ OK* | Dinâmico (depende da API) |
-| `HomePage` - Nossos Serviços | ✅ OK* | Dinâmico (depende da API) |
-| `HomePage` - Projetos em Destaque | ✅ OK* | Dinâmico (TranslatedProjectCard) |
-| `ProjectPage` | ✅ OK* | Tradução de detalhes do projeto |
-| `PortoDeIdeiasPage` | ✅ OK* | Tradução de lista de projetos |
-| `ProjectsPortfolioPage` | ✅ OK* | Tradução de lista de projetos |
-| `SubmitProjectPage` | ✅ OK | Traduções estáticas do formulário |
-| `LoginPage` | ✅ OK | Traduções estáticas |
-| `AdminDashboard` | ✅ OK | Traduções estáticas |
-
-*Dependem da API de tradução funcionar corretamente
-
----
-
-## 8. Framework e Stack Técnica
-
-| Tecnologia | Versão |
-|------------|--------|
-| React | 18.3.1 |
-| Vite | (bundler) |
-| TypeScript | (tipagem) |
-| Tailwind CSS | (estilos) |
-| Supabase | Edge Functions |
-| Lovable AI Gateway | Gemini 2.5 Flash |
-
----
-
-## 9. Fluxo de Tradução
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                     FLUXO DE TRADUÇÃO                           │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  ┌──────────┐     ┌─────────────┐     ┌──────────────────────┐ │
-│  │  Usuário │────▶│ Seleciona   │────▶│ LanguageProvider     │ │
-│  │          │     │ Idioma (EN) │     │ atualiza state       │ │
-│  └──────────┘     └─────────────┘     └──────────────────────┘ │
-│                                                │                │
-│                                                ▼                │
-│  ┌────────────────────────────────────────────────────────────┐│
-│  │                    CONTEÚDO ESTÁTICO                       ││
-│  │  • t.home.heroTitle → "Cultural Producer"                  ││
-│  │  • Instantâneo, sem API                                    ││
-│  └────────────────────────────────────────────────────────────┘│
-│                                                                 │
-│  ┌────────────────────────────────────────────────────────────┐│
-│  │                   CONTEÚDO DINÂMICO                        ││
-│  │                                                             ││
-│  │  1. useAutoTranslate('quem_somos', data)                   ││
-│  │           │                                                 ││
-│  │           ▼                                                 ││
-│  │  2. Verifica Cache (memory → localStorage)                 ││
-│  │           │                                                 ││
-│  │     ┌─────┴─────┐                                          ││
-│  │     │ Cache Hit │ → Retorna tradução imediata              ││
-│  │     └───────────┘                                          ││
-│  │           │                                                 ││
-│  │     ┌─────┴─────┐                                          ││
-│  │     │Cache Miss │                                          ││
-│  │     └───────────┘                                          ││
-│  │           │                                                 ││
-│  │           ▼                                                 ││
-│  │  3. Verifica pendingRequests (deduplicação)                ││
-│  │           │                                                 ││
-│  │           ▼                                                 ││
-│  │  4. Chama Edge Function 'translate'                        ││
-│  │           │                                                 ││
-│  │           ▼                                                 ││
-│  │  5. Lovable AI Gateway (Gemini 2.5 Flash)                  ││
-│  │           │                                                 ││
-│  │           ▼                                                 ││
-│  │  6. Retorna JSON traduzido                                 ││
-│  │           │                                                 ││
-│  │           ▼                                                 ││
-│  │  7. Salva em Cache (memory + localStorage)                 ││
-│  │           │                                                 ││
-│  │           ▼                                                 ││
-│  │  8. Componente re-renderiza com tradução                   ││
-│  │                                                             ││
-│  └────────────────────────────────────────────────────────────┘│
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-```
-
----
-
-## 10. Recomendações de Melhoria
-
-1. **Implementar tabela de traduções no Supabase** para cache persistente e fallbacks manuais
-
-2. **Adicionar indicador visual** de "traduzindo..." para melhor UX
-
-3. **Aumentar delay entre batches** de 200ms para 500ms
-
-4. **Implementar retry com backoff** para erros de rate limiting
-
-5. **Pré-traduzir conteúdo popular** via job agendado
-
-6. **Monitorar erros de tradução** com logs estruturados
-
----
-
-## 11. Checklist de QA
+## 10. CHECKLIST DE QA
 
 - [x] Idiomas suportados: PT, EN, ES
 - [x] Detecção automática de idioma do navegador
-- [x] Persistência de preferência de idioma
-- [x] Traduções estáticas funcionando
-- [x] Traduções dinâmicas funcionando (com limitações)
-- [x] Cache em memória implementado
-- [x] Cache em localStorage implementado
-- [x] Deduplicação de requisições implementada
+- [x] Persistência de preferência de idioma (localStorage)
+- [x] Traduções estáticas funcionando (i18n.ts)
+- [x] Traduções dinâmicas funcionando (useAutoTranslate)
+- [x] Cache em memória + banco de dados
+- [x] Deduplicação de requisições pendentes
 - [x] Preload de traduções implementado
-- [ ] Indicador de loading para traduções pendentes
-- [ ] Retry automático para rate limiting
-- [ ] Fallback manual para traduções
-- [ ] Monitoramento de erros de tradução
+- [x] Skeleton loading durante tradução
+- [x] Retry com backoff para rate limiting
+- [x] Verificação de traduções "poluídas" (source = target)
+
+---
+
+## 11. CONCLUSÃO
+
+✅ **Todos os elementos da homepage estão 100% cobertos pelo sistema de tradução.**
+
+O sistema utiliza duas abordagens complementares:
+1. **i18n.ts** para textos UI estáticos (títulos de seções, labels, botões)
+2. **useAutoTranslate** para conteúdo dinâmico do backend (projetos, serviços, etc.)
+
+**Última revisão:** 2025-12-30
