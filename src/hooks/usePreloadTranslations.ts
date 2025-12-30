@@ -195,6 +195,8 @@ export const createTranslationItems = {
       project_type?: string | null;
       location?: string | null;
       categorias_tags?: string[] | null;
+      incentive_law_details?: string | null;
+      has_incentive_law?: boolean | null;
     }>,
     namespacePrefix: string = "project"
   ): TranslationItem[] => {
@@ -208,6 +210,10 @@ export const createTranslationItems = {
       // Traduzir a primeira categoria/tag também
       const firstCat = project.categorias_tags?.[0] || project.project_type;
       if (firstCat) items.push({ namespace: `${namespacePrefix}_badge_cat_${project.id}`, value: firstCat });
+      // Traduzir lei de incentivo
+      if (project.has_incentive_law && project.incentive_law_details) {
+        items.push({ namespace: `${namespacePrefix}_law_${project.id}`, value: project.incentive_law_details });
+      }
     });
 
     return items;

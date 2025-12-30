@@ -35,6 +35,8 @@ export const translations = {
     },
     projects: {
       title: 'Projetos',
+      portfolioTitle: 'Portfólio Criativo',
+      portfolioSubtitle: 'Projetos que estão em movimento. Aqui você encontra o que já realizamos, o que estamos desenvolvendo e o que busca parceiros pra sair do papel.',
       search: 'Buscar projetos...',
       allCategories: 'Todas as Categorias',
       noResults: 'Nenhum projeto encontrado',
@@ -58,7 +60,6 @@ export const translations = {
       applyFilters: 'Aplicar Filtros',
       noProjectsFound: 'Nenhum projeto encontrado',
       adjustFilters: 'Tente ajustar seus filtros ou faça uma busca diferente.',
-      portfolioSubtitle: 'Explore todos os projetos aprovados e encontre iniciativas culturais para apoiar.',
       viewProjects: 'Ver {count} Projeto(s)',
 
       // Porto de Ideias grid
@@ -292,6 +293,8 @@ export const translations = {
     },
     projects: {
       title: 'Projects',
+      portfolioTitle: 'Creative Portfolio',
+      portfolioSubtitle: 'Projects in motion. Here you can find what we have already done, what we are developing, and what is looking for partners to get off the ground.',
       search: 'Search projects...',
       allCategories: 'All Categories',
       noResults: 'No projects found',
@@ -315,7 +318,6 @@ export const translations = {
       applyFilters: 'Apply Filters',
       noProjectsFound: 'No projects found',
       adjustFilters: 'Try adjusting your filters or search for something else.',
-      portfolioSubtitle: 'Explore all approved projects and find cultural initiatives to support.',
       viewProjects: 'View {count} Project(s)',
       // Stage labels
       stageAll: 'Stage',
@@ -547,6 +549,8 @@ export const translations = {
     },
     projects: {
       title: 'Proyectos',
+      portfolioTitle: 'Portafolio Creativo',
+      portfolioSubtitle: 'Proyectos en movimiento. Aquí encuentras lo que ya realizamos, lo que estamos desarrollando y lo que busca socios para salir del papel.',
       search: 'Buscar proyectos...',
       allCategories: 'Todas las Categorías',
       noResults: 'No se encontraron proyectos',
@@ -570,7 +574,6 @@ export const translations = {
       applyFilters: 'Aplicar Filtros',
       noProjectsFound: 'No se encontraron proyectos',
       adjustFilters: 'Intenta ajustar tus filtros o buscar algo diferente.',
-      portfolioSubtitle: 'Explore todos los proyectos aprobados y encuentre iniciativas culturales para apoyar.',
       viewProjects: 'Ver {count} Proyecto(s)',
       // Stage labels
       stageAll: 'Etapa',

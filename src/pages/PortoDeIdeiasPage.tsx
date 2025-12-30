@@ -129,8 +129,8 @@ const PortoDeIdeiasPage = () => {
   const headerTitle = language === 'pt' ? headerTitlePt : (translatedTitle || headerTitlePt);
   const headerDescription = language === 'pt' ? headerDescriptionPt : (translatedDescription || headerDescriptionPt);
 
-  // Preload de traduções quando dados carregarem
-  const preloadItems = createTranslationItems.forProjectList(projects);
+  // Preload de traduções usando o prefixo "grid" que corresponde ao ProjectGrid
+  const preloadItems = createTranslationItems.forProjectList(projects, "grid");
   usePreloadTranslations(preloadItems, !loading);
   
   // Filters
