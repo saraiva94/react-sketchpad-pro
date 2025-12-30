@@ -5,7 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { translationManager } from "@/lib/translationManager";
 import { LayoutGrid, Eye, EyeOff, Save, GripVertical, Star } from "lucide-react";
+
+type TargetLanguage = "en" | "es";
 
 interface Project {
   id: string;
@@ -108,10 +111,32 @@ export function PortoIdeiasCardsManager({ projects, onFeaturedChange }: PortoIde
     }));
   };
 
+  const warmProjectTranslations = async (projectId: string) => {
+    // Busca os campos reais usados no card de destaque (inclui synopsis)
+    const { data, error } = await supabase
+      .from("projects")
+      .select("id, title, synopsis, project_type")
+      .eq("id", projectId)
+      .maybeSingle();
+
+    if (error || !data) {
+      throw new Error("Não foi possível carregar o projeto para aquecer traduções.");
+    }
+
+    const langs: TargetLanguage[] = ["en", "es"];
+
+    // Aquece traduções por-campo: isso popula o banco e evita chamadas ao gateway na navegação do usuário.
+    for (const lang of langs) {
+      await translationManager.getTranslation(`project_title_${data.id}`, data.title, lang);
+      await translationManager.getTranslation(`project_synopsis_${data.id}`, data.synopsis, lang);
+      await translationManager.getTranslation(`project_type_${data.id}`, data.project_type, lang);
+    }
+  };
+
   const toggleFeatured = async (cardId: string) => {
     const currentFeaturedCount = Object.values(featuredCards).filter(Boolean).length;
     const isCurrentlyFeatured = featuredCards[cardId];
-    
+
     // Can't add more than 3 featured
     if (!isCurrentlyFeatured && currentFeaturedCount >= 3) {
       toast({
@@ -122,9 +147,11 @@ export function PortoIdeiasCardsManager({ projects, onFeaturedChange }: PortoIde
       return;
     }
 
+    const willBeFeatured = !isCurrentlyFeatured;
+
     const newFeatured = {
       ...featuredCards,
-      [cardId]: !isCurrentlyFeatured
+      [cardId]: willBeFeatured,
     };
 
     setFeaturedCards(newFeatured);
@@ -137,10 +164,33 @@ export function PortoIdeiasCardsManager({ projects, onFeaturedChange }: PortoIde
 
     toast({
       title: isCurrentlyFeatured ? "Removido dos destaques" : "Adicionado aos destaques",
-      description: isCurrentlyFeatured 
+      description: isCurrentlyFeatured
         ? "O projeto foi removido dos destaques da homepage."
         : "O projeto foi adicionado aos destaques da homepage.",
     });
+
+    // IMPORTANT: ao adicionar destaque, aquecer traduções EN/ES agora (evita que um card fique diferente por rate-limit)
+    if (willBeFeatured) {
+      toast({
+        title: "Preparando traduções",
+        description: "Aquecendo EN/ES para este destaque (pode levar alguns segundos).",
+      });
+
+      try {
+        await warmProjectTranslations(cardId);
+        toast({
+          title: "Traduções prontas",
+          description: "EN/ES foram armazenados em cache para este destaque.",
+        });
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : "Não foi possível aquecer traduções agora.";
+        toast({
+          title: "Tradução pendente",
+          description: msg + " (se houver limite de requisições, tente novamente em instantes).",
+          variant: "destructive",
+        });
+      }
+    }
 
     // Notify parent to refresh
     onFeaturedChange?.();
