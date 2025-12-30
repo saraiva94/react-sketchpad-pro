@@ -207,14 +207,18 @@ const HomePage = () => {
   const [servicosContent, setServicosContent] = useState<ServicosContent>({
     title: "Nossos Serviços",
     services: [
-      { icon: "Film", text: "Desenvolvimento de projetos culturais e audiovisuais", hoverColor: "group-hover:text-rose-500" },
-      { icon: "Settings", text: "Produção executiva e gestão de equipe", hoverColor: "group-hover:text-amber-500" },
-      { icon: "FileText", text: "Estruturação para leis de incentivo", hoverColor: "group-hover:text-emerald-500" },
-      { icon: "DollarSign", text: "Captação de recursos públicos e privados", hoverColor: "group-hover:text-cyan-500" },
-      { icon: "Calendar", text: "Produção de obras audiovisuais e eventos culturais", hoverColor: "group-hover:text-violet-500" },
-      { icon: "Megaphone", text: "Distribuição, comunicação e lançamento de projetos", hoverColor: "group-hover:text-pink-500" },
-      { icon: "Mic", text: "Criação e roteirização de videocasts e podcasts", hoverColor: "group-hover:text-orange-500" },
-      { icon: "HelpCircle", text: "Consultoria para formatação de projetos", hoverColor: "group-hover:text-sky-500" },
+      { icon: "FileText", text: "Desenvolvimento de roteiros", hoverColor: "group-hover:text-rose-500" },
+      { icon: "Film", text: "Produção de filmes, séries, curtas-metragens e documentários", hoverColor: "group-hover:text-amber-500" },
+      { icon: "Megaphone", text: "Produção de obras teatrais e espetáculos", hoverColor: "group-hover:text-emerald-500" },
+      { icon: "Mic", text: "Criação de videocasts e podcasts", hoverColor: "group-hover:text-cyan-500" },
+      { icon: "Calendar", text: "Produção de conteúdo publicitário e institucional", hoverColor: "group-hover:text-violet-500" },
+      { icon: "Rocket", text: "Elaboração de projetos para leis de incentivo", hoverColor: "group-hover:text-pink-500" },
+      { icon: "DollarSign", text: "Captação de recursos públicos e privados", hoverColor: "group-hover:text-orange-500" },
+      { icon: "Users", text: "Produção executiva e gestão de equipe", hoverColor: "group-hover:text-sky-500" },
+      { icon: "HelpCircle", text: "Consultoria criativa para projetos culturais", hoverColor: "group-hover:text-teal-500" },
+      { icon: "Waves", text: "Distribuição e estratégias de circulação", hoverColor: "group-hover:text-indigo-500" },
+      { icon: "Lightbulb", text: "Criação de portfólios e materiais de apresentação", hoverColor: "group-hover:text-lime-500" },
+      { icon: "Briefcase", text: "Consultoria para formatação e estruturação de projetos", hoverColor: "group-hover:text-rose-500" },
     ]
   });
 
@@ -265,7 +269,6 @@ const HomePage = () => {
   const preloadItems = [
     ...createTranslationItems.forSettings('quem_somos', quemSomosContent),
     ...createTranslationItems.forSettings('nossos_servicos', servicosContent),
-    ...createTranslationItems.forProjectList(featuredProjects),
   ];
   usePreloadTranslations(preloadItems, !loadingProjects);
 
@@ -629,6 +632,39 @@ const HomePage = () => {
   
   const displayItems = buildDisplayProjects();
 
+  // Tradução em lote dos cards de destaque (reduz rate-limit, melhora consistência EN/ES)
+  type FeaturedCardPayload = { id: string; title: string; synopsis: string; project_type: string };
+  const featuredCardsPayload: FeaturedCardPayload[] = (Array.isArray(displayItems) ? displayItems : []).map((it) => ({
+    id: it.data.id,
+    title: it.data.title,
+    synopsis: it.data.synopsis,
+    project_type: it.data.project_type,
+  }));
+
+  const { translated: translatedFeaturedCards } = useAutoTranslate(
+    "homepage_featured_cards",
+    featuredCardsPayload
+  );
+
+  const isValidFeaturedCards = (input: any): input is FeaturedCardPayload[] => {
+    return (
+      Array.isArray(input) &&
+      input.every(
+        (c) =>
+          c &&
+          typeof c.id === "string" &&
+          typeof c.title === "string" &&
+          typeof c.synopsis === "string" &&
+          typeof c.project_type === "string"
+      )
+    );
+  };
+
+  const featuredCardsMap = new Map<string, FeaturedCardPayload>();
+  if (language !== "pt" && isValidFeaturedCards(translatedFeaturedCards)) {
+    translatedFeaturedCards.forEach((c) => featuredCardsMap.set(c.id, c));
+  }
+
   // Intersection observers for animations - each section only animates when entering viewport
   const { ref: heroRef, isInView: heroInView } = useInView<HTMLElement>({ threshold: 0.1 });
   const { ref: quemSomosRef, isInView: quemSomosInView } = useInView<HTMLElement>({ threshold: 0.1, rootMargin: '-50px 0px' });
@@ -813,7 +849,9 @@ const HomePage = () => {
                 const isExample = item.type === 'example';
                 const linkUrl = isExample ? (project as typeof exampleProjects[0]).link : `/project/${project.id}`;
                 const isLeftCard = index % 2 === 0;
-                
+
+                const translatedCard = featuredCardsMap.get(project.id);
+
                 return (
                   <TranslatedProjectCard
                     key={project.id}
@@ -824,6 +862,8 @@ const HomePage = () => {
                       project_type: project.project_type,
                       image_url: project.image_url,
                     }}
+                    translatedProject={translatedCard}
+                    skipTranslation={language !== 'pt' && !!translatedCard}
                     linkUrl={linkUrl}
                     isLeftCard={isLeftCard}
                     heroReady={heroReady}
@@ -853,6 +893,7 @@ const HomePage = () => {
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
               {displayServicos.services.map((service, index) => {
                 const ServiceIcon = iconMap[service.icon] || Star;
+                const skipTranslation = language !== "pt" && isValidServicos(translatedServicos);
                 return (
                   <TranslatedServiceCard
                     key={index}
@@ -862,7 +903,7 @@ const HomePage = () => {
                     hoverColor={service.hoverColor}
                     index={index}
                     inView={servicosInView}
-                    skipTranslation
+                    skipTranslation={skipTranslation}
                   />
                 );
               })}
