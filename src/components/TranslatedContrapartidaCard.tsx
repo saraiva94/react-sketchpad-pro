@@ -55,17 +55,36 @@ export function TranslatedContrapartidaCard({
     }).format(number);
   };
 
-  // Map indice to display label
+  // Map indice to display label - use translations
   const getIndiceLabel = (indice?: string) => {
-    const labels: Record<string, string> = {
-      'por_episodio': 'por episódio',
-      'por_temporada': 'por temporada',
-      'por_projeto': 'por projeto',
-      'por_evento': 'por evento',
-      'por_mes': 'por mês',
-      'por_ano': 'por ano',
+    const labels: Record<string, Record<string, string>> = {
+      pt: {
+        'por_episodio': 'por episódio',
+        'por_temporada': 'por temporada',
+        'por_projeto': 'por projeto',
+        'por_evento': 'por evento',
+        'por_mes': 'por mês',
+        'por_ano': 'por ano',
+      },
+      en: {
+        'por_episodio': 'per episode',
+        'por_temporada': 'per season',
+        'por_projeto': 'per project',
+        'por_evento': 'per event',
+        'por_mes': 'per month',
+        'por_ano': 'per year',
+      },
+      es: {
+        'por_episodio': 'por episodio',
+        'por_temporada': 'por temporada',
+        'por_projeto': 'por proyecto',
+        'por_evento': 'por evento',
+        'por_mes': 'por mes',
+        'por_ano': 'por año',
+      },
     };
-    return indice && indice !== 'none' ? labels[indice] : null;
+    if (!indice || indice === 'none') return null;
+    return labels[language]?.[indice] || labels.pt[indice] || null;
   };
 
   const indiceLabel = getIndiceLabel(contrapartida.indice);
