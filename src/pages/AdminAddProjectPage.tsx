@@ -399,12 +399,14 @@ const AdminAddProjectPage = () => {
                   <CategoriesMultiSelect
                     value={categoriasTags}
                     onChange={setCategoriasTags}
+                    allowCustom={true}
                   />
 
                   {/* Stages Multi-Select */}
                   <StagesMultiSelect 
                     value={stages} 
-                    onChange={setStages} 
+                    onChange={setStages}
+                    allowCustom={true}
                   />
 
                   <div>
@@ -456,6 +458,7 @@ const AdminAddProjectPage = () => {
                   <IncentiveLawsMultiSelect
                     value={incentiveLaws}
                     onChange={setIncentiveLaws}
+                    allowCustom={true}
                   />
                 </div>
 

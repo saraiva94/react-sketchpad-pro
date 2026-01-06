@@ -3,10 +3,14 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Plus, X, Check } from "lucide-react";
+import { Plus, X, Check, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useProjectOptions, useAddProjectOption, useRemoveProjectOption, type OptionItem } from "@/hooks/useProjectOptions";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
-const DEFAULT_CATEGORY_OPTIONS = [
+// Fallback options when database is loading or empty
+const DEFAULT_CATEGORY_OPTIONS: OptionItem[] = [
   { value: "cinema", label: "Cinema" },
   { value: "teatro", label: "Teatro" },
   { value: "audiovisual", label: "Audiovisual" },
@@ -36,37 +40,27 @@ interface CategoriesMultiSelectProps {
   onChange: (categories: string[]) => void;
   label?: string;
   allowCustom?: boolean;
-  availableOptions?: string[];
-  onOptionsChange?: (options: string[]) => void;
 }
 
 export const CategoriesMultiSelect = ({ 
   value, 
   onChange, 
   label = "Categorias",
-  allowCustom = false,
-  availableOptions,
-  onOptionsChange
+  allowCustom = false
 }: CategoriesMultiSelectProps) => {
   const [newTag, setNewTag] = useState("");
   const [confirmingDelete, setConfirmingDelete] = useState<string | null>(null);
   
-  // Internal state for options when allowCustom but no external control
-  const [internalOptions, setInternalOptions] = useState<string[]>(() => 
-    DEFAULT_CATEGORY_OPTIONS.map(o => o.value)
-  );
+  // Load options from database
+  const { data: dbOptions, isLoading } = useProjectOptions('project_categories');
+  const addOptionMutation = useAddProjectOption('project_categories');
+  const removeOptionMutation = useRemoveProjectOption('project_categories');
 
-  // Determine which options to use
-  const optionValues = availableOptions ?? internalOptions;
-  
-  // Build display options
-  const options = optionValues.map(v => {
-    const def = DEFAULT_CATEGORY_OPTIONS.find(d => d.value === v);
-    return { value: v, label: def?.label || v };
-  });
+  // Use database options if available, otherwise fallback to defaults
+  const options = dbOptions && dbOptions.length > 0 ? dbOptions : DEFAULT_CATEGORY_OPTIONS;
 
   const toggleCategory = (category: string) => {
-    if (confirmingDelete) return; // Don't toggle while confirming delete
+    if (confirmingDelete) return;
     if (value.includes(category)) {
       onChange(value.filter(c => c !== category));
     } else {
@@ -74,38 +68,43 @@ export const CategoriesMultiSelect = ({
     }
   };
 
-  const confirmDelete = (optionValue: string) => {
+  const confirmDelete = async (optionValue: string) => {
+    // Check if in use
+    const { data: projectsUsingIt } = await supabase
+      .from('projects')
+      .select('id')
+      .contains('categorias_tags', [optionValue])
+      .limit(1);
+
+    if (projectsUsingIt && projectsUsingIt.length > 0) {
+      toast.error('Esta categoria está sendo usada em projetos e não pode ser removida');
+      setConfirmingDelete(null);
+      return;
+    }
+
     // Remove from selected values
     if (value.includes(optionValue)) {
       onChange(value.filter(c => c !== optionValue));
     }
-    // Remove from options
-    if (onOptionsChange && availableOptions) {
-      onOptionsChange(availableOptions.filter(o => o !== optionValue));
-    } else if (allowCustom) {
-      setInternalOptions(prev => prev.filter(o => o !== optionValue));
-    }
+    
+    // Remove from database
+    await removeOptionMutation.mutateAsync(optionValue);
     setConfirmingDelete(null);
   };
 
-  const addCustomTag = () => {
+  const addCustomTag = async () => {
     const trimmed = newTag.trim();
     if (!trimmed) return;
     
-    // Add to options list
-    if (onOptionsChange && availableOptions) {
-      if (!availableOptions.includes(trimmed)) {
-        onOptionsChange([...availableOptions, trimmed]);
-      }
-    } else if (allowCustom) {
-      if (!internalOptions.includes(trimmed)) {
-        setInternalOptions(prev => [...prev, trimmed]);
-      }
-    }
+    // Create value from label (lowercase, underscores)
+    const newValue = trimmed.toLowerCase().replace(/\s+/g, '_').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    
+    // Add to database
+    await addOptionMutation.mutateAsync({ value: newValue, label: trimmed });
     
     // Select the new option
-    if (!value.includes(trimmed)) {
-      onChange([...value, trimmed]);
+    if (!value.includes(newValue)) {
+      onChange([...value, newValue]);
     }
     setNewTag("");
   };
@@ -116,6 +115,18 @@ export const CategoriesMultiSelect = ({
       addCustomTag();
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-3">
+        {label && <Label>{label}</Label>}
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          <span className="text-sm">Carregando categorias...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-3">
@@ -136,9 +147,13 @@ export const CategoriesMultiSelect = ({
             variant="outline"
             size="icon"
             onClick={addCustomTag}
-            disabled={!newTag.trim()}
+            disabled={!newTag.trim() || addOptionMutation.isPending}
           >
-            <Plus className="h-4 w-4" />
+            {addOptionMutation.isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Plus className="h-4 w-4" />
+            )}
           </Button>
         </div>
       )}
@@ -184,8 +199,13 @@ export const CategoriesMultiSelect = ({
                       confirmDelete(cat.value);
                     }}
                     className="hover:bg-green-500/30 rounded-full p-0.5"
+                    disabled={removeOptionMutation.isPending}
                   >
-                    <Check className="h-3 w-3 text-green-400" />
+                    {removeOptionMutation.isPending ? (
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                    ) : (
+                      <Check className="h-3 w-3 text-green-400" />
+                    )}
                   </button>
                   <button
                     type="button"
