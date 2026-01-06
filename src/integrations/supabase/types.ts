@@ -206,6 +206,7 @@ export type Database = {
           description: string | null
           diferenciais: string | null
           featured_on_homepage: boolean | null
+          festivals_exhibitions: Json | null
           has_incentive_law: boolean | null
           hero_image_url: string | null
           id: string
@@ -246,6 +247,7 @@ export type Database = {
           description?: string | null
           diferenciais?: string | null
           featured_on_homepage?: boolean | null
+          festivals_exhibitions?: Json | null
           has_incentive_law?: boolean | null
           hero_image_url?: string | null
           id?: string
@@ -286,6 +288,7 @@ export type Database = {
           description?: string | null
           diferenciais?: string | null
           featured_on_homepage?: boolean | null
+          festivals_exhibitions?: Json | null
           has_incentive_law?: boolean | null
           hero_image_url?: string | null
           id?: string

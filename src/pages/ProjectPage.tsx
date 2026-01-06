@@ -51,6 +51,12 @@ interface NewsItem {
   date?: string;
 }
 
+interface FestivalItem {
+  title: string;
+  url?: string;
+  date?: string;
+}
+
 interface Project {
   id: string;
   title: string;
@@ -80,6 +86,7 @@ interface Project {
   stages: string[] | null;
   awards: string[] | null;
   news: NewsItem[] | null;
+  festivals_exhibitions: FestivalItem[] | null;
   additional_info: string | null;
 }
 
@@ -209,10 +216,10 @@ const ProjectPage = () => {
       .maybeSingle();
 
     if (!error && data) {
-      // Fetch awards and news from projects table (not in public view)
+      // Fetch awards, news and festivals from projects table (not in public view)
       const { data: extraData } = await supabase
         .from("projects")
-        .select("awards, news")
+        .select("awards, news, festivals_exhibitions")
         .eq("id", id)
         .maybeSingle();
       
@@ -220,6 +227,7 @@ const ProjectPage = () => {
         ...data,
         awards: extraData?.awards || [],
         news: (extraData?.news as unknown as NewsItem[]) || [],
+        festivals_exhibitions: (extraData?.festivals_exhibitions as unknown as FestivalItem[]) || [],
       } as unknown as Project;
       
       setProject(projectData);
@@ -765,12 +773,12 @@ const ProjectPage = () => {
             )}
 
             {/* Recognition and Media */}
-            {((displayProject?.awards && displayProject.awards.length > 0) || (displayProject?.news && displayProject.news.length > 0)) && (
+            {((displayProject?.awards && displayProject.awards.length > 0) || (displayProject?.news && displayProject.news.length > 0) || (displayProject?.festivals_exhibitions && displayProject.festivals_exhibitions.length > 0)) && (
               <section>
                 <h2 className="text-2xl font-serif font-bold text-foreground mb-6">
                   {t.projectDetails.recognitionMedia}
                 </h2>
-                <div className="grid md:grid-cols-2 gap-6">
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {displayProject?.awards && displayProject.awards.length > 0 && (
                     <div>
                       <h3 className="font-semibold text-foreground mb-4 flex items-center">
@@ -789,6 +797,48 @@ const ProjectPage = () => {
                                 showSkeleton={false}
                               />
                             </div>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {displayProject?.festivals_exhibitions && displayProject.festivals_exhibitions.length > 0 && (
+                    <div>
+                      <h3 className="font-semibold text-foreground mb-4 flex items-center">
+                        <Play className="w-5 h-5 text-violet-500 mr-2" />
+                        {t.projectDetails.festivalsExhibitions}
+                      </h3>
+                      <ul className="space-y-3">
+                        {displayProject.festivals_exhibitions.map((item, index) => (
+                          <li key={index}>
+                            {item.url ? (
+                              <a 
+                                href={item.url} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="block p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
+                              >
+                                <TranslatedText 
+                                  namespace={`festival_${id}_${index}`}
+                                  value={item.title}
+                                  as="h4"
+                                  className="font-medium text-foreground mb-1"
+                                  showSkeleton={false}
+                                />
+                                {item.date && <p className="text-sm text-muted-foreground">{item.date}</p>}
+                              </a>
+                            ) : (
+                              <div className="block p-3 bg-muted/50 rounded-lg">
+                                <TranslatedText 
+                                  namespace={`festival_${id}_${index}`}
+                                  value={item.title}
+                                  as="h4"
+                                  className="font-medium text-foreground mb-1"
+                                  showSkeleton={false}
+                                />
+                                {item.date && <p className="text-sm text-muted-foreground">{item.date}</p>}
+                              </div>
+                            )}
                           </li>
                         ))}
                       </ul>

@@ -225,6 +225,7 @@ const AdminDashboard = () => {
   const [editContrapartidas, setEditContrapartidas] = useState<Contrapartida[]>([]);
   const [editAwards, setEditAwards] = useState<string[]>([]);
   const [editNews, setEditNews] = useState<NewsItem[]>([]);
+  const [editFestivals, setEditFestivals] = useState<{ title: string; url?: string; date?: string }[]>([]);
   const [editTeamMembers, setEditTeamMembers] = useState<TeamMemberData[]>([]);
   const [editAdditionalInfo, setEditAdditionalInfo] = useState("");
   
@@ -2881,8 +2882,10 @@ const AdminDashboard = () => {
               <RecognitionEditor
                 awards={editAwards}
                 news={editNews}
+                festivals={editFestivals}
                 onAwardsChange={setEditAwards}
                 onNewsChange={setEditNews}
+                onFestivalsChange={setEditFestivals}
               />
             </div>
 
