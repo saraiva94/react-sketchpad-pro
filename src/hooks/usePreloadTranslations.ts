@@ -187,7 +187,8 @@ export const createTranslationItems = {
 
   /**
    * Cria itens de tradução para uma lista de projetos (cards) usando os mesmos namespaces
-   * do TranslatedProjectCard (project_title_*, project_synopsis_*, project_type_*).
+   * padronizados do ProjectPage e ProjectGrid (project_full_*).
+   * @param namespacePrefix - Ignorado, sempre usa project_full para consistência de cache
    */
   forProjectList: (
     projects: Array<{
@@ -200,21 +201,22 @@ export const createTranslationItems = {
       incentive_law_details?: string | null;
       has_incentive_law?: boolean | null;
     }>,
-    namespacePrefix: string = "project"
+    _namespacePrefix: string = "project_full" // Parâmetro mantido para compatibilidade, mas sempre usa project_full
   ): TranslationItem[] => {
     const items: TranslationItem[] = [];
 
     projects.forEach((project) => {
-      if (project.title) items.push({ namespace: `${namespacePrefix}_title_${project.id}`, value: project.title });
-      if (project.synopsis) items.push({ namespace: `${namespacePrefix}_synopsis_${project.id}`, value: project.synopsis });
-      if (project.project_type) items.push({ namespace: `${namespacePrefix}_type_${project.id}`, value: project.project_type });
-      if (project.location) items.push({ namespace: `${namespacePrefix}_loc_${project.id}`, value: project.location });
+      // Usar SEMPRE namespace project_full_* para consistência de cache global
+      if (project.title) items.push({ namespace: `project_full_${project.id}_title`, value: project.title });
+      if (project.synopsis) items.push({ namespace: `project_full_${project.id}_synopsis`, value: project.synopsis });
+      if (project.project_type) items.push({ namespace: `project_type`, value: project.project_type });
+      if (project.location) items.push({ namespace: `location_${project.id}`, value: project.location });
       // Traduzir a primeira categoria/tag também
       const firstCat = project.categorias_tags?.[0] || project.project_type;
-      if (firstCat) items.push({ namespace: `${namespacePrefix}_badge_cat_${project.id}`, value: firstCat });
+      if (firstCat) items.push({ namespace: `project_full_${project.id}_category`, value: firstCat });
       // Traduzir lei de incentivo
       if (project.has_incentive_law && project.incentive_law_details) {
-        items.push({ namespace: `${namespacePrefix}_law_${project.id}`, value: project.incentive_law_details });
+        items.push({ namespace: `incentive_law_label`, value: project.incentive_law_details });
       }
     });
 

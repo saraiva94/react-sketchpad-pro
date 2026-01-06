@@ -67,11 +67,11 @@ function ProjectCard({
   const project = item.data;
   const stageInfo = getStageInfo(project.stage);
 
-  // Auto-translate all card fields - works automatically for new projects
-  const { translated: translatedTitle, isTranslating: isTranslatingTitle } = useAutoTranslate(`grid_title_${project.id}`, project.title);
-  const { translated: translatedSynopsis, isTranslating: isTranslatingSynopsis } = useAutoTranslate(`grid_synopsis_${project.id}`, project.synopsis);
-  const { translated: translatedType, isTranslating: isTranslatingType } = useAutoTranslate(`grid_type_${project.id}`, project.project_type);
-  const { translated: translatedLocation, isTranslating: isTranslatingLocation } = useAutoTranslate(`grid_loc_${project.id}`, project.location);
+  // Auto-translate all card fields - using standardized namespaces for cache consistency
+  const { translated: translatedTitle, isTranslating: isTranslatingTitle } = useAutoTranslate(`project_full_${project.id}_title`, project.title);
+  const { translated: translatedSynopsis, isTranslating: isTranslatingSynopsis } = useAutoTranslate(`project_full_${project.id}_synopsis`, project.synopsis);
+  const { translated: translatedType, isTranslating: isTranslatingType } = useAutoTranslate(`project_type`, project.project_type);
+  const { translated: translatedLocation, isTranslating: isTranslatingLocation } = useAutoTranslate(`location_${project.id}`, project.location);
 
   const displayTitle = language === "pt" ? project.title : (translatedTitle || project.title);
   const displaySynopsis = language === "pt" ? project.synopsis : (translatedSynopsis || project.synopsis);
@@ -94,7 +94,7 @@ function ProjectCard({
   })();
 
   const { translated: translatedLawLabel } = useAutoTranslate(
-    matchedLaw ? `grid_law_${project.id}` : `grid_law_${project.id}_none`,
+    matchedLaw ? `incentive_law_label` : `incentive_law_none`,
     matchedLaw?.label
   );
 

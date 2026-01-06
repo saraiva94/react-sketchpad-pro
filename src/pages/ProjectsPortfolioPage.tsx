@@ -35,7 +35,7 @@ function TranslatedCategoryButton({
       size="sm"
       onClick={onSelect}
     >
-      <TranslatedText namespace={`portfolio_cat_${value}`} value={value} />
+      <TranslatedText namespace={`category_${value}`} value={value} />
     </Button>
   );
 }
@@ -75,8 +75,8 @@ const ProjectsPortfolioPage = () => {
     setLoading(false);
   };
 
-  // Preload de traduções usando o prefixo "portfolio" que corresponde aos TranslatedText abaixo
-  const preloadItems = createTranslationItems.forProjectList(projects, "portfolio");
+  // Preload de traduções usando namespace padronizado "project_full" para reuso de cache
+  const preloadItems = createTranslationItems.forProjectList(projects, "project_full");
   usePreloadTranslations(preloadItems, !loading);
 
   const categories = [...new Set(projects.flatMap((p) => p.categorias_tags || [p.project_type]))];
@@ -179,22 +179,22 @@ const ProjectsPortfolioPage = () => {
                   <div className="flex items-center justify-between mb-3">
                     <Badge variant="outline" className="text-xs">
                       <TranslatedText
-                        namespace={`portfolio_badge_cat_${project.id}`}
+                        namespace={`project_full_${project.id}_category`}
                         value={project.categorias_tags?.[0] || project.project_type}
                       />
                     </Badge>
                     {project.location && (
                       <span className="text-xs text-muted-foreground flex items-center gap-1">
                         <MapPin className="w-3 h-3" />
-                        <TranslatedText namespace={`portfolio_loc_${project.id}`} value={project.location} />
+                        <TranslatedText namespace={`location_${project.id}`} value={project.location} />
                       </span>
                     )}
                   </div>
                   <h3 className="text-lg font-bold text-foreground mb-2">
-                    <TranslatedText namespace={`portfolio_title_${project.id}`} value={project.title} as="span" />
+                    <TranslatedText namespace={`project_full_${project.id}_title`} value={project.title} as="span" />
                   </h3>
                   <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
-                    <TranslatedText namespace={`portfolio_synopsis_${project.id}`} value={project.synopsis} as="span" />
+                    <TranslatedText namespace={`project_full_${project.id}_synopsis`} value={project.synopsis} as="span" />
                   </p>
                   
                   <div className="flex items-center justify-between pt-4 border-t">
