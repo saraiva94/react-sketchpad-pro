@@ -139,9 +139,9 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
           />
         </Link>
 
-        {/* Admin Button - Icon only (Homepage) */}
+        {/* Admin Button - Icon only (Homepage) - positioned in nav on larger screens */}
         {isAdmin && currentPage === "home" && (
-          <div className="hidden md:flex absolute left-1/2 -translate-x-1/2">
+          <div className="hidden lg:flex absolute left-1/2 -translate-x-1/2">
             <Link
               to="/admin"
               className="p-2 text-foreground bg-accent/15 hover:bg-accent/25 rounded-xl transition-colors"
@@ -155,13 +155,24 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
         {/* Desktop Navigation - Section Links */}
         {showNav && currentPage === "home" && (
           <nav className="hidden md:flex items-center gap-1">
+            {/* Admin Button - In nav for md screens, centered for lg+ */}
+            {isAdmin && (
+              <Link
+                to="/admin"
+                className="lg:hidden p-2 text-foreground bg-accent/15 hover:bg-accent/25 rounded-xl transition-colors mr-2"
+                title={t.nav.admin}
+              >
+                <Settings className="w-5 h-5" />
+              </Link>
+            )}
+
             {/* Projetos em Captação Link with Lightbulb - Destacado com Rainbow */}
             <Link
               to="/porto-de-ideias"
-              className="group flex items-center gap-2 px-4 py-2 text-lg font-semibold transition-all duration-300 rounded-xl rainbow-border-glow rainbow-text-hover"
+              className="group flex items-center gap-2 px-3 lg:px-4 py-2 text-base lg:text-lg font-semibold transition-all duration-300 rounded-xl rainbow-border-glow rainbow-text-hover"
             >
-              <Lightbulb className="w-6 h-6 text-yellow-400 group-hover:fill-yellow-400 group-hover:drop-shadow-[0_0_16px_rgba(250,204,21,1)] group-hover:scale-125 transition-all duration-300" />
-              <span className="text-foreground">{t.nav.projects}</span>
+              <Lightbulb className="w-5 h-5 lg:w-6 lg:h-6 text-yellow-400 group-hover:fill-yellow-400 group-hover:drop-shadow-[0_0_16px_rgba(250,204,21,1)] group-hover:scale-125 transition-all duration-300" />
+              <span className="text-foreground whitespace-nowrap">{t.nav.projects}</span>
             </Link>
 
             {/* Section Links */}
@@ -169,7 +180,7 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
               <button
                 key={section.id}
                 onClick={() => scrollToSection(section.id)}
-                className={`relative px-4 py-2 text-sm font-medium transition-all duration-200 rounded-lg ${
+                className={`relative px-2 lg:px-4 py-2 text-xs lg:text-sm font-medium transition-all duration-200 rounded-lg whitespace-nowrap ${
                   activeSection === section.id
                     ? "text-foreground bg-accent/15"
                     : "text-muted-foreground hover:text-foreground hover:bg-accent/10"
