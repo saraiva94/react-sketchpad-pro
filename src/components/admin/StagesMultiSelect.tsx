@@ -3,10 +3,14 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Plus, X, Check } from "lucide-react";
+import { Plus, X, Check, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useProjectOptions, useAddProjectOption, useRemoveProjectOption, type OptionItem } from "@/hooks/useProjectOptions";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
-const DEFAULT_STAGE_OPTIONS = [
+// Fallback options when database is loading or empty
+const DEFAULT_STAGE_OPTIONS: OptionItem[] = [
   { value: "ideia", label: "Ideia inicial" },
   { value: "development", label: "Desenvolvimento" },
   { value: "captacao", label: "Captação de recursos" },
@@ -23,37 +27,27 @@ interface StagesMultiSelectProps {
   onChange: (stages: string[]) => void;
   label?: string;
   allowCustom?: boolean;
-  availableOptions?: string[];
-  onOptionsChange?: (options: string[]) => void;
 }
 
 export const StagesMultiSelect = ({ 
   value, 
   onChange, 
   label = "Estágios do Projeto",
-  allowCustom = false,
-  availableOptions,
-  onOptionsChange
+  allowCustom = false
 }: StagesMultiSelectProps) => {
   const [newStage, setNewStage] = useState("");
   const [confirmingDelete, setConfirmingDelete] = useState<string | null>(null);
   
-  // Internal state for options when allowCustom but no external control
-  const [internalOptions, setInternalOptions] = useState<string[]>(() => 
-    DEFAULT_STAGE_OPTIONS.map(o => o.value)
-  );
+  // Load options from database
+  const { data: dbOptions, isLoading } = useProjectOptions('project_stages');
+  const addOptionMutation = useAddProjectOption('project_stages');
+  const removeOptionMutation = useRemoveProjectOption('project_stages');
 
-  // Determine which options to use
-  const optionValues = availableOptions ?? internalOptions;
-  
-  // Build display options
-  const options = optionValues.map(v => {
-    const def = DEFAULT_STAGE_OPTIONS.find(d => d.value === v);
-    return { value: v, label: def?.label || v };
-  });
+  // Use database options if available, otherwise fallback to defaults
+  const options = dbOptions && dbOptions.length > 0 ? dbOptions : DEFAULT_STAGE_OPTIONS;
 
   const toggleStage = (stage: string) => {
-    if (confirmingDelete) return; // Don't toggle while confirming delete
+    if (confirmingDelete) return;
     if (value.includes(stage)) {
       onChange(value.filter(s => s !== stage));
     } else {
@@ -61,38 +55,43 @@ export const StagesMultiSelect = ({
     }
   };
 
-  const confirmDelete = (optionValue: string) => {
+  const confirmDelete = async (optionValue: string) => {
+    // Check if in use
+    const { data: projectsUsingIt } = await supabase
+      .from('projects')
+      .select('id')
+      .contains('stages', [optionValue])
+      .limit(1);
+
+    if (projectsUsingIt && projectsUsingIt.length > 0) {
+      toast.error('Este estágio está sendo usado em projetos e não pode ser removido');
+      setConfirmingDelete(null);
+      return;
+    }
+
     // Remove from selected values
     if (value.includes(optionValue)) {
       onChange(value.filter(s => s !== optionValue));
     }
-    // Remove from options
-    if (onOptionsChange && availableOptions) {
-      onOptionsChange(availableOptions.filter(o => o !== optionValue));
-    } else if (allowCustom) {
-      setInternalOptions(prev => prev.filter(o => o !== optionValue));
-    }
+    
+    // Remove from database
+    await removeOptionMutation.mutateAsync(optionValue);
     setConfirmingDelete(null);
   };
 
-  const addCustomStage = () => {
+  const addCustomStage = async () => {
     const trimmed = newStage.trim();
     if (!trimmed) return;
     
-    // Add to options list
-    if (onOptionsChange && availableOptions) {
-      if (!availableOptions.includes(trimmed)) {
-        onOptionsChange([...availableOptions, trimmed]);
-      }
-    } else if (allowCustom) {
-      if (!internalOptions.includes(trimmed)) {
-        setInternalOptions(prev => [...prev, trimmed]);
-      }
-    }
+    // Create value from label (lowercase, underscores)
+    const newValue = trimmed.toLowerCase().replace(/\s+/g, '_').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    
+    // Add to database
+    await addOptionMutation.mutateAsync({ value: newValue, label: trimmed });
     
     // Select the new option
-    if (!value.includes(trimmed)) {
-      onChange([...value, trimmed]);
+    if (!value.includes(newValue)) {
+      onChange([...value, newValue]);
     }
     setNewStage("");
   };
@@ -103,6 +102,18 @@ export const StagesMultiSelect = ({
       addCustomStage();
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-3">
+        {label && <Label>{label}</Label>}
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          <span className="text-sm">Carregando estágios...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-3">
@@ -123,9 +134,13 @@ export const StagesMultiSelect = ({
             variant="outline"
             size="icon"
             onClick={addCustomStage}
-            disabled={!newStage.trim()}
+            disabled={!newStage.trim() || addOptionMutation.isPending}
           >
-            <Plus className="h-4 w-4" />
+            {addOptionMutation.isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Plus className="h-4 w-4" />
+            )}
           </Button>
         </div>
       )}
@@ -171,8 +186,13 @@ export const StagesMultiSelect = ({
                       confirmDelete(stage.value);
                     }}
                     className="hover:bg-green-500/30 rounded-full p-0.5"
+                    disabled={removeOptionMutation.isPending}
                   >
-                    <Check className="h-3 w-3 text-green-400" />
+                    {removeOptionMutation.isPending ? (
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                    ) : (
+                      <Check className="h-3 w-3 text-green-400" />
+                    )}
                   </button>
                   <button
                     type="button"

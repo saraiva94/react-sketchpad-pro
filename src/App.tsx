@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { LanguageProvider } from "@/hooks/useLanguage";
 import { ScrollToTop } from "@/components/ScrollToTop";
+import { useRealtimeSettings } from "@/hooks/useRealtimeSettings";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -21,11 +22,18 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+// Component to initialize realtime sync
+const RealtimeSync = () => {
+  useRealtimeSettings();
+  return null;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <LanguageProvider>
       <ThemeProvider>
         <TooltipProvider>
+          <RealtimeSync />
           <Toaster />
           <Sonner />
           <BrowserRouter>

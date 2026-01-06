@@ -3,10 +3,14 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Plus, X, Check } from "lucide-react";
+import { Plus, X, Check, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useProjectOptions, useAddProjectOption, useRemoveProjectOption, type OptionItem } from "@/hooks/useProjectOptions";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
-const DEFAULT_INCENTIVE_LAW_OPTIONS = [
+// Fallback options when database is loading or empty
+const DEFAULT_INCENTIVE_LAW_OPTIONS: OptionItem[] = [
   { value: "lei_rouanet", label: "Lei Rouanet" },
   { value: "lei_audiovisual", label: "Lei do Audiovisual" },
   { value: "icms_rj", label: "ICMS RJ" },
@@ -20,37 +24,27 @@ interface IncentiveLawsMultiSelectProps {
   onChange: (laws: string[]) => void;
   label?: string;
   allowCustom?: boolean;
-  availableOptions?: string[];
-  onOptionsChange?: (options: string[]) => void;
 }
 
 export const IncentiveLawsMultiSelect = ({ 
   value, 
   onChange, 
   label = "Leis de Incentivo",
-  allowCustom = false,
-  availableOptions,
-  onOptionsChange
+  allowCustom = false
 }: IncentiveLawsMultiSelectProps) => {
   const [newLaw, setNewLaw] = useState("");
   const [confirmingDelete, setConfirmingDelete] = useState<string | null>(null);
   
-  // Internal state for options when allowCustom but no external control
-  const [internalOptions, setInternalOptions] = useState<string[]>(() => 
-    DEFAULT_INCENTIVE_LAW_OPTIONS.map(o => o.value)
-  );
+  // Load options from database
+  const { data: dbOptions, isLoading } = useProjectOptions('incentive_laws');
+  const addOptionMutation = useAddProjectOption('incentive_laws');
+  const removeOptionMutation = useRemoveProjectOption('incentive_laws');
 
-  // Determine which options to use
-  const optionValues = availableOptions ?? internalOptions;
-  
-  // Build display options
-  const options = optionValues.map(v => {
-    const def = DEFAULT_INCENTIVE_LAW_OPTIONS.find(d => d.value === v);
-    return { value: v, label: def?.label || v };
-  });
+  // Use database options if available, otherwise fallback to defaults
+  const options = dbOptions && dbOptions.length > 0 ? dbOptions : DEFAULT_INCENTIVE_LAW_OPTIONS;
 
   const toggleLaw = (law: string) => {
-    if (confirmingDelete) return; // Don't toggle while confirming delete
+    if (confirmingDelete) return;
     if (value.includes(law)) {
       onChange(value.filter(l => l !== law));
     } else {
@@ -58,38 +52,43 @@ export const IncentiveLawsMultiSelect = ({
     }
   };
 
-  const confirmDelete = (optionValue: string) => {
+  const confirmDelete = async (optionValue: string) => {
+    // Check if in use (incentive_law_details is a text field, not array)
+    const { data: projectsUsingIt } = await supabase
+      .from('projects')
+      .select('id')
+      .ilike('incentive_law_details', `%${optionValue}%`)
+      .limit(1);
+
+    if (projectsUsingIt && projectsUsingIt.length > 0) {
+      toast.error('Esta lei de incentivo está sendo usada em projetos e não pode ser removida');
+      setConfirmingDelete(null);
+      return;
+    }
+
     // Remove from selected values
     if (value.includes(optionValue)) {
       onChange(value.filter(l => l !== optionValue));
     }
-    // Remove from options
-    if (onOptionsChange && availableOptions) {
-      onOptionsChange(availableOptions.filter(o => o !== optionValue));
-    } else if (allowCustom) {
-      setInternalOptions(prev => prev.filter(o => o !== optionValue));
-    }
+    
+    // Remove from database
+    await removeOptionMutation.mutateAsync(optionValue);
     setConfirmingDelete(null);
   };
 
-  const addCustomLaw = () => {
+  const addCustomLaw = async () => {
     const trimmed = newLaw.trim();
     if (!trimmed) return;
     
-    // Add to options list
-    if (onOptionsChange && availableOptions) {
-      if (!availableOptions.includes(trimmed)) {
-        onOptionsChange([...availableOptions, trimmed]);
-      }
-    } else if (allowCustom) {
-      if (!internalOptions.includes(trimmed)) {
-        setInternalOptions(prev => [...prev, trimmed]);
-      }
-    }
+    // Create value from label (lowercase, underscores)
+    const newValue = trimmed.toLowerCase().replace(/\s+/g, '_').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    
+    // Add to database
+    await addOptionMutation.mutateAsync({ value: newValue, label: trimmed });
     
     // Select the new option
-    if (!value.includes(trimmed)) {
-      onChange([...value, trimmed]);
+    if (!value.includes(newValue)) {
+      onChange([...value, newValue]);
     }
     setNewLaw("");
   };
@@ -100,6 +99,18 @@ export const IncentiveLawsMultiSelect = ({
       addCustomLaw();
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-3">
+        {label && <Label>{label}</Label>}
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          <span className="text-sm">Carregando leis de incentivo...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-3">
@@ -120,9 +131,13 @@ export const IncentiveLawsMultiSelect = ({
             variant="outline"
             size="icon"
             onClick={addCustomLaw}
-            disabled={!newLaw.trim()}
+            disabled={!newLaw.trim() || addOptionMutation.isPending}
           >
-            <Plus className="h-4 w-4" />
+            {addOptionMutation.isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Plus className="h-4 w-4" />
+            )}
           </Button>
         </div>
       )}
@@ -168,8 +183,13 @@ export const IncentiveLawsMultiSelect = ({
                       confirmDelete(law.value);
                     }}
                     className="hover:bg-green-500/30 rounded-full p-0.5"
+                    disabled={removeOptionMutation.isPending}
                   >
-                    <Check className="h-3 w-3 text-green-400" />
+                    {removeOptionMutation.isPending ? (
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                    ) : (
+                      <Check className="h-3 w-3 text-green-400" />
+                    )}
                   </button>
                   <button
                     type="button"
@@ -199,7 +219,6 @@ export const normalizeIncentiveLawValue = (raw: string): string => {
   const v = raw.trim();
   const lower = v.toLowerCase();
 
-  // Common legacy values / labels -> canonical option values
   if (lower === "lei rouanet" || lower === "rouanet" || lower.includes("rouanet")) return "lei_rouanet";
   if (lower === "lei do audiovisual" || lower === "audiovisual" || lower.includes("audiovisual")) return "lei_audiovisual";
   if (lower === "icms rj" || lower === "icms" || lower.includes("icms")) return "icms_rj";
