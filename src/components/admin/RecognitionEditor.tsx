@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, X, Award, Newspaper } from "lucide-react";
+import { Plus, X, Award, Newspaper, Film } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,21 +10,32 @@ export interface NewsItem {
   date?: string;
 }
 
+export interface FestivalItem {
+  title: string;
+  url?: string;
+  date?: string;
+}
+
 interface RecognitionEditorProps {
   awards: string[];
   news: NewsItem[];
+  festivals: FestivalItem[];
   onAwardsChange: (awards: string[]) => void;
   onNewsChange: (news: NewsItem[]) => void;
+  onFestivalsChange: (festivals: FestivalItem[]) => void;
 }
 
 export function RecognitionEditor({ 
   awards, 
-  news, 
+  news,
+  festivals,
   onAwardsChange, 
-  onNewsChange 
+  onNewsChange,
+  onFestivalsChange
 }: RecognitionEditorProps) {
   const [newAward, setNewAward] = useState("");
   const [newNewsItem, setNewNewsItem] = useState<NewsItem>({ title: "", url: "", date: "" });
+  const [newFestivalItem, setNewFestivalItem] = useState<FestivalItem>({ title: "", url: "", date: "" });
 
   const addAward = () => {
     if (!newAward.trim()) return;
@@ -48,6 +59,20 @@ export function RecognitionEditor({
 
   const removeNewsItem = (index: number) => {
     onNewsChange(news.filter((_, i) => i !== index));
+  };
+
+  const addFestivalItem = () => {
+    if (!newFestivalItem.title.trim()) return;
+    onFestivalsChange([...festivals, { 
+      title: newFestivalItem.title.trim(),
+      url: newFestivalItem.url?.trim() || undefined,
+      date: newFestivalItem.date?.trim() || undefined
+    }]);
+    setNewFestivalItem({ title: "", url: "", date: "" });
+  };
+
+  const removeFestivalItem = (index: number) => {
+    onFestivalsChange(festivals.filter((_, i) => i !== index));
   };
 
   return (
@@ -100,6 +125,65 @@ export function RecognitionEditor({
             disabled={!newAward.trim()}
           >
             <Plus className="w-4 h-4" />
+          </Button>
+        </div>
+      </div>
+
+      {/* Festivals Section */}
+      <div className="space-y-4">
+        <Label className="flex items-center gap-2">
+          <Film className="w-4 h-4 text-violet-500" />
+          Exibições e Festivais
+        </Label>
+        
+        {festivals.length > 0 && (
+          <ul className="space-y-2">
+            {festivals.map((item, index) => (
+              <li key={index} className="flex items-center justify-between p-2 bg-muted/50 rounded-lg">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{item.title}</p>
+                  {item.date && <p className="text-xs text-muted-foreground">{item.date}</p>}
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => removeFestivalItem(index)}
+                >
+                  <X className="w-4 h-4 text-destructive" />
+                </Button>
+              </li>
+            ))}
+          </ul>
+        )}
+        
+        <div className="space-y-2 p-3 border border-dashed rounded-lg">
+          <Input
+            placeholder="Nome do Festival/Exibição *"
+            value={newFestivalItem.title}
+            onChange={(e) => setNewFestivalItem({ ...newFestivalItem, title: e.target.value })}
+          />
+          <div className="grid grid-cols-2 gap-2">
+            <Input
+              placeholder="URL (opcional)"
+              value={newFestivalItem.url}
+              onChange={(e) => setNewFestivalItem({ ...newFestivalItem, url: e.target.value })}
+            />
+            <Input
+              placeholder="Data (ex: 15/03/2024)"
+              value={newFestivalItem.date}
+              onChange={(e) => setNewFestivalItem({ ...newFestivalItem, date: e.target.value })}
+            />
+          </div>
+          <Button 
+            type="button" 
+            variant="secondary" 
+            size="sm"
+            onClick={addFestivalItem}
+            disabled={!newFestivalItem.title.trim()}
+          >
+            <Plus className="w-4 h-4 mr-1" />
+            Adicionar Festival/Exibição
           </Button>
         </div>
       </div>

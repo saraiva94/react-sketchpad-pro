@@ -60,6 +60,7 @@ const AdminAddProjectPage = () => {
   // Reconhecimentos e Mídia
   const [awards, setAwards] = useState<string[]>([]);
   const [news, setNews] = useState<NewsItem[]>([]);
+  const [festivals, setFestivals] = useState<{ title: string; url?: string; date?: string }[]>([]);
   
   // Financiamento
   const [valorSugerido, setValorSugerido] = useState("");
@@ -198,6 +199,7 @@ const AdminAddProjectPage = () => {
           presentation_document_url: presentationDocUrl || null,
           awards: awards.length > 0 ? awards : [],
           news: news.length > 0 ? news : [],
+          festivals_exhibitions: festivals.length > 0 ? festivals : [],
           additional_info: additionalInfo || null,
           admin_notes: adminNotes || null,
           status: "approved",
@@ -643,8 +645,10 @@ const AdminAddProjectPage = () => {
                 <RecognitionEditor
                   awards={awards}
                   news={news}
+                  festivals={festivals}
                   onAwardsChange={setAwards}
                   onNewsChange={setNews}
+                  onFestivalsChange={setFestivals}
                 />
 
                 {/* Notas do Administrador */}

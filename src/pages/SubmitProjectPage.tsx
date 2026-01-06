@@ -72,6 +72,7 @@ const SubmitProjectPage = () => {
   // Reconhecimentos e Mídia
   const [awards, setAwards] = useState<string[]>([]);
   const [news, setNews] = useState<NewsItem[]>([]);
+  const [festivals, setFestivals] = useState<{ title: string; url?: string; date?: string }[]>([]);
   
   // Financiamento
   const [valorSugerido, setValorSugerido] = useState("");
@@ -218,6 +219,7 @@ const SubmitProjectPage = () => {
           diferenciais: diferenciais || null,
           awards: awards.length > 0 ? awards : [],
           news: news.length > 0 ? news : [],
+          festivals_exhibitions: festivals.length > 0 ? festivals : [],
           presentation_document_url: presentationDocUrl || null,
           stages: stages.length > 0 ? stages : null,
           has_incentive_law: incentiveLaws.length > 0,
@@ -690,8 +692,10 @@ const SubmitProjectPage = () => {
                 <RecognitionEditor
                   awards={awards}
                   news={news}
+                  festivals={festivals}
                   onAwardsChange={setAwards}
                   onNewsChange={setNews}
+                  onFestivalsChange={setFestivals}
                 />
 
                 {/* Impacto */}
