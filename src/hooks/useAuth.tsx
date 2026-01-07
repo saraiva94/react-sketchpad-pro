@@ -106,7 +106,11 @@ export function useAuth() {
   const signOut = async () => {
     // Limpa localStorage
     localStorage.removeItem("isAdminLoggedIn");
+    
+    // Limpa todos os estados locais
     setIsAdmin(false);
+    setUser(null);
+    setSession(null);
     
     // Também faz signOut do Supabase se houver sessão
     const { error } = await supabase.auth.signOut();

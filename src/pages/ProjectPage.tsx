@@ -106,6 +106,7 @@ interface ProjectMember {
     twitter?: string;
     website?: string;
     imdb?: string;
+    whatsapp?: string;
   } | null;
   detalhes?: string | null;
 }

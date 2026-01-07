@@ -903,6 +903,17 @@ const HomePage = () => {
               })}
             </div>
           )}
+
+          {/* Botão "Conheça todos os projetos" */}
+          <div className={`flex justify-center mt-12 transition-all duration-700 ${portoIdeiasInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`} style={{ transitionDelay: '400ms' }}>
+            <Link
+              to="/porto-de-ideias"
+              className="group inline-flex items-center gap-2 px-8 py-4 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-1"
+            >
+              {t.home.viewAllProjects}
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </div>
         </div>
       </section>
 

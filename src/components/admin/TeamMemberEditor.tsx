@@ -17,7 +17,8 @@ import {
   ExternalLink,
   Twitter,
   AlertCircle,
-  Check
+  Check,
+  MessageCircle
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -95,6 +96,18 @@ const socialValidation = {
       }
       return { valid: false, message: "Formato inválido. Use uma URL válida (https://...)" };
     }
+  },
+  whatsapp: {
+    validate: (value: string) => {
+      if (!value) return { valid: true, message: "" };
+      // Remove todos os caracteres não numéricos para validação
+      const digitsOnly = value.replace(/\D/g, '');
+      // WhatsApp precisa de pelo menos 10 dígitos (DDD + número)
+      if (digitsOnly.length >= 10 && digitsOnly.length <= 15) {
+        return { valid: true, message: "" };
+      }
+      return { valid: false, message: "Use apenas números: código do país + DDD + número (ex: 5511999999999)" };
+    }
   }
 };
 
@@ -114,6 +127,7 @@ export interface TeamMemberData {
     twitter?: string;
     imdb?: string;
     website?: string;
+    whatsapp?: string;
   };
   curriculum_url?: string;
   detalhes?: string;
@@ -493,6 +507,34 @@ export const TeamMemberEditor = ({ members, onChange }: TeamMemberEditorProps) =
                         </TooltipContent>
                       </Tooltip>
                     ) : member.social_links?.website ? (
+                      <Check className="w-4 h-4 text-green-500 absolute right-2" />
+                    ) : null}
+                  </div>
+
+                  {/* WhatsApp */}
+                  <div className="relative flex items-center gap-2">
+                    <MessageCircle className="w-4 h-4 text-green-500 shrink-0" />
+                    <Input
+                      value={member.social_links?.whatsapp || ""}
+                      onChange={(e) => {
+                        // Permite apenas números
+                        const value = e.target.value.replace(/\D/g, '');
+                        updateSocialLink(index, "whatsapp", value);
+                      }}
+                      onBlur={(e) => validateSocialLink(index, "whatsapp", e.target.value)}
+                      placeholder="5511999999999"
+                      className={`flex-1 ${validationErrors[`${index}-whatsapp`] ? 'border-red-500 focus-visible:ring-red-500' : member.social_links?.whatsapp ? 'border-green-500' : ''}`}
+                    />
+                    {validationErrors[`${index}-whatsapp`] ? (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <AlertCircle className="w-4 h-4 text-red-500 absolute right-2" />
+                        </TooltipTrigger>
+                        <TooltipContent className="bg-red-500 text-white">
+                          {validationErrors[`${index}-whatsapp`]}
+                        </TooltipContent>
+                      </Tooltip>
+                    ) : member.social_links?.whatsapp ? (
                       <Check className="w-4 h-4 text-green-500 absolute right-2" />
                     ) : null}
                   </div>
