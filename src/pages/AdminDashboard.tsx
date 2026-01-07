@@ -254,7 +254,7 @@ const AdminDashboard = () => {
   const [showDeleteContactsConfirm, setShowDeleteContactsConfirm] = useState(false);
   const [contactsProjectToDelete, setContactsProjectToDelete] = useState<string | null>(null);
 
-  const { user, loading: authLoading, isAdmin } = useAuth();
+  const { user, loading: authLoading, isAdmin, signOut } = useAuth();
 
   useEffect(() => {
     if (authLoading) return;
@@ -1179,7 +1179,7 @@ const AdminDashboard = () => {
   };
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
+    await signOut();
     navigate("/");
   };
 
