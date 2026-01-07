@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -515,7 +515,8 @@ const HomePage = () => {
   };
 
   // Projetos de exemplo para exibir quando não há projetos reais em destaque
-  const exampleProjectsPt = [
+  // CRITICAL: useMemo para evitar recriação e loop infinito no useAutoTranslate
+  const exampleProjectsPt = useMemo(() => [
     {
       id: "exemplo-cultura-legado",
       title: "Sua Cultura, Seu Legado",
@@ -576,7 +577,7 @@ const HomePage = () => {
       impacto_cultural: "Ampliação do acesso à música brasileira através de plataformas digitais e eventos presenciais.",
       link: "/exemplo/recursos-disponiveis",
     },
-  ];
+  ], []);
 
   // Auto-tradução dos projetos de exemplo
   const { translated: translatedExampleProjects } = useAutoTranslate('example_projects', exampleProjectsPt);
@@ -585,10 +586,10 @@ const HomePage = () => {
     : (Array.isArray(translatedExampleProjects) ? translatedExampleProjects : exampleProjectsPt);
 
   // Construir lista de projetos combinando reais + exemplos respeitando a ordem global
-  const buildDisplayProjects = () => {
-    // Criar lista de todos os itens com seu tipo
-    type DisplayItem = { type: 'real'; data: Project } | { type: 'example'; data: typeof exampleProjectsPt[0] };
-    
+  // CRITICAL: useMemo para evitar recriação e loop infinito
+  type DisplayItem = { type: 'real'; data: Project } | { type: 'example'; data: typeof exampleProjectsPt[0] };
+  
+  const displayItems = useMemo<DisplayItem[]>(() => {
     // Garantir que featuredProjects seja um array
     const safeProjects = Array.isArray(featuredProjects) ? featuredProjects : [];
     const safeExamples = Array.isArray(exampleProjects) ? exampleProjects : exampleProjectsPt;
@@ -623,18 +624,19 @@ const HomePage = () => {
     }
     
     return allItems.slice(0, 4);
-  };
-  
-  const displayItems = buildDisplayProjects();
+  }, [featuredProjects, exampleProjects, exampleProjectsPt, featuredExampleCards, featuredVisibility, featuredOrder]);
 
   // Tradução em lote dos cards de destaque (reduz rate-limit, melhora consistência EN/ES)
+  // CRITICAL: useMemo para evitar recriação e loop infinito no useAutoTranslate
   type FeaturedCardPayload = { id: string; title: string; synopsis: string; project_type: string };
-  const featuredCardsPayload: FeaturedCardPayload[] = (Array.isArray(displayItems) ? displayItems : []).map((it) => ({
-    id: it.data.id,
-    title: it.data.title,
-    synopsis: it.data.synopsis,
-    project_type: it.data.project_type,
-  }));
+  const featuredCardsPayload = useMemo<FeaturedCardPayload[]>(() => {
+    return (Array.isArray(displayItems) ? displayItems : []).map((it) => ({
+      id: it.data.id,
+      title: it.data.title,
+      synopsis: it.data.synopsis,
+      project_type: it.data.project_type,
+    }));
+  }, [displayItems]);
 
   const { translated: translatedFeaturedCards } = useAutoTranslate(
     "homepage_featured_cards",
