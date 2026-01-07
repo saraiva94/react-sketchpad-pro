@@ -2,7 +2,7 @@
  * Hook para traduzir automaticamente conteúdo do backend quando o idioma não for PT.
  * Usa o TranslationManager com sistema de fila e rate limiting.
  */
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useLanguage } from "./useLanguage";
 import { translationManager } from "@/lib/translationManager";
 
@@ -20,14 +20,18 @@ export function useAutoTranslate<T = unknown>(
   const [retryTick, setRetryTick] = useState(0);
   const retryTimeoutRef = useRef<number | null>(null);
   const mountedRef = useRef(true);
-  const lastValueRef = useRef<string>("");
-  const lastLangRef = useRef<string>(language);
+  const lastTranslatedKeyRef = useRef<string>("");
 
-  // Estabilizar o stringify do valor
-  const getValueKey = useCallback((v: T | null | undefined): string => {
-    if (v === null || v === undefined) return "";
-    return typeof v === "string" ? v : JSON.stringify(v);
-  }, []);
+  // Estabilizar o stringify do valor - memoizado para evitar recálculos
+  const valueKey = useMemo(() => {
+    if (value === null || value === undefined) return "";
+    return typeof value === "string" ? value : JSON.stringify(value);
+  }, [value]);
+
+  // Chave única que combina namespace, valor e idioma
+  const translationKey = useMemo(() => {
+    return `${namespace}:${language}:${valueKey}`;
+  }, [namespace, language, valueKey]);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -45,29 +49,19 @@ export function useAutoTranslate<T = unknown>(
     if (language === "pt" || value === null || value === undefined) {
       setTranslated(value);
       setIsTranslating(false);
-      lastLangRef.current = language;
       return;
     }
 
-    const valueKey = getValueKey(value);
-    const languageChanged = language !== lastLangRef.current;
-    const valueChanged = valueKey !== lastValueRef.current;
+    // CRÍTICO: Evitar loop infinito - só processa se a chave realmente mudou
     const isRetry = retryTick > 0;
-
-    // IMPORTANTE: Quando o idioma muda, resetar o estado de tradução para o valor original
-    // Isso evita mostrar tradução do idioma anterior enquanto busca a nova
-    if (languageChanged) {
-      setTranslated(value);
-    }
-
-    // Sempre atualiza refs imediatamente
-    lastValueRef.current = valueKey;
-    lastLangRef.current = language;
-
-    // Se nada mudou e não é retry, não refaz a tradução
-    if (!languageChanged && !valueChanged && !isRetry) {
+    const keyChanged = translationKey !== lastTranslatedKeyRef.current;
+    
+    if (!keyChanged && !isRetry) {
       return;
     }
+
+    // Atualiza a ref ANTES de processar para evitar loops
+    lastTranslatedKeyRef.current = translationKey;
 
     // Reset retryTick após usar
     if (isRetry) {
@@ -118,7 +112,7 @@ export function useAutoTranslate<T = unknown>(
     return () => {
       cancelled = true;
     };
-  }, [namespace, value, language, getValueKey, retryTick]);
+  }, [translationKey, retryTick, namespace, value, language]);
 
   // Sempre retorna um valor válido: tradução ou fallback para original
   return {
