@@ -30,7 +30,9 @@ const stopAllVideos = (videoRefs: React.MutableRefObject<(HTMLVideoElement | nul
 
 export function VideoCarousel({ videos, loading = false, displayCount = 5, onAnimationComplete }: VideoCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  // Start with cards already in position but hidden, then fade in
   const [hasEntered, setHasEntered] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
   const hasCalledComplete = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
@@ -94,13 +96,14 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5, onAni
     };
   }, []);
 
-  // Entrance animation - single expansion from center to final positions
+  // Entrance animation - cards start in position but hidden, then fade in together
   useEffect(() => {
     if (!loading && !hasEntered) {
-      // Small delay then expand to final positions
-      const expandTimer = setTimeout(() => {
+      // Cards are already positioned, just make them visible with a fade
+      const fadeTimer = setTimeout(() => {
         setHasEntered(true);
-      }, 50);
+        setIsVisible(true);
+      }, 100);
       
       // Notify parent after animation completes
       const completeTimer = setTimeout(() => {
@@ -108,10 +111,10 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5, onAni
           onAnimationComplete?.();
           hasCalledComplete.current = true;
         }
-      }, 850);
+      }, 600);
       
       return () => {
-        clearTimeout(expandTimer);
+        clearTimeout(fadeTimer);
         clearTimeout(completeTimer);
       };
     }
@@ -209,14 +212,13 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5, onAni
   const getCardStyles = (position: number, forEntrance: boolean = false) => {
     const absPosition = Math.abs(position);
     
-    // Initial state - all cards stacked at center
-    if (!hasEntered && forEntrance) {
-      const initialScale = 1 - (absPosition * 0.1);
+    // Initial state - cards already in final position but invisible (prevents overlap flash)
+    if (!isVisible && forEntrance) {
       return {
-        opacity: absPosition <= 2 ? 0.5 : 0,
-        transform: `translateX(0) translateZ(${-absPosition * 15}px) scale(${Math.max(0.7, initialScale)})`,
+        opacity: 0,
+        transform: getTransformForPosition(position, absPosition, displayCount),
         zIndex: 10 - absPosition,
-        visibility: absPosition <= 2 ? 'visible' as const : 'hidden' as const,
+        visibility: 'hidden' as const,
       };
     }
     
@@ -278,36 +280,34 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5, onAni
       };
     }
 
-    // Scale hierarchy: center=1, first level=0.70, second level=0.50
-    let scale: number;
-    let translateX: number;
-    let translateZ: number;
-    
-    if (position === 0) {
-      scale = 1;
-      translateX = 0;
-      translateZ = 0;
-    } else if (absPosition === 1) {
-      // First level cards - medium size, overlapping with center
-      scale = 0.70;
-      translateX = position * 38;
-      translateZ = -80;
-    } else {
-      // Second level cards - smallest, overlapping more with first level
-      scale = 0.50;
-      translateX = position * 35;
-      translateZ = -160;
-    }
-    
     const opacity = 1;
     const zIndex = 10 - absPosition;
 
     return {
       opacity,
-      transform: `translateX(${translateX}%) translateZ(${translateZ}px) scale(${scale})`,
+      transform: getTransformForPosition(position, absPosition, displayCount),
       zIndex,
       visibility: 'visible' as const,
     };
+  };
+  
+  // Helper to calculate transform based on position
+  const getTransformForPosition = (position: number, absPosition: number, count: number): string => {
+    if (count === 1) {
+      return position === 0 ? `translateX(0) translateZ(0) scale(1)` : `translateX(${position * 100}%) scale(0.4)`;
+    }
+    
+    if (count === 3) {
+      if (position === 0) return `translateX(0) translateZ(0) scale(1)`;
+      if (absPosition === 1) return `translateX(${position * 45}%) translateZ(-80px) scale(0.75)`;
+      return `translateX(${position * 100}%) scale(0.4)`;
+    }
+    
+    // 5 video mode
+    if (position === 0) return `translateX(0) translateZ(0) scale(1)`;
+    if (absPosition === 1) return `translateX(${position * 38}%) translateZ(-80px) scale(0.70)`;
+    if (absPosition === 2) return `translateX(${position * 35}%) translateZ(-160px) scale(0.50)`;
+    return `translateX(${position * 100}%) scale(0.4)`;
   };
 
   // Get skeleton card styles based on position
@@ -469,9 +469,6 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5, onAni
           const hasVideo = video && video.url;
           const isCenter = position === 0;
 
-          // Calculate staggered delay for entrance animation
-          const staggerDelay = !hasEntered ? Math.abs(position) * 80 : 0;
-
           return (
             <div
               key={index}
@@ -480,9 +477,8 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5, onAni
                 ...styles,
                 transformStyle: 'preserve-3d',
                 cursor: isCenter ? 'default' : 'pointer',
-                transitionDuration: '700ms',
+                transitionDuration: isVisible ? '500ms' : '0ms',
                 transitionTimingFunction: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-                transitionDelay: `${staggerDelay}ms`,
               }}
               onClick={() => hasEntered && !isCenter && setCurrentIndex(index)}
             >
