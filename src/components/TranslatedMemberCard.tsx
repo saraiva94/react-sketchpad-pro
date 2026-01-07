@@ -8,7 +8,8 @@ import {
   Youtube,
   Twitter,
   Globe,
-  FileText
+  FileText,
+  MessageCircle
 } from "lucide-react";
 
 interface ProjectMember {
@@ -27,6 +28,7 @@ interface ProjectMember {
     twitter?: string;
     website?: string;
     imdb?: string;
+    whatsapp?: string;
   } | null;
   detalhes?: string | null;
 }
@@ -122,6 +124,11 @@ export function TranslatedMemberCard({ member, getInitials }: TranslatedMemberCa
                   <Globe className="w-4 h-4 text-emerald-500" />
                 </a>
               )
+            )}
+            {member.social_links?.whatsapp && (
+              <a href={`https://wa.me/${member.social_links.whatsapp.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="social-link-circle social-link-whatsapp w-8 h-8 rounded-full bg-green-500/10 flex items-center justify-center hover:bg-green-500/30" title="WhatsApp">
+                <MessageCircle className="w-4 h-4 text-green-500" />
+              </a>
             )}
             {member.curriculum_url && (
               <a href={member.curriculum_url} target="_blank" rel="noopener noreferrer" className="social-link-circle social-link-cv w-8 h-8 rounded-full bg-orange-500/10 flex items-center justify-center hover:bg-orange-500/30" title="Baixar Currículo">

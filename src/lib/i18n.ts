@@ -32,6 +32,7 @@ export const translations = {
       ecosystemTitle: 'Um Ecossistema de Conexões',
       ecosystemSubtitle: 'Mais que uma vitrine, somos um porto seguro onde as ideias atracam, ganham força e partem para o mundo.',
       statsNote: 'Estatísticas de projetos reais cadastrados na plataforma',
+      viewAllProjects: 'Conheça todos os projetos',
     },
     projects: {
       title: 'Projetos',
@@ -291,6 +292,7 @@ export const translations = {
       ecosystemTitle: 'An Ecosystem of Connections',
       ecosystemSubtitle: 'More than a showcase, we are a safe harbor where ideas dock, gain strength, and set sail for the world.',
       statsNote: 'Statistics from real projects registered on the platform',
+      viewAllProjects: 'Discover all projects',
     },
     projects: {
       title: 'Projects',
@@ -548,6 +550,7 @@ export const translations = {
       ecosystemTitle: 'Un Ecosistema de Conexiones',
       ecosystemSubtitle: 'Más que una vitrina, somos un puerto seguro donde las ideas atracan, ganan fuerza y parten hacia el mundo.',
       statsNote: 'Estadísticas de proyectos reales registrados en la plataforma',
+      viewAllProjects: 'Conoce todos los proyectos',
     },
     projects: {
       title: 'Proyectos',
