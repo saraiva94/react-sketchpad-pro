@@ -163,7 +163,7 @@ const HomePage = () => {
   const [statsVisible, setStatsVisible] = useState(true);
   const [institutionalVideos, setInstitutionalVideos] = useState<VideoItem[]>([]);
   const [loadingVideo, setLoadingVideo] = useState(true);
-  const [carouselDisplayCount, setCarouselDisplayCount] = useState<1 | 3 | 5 | null>(null);
+  const [carouselDisplayCount, setCarouselDisplayCount] = useState<1 | 3 | 5>(5); // Default to 5, will be updated by fetch
   const [loadingSettings, setLoadingSettings] = useState(true);
   const [heroReady, setHeroReady] = useState(false);
   const [featuredVisibility, setFeaturedVisibility] = useState<Record<string, boolean>>({});
@@ -726,30 +726,12 @@ const HomePage = () => {
       <section ref={heroRef} id="inicio" className="relative py-20 lg:py-32 overflow-hidden z-10">
         <div className="container mx-auto px-4 relative z-10">
           <div className={`max-w-5xl mx-auto transition-all duration-1000 ease-out ${heroInView ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
-            {carouselDisplayCount !== null ? (
-              <VideoCarousel 
-                videos={institutionalVideos} 
-                loading={loadingVideo} 
-                displayCount={carouselDisplayCount}
-                onAnimationComplete={() => setHeroReady(true)}
-              />
-            ) : (
-              <div className="aspect-video w-full flex items-center justify-center animate-fade-in">
-                <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-2xl border border-border bg-card card-solid">
-                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-6">
-                    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center border border-border shadow-lg animate-pulse">
-                      <Play className="w-12 h-12 text-primary-foreground ml-1" />
-                    </div>
-                    <p className="text-muted-foreground text-sm animate-pulse">{t.common.loading}</p>
-                  </div>
-                  {/* Decorative corners */}
-                  <div className="absolute top-4 left-4 w-12 h-12 border-l-2 border-t-2 border-primary/50 rounded-tl-lg" />
-                  <div className="absolute top-4 right-4 w-12 h-12 border-r-2 border-t-2 border-primary/50 rounded-tr-lg" />
-                  <div className="absolute bottom-4 left-4 w-12 h-12 border-l-2 border-b-2 border-primary/50 rounded-bl-lg" />
-                  <div className="absolute bottom-4 right-4 w-12 h-12 border-r-2 border-b-2 border-primary/50 rounded-br-lg" />
-                </div>
-              </div>
-            )}
+            <VideoCarousel 
+              videos={institutionalVideos} 
+              loading={loadingVideo} 
+              displayCount={carouselDisplayCount}
+              onAnimationComplete={() => setHeroReady(true)}
+            />
           </div>
         </div>
       </section>
