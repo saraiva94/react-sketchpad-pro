@@ -16,6 +16,7 @@ import { useInView } from "@/hooks/useInView";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useAutoTranslate } from "@/hooks/useAutoTranslate";
 import { usePreloadTranslations, createTranslationItems } from "@/hooks/usePreloadTranslations";
+import { useAuth } from "@/hooks/useAuth";
 import { 
   Search,
   X,
@@ -111,6 +112,7 @@ const sortValueMap = {
 
 const PortoDeIdeiasPage = () => {
   const { t, language } = useLanguage();
+  const { isAdmin } = useAuth();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [displaySlots, setDisplaySlots] = useState(6); // Default 6 project slots (2 rows of 3)
@@ -616,6 +618,7 @@ const PortoDeIdeiasPage = () => {
               getBudgetRange={getBudgetRange}
               getStageInfo={getStageInfo}
               getInitials={getInitials}
+              isAdmin={isAdmin}
             />
           )}
         </div>
