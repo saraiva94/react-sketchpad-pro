@@ -1,6 +1,25 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useSensor, useSensors, PointerSensor, TouchSensor } from '@dnd-kit/core';
+
+// Hook para configurar sensores com delay de 500ms
+export const useDragSensors = () => {
+  return useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        delay: 500,
+        tolerance: 5,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 500,
+        tolerance: 5,
+      },
+    })
+  );
+};
 
 export const useReorderProjects = () => {
   const queryClient = useQueryClient();
