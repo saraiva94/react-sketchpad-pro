@@ -3,11 +3,16 @@ import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowRight, Anchor, Shield, MapPin } from "lucide-react";
+import { ArrowRight, Anchor, Shield, MapPin, GripVertical } from "lucide-react";
 import { useDominantColor } from "@/hooks/useDominantColor";
 import { INCENTIVE_LAWS } from "@/components/admin/IncentiveLawsMultiSelect";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useAutoTranslate } from "@/hooks/useAutoTranslate";
+import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
+import { SortableContext, rectSortingStrategy, arrayMove, useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { useDragSensors } from "@/hooks/useReorder";
+import { toast } from "sonner";
 
 interface Project {
   id: string;
@@ -43,6 +48,55 @@ interface ProjectGridProps {
   getBudgetRange: (value: number | null) => { label: string; color: string };
   getStageInfo: (stage: string | null) => { label: string; color: string };
   getInitials: (name: string | null) => string;
+  isAdmin?: boolean;
+}
+
+// Wrapper sortável para cards
+function SortableProjectWrapper({
+  item,
+  children,
+  isAdmin,
+}: {
+  item: SortableItem;
+  children: React.ReactNode;
+  isAdmin: boolean;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    setActivatorNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: item.id, disabled: !isAdmin });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 1000 : 'auto',
+  };
+
+  if (!isAdmin) {
+    return <>{children}</>;
+  }
+
+  return (
+    <div ref={setNodeRef} style={style} className="relative group/drag">
+      {/* Drag handle */}
+      <div
+        ref={setActivatorNodeRef}
+        {...attributes}
+        {...listeners}
+        className="absolute -left-2 top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover/drag:opacity-100 transition-opacity cursor-grab active:cursor-grabbing bg-background/90 rounded-md p-1 border shadow-sm touch-none"
+        title="Segure 0.5s para arrastar"
+      >
+        <GripVertical className="w-4 h-4 text-muted-foreground" />
+      </div>
+      {children}
+    </div>
+  );
 }
 
 function ProjectCard({
@@ -225,9 +279,11 @@ export function ProjectGrid({
   getBudgetRange,
   getStageInfo,
   getInitials,
+  isAdmin = false,
 }: ProjectGridProps) {
   const { t } = useLanguage();
   const [sortableItems, setSortableItems] = useState<SortableItem[]>([]);
+  const sensors = useDragSensors();
 
   useEffect(() => {
     const loadOrder = async () => {
@@ -276,21 +332,63 @@ export function ProjectGrid({
     loadOrder();
   }, [projects]);
 
+  const handleDragEnd = async (event: DragEndEvent) => {
+    if (!isAdmin) return;
+    
+    const { active, over } = event;
+    
+    if (over && active.id !== over.id) {
+      const oldIndex = sortableItems.findIndex(item => item.id === active.id);
+      const newIndex = sortableItems.findIndex(item => item.id === over.id);
+      
+      const newOrder = arrayMove(sortableItems, oldIndex, newIndex);
+      setSortableItems(newOrder);
+      
+      // Salvar no banco
+      try {
+        const orderIds = newOrder.map(item => item.id);
+        
+        const { data: existing } = await supabase
+          .from("settings")
+          .select("id")
+          .eq("key", "porto_ideias_unified_order")
+          .maybeSingle();
+        
+        if (existing) {
+          await supabase
+            .from("settings")
+            .update({ value: orderIds })
+            .eq("key", "porto_ideias_unified_order");
+        } else {
+          await supabase
+            .from("settings")
+            .insert({ key: "porto_ideias_unified_order", value: orderIds });
+        }
+        
+        toast.success("Ordem dos projetos atualizada");
+      } catch (error) {
+        console.error("Erro ao salvar ordem:", error);
+        toast.error("Erro ao salvar ordem");
+      }
+    }
+  };
+
   const displayedItems = sortableItems.slice(0, displaySlots);
 
-  return (
-    <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+  const gridContent = (
+    <>
       {displayedItems.map((item, index) => (
-        <ProjectCard
-          key={item.id}
-          item={item}
-          index={index}
-          isInView={isInView}
-          formatBudget={formatBudget}
-          getBudgetRange={getBudgetRange}
-          getStageInfo={getStageInfo}
-          getInitials={getInitials}
-        />
+        <SortableProjectWrapper key={item.id} item={item} isAdmin={isAdmin}>
+          <ProjectCard
+            item={item}
+            index={index}
+            isInView={isInView}
+            formatBudget={formatBudget}
+            getBudgetRange={getBudgetRange}
+            getStageInfo={getStageInfo}
+            getInitials={getInitials}
+          />
+        </SortableProjectWrapper>
       ))}
 
       {/* CTA Card Rainbow - After projects */}
@@ -353,6 +451,28 @@ export function ProjectGrid({
           </div>
         ));
       })()}
+    </>
+  );
+
+  if (isAdmin) {
+    return (
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext items={displayedItems.map(item => item.id)} strategy={rectSortingStrategy}>
+          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+            {gridContent}
+          </div>
+        </SortableContext>
+      </DndContext>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+      {gridContent}
     </div>
   );
 }

@@ -18,6 +18,12 @@ import { useInView } from "@/hooks/useInView";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useAutoTranslate } from "@/hooks/useAutoTranslate";
 import { usePreloadTranslations, createTranslationItems } from "@/hooks/usePreloadTranslations";
+import { useAuth } from "@/hooks/useAuth";
+import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
+import { SortableContext, rectSortingStrategy, arrayMove, useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { useDragSensors } from "@/hooks/useReorder";
+import { toast } from "sonner";
 import {
   Users, 
   Target, 
@@ -68,6 +74,7 @@ import {
   Umbrella,
   Waves,
   Wind,
+  GripVertical,
   LucideIcon
 } from "lucide-react";
 
@@ -151,8 +158,64 @@ interface VideoItem {
   title?: string;
 }
 
+// Type for display items (declared at module level for reuse)
+type DisplayItem = { type: 'real'; data: Project } | { type: 'example'; data: { id: string; title: string; synopsis: string; project_type: string; image_url: string; link: string; [key: string]: any } };
+
+// Sortable wrapper component for featured cards
+function SortableFeaturedCard({
+  item,
+  children,
+  isAdmin,
+}: {
+  item: DisplayItem;
+  children: React.ReactNode;
+  isAdmin: boolean;
+}) {
+  const itemId = item.type === 'real' ? `real-${item.data.id}` : item.data.id;
+  
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    setActivatorNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: itemId, disabled: !isAdmin });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 1000 : 'auto',
+  };
+
+  if (!isAdmin) {
+    return <>{children}</>;
+  }
+
+  return (
+    <div ref={setNodeRef} style={style} className="relative group/drag">
+      {/* Drag handle */}
+      <div
+        ref={setActivatorNodeRef}
+        {...attributes}
+        {...listeners}
+        className="absolute -left-2 top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover/drag:opacity-100 transition-opacity cursor-grab active:cursor-grabbing bg-background/90 rounded-md p-1 border shadow-sm touch-none"
+        title="Segure 0.5s para arrastar"
+      >
+        <GripVertical className="w-4 h-4 text-muted-foreground" />
+      </div>
+      {children}
+    </div>
+  );
+}
+
+
 const HomePage = () => {
   const { t, language } = useLanguage();
+  const { isAdmin } = useAuth();
+  const sensors = useDragSensors();
   const [featuredProjects, setFeaturedProjects] = useState<Project[]>([]);
   const [loadingProjects, setLoadingProjects] = useState(true);
   const [stats, setStats] = useState<ProjectStats>({
@@ -170,6 +233,7 @@ const HomePage = () => {
   const [featuredVisibility, setFeaturedVisibility] = useState<Record<string, boolean>>({});
   const [featuredOrder, setFeaturedOrder] = useState<string[]>([]);
   const [featuredExampleCards, setFeaturedExampleCards] = useState<Record<string, boolean>>({});
+  const [localDisplayItems, setLocalDisplayItems] = useState<DisplayItem[]>([]);
   
   // Quem Somos content
   interface QuemSomosCard {
@@ -588,8 +652,6 @@ const HomePage = () => {
 
   // Construir lista de projetos combinando reais + exemplos respeitando a ordem global
   // CRITICAL: useMemo para evitar recriação e loop infinito
-  type DisplayItem = { type: 'real'; data: Project } | { type: 'example'; data: typeof exampleProjectsPt[0] };
-  
   const displayItems = useMemo<DisplayItem[]>(() => {
     // Garantir que featuredProjects seja um array
     const safeProjects = Array.isArray(featuredProjects) ? featuredProjects : [];
@@ -626,6 +688,60 @@ const HomePage = () => {
     
     return allItems.slice(0, 4);
   }, [featuredProjects, exampleProjects, exampleProjectsPt, featuredExampleCards, featuredVisibility, featuredOrder]);
+
+  // Sincronizar estado local com displayItems para drag & drop
+  useEffect(() => {
+    setLocalDisplayItems(displayItems);
+  }, [displayItems]);
+
+  // Handler de drag para projetos em destaque
+  const handleFeaturedDragEnd = async (event: DragEndEvent) => {
+    if (!isAdmin) return;
+    
+    const { active, over } = event;
+    
+    if (over && active.id !== over.id) {
+      const oldIndex = localDisplayItems.findIndex(item => {
+        const itemId = item.type === 'real' ? `real-${item.data.id}` : item.data.id;
+        return itemId === active.id;
+      });
+      const newIndex = localDisplayItems.findIndex(item => {
+        const itemId = item.type === 'real' ? `real-${item.data.id}` : item.data.id;
+        return itemId === over.id;
+      });
+      
+      const newOrder = arrayMove(localDisplayItems, oldIndex, newIndex);
+      setLocalDisplayItems(newOrder);
+      
+      // Salvar no banco
+      try {
+        const orderIds = newOrder.map(item => item.type === 'real' ? `real-${item.data.id}` : item.data.id);
+        
+        const { data: existing } = await supabase
+          .from("settings")
+          .select("id")
+          .eq("key", "featured_projects_order")
+          .maybeSingle();
+        
+        if (existing) {
+          await supabase
+            .from("settings")
+            .update({ value: orderIds })
+            .eq("key", "featured_projects_order");
+        } else {
+          await supabase
+            .from("settings")
+            .insert({ key: "featured_projects_order", value: orderIds });
+        }
+        
+        setFeaturedOrder(orderIds);
+        toast.success("Ordem dos projetos atualizada");
+      } catch (error) {
+        console.error("Erro ao salvar ordem:", error);
+        toast.error("Erro ao salvar ordem");
+      }
+    }
+  };
 
   // Tradução em lote dos cards de destaque (reduz rate-limit, melhora consistência EN/ES)
   // CRITICAL: useMemo para evitar recriação e loop infinito no useAutoTranslate
@@ -859,12 +975,57 @@ const HomePage = () => {
                 </div>
               ))}
             </div>
+          ) : isAdmin ? (
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleFeaturedDragEnd}
+            >
+              <SortableContext 
+                items={localDisplayItems.map(item => item.type === 'real' ? `real-${item.data.id}` : item.data.id)} 
+                strategy={rectSortingStrategy}
+              >
+                <div className="grid md:grid-cols-2 gap-6 md:gap-8">
+                  {(Array.isArray(localDisplayItems) ? localDisplayItems : []).map((item, index) => {
+                    const project = item.data;
+                    const isExample = item.type === 'example';
+                    const linkUrl = isExample ? (project as any).link : `/project/${project.id}`;
+                    const isLeftCard = index % 2 === 0;
+
+                    const translatedEntry = featuredCardsMap.get(project.id);
+                    const translatedCard = translatedEntry?.partial;
+                    const canSkipTranslation = translatedEntry?.complete === true;
+
+                    return (
+                      <SortableFeaturedCard key={project.id} item={item} isAdmin={isAdmin}>
+                        <TranslatedProjectCard
+                          project={{
+                            id: project.id,
+                            title: project.title,
+                            synopsis: project.synopsis,
+                            project_type: project.project_type,
+                            image_url: project.image_url,
+                          }}
+                          translatedProject={translatedCard}
+                          skipTranslation={canSkipTranslation}
+                          linkUrl={linkUrl}
+                          isLeftCard={isLeftCard}
+                          heroReady={heroReady}
+                          inView={portoIdeiasInView}
+                          index={index}
+                        />
+                      </SortableFeaturedCard>
+                    );
+                  })}
+                </div>
+              </SortableContext>
+            </DndContext>
           ) : (
             <div className="grid md:grid-cols-2 gap-6 md:gap-8">
               {(Array.isArray(displayItems) ? displayItems : []).map((item, index) => {
                 const project = item.data;
                 const isExample = item.type === 'example';
-                const linkUrl = isExample ? (project as typeof exampleProjects[0]).link : `/project/${project.id}`;
+                const linkUrl = isExample ? (project as any).link : `/project/${project.id}`;
                 const isLeftCard = index % 2 === 0;
 
                 const translatedEntry = featuredCardsMap.get(project.id);
