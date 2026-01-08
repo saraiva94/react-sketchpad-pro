@@ -1451,70 +1451,142 @@ const AdminDashboard = () => {
                 Seção Hero - Vídeos Institucionais
               </div>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {institutionalVideos.slice(0, carouselDisplayCount).map((video, index) => (
-                  <Card key={index} className="overflow-hidden">
-                    <CardContent className="p-4 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <h4 className="font-medium text-sm">Vídeo {index + 1}</h4>
-                        {video.url && <Badge variant="secondary" className="text-xs">Ativo</Badge>}
-                      </div>
-                      
-                      {video.url && (
-                        <div className="rounded-lg overflow-hidden border aspect-video">
-                          <video src={video.url} controls className="w-full h-full object-cover" />
+                {institutionalVideos.slice(0, carouselDisplayCount).map((video, index) => {
+                  // Helpers para detectar YouTube
+                  const isYouTubeUrl = (url: string) => url.includes('youtube.com') || url.includes('youtu.be');
+                  const extractYouTubeId = (url: string): string | null => {
+                    const patterns = [
+                      /(?:youtube\.com\/watch\?v=)([a-zA-Z0-9_-]{11})/,
+                      /(?:youtu\.be\/)([a-zA-Z0-9_-]{11})/,
+                      /(?:youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
+                      /(?:youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/,
+                    ];
+                    for (const pattern of patterns) {
+                      const match = url.match(pattern);
+                      if (match && match[1]) return match[1];
+                    }
+                    return null;
+                  };
+                  
+                  const youtubeId = video.url ? extractYouTubeId(video.url) : null;
+                  const isYouTube = video.url && isYouTubeUrl(video.url);
+                  
+                  return (
+                    <Card key={index} className="overflow-hidden">
+                      <CardContent className="p-4 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-medium text-sm">Vídeo {index + 1}</h4>
+                          <div className="flex items-center gap-2">
+                            {video.url && isYouTube && (
+                              <Badge variant="outline" className="text-xs bg-red-50 text-red-600 border-red-200">
+                                <Youtube className="w-3 h-3 mr-1" />
+                                YouTube
+                              </Badge>
+                            )}
+                            {video.url && !isYouTube && (
+                              <Badge variant="outline" className="text-xs bg-blue-50 text-blue-600 border-blue-200">
+                                <Video className="w-3 h-3 mr-1" />
+                                Arquivo
+                              </Badge>
+                            )}
+                            {video.url && <Badge variant="secondary" className="text-xs">Ativo</Badge>}
+                          </div>
                         </div>
-                      )}
-                      
-                      <div className="flex gap-2">
-                        <Input
-                          placeholder="URL do vídeo"
-                          value={video.url}
-                          onChange={(e) => {
-                            const newVideos = [...institutionalVideos];
-                            newVideos[index] = { ...newVideos[index], url: e.target.value };
-                            setInstitutionalVideos(newVideos);
-                          }}
-                          className="flex-1 text-sm"
-                        />
-                        <Label
-                          htmlFor={`video-upload-${index}`}
-                          className="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-3"
-                        >
-                          <Upload className="w-4 h-4" />
-                        </Label>
-                        <input
-                          id={`video-upload-${index}`}
-                          type="file"
-                          accept="video/*"
-                          className="hidden"
-                          disabled={uploadingVideoIndex === index}
-                          onChange={async (e) => {
-                            const file = e.target.files?.[0];
-                            if (!file) return;
-                            
-                            setUploadingVideoIndex(index);
-                            const fileName = `institutional-${index}-${Date.now()}.${file.name.split('.').pop()}`;
-                            
-                            const { data, error } = await supabase.storage
-                              .from("project-media")
-                              .upload(fileName, file);
-                            
-                            if (error) {
-                              toast({ title: "Erro no upload", description: error.message, variant: "destructive" });
-                            } else {
-                              const { data: urlData } = supabase.storage.from("project-media").getPublicUrl(fileName);
+                        
+                        {/* Preview do vídeo - YouTube ou arquivo */}
+                        {video.url && (
+                          <div className="rounded-lg overflow-hidden border aspect-video bg-muted">
+                            {isYouTube && youtubeId ? (
+                              <iframe
+                                src={`https://www.youtube.com/embed/${youtubeId}?modestbranding=1&rel=0`}
+                                className="w-full h-full"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowFullScreen
+                                title={`Preview Vídeo ${index + 1}`}
+                              />
+                            ) : (
+                              <video src={video.url} controls className="w-full h-full object-cover" />
+                            )}
+                          </div>
+                        )}
+                        
+                        {/* Indicador de tipo detectado */}
+                        {video.url && !youtubeId && isYouTube && (
+                          <p className="text-xs text-amber-600 flex items-center gap-1">
+                            ⚠️ URL do YouTube inválida - verifique o link
+                          </p>
+                        )}
+                        
+                        <div className="flex gap-2">
+                          <Input
+                            placeholder="URL do YouTube ou arquivo de vídeo"
+                            value={video.url}
+                            onChange={(e) => {
                               const newVideos = [...institutionalVideos];
-                              newVideos[index] = { ...newVideos[index], url: urlData.publicUrl };
+                              newVideos[index] = { ...newVideos[index], url: e.target.value };
                               setInstitutionalVideos(newVideos);
-                              toast({ title: "Upload concluído!", description: `Vídeo ${index + 1} enviado.` });
-                            }
-                            setUploadingVideoIndex(null);
-                          }}
-                        />
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                            }}
+                            className="flex-1 text-sm"
+                          />
+                          <Label
+                            htmlFor={`video-upload-${index}`}
+                            className="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-3"
+                            title="Upload de arquivo de vídeo"
+                          >
+                            <Upload className="w-4 h-4" />
+                          </Label>
+                          <input
+                            id={`video-upload-${index}`}
+                            type="file"
+                            accept="video/*"
+                            className="hidden"
+                            disabled={uploadingVideoIndex === index}
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0];
+                              if (!file) return;
+                              
+                              setUploadingVideoIndex(index);
+                              const fileName = `institutional-${index}-${Date.now()}.${file.name.split('.').pop()}`;
+                              
+                              const { data, error } = await supabase.storage
+                                .from("project-media")
+                                .upload(fileName, file);
+                              
+                              if (error) {
+                                toast({ title: "Erro no upload", description: error.message, variant: "destructive" });
+                              } else {
+                                const { data: urlData } = supabase.storage.from("project-media").getPublicUrl(fileName);
+                                const newVideos = [...institutionalVideos];
+                                newVideos[index] = { ...newVideos[index], url: urlData.publicUrl };
+                                setInstitutionalVideos(newVideos);
+                                toast({ title: "Upload concluído!", description: `Vídeo ${index + 1} enviado.` });
+                              }
+                              setUploadingVideoIndex(null);
+                            }}
+                          />
+                          {video.url && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => {
+                                const newVideos = [...institutionalVideos];
+                                newVideos[index] = { url: "", title: "" };
+                                setInstitutionalVideos(newVideos);
+                              }}
+                              title="Remover vídeo"
+                            >
+                              <X className="w-4 h-4 text-destructive" />
+                            </Button>
+                          )}
+                        </div>
+                        
+                        <p className="text-xs text-muted-foreground">
+                          Suporta: YouTube (youtube.com, youtu.be) ou arquivos .mp4/.webm
+                        </p>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
               <Button 
                 onClick={async () => {
