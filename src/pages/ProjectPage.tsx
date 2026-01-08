@@ -19,8 +19,10 @@ import jsPDF from "jspdf";
 import imdbLogo from "@/assets/imdb-logo.png";
 import { TranslatedMemberCard } from "@/components/TranslatedMemberCard";
 import { SmartTeamGrid } from "@/components/SmartTeamGrid";
+import { SortableTeamGrid } from "@/components/SortableTeamGrid";
 import { TranslatedContrapartidaCard } from "@/components/TranslatedContrapartidaCard";
 import { WavesBackground } from "@/components/WavesBackground";
+import { useAuth } from "@/hooks/useAuth";
 import { 
   ArrowLeft, 
   MapPin, 
@@ -132,6 +134,7 @@ const ProjectPage = () => {
   const { id } = useParams();
   const { toast } = useToast();
   const { t, language } = useLanguage();
+  const { isAdmin } = useAuth();
   const [project, setProject] = useState<Project | null>(null);
   const [members, setMembers] = useState<ProjectMember[]>([]);
   const [loading, setLoading] = useState(true);
@@ -240,8 +243,9 @@ const ProjectPage = () => {
   const fetchMembers = async () => {
     const { data } = await supabase
       .from("project_members")
-      .select("id, nome, funcao, email, telefone, photo_url, curriculum_url, social_links, detalhes")
-      .eq("project_id", id);
+      .select("id, nome, funcao, email, telefone, photo_url, curriculum_url, social_links, detalhes, order_index")
+      .eq("project_id", id)
+      .order("order_index", { ascending: true, nullsFirst: false });
     
     if (data) {
       setMembers(data.map(m => ({
@@ -675,9 +679,18 @@ const ProjectPage = () => {
                     {t.projectDetails.technicalSheet}
                   </h2>
                   
-                  {/* Equipe técnica com layout inteligente */}
+                  {/* Equipe técnica com drag-and-drop para admin */}
                   {otherMembers.length > 0 && (
-                    <SmartTeamGrid members={otherMembers} getInitials={getInitials} />
+                    <SortableTeamGrid 
+                      members={otherMembers} 
+                      getInitials={getInitials}
+                      projectId={id!}
+                      isAdmin={isAdmin}
+                      onMembersReordered={(newMembers) => {
+                        // Atualiza a lista local combinando com castMembers
+                        setMembers([...newMembers, ...castMembers]);
+                      }}
+                    />
                   )}
                   
                   {/* Divider between crew and cast */}
@@ -689,9 +702,18 @@ const ProjectPage = () => {
                     </div>
                   )}
                   
-                  {/* Elenco com layout inteligente */}
+                  {/* Elenco com drag-and-drop para admin */}
                   {castMembers.length > 0 && (
-                    <SmartTeamGrid members={castMembers} getInitials={getInitials} />
+                    <SortableTeamGrid 
+                      members={castMembers} 
+                      getInitials={getInitials}
+                      projectId={id!}
+                      isAdmin={isAdmin}
+                      onMembersReordered={(newMembers) => {
+                        // Atualiza a lista local combinando com otherMembers
+                        setMembers([...otherMembers, ...newMembers]);
+                      }}
+                    />
                   )}
                 </section>
               );
