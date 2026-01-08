@@ -187,12 +187,13 @@ export function FeaturedProjectsManager({ projects, onProjectUpdate }: FeaturedP
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 8,
+        delay: 500,
+        tolerance: 5,
       },
     }),
     useSensor(TouchSensor, {
       activationConstraint: {
-        delay: 200,
+        delay: 500,
         tolerance: 5,
       },
     }),
