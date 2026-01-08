@@ -146,6 +146,7 @@ export type Database = {
           funcao: string | null
           id: string
           nome: string
+          order_index: number | null
           photo_url: string | null
           project_id: string
           social_links: Json | null
@@ -159,6 +160,7 @@ export type Database = {
           funcao?: string | null
           id?: string
           nome: string
+          order_index?: number | null
           photo_url?: string | null
           project_id: string
           social_links?: Json | null
@@ -172,6 +174,7 @@ export type Database = {
           funcao?: string | null
           id?: string
           nome?: string
+          order_index?: number | null
           photo_url?: string | null
           project_id?: string
           social_links?: Json | null
@@ -220,6 +223,7 @@ export type Database = {
           location: string | null
           media_url: string | null
           news: Json | null
+          order_index: number | null
           presentation_document_url: string | null
           project_type: string
           publico_alvo: string | null
@@ -261,6 +265,7 @@ export type Database = {
           location?: string | null
           media_url?: string | null
           news?: Json | null
+          order_index?: number | null
           presentation_document_url?: string | null
           project_type: string
           publico_alvo?: string | null
@@ -302,6 +307,7 @@ export type Database = {
           location?: string | null
           media_url?: string | null
           news?: Json | null
+          order_index?: number | null
           presentation_document_url?: string | null
           project_type?: string
           publico_alvo?: string | null
