@@ -125,7 +125,7 @@ export const ContactModal = () => {
         className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-muted transition-colors group"
       >
         <div className="w-12 h-12 bg-[#F5C518] rounded-full flex items-center justify-center group-hover:scale-110 transition-transform overflow-hidden">
-          <img src={imdbIcon} alt="IMDb" className="w-8 h-8 object-contain" />
+          <img src={imdbIcon} alt="IMDb" className="w-10 h-10 object-contain" />
         </div>
         <span className="text-xs text-muted-foreground">IMDb</span>
       </a>
