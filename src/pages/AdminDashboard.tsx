@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -129,6 +130,7 @@ interface ProjectMember {
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const [projects, setProjects] = useState<Project[]>([]);
   const [projectMembers, setProjectMembers] = useState<ProjectMember[]>([]);
@@ -1019,6 +1021,12 @@ const AdminDashboard = () => {
         title: "Salvo!",
         description: "As alterações foram salvas com sucesso.",
       });
+      
+      // Invalidar cache do React Query para forçar refetch em outras páginas
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      queryClient.invalidateQueries({ queryKey: ['project', selectedProject.id] });
+      queryClient.invalidateQueries({ queryKey: ['settings'] });
+      
       fetchProjects();
       fetchProjectMembers();
       setShowEditDialog(false);

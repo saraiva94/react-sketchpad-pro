@@ -29,6 +29,9 @@ interface Project {
   synopsis: string;
   project_type: string;
   image_url: string | null;
+  hero_image_url?: string | null;
+  card_image_url?: string | null;
+  updated_at?: string | null;
   location: string | null;
   categorias_tags: string[] | null;
   responsavel_nome: string | null;
@@ -37,6 +40,7 @@ interface Project {
   has_incentive_law: boolean;
   incentive_law_details: string | null;
   stage: string | null;
+  stages: string[] | null;
 }
 
 // Default values - will be overwritten by database values
@@ -185,7 +189,7 @@ const PortoDeIdeiasPage = () => {
     // Use projects_public view to avoid exposing sensitive contact information
     const { data } = await supabase
       .from("projects_public")
-      .select("id, title, synopsis, project_type, image_url, location, categorias_tags, responsavel_primeiro_nome, valor_sugerido, budget, has_incentive_law, incentive_law_details, stage")
+      .select("id, title, synopsis, project_type, image_url, hero_image_url, card_image_url, updated_at, location, categorias_tags, responsavel_primeiro_nome, valor_sugerido, budget, has_incentive_law, incentive_law_details, stage, stages")
       .order("created_at", { ascending: false });
     
     // Map responsavel_primeiro_nome to responsavel_nome for compatibility
@@ -313,7 +317,9 @@ const PortoDeIdeiasPage = () => {
 
     let matchesStage = true;
     if (selectedStage !== "all") {
-      matchesStage = project.stage === selectedStage;
+      // Verificar tanto no array stages quanto no campo legado stage
+      const projectStages = project.stages || [];
+      matchesStage = projectStages.includes(selectedStage) || project.stage === selectedStage;
     }
 
     let matchesIncentiveLaw = true;

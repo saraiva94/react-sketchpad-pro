@@ -26,6 +26,7 @@ interface Project {
   has_incentive_law: boolean;
   incentive_law_details: string | null;
   stage: string | null;
+  stages: string[] | null;
 }
 
 interface SortableItem {
@@ -65,7 +66,9 @@ function ProjectCard({
   const { backgroundColor, textColor } = useDominantColor(cardImageUrl);
 
   const project = item.data;
-  const stageInfo = getStageInfo(project.stage);
+  // Usar stages[0] se disponível, senão fallback para stage legado
+  const primaryStage = project.stages && project.stages.length > 0 ? project.stages[0] : project.stage;
+  const stageInfo = getStageInfo(primaryStage);
 
   // Auto-translate all card fields - using standardized namespaces for cache consistency
   const { translated: translatedTitle, isTranslating: isTranslatingTitle } = useAutoTranslate(`project_full_${project.id}_title`, project.title);
@@ -194,7 +197,7 @@ function ProjectCard({
                 </Badge>
               )
             )}
-            {project.stage && (
+            {primaryStage && (
               <Badge variant="outline" className={`text-xs ${stageInfo.color}`}>
                 {stageInfo.label}
               </Badge>

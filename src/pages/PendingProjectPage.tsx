@@ -45,6 +45,7 @@ interface Project {
   publico_alvo: string | null;
   diferenciais: string | null;
   stage: string | null;
+  stages: string[] | null;
 }
 
 interface TeamMember {
@@ -562,8 +563,10 @@ const PendingProjectPage = () => {
                   
                   <div className="flex flex-wrap gap-2 mb-4">
                     <Badge variant="outline">{project.project_type}</Badge>
-                    {project.stage && (
-                      <Badge variant="secondary">{getStageLabel(project.stage)}</Badge>
+                    {(project.stages && project.stages.length > 0) && (
+                      project.stages.slice(0, 2).map((stg, idx) => (
+                        <Badge key={idx} variant="secondary">{getStageLabel(stg)}</Badge>
+                      ))
                     )}
                     {project.has_incentive_law && (
                       <Badge className="bg-green-600">
