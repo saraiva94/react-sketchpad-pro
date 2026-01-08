@@ -32,14 +32,18 @@ export function SortableProjectCard({ id, children, isAdmin = false }: SortableP
   }
 
   return (
-    <div ref={setNodeRef} style={style} className="relative group">
-      {/* Drag handle - only visible on hover for admins */}
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="relative group cursor-grab active:cursor-grabbing touch-none"
+      {...attributes}
+      {...listeners}
+      title="Segure 0.5s e arraste"
+    >
+      {/* Drag handle - visual hint for admins */}
       <div
-        ref={setActivatorNodeRef}
-        {...attributes}
-        {...listeners}
-        className="absolute -left-2 top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing bg-background/90 rounded-md p-1 border shadow-sm touch-none"
-        title="Segure 0.5s para arrastar"
+        className="absolute -left-2 top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-background/90 rounded-md p-1 border shadow-sm"
+        aria-hidden="true"
       >
         <GripVertical className="w-4 h-4 text-muted-foreground" />
       </div>
