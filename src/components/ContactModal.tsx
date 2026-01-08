@@ -169,13 +169,12 @@ export const ContactModal = () => {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button 
-          variant="outline"
-          className="border-primary/30 text-primary hover:bg-primary/10 font-medium px-6 py-2 rounded-lg transition-all duration-300"
+        <button 
+          className="group inline-flex items-center gap-2 px-8 py-4 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-1"
         >
-          <MessageCircle className="w-4 h-4 mr-2" />
+          <MessageCircle className="w-5 h-5" />
           Fale Conosco
-        </Button>
+        </button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
