@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 
 interface VideoItem {
   url: string;
@@ -15,6 +16,45 @@ interface VideoCarouselProps {
   displayCount?: 1 | 3 | 5;
   onAnimationComplete?: () => void;
 }
+
+/**
+ * Extrai ID do YouTube de qualquer formato de URL
+ */
+const extractYouTubeId = (url: string): string | null => {
+  if (!url) return null;
+  
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=)([a-zA-Z0-9_-]{11})/,
+    /(?:youtu\.be\/)([a-zA-Z0-9_-]{11})/,
+    /(?:youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
+    /(?:youtube\.com\/v\/)([a-zA-Z0-9_-]{11})/,
+    /(?:youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/,
+  ];
+  
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match && match[1]) {
+      return match[1];
+    }
+  }
+  
+  return null;
+};
+
+/**
+ * Verifica se é URL do YouTube
+ */
+const isYouTubeVideo = (url: string): boolean => {
+  return url.includes('youtube.com') || url.includes('youtu.be');
+};
+
+/**
+ * Verifica se é arquivo de vídeo direto
+ */
+const isDirectVideo = (url: string): boolean => {
+  const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov'];
+  return videoExtensions.some(ext => url.toLowerCase().includes(ext));
+};
 
 // Helper function to stop all videos
 const stopAllVideos = (videoRefs: React.MutableRefObject<(HTMLVideoElement | null)[]>) => {
@@ -485,32 +525,59 @@ export function VideoCarousel({ videos, loading = false, displayCount = 5, onAni
               <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-2xl border border-border bg-card card-solid">
                 {hasVideo ? (
                   <>
-                    {isCenter ? (
-                      <video
-                        ref={el => { videoRefs.current[index] = el; }}
-                        autoPlay
-                        loop
-                        src={video.url}
-                        controls
-                        className="w-full h-full object-cover"
-                      >
-                        Seu navegador não suporta vídeos.
-                      </video>
-                    ) : (
-                      <>
+                    {(() => {
+                      const youtubeId = isYouTubeVideo(video.url) ? extractYouTubeId(video.url) : null;
+                      
+                      // YouTube video
+                      if (youtubeId) {
+                        return (
+                          <div className="absolute inset-0 w-full h-full">
+                            <iframe
+                              src={`https://www.youtube.com/embed/${youtubeId}?autoplay=${isCenter ? 1 : 0}&mute=${isCenter ? 0 : 1}&loop=1&playlist=${youtubeId}&controls=${isCenter ? 1 : 0}&modestbranding=1&rel=0`}
+                              className="absolute inset-0 w-full h-full"
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowFullScreen
+                              title={video.title || "Video"}
+                            />
+                            {!isCenter && (
+                              <div className="absolute inset-0 bg-black/50 flex items-center justify-center pointer-events-none">
+                                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary/80 to-accent/80 flex items-center justify-center border border-border shadow-xl backdrop-blur-sm">
+                                  <Play className="w-10 h-10 text-primary-foreground ml-1" />
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      }
+                      
+                      // Direct video file (mp4, webm, etc)
+                      return isCenter ? (
                         <video
                           ref={el => { videoRefs.current[index] = el; }}
+                          autoPlay
+                          loop
                           src={video.url}
+                          controls
                           className="w-full h-full object-cover"
-                          muted
-                        />
-                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary/80 to-accent/80 flex items-center justify-center border border-border shadow-xl backdrop-blur-sm">
-                            <Play className="w-10 h-10 text-primary-foreground ml-1" />
+                        >
+                          Seu navegador não suporta vídeos.
+                        </video>
+                      ) : (
+                        <>
+                          <video
+                            ref={el => { videoRefs.current[index] = el; }}
+                            src={video.url}
+                            className="w-full h-full object-cover"
+                            muted
+                          />
+                          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary/80 to-accent/80 flex items-center justify-center border border-border shadow-xl backdrop-blur-sm">
+                              <Play className="w-10 h-10 text-primary-foreground ml-1" />
+                            </div>
                           </div>
-                        </div>
-                      </>
-                    )}
+                        </>
+                      );
+                    })()}
                   </>
                 ) : (
                   <>
