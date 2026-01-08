@@ -12,6 +12,7 @@ import { LazyFloatingOrbs } from "@/components/LazyFloatingOrbs";
 import { ShinyText } from "@/components/ShinyText";
 import { VideoCarousel } from "@/components/VideoCarousel";
 import { TranslatedProjectCard } from "@/components/TranslatedProjectCard";
+import { ContactModal } from "@/components/ContactModal";
 import { TranslatedServiceCard } from "@/components/TranslatedServiceCard";
 import { useInView } from "@/hooks/useInView";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -818,6 +819,11 @@ const HomePage = () => {
                 </Card>
               );
             })}
+          </div>
+
+          {/* Botão Fale Conosco */}
+          <div className={`mt-12 flex justify-center transition-all duration-700 ${quemSomosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`} style={{ transitionDelay: '600ms' }}>
+            <ContactModal />
           </div>
         </div>
       </section>
