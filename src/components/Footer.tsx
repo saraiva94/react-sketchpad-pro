@@ -115,9 +115,9 @@ export function Footer() {
           </div>
           
           <div>
-            <h4 className="font-semibold text-white mb-2 text-sm">{t.nav.home}</h4>
+            <h4 className="font-semibold text-white mb-2 text-sm">Sessões</h4>
             <ul className="space-y-1 text-xs">
-              <li><Link to="/" className="text-gray-400 hover:text-primary transition-colors">{t.nav.home}</Link></li>
+              <li><Link to="/" className="text-gray-400 hover:text-primary transition-colors">PortoBello Filmes</Link></li>
               <li><Link to="/porto-de-ideias" className="text-gray-400 hover:text-primary transition-colors">{t.nav.portoDeIdeias}</Link></li>
             </ul>
           </div>
