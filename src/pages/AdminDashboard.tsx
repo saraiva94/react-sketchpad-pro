@@ -1869,13 +1869,30 @@ const AdminDashboard = () => {
                       <div className="w-8 h-8 rounded-full bg-[#25D366] flex items-center justify-center flex-shrink-0">
                         <MessageSquare className="w-4 h-4 text-white" />
                       </div>
-                      <Input
-                        placeholder="Número do WhatsApp (ex: 5521999999999)"
-                        value={socialLinks.whatsapp?.url || ""}
-                        onChange={(e) => setSocialLinks(prev => ({ ...prev, whatsapp: { ...(prev.whatsapp || { enabled: false, url: '' }), url: e.target.value } }))}
-                        className="flex-1 text-sm"
-                        disabled={!socialLinks.whatsapp?.enabled}
-                      />
+                      <div className="flex-1 flex items-center gap-1">
+                        <span className="text-sm text-muted-foreground font-medium">+55</span>
+                        <Input
+                          placeholder="(21) 99999-9999"
+                          value={(() => {
+                            const raw = (socialLinks.whatsapp?.url || "").replace(/^55/, "").replace(/\D/g, "");
+                            if (raw.length === 0) return "";
+                            if (raw.length <= 2) return `(${raw}`;
+                            if (raw.length <= 7) return `(${raw.slice(0, 2)}) ${raw.slice(2)}`;
+                            return `(${raw.slice(0, 2)}) ${raw.slice(2, 7)}-${raw.slice(7, 11)}`;
+                          })()}
+                          onChange={(e) => {
+                            const digits = e.target.value.replace(/\D/g, "").slice(0, 11);
+                            const fullNumber = digits ? `55${digits}` : "";
+                            setSocialLinks(prev => ({ 
+                              ...prev, 
+                              whatsapp: { ...(prev.whatsapp || { enabled: false, url: '' }), url: fullNumber } 
+                            }));
+                          }}
+                          className="flex-1 text-sm"
+                          disabled={!socialLinks.whatsapp?.enabled}
+                          maxLength={16}
+                        />
+                      </div>
                       <Switch
                         checked={socialLinks.whatsapp?.enabled || false}
                         onCheckedChange={(checked) => setSocialLinks(prev => ({ ...prev, whatsapp: { ...(prev.whatsapp || { enabled: false, url: '' }), enabled: checked } }))}
