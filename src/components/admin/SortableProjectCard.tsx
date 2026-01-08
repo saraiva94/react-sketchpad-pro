@@ -1,0 +1,47 @@
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { GripVertical } from 'lucide-react';
+import { ReactNode } from 'react';
+
+interface SortableProjectCardProps {
+  id: string;
+  children: ReactNode;
+  isAdmin?: boolean;
+}
+
+export function SortableProjectCard({ id, children, isAdmin = false }: SortableProjectCardProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id, disabled: !isAdmin });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 1000 : 'auto',
+  };
+
+  if (!isAdmin) {
+    return <>{children}</>;
+  }
+
+  return (
+    <div ref={setNodeRef} style={style} className="relative group">
+      {/* Drag handle - only visible on hover for admins */}
+      <div
+        {...attributes}
+        {...listeners}
+        className="absolute -left-2 top-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing bg-background/90 rounded-md p-1 border shadow-sm"
+        title="Arrastar para reordenar"
+      >
+        <GripVertical className="w-4 h-4 text-muted-foreground" />
+      </div>
+      {children}
+    </div>
+  );
+}
