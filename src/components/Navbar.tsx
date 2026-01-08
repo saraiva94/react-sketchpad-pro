@@ -139,8 +139,8 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
           />
         </Link>
 
-        {/* Admin Button - Icon only (Homepage) - positioned in nav on larger screens */}
-        {isAdmin && currentPage === "home" && (
+        {/* Admin Button - Always centered for admins on all pages (lg+) */}
+        {isAdmin && (
           <div className="hidden lg:flex absolute left-1/2 -translate-x-1/2">
             <Link
               to="/admin"
@@ -199,13 +199,14 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
           </nav>
         )}
 
-        {/* Desktop Navigation for other pages (with Language Selector + Admin) */}
+        {/* Desktop Navigation for other pages (with Language Selector) */}
         {showNav && currentPage !== "home" && (
           <nav className="hidden md:flex items-center gap-2">
+            {/* Admin button for md screens (lg+ uses centered one) */}
             {isAdmin && (
               <Link
                 to="/admin"
-                className="p-2 text-foreground bg-accent/15 hover:bg-accent/25 rounded-xl transition-colors"
+                className="lg:hidden p-2 text-foreground bg-accent/15 hover:bg-accent/25 rounded-xl transition-colors"
                 title={t.nav.admin}
               >
                 <Settings className="w-5 h-5" />
