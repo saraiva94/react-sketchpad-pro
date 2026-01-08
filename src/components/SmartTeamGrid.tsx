@@ -115,32 +115,31 @@ export function SmartTeamGrid({ members, getInitials }: SmartTeamGridProps) {
         }
         
         if (group.type === 'large-with-smalls') {
-          // 1 card grande + 2 cards pequenos lado a lado
-          // Layout: [Grande (2 linhas)] [Pequeno1]
-          //                             [Pequeno2]
+          // 1 card grande + 2 cards pequenos ao lado (empilhados verticalmente)
+          // Layout: [Grande] [Pequeno1]
+          //                  [Pequeno2]
           const [largeMember, ...smallMembers] = group.members;
           return (
             <div 
               key={`large-with-smalls-${groupIdx}`}
               className="grid grid-cols-1 md:grid-cols-2 gap-4"
             >
-              {/* Card grande ocupando altura de 2 pequenos */}
-              <div className="md:row-span-2">
+              {/* Card grande - altura automática que se ajusta */}
+              <div className="h-full">
                 <TranslatedMemberCard 
                   member={largeMember} 
                   getInitials={getInitials} 
                 />
               </div>
               
-              {/* 2 cards pequenos empilhados */}
+              {/* 2 cards pequenos empilhados ao lado */}
               <div className="flex flex-col gap-4">
                 {smallMembers.map(member => (
-                  <div key={member.id} className="flex-1">
-                    <TranslatedMemberCard 
-                      member={member} 
-                      getInitials={getInitials}
-                    />
-                  </div>
+                  <TranslatedMemberCard 
+                    key={member.id}
+                    member={member} 
+                    getInitials={getInitials}
+                  />
                 ))}
               </div>
             </div>
