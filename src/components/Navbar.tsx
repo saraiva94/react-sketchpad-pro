@@ -199,9 +199,18 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
           </nav>
         )}
 
-        {/* Desktop Navigation for other pages (with Language Selector) */}
+        {/* Desktop Navigation for other pages (with Language Selector + Admin) */}
         {showNav && currentPage !== "home" && (
           <nav className="hidden md:flex items-center gap-2">
+            {isAdmin && (
+              <Link
+                to="/admin"
+                className="p-2 text-foreground bg-accent/15 hover:bg-accent/25 rounded-xl transition-colors"
+                title={t.nav.admin}
+              >
+                <Settings className="w-5 h-5" />
+              </Link>
+            )}
             <LanguageSelector />
           </nav>
         )}
