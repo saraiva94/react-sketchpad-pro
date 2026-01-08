@@ -186,6 +186,7 @@ const AdminDashboard = () => {
     twitter: SocialLink;
     imdb: SocialLink;
     website: SocialLink;
+    whatsapp?: SocialLink;
   }
   const [socialLinks, setSocialLinks] = useState<SocialLinksConfig>({
     facebook: { enabled: false, url: "" },
@@ -194,7 +195,8 @@ const AdminDashboard = () => {
     youtube: { enabled: false, url: "" },
     twitter: { enabled: false, url: "" },
     imdb: { enabled: false, url: "" },
-    website: { enabled: false, url: "" }
+    website: { enabled: false, url: "" },
+    whatsapp: { enabled: false, url: "" }
   });
   const [savingSocialLinks, setSavingSocialLinks] = useState(false);
 
@@ -812,19 +814,21 @@ const AdminDashboard = () => {
         }
       });
     
-    // Fetch awards and news from project
+    // Fetch awards, news and festivals from project
     supabase
       .from("projects")
-      .select("awards, news")
+      .select("awards, news, festivals_exhibitions")
       .eq("id", project.id)
       .maybeSingle()
       .then(({ data }) => {
         if (data) {
           setEditAwards((data.awards as string[]) || []);
           setEditNews((data.news as unknown as NewsItem[]) || []);
+          setEditFestivals((data.festivals_exhibitions as unknown as { title: string; url?: string; date?: string }[]) || []);
         } else {
           setEditAwards([]);
           setEditNews([]);
+          setEditFestivals([]);
         }
       });
     
@@ -959,6 +963,7 @@ const AdminDashboard = () => {
         responsavel_genero: editResponsavelGenero || null,
         awards: editAwards.length > 0 ? editAwards : [],
         news: editNews.length > 0 ? editNews : [],
+        festivals_exhibitions: editFestivals.length > 0 ? editFestivals : [],
         presentation_document_url: editPresentationDocUrl || null,
         additional_info: editAdditionalInfo || null,
       } as any)
@@ -1784,6 +1789,24 @@ const AdminDashboard = () => {
                       <Switch
                         checked={socialLinks.website.enabled}
                         onCheckedChange={(checked) => setSocialLinks(prev => ({ ...prev, website: { ...prev.website, enabled: checked } }))}
+                      />
+                    </div>
+
+                    {/* WhatsApp */}
+                    <div className="flex items-center gap-3 p-2 border rounded-lg">
+                      <div className="w-8 h-8 rounded-full bg-[#25D366] flex items-center justify-center flex-shrink-0">
+                        <MessageSquare className="w-4 h-4 text-white" />
+                      </div>
+                      <Input
+                        placeholder="Número do WhatsApp (ex: 5521999999999)"
+                        value={socialLinks.whatsapp?.url || ""}
+                        onChange={(e) => setSocialLinks(prev => ({ ...prev, whatsapp: { ...(prev.whatsapp || { enabled: false, url: '' }), url: e.target.value } }))}
+                        className="flex-1 text-sm"
+                        disabled={!socialLinks.whatsapp?.enabled}
+                      />
+                      <Switch
+                        checked={socialLinks.whatsapp?.enabled || false}
+                        onCheckedChange={(checked) => setSocialLinks(prev => ({ ...prev, whatsapp: { ...(prev.whatsapp || { enabled: false, url: '' }), enabled: checked } }))}
                       />
                     </div>
 

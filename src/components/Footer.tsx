@@ -7,7 +7,8 @@ import {
   Linkedin,
   Youtube,
   Globe,
-  Twitter
+  Twitter,
+  MessageCircle
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,6 +29,7 @@ interface SocialLinksConfig {
   twitter: SocialLink;
   imdb: SocialLink;
   website: SocialLink;
+  whatsapp?: SocialLink;
 }
 
 const DEFAULT_SOCIAL_LINKS: SocialLinksConfig = {
@@ -226,6 +228,17 @@ export function Footer() {
                   <Globe className="w-3 h-3 text-white" />
                 </a>
               )}
+              {socialLinks.whatsapp?.enabled && socialLinks.whatsapp?.url && (
+                <a 
+                  href={`https://wa.me/${socialLinks.whatsapp.url.replace(/\D/g, '')}`}
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="w-7 h-7 rounded-full bg-[#25D366] flex items-center justify-center hover:opacity-80 transition-opacity"
+                  aria-label="WhatsApp"
+                >
+                  <MessageCircle className="w-3 h-3 text-white" />
+                </a>
+              )}
             </div>
           </div>
         </div>
@@ -339,6 +352,17 @@ export function SocialLinksDisplay() {
           aria-label="Website"
         >
           <Globe className="w-5 h-5 text-white" />
+        </a>
+      )}
+      {socialLinks.whatsapp?.enabled && socialLinks.whatsapp?.url && (
+        <a 
+          href={`https://wa.me/${socialLinks.whatsapp.url.replace(/\D/g, '')}`}
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="w-10 h-10 rounded-full bg-[#25D366] flex items-center justify-center hover:scale-110 transition-transform"
+          aria-label="WhatsApp"
+        >
+          <MessageCircle className="w-5 h-5 text-white" />
         </a>
       )}
     </div>
