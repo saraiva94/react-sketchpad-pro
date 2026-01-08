@@ -91,14 +91,89 @@ export const ContactModal = () => {
     { key: "website", icon: Globe, color: "bg-emerald-500", label: "Website" },
   ];
 
+  // Collect all enabled items to display in grid
+  const allItems: React.ReactNode[] = [];
+
+  socialItems.forEach(({ key, icon: Icon, color, label }) => {
+    const link = socialLinks[key as keyof SocialLinksConfig];
+    if (link?.enabled && link.url) {
+      allItems.push(
+        <a
+          key={key}
+          href={link.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-muted transition-colors group"
+        >
+          <div className={`w-12 h-12 ${color} rounded-full flex items-center justify-center group-hover:scale-110 transition-transform`}>
+            <Icon className="w-6 h-6 text-white" />
+          </div>
+          <span className="text-xs text-muted-foreground">{label}</span>
+        </a>
+      );
+    }
+  });
+
+  // IMDb
+  if (socialLinks.imdb?.enabled && socialLinks.imdb.url) {
+    allItems.push(
+      <a
+        key="imdb"
+        href={socialLinks.imdb.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-muted transition-colors group"
+      >
+        <div className="w-12 h-12 bg-[#F5C518] rounded-full flex items-center justify-center group-hover:scale-110 transition-transform overflow-hidden">
+          <img src={imdbIcon} alt="IMDb" className="w-8 h-8 object-contain" />
+        </div>
+        <span className="text-xs text-muted-foreground">IMDb</span>
+      </a>
+    );
+  }
+
+  // WhatsApp
+  if (socialLinks.whatsapp?.enabled && socialLinks.whatsapp.url) {
+    allItems.push(
+      <a
+        key="whatsapp"
+        href={`https://wa.me/${socialLinks.whatsapp.url.replace(/\D/g, '')}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-muted transition-colors group"
+      >
+        <div className="w-12 h-12 bg-[#25D366] rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+          <MessageCircle className="w-6 h-6 text-white" />
+        </div>
+        <span className="text-xs text-muted-foreground">WhatsApp</span>
+      </a>
+    );
+  }
+
+  // Email(s) - only first email as circular icon
+  if (emails.length > 0) {
+    allItems.push(
+      <a
+        key="email"
+        href={`mailto:${emails[0]}`}
+        className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-muted transition-colors group"
+      >
+        <div className="w-12 h-12 bg-[#EA4335] rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+          <Mail className="w-6 h-6 text-white" />
+        </div>
+        <span className="text-xs text-muted-foreground">E-mail</span>
+      </a>
+    );
+  }
+
   return (
     <Dialog>
       <DialogTrigger asChild>
         <Button 
-          size="lg" 
-          className="bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground font-semibold px-8 py-6 text-lg rounded-full shadow-elegant transition-all duration-300 hover:scale-105"
+          variant="outline"
+          className="border-primary/30 text-primary hover:bg-primary/10 font-medium px-6 py-2 rounded-lg transition-all duration-300"
         >
-          <MessageCircle className="w-5 h-5 mr-2" />
+          <MessageCircle className="w-4 h-4 mr-2" />
           Fale Conosco
         </Button>
       </DialogTrigger>
@@ -109,80 +184,11 @@ export const ContactModal = () => {
           </DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-6 py-4">
-          {/* Social Media Links */}
-          <div className="grid grid-cols-3 gap-4">
-            {socialItems.map(({ key, icon: Icon, color, label }) => {
-              const link = socialLinks[key as keyof SocialLinksConfig];
-              if (!link?.enabled || !link.url) return null;
-              
-              return (
-                <a
-                  key={key}
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-muted transition-colors group"
-                >
-                  <div className={`w-12 h-12 ${color} rounded-full flex items-center justify-center group-hover:scale-110 transition-transform`}>
-                    <Icon className="w-6 h-6 text-white" />
-                  </div>
-                  <span className="text-xs text-muted-foreground">{label}</span>
-                </a>
-              );
-            })}
-            
-            {/* IMDb */}
-            {socialLinks.imdb?.enabled && socialLinks.imdb.url && (
-              <a
-                href={socialLinks.imdb.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-muted transition-colors group"
-              >
-                <div className="w-12 h-12 bg-[#F5C518] rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <img src={imdbIcon} alt="IMDb" className="w-6 h-6" />
-                </div>
-                <span className="text-xs text-muted-foreground">IMDb</span>
-              </a>
-            )}
-            
-            {/* WhatsApp */}
-            {socialLinks.whatsapp?.enabled && socialLinks.whatsapp.url && (
-              <a
-                href={`https://wa.me/${socialLinks.whatsapp.url.replace(/\D/g, '')}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-muted transition-colors group"
-              >
-                <div className="w-12 h-12 bg-[#25D366] rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <MessageCircle className="w-6 h-6 text-white" />
-                </div>
-                <span className="text-xs text-muted-foreground">WhatsApp</span>
-              </a>
-            )}
+        <div className="py-4">
+          {/* All contact items in unified grid */}
+          <div className="grid grid-cols-3 gap-4 justify-items-center">
+            {allItems}
           </div>
-
-          {/* Email Section */}
-          {emails.length > 0 && (
-            <div className="border-t pt-4">
-              <p className="text-sm text-muted-foreground text-center mb-3">
-                E-mail
-              </p>
-              <div className="space-y-2">
-                {emails.map((email, index) => (
-                  <a
-                    key={index}
-                    href={`mailto:${email}`}
-                    className="flex items-center justify-center gap-2 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors text-foreground"
-                  >
-                    <Mail className="w-4 h-4 text-primary" />
-                    <span className="text-sm">{email}</span>
-                  </a>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       </DialogContent>
     </Dialog>
