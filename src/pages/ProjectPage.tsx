@@ -18,6 +18,7 @@ import { getStageLabel } from "@/components/admin/StagesMultiSelect";
 import jsPDF from "jspdf";
 import imdbLogo from "@/assets/imdb-logo.png";
 import { TranslatedMemberCard } from "@/components/TranslatedMemberCard";
+import { SmartTeamGrid } from "@/components/SmartTeamGrid";
 import { TranslatedContrapartidaCard } from "@/components/TranslatedContrapartidaCard";
 import { WavesBackground } from "@/components/WavesBackground";
 import { 
@@ -654,8 +655,7 @@ const ProjectPage = () => {
             {/* Team */}
             {members.length > 0 && (() => {
               // Separate members: cast (elenco) vs other roles
-              // Only match if funcao starts with "Elenco" to be more precise
-              const isCastRole = (funcao?: string) => {
+              const isCastRole = (funcao?: string | null) => {
                 if (!funcao) return false;
                 const lower = funcao.toLowerCase().trim();
                 return lower.startsWith('elenco') || 
@@ -668,10 +668,6 @@ const ProjectPage = () => {
               const castMembers = members.filter(m => isCastRole(m.funcao));
               const otherMembers = members.filter(m => !isCastRole(m.funcao));
 
-              const renderMemberCard = (member: ProjectMember) => (
-                <TranslatedMemberCard key={member.id} member={member} getInitials={getInitials} />
-              );
-
               return (
                 <section>
                   <h2 className="text-2xl font-serif font-bold text-foreground mb-6 flex items-center gap-2">
@@ -679,11 +675,9 @@ const ProjectPage = () => {
                     {t.projectDetails.technicalSheet}
                   </h2>
                   
-                  {/* Other roles (equipe técnica) */}
+                  {/* Equipe técnica com layout inteligente */}
                   {otherMembers.length > 0 && (
-                    <div className="grid md:grid-cols-2 gap-4">
-                      {otherMembers.map(renderMemberCard)}
-                    </div>
+                    <SmartTeamGrid members={otherMembers} getInitials={getInitials} />
                   )}
                   
                   {/* Divider between crew and cast */}
@@ -695,11 +689,9 @@ const ProjectPage = () => {
                     </div>
                   )}
                   
-                  {/* Cast members (elenco) */}
+                  {/* Elenco com layout inteligente */}
                   {castMembers.length > 0 && (
-                    <div className="grid md:grid-cols-2 gap-4">
-                      {castMembers.map(renderMemberCard)}
-                    </div>
+                    <SmartTeamGrid members={castMembers} getInitials={getInitials} />
                   )}
                 </section>
               );
