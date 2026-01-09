@@ -13,6 +13,8 @@ export type SettingKey =
 export interface OptionItem {
   value: string;
   label: string;
+  color?: string;
+  textColor?: string;
 }
 
 // Type guard for OptionItem
