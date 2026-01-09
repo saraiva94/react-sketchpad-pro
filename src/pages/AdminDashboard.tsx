@@ -147,7 +147,7 @@ const AdminDashboard = () => {
   const [showDetails, setShowDetails] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
-  const [activeSection, setActiveSection] = useState<"projects" | "requests" | "contacts" | "homepage" | "portfolio">("homepage");
+  const [activeSection, setActiveSection] = useState<"projects" | "requests" | "contacts" | "homepage" | "captacao" | "portfolio">("homepage");
   const [statsVisible, setStatsVisible] = useState(true);
   const [loadingSettings, setLoadingSettings] = useState(true);
   const [featuredRefreshKey, setFeaturedRefreshKey] = useState(0);
@@ -1359,6 +1359,20 @@ const AdminDashboard = () => {
           </Button>
           <Button 
             type="button"
+            variant={activeSection === "captacao" ? "default" : "ghost"}
+            size="sm"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setActiveSection("captacao");
+            }}
+            className="rounded-md"
+          >
+            <Lightbulb className="w-4 h-4 mr-2" />
+            Projetos em Captação
+          </Button>
+          <Button 
+            type="button"
             variant={activeSection === "portfolio" ? "default" : "ghost"}
             size="sm"
             onClick={(e) => {
@@ -1368,8 +1382,8 @@ const AdminDashboard = () => {
             }}
             className="rounded-md"
           >
-            <Lightbulb className="w-4 h-4 mr-2" />
-            Porto de Ideias
+            <Rocket className="w-4 h-4 mr-2" />
+            Portfólio
           </Button>
           <Button 
             type="button"
@@ -1940,20 +1954,11 @@ const AdminDashboard = () => {
           </div>
         )}
 
-        {/* Portfolio Section */}
-        {activeSection === "portfolio" && (
+        {/* Captação Section - Página Porto de Ideias */}
+        {activeSection === "captacao" && (
           <div className="space-y-6">
-            {/* Separador - Página de Projetos */}
             <div className="text-lg font-semibold text-muted-foreground border-b pb-2 mb-4">
-              📄 Página de Projetos
-            </div>
-
-            {/* Contact Buttons Editor */}
-            <ContactButtonsEditor />
-
-            {/* Separador - Página Porto de Ideias */}
-            <div className="text-lg font-semibold text-muted-foreground border-b pb-2 mb-4 mt-8">
-              💡 Página Porto de Ideias
+              💡 Página Projetos em Captação (Porto de Ideias)
             </div>
 
             {/* Porto de Ideias Header Editor */}
@@ -1964,6 +1969,27 @@ const AdminDashboard = () => {
               projects={projects.filter(p => p.status === "approved")}
               onFeaturedChange={() => setFeaturedRefreshKey(prev => prev + 1)}
             />
+          </div>
+        )}
+
+        {/* Portfolio Section - Página Portfólio */}
+        {activeSection === "portfolio" && (
+          <div className="space-y-6">
+            <div className="text-lg font-semibold text-muted-foreground border-b pb-2 mb-4">
+              🚀 Página Portfólio
+            </div>
+
+            {/* Contact Buttons Editor */}
+            <ContactButtonsEditor />
+
+            <Card>
+              <CardContent className="p-6">
+                <p className="text-sm text-muted-foreground">
+                  A página de Portfólio exibe projetos marcados como "Portfólio" na lista de projetos.
+                  Use a aba <strong>Projetos</strong> para gerenciar quais projetos aparecem nesta página.
+                </p>
+              </CardContent>
+            </Card>
           </div>
         )}
 
