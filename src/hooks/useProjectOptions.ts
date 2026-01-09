@@ -22,9 +22,14 @@ const isOptionItem = (item: unknown): item is OptionItem => {
   return typeof item === 'object' && item !== null && 'value' in item && 'label' in item;
 };
 
-// Convert OptionItem[] to Json-compatible format
+// Convert OptionItem[] to Json-compatible format (preserving all fields)
 const toJsonArray = (options: OptionItem[]): Json => {
-  return options.map(opt => ({ value: opt.value, label: opt.label })) as unknown as Json;
+  return options.map(opt => ({
+    value: opt.value,
+    label: opt.label,
+    ...(opt.color && { color: opt.color }),
+    ...(opt.textColor && { textColor: opt.textColor }),
+  })) as unknown as Json;
 };
 
 /**
@@ -54,7 +59,15 @@ export const useProjectOptions = (settingKey: SettingKey) => {
       if (Array.isArray(value)) {
         // Check if it's already in {value, label} format
         if (value.length > 0 && isOptionItem(value[0])) {
-          return value.map(v => ({ value: String((v as Record<string, unknown>).value), label: String((v as Record<string, unknown>).label) }));
+          return value.map(v => {
+            const obj = v as Record<string, unknown>;
+            return {
+              value: String(obj.value),
+              label: String(obj.label),
+              color: obj.color ? String(obj.color) : undefined,
+              textColor: obj.textColor ? String(obj.textColor) : undefined,
+            };
+          });
         }
         // Simple string array - convert to {value, label}
         return value.map((v) => ({ value: String(v), label: String(v) }));
@@ -103,7 +116,15 @@ export const useAddProjectOption = (settingKey: SettingKey) => {
       
       if (Array.isArray(value)) {
         if (value.length > 0 && isOptionItem(value[0])) {
-          currentOptions = value.map(v => ({ value: String((v as Record<string, unknown>).value), label: String((v as Record<string, unknown>).label) }));
+          currentOptions = value.map(v => {
+            const obj = v as Record<string, unknown>;
+            return {
+              value: String(obj.value),
+              label: String(obj.label),
+              color: obj.color ? String(obj.color) : undefined,
+              textColor: obj.textColor ? String(obj.textColor) : undefined,
+            };
+          });
         } else {
           currentOptions = value.map((v) => ({ value: String(v), label: String(v) }));
         }
@@ -160,7 +181,15 @@ export const useRemoveProjectOption = (settingKey: SettingKey) => {
       
       if (Array.isArray(value)) {
         if (value.length > 0 && isOptionItem(value[0])) {
-          currentOptions = value.map(v => ({ value: String((v as Record<string, unknown>).value), label: String((v as Record<string, unknown>).label) }));
+          currentOptions = value.map(v => {
+            const obj = v as Record<string, unknown>;
+            return {
+              value: String(obj.value),
+              label: String(obj.label),
+              color: obj.color ? String(obj.color) : undefined,
+              textColor: obj.textColor ? String(obj.textColor) : undefined,
+            };
+          });
         } else {
           currentOptions = value.map((v) => ({ value: String(v), label: String(v) }));
         }
