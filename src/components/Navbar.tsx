@@ -204,8 +204,8 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
                       <Rocket className="w-6 h-6 text-primary group-hover:drop-shadow-[0_0_12px_hsl(var(--primary)/0.8)] transition-all duration-300" />
                     </div>
                     <div className="relative flex-1">
-                      <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">Projetos em Andamento</h3>
-                      <p className="text-sm text-muted-foreground">Acompanhe nosso portfólio</p>
+                      <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">Portfólio</h3>
+                      <p className="text-sm text-muted-foreground">Nossos projetos realizados</p>
                     </div>
                   </Link>
                 </div>
@@ -276,8 +276,8 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
                   >
                     <Rocket className="w-5 h-5 text-primary" />
                     <div>
-                      <h3 className="text-sm font-medium text-foreground">Projetos em Andamento</h3>
-                      <p className="text-xs text-muted-foreground">Acompanhe nosso portfólio</p>
+                      <h3 className="text-sm font-medium text-foreground">Portfólio</h3>
+                      <p className="text-xs text-muted-foreground">Nossos projetos realizados</p>
                     </div>
                   </Link>
                 </div>
@@ -369,8 +369,8 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
                     >
                       <Rocket className="w-6 h-6 text-primary transition-all duration-300" />
                       <div>
-                        <span className="block font-semibold text-foreground">Projetos em Andamento</span>
-                        <span className="text-xs text-muted-foreground">Acompanhe nosso portfólio</span>
+                        <span className="block font-semibold text-foreground">Portfólio</span>
+                        <span className="text-xs text-muted-foreground">Nossos projetos realizados</span>
                       </div>
                     </Link>
 
