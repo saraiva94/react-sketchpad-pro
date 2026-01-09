@@ -615,6 +615,7 @@ const PortoDeIdeiasPage = () => {
               getStageInfo={getStageInfo}
               getInitials={getInitials}
               isAdmin={isAdmin}
+              showCtaCard={true}
             />
           )}
         </div>
