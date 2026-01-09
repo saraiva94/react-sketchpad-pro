@@ -1369,7 +1369,7 @@ const AdminDashboard = () => {
             className="rounded-md"
           >
             <Lightbulb className="w-4 h-4 mr-2" />
-            Portfólio
+            Porto de Ideias
           </Button>
           <Button 
             type="button"
