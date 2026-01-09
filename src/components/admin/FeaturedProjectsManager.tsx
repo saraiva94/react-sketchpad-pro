@@ -369,8 +369,11 @@ export function FeaturedProjectsManager({ projects, onProjectUpdate }: FeaturedP
 
     const isCurrentlyFeatured = project.featured_on_homepage;
     
-    // Check if we're at max capacity (4)
-    if (!isCurrentlyFeatured && featuredItems.length >= 4) {
+    // Count current featured projects from the projects array (most accurate source)
+    const currentFeaturedCount = projects.filter(p => p.featured_on_homepage && p.status === "approved").length;
+    
+    // Check if we're at max capacity (4) - only when trying to add
+    if (!isCurrentlyFeatured && currentFeaturedCount >= 4) {
       toast({
         title: "Limite atingido",
         description: "Você já tem 4 projetos em destaque. Remova um antes de adicionar outro.",
