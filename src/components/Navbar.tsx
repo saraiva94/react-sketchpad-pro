@@ -2,13 +2,13 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, X, Lightbulb, Settings } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Menu, X, Lightbulb, Rocket, FolderOpen, ChevronDown, Settings } from "lucide-react";
 import portobelloLogo from "@/assets/portobello-logo.png";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
 import { LanguageSelector } from "@/components/LanguageSelector";
-
 interface NavbarProps {
   showNav?: boolean;
   currentPage?: string;
@@ -29,6 +29,7 @@ const defaultSections: SectionLabel[] = [
 
 export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [projectsPopoverOpen, setProjectsPopoverOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<string>("");
   const { isAdmin } = useAuth();
   const { t, language } = useLanguage();
@@ -166,22 +167,50 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
               </Link>
             )}
 
-            {/* Portfólio (todos os projetos) */}
-            <Link
-              to="/projetos"
-              className="group flex items-center gap-2 px-3 lg:px-4 py-2 text-base lg:text-lg font-semibold transition-all duration-300 rounded-xl text-muted-foreground hover:text-foreground hover:bg-accent/10"
-            >
-              <span className="whitespace-nowrap">{t.nav.projects}</span>
-            </Link>
+            {/* Projetos Dropdown */}
+            <Popover open={projectsPopoverOpen} onOpenChange={setProjectsPopoverOpen}>
+              <PopoverTrigger asChild>
+                <button className="group flex items-center gap-2 px-3 lg:px-4 py-2 text-base lg:text-lg font-semibold transition-all duration-300 rounded-xl text-muted-foreground hover:text-foreground hover:bg-accent/10">
+                  <span className="whitespace-nowrap">{t.nav.projects}</span>
+                  <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${projectsPopoverOpen ? 'rotate-180' : ''}`} />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 p-3 bg-card border-border shadow-xl" align="center">
+                <div className="grid gap-3">
+                  {/* Projetos em Captação */}
+                  <Link
+                    to="/porto-de-ideias"
+                    onClick={() => setProjectsPopoverOpen(false)}
+                    className="group relative flex items-center gap-4 p-4 rounded-xl border border-border bg-gradient-to-br from-yellow-500/10 to-orange-500/10 hover:from-yellow-500/20 hover:to-orange-500/20 hover:border-yellow-500/50 transition-all duration-300 overflow-hidden"
+                  >
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-[radial-gradient(circle_at_50%_50%,rgba(250,204,21,0.15),transparent_70%)]" />
+                    <div className="relative flex items-center justify-center w-12 h-12 rounded-xl bg-yellow-500/20 group-hover:scale-110 transition-transform duration-300">
+                      <Lightbulb className="w-6 h-6 text-yellow-400 group-hover:fill-yellow-400 group-hover:drop-shadow-[0_0_12px_rgba(250,204,21,0.8)] transition-all duration-300" />
+                    </div>
+                    <div className="relative flex-1">
+                      <h3 className="font-semibold text-foreground group-hover:text-yellow-400 transition-colors">Projetos em Captação</h3>
+                      <p className="text-sm text-muted-foreground">Apoie projetos culturais</p>
+                    </div>
+                  </Link>
 
-            {/* Porto de Ideias Link with Lightbulb - Destacado com Rainbow */}
-            <Link
-              to="/porto-de-ideias"
-              className="group flex items-center gap-2 px-3 lg:px-4 py-2 text-base lg:text-lg font-semibold transition-all duration-300 rounded-xl rainbow-border-glow rainbow-text-hover"
-            >
-              <Lightbulb className="w-5 h-5 lg:w-6 lg:h-6 text-yellow-400 group-hover:fill-yellow-400 group-hover:drop-shadow-[0_0_16px_rgba(250,204,21,1)] group-hover:scale-125 transition-all duration-300" />
-              <span className="text-foreground whitespace-nowrap">{t.nav.portoDeIdeias}</span>
-            </Link>
+                  {/* Projetos em Andamento */}
+                  <Link
+                    to="/projetos"
+                    onClick={() => setProjectsPopoverOpen(false)}
+                    className="group relative flex items-center gap-4 p-4 rounded-xl border border-border bg-gradient-to-br from-primary/10 to-accent/10 hover:from-primary/20 hover:to-accent/20 hover:border-primary/50 transition-all duration-300 overflow-hidden"
+                  >
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-[radial-gradient(circle_at_50%_50%,hsl(var(--primary)/0.15),transparent_70%)]" />
+                    <div className="relative flex items-center justify-center w-12 h-12 rounded-xl bg-primary/20 group-hover:scale-110 transition-transform duration-300">
+                      <Rocket className="w-6 h-6 text-primary group-hover:drop-shadow-[0_0_12px_hsl(var(--primary)/0.8)] transition-all duration-300" />
+                    </div>
+                    <div className="relative flex-1">
+                      <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">Projetos em Andamento</h3>
+                      <p className="text-sm text-muted-foreground">Acompanhe nosso portfólio</p>
+                    </div>
+                  </Link>
+                </div>
+              </PopoverContent>
+            </Popover>
 
             {/* Section Links */}
             {sections.map((section) => (
@@ -221,19 +250,39 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
               </Link>
             )}
 
-            <Link
-              to="/projetos"
-              className="px-3 py-2 text-sm font-medium rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent/10 transition-colors"
-            >
-              {t.nav.projects}
-            </Link>
-
-            <Link
-              to="/porto-de-ideias"
-              className="px-3 py-2 text-sm font-medium rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent/10 transition-colors"
-            >
-              {t.nav.portoDeIdeias}
-            </Link>
+            {/* Projetos Dropdown for other pages */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <button className="flex items-center gap-1 px-3 py-2 text-sm font-medium rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent/10 transition-colors">
+                  {t.nav.projects}
+                  <ChevronDown className="w-3 h-3" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-72 p-3 bg-card border-border shadow-xl" align="center">
+                <div className="grid gap-2">
+                  <Link
+                    to="/porto-de-ideias"
+                    className="group flex items-center gap-3 p-3 rounded-lg hover:bg-yellow-500/10 transition-colors"
+                  >
+                    <Lightbulb className="w-5 h-5 text-yellow-400" />
+                    <div>
+                      <h3 className="text-sm font-medium text-foreground">Projetos em Captação</h3>
+                      <p className="text-xs text-muted-foreground">Apoie projetos culturais</p>
+                    </div>
+                  </Link>
+                  <Link
+                    to="/projetos"
+                    className="group flex items-center gap-3 p-3 rounded-lg hover:bg-primary/10 transition-colors"
+                  >
+                    <Rocket className="w-5 h-5 text-primary" />
+                    <div>
+                      <h3 className="text-sm font-medium text-foreground">Projetos em Andamento</h3>
+                      <p className="text-xs text-muted-foreground">Acompanhe nosso portfólio</p>
+                    </div>
+                  </Link>
+                </div>
+              </PopoverContent>
+            </Popover>
 
             <LanguageSelector />
           </nav>
@@ -296,23 +345,33 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
                        <LanguageSelector />
                      </div>
 
-                    {/* Portfólio (todos os projetos) */}
-                    <Link
-                      to="/projetos"
-                      onClick={handleNavClick}
-                      className="flex items-center gap-2 px-4 py-3 text-lg font-semibold text-muted-foreground hover:text-foreground hover:bg-accent/10 rounded-xl transition-colors"
-                    >
-                      <span>{t.nav.projects}</span>
-                    </Link>
-
-                    {/* Porto de Ideias */}
+                    {/* Projetos Section - Mobile */}
+                    <div className="text-sm font-medium text-muted-foreground px-4 py-2">{t.nav.projects}</div>
+                    
+                    {/* Projetos em Captação */}
                     <Link
                       to="/porto-de-ideias"
                       onClick={handleNavClick}
-                      className="group flex items-center gap-2 px-4 py-3 text-lg font-semibold transition-all duration-300 rounded-xl rainbow-border-glow rainbow-text-hover"
+                      className="group flex items-center gap-3 px-4 py-3 rounded-xl bg-gradient-to-r from-yellow-500/10 to-orange-500/10 hover:from-yellow-500/20 hover:to-orange-500/20 transition-all duration-300"
                     >
-                      <Lightbulb className="w-6 h-6 text-yellow-400 group-hover:fill-yellow-400 group-hover:drop-shadow-[0_0_16px_rgba(250,204,21,1)] transition-all duration-300" />
-                      <span className="text-foreground">{t.nav.portoDeIdeias}</span>
+                      <Lightbulb className="w-6 h-6 text-yellow-400 group-hover:fill-yellow-400 transition-all duration-300" />
+                      <div>
+                        <span className="block font-semibold text-foreground">Projetos em Captação</span>
+                        <span className="text-xs text-muted-foreground">Apoie projetos culturais</span>
+                      </div>
+                    </Link>
+
+                    {/* Projetos em Andamento */}
+                    <Link
+                      to="/projetos"
+                      onClick={handleNavClick}
+                      className="group flex items-center gap-3 px-4 py-3 rounded-xl bg-gradient-to-r from-primary/10 to-accent/10 hover:from-primary/20 hover:to-accent/20 transition-all duration-300"
+                    >
+                      <Rocket className="w-6 h-6 text-primary transition-all duration-300" />
+                      <div>
+                        <span className="block font-semibold text-foreground">Projetos em Andamento</span>
+                        <span className="text-xs text-muted-foreground">Acompanhe nosso portfólio</span>
+                      </div>
                     </Link>
 
                     {currentPage === "home" && (
