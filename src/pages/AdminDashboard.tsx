@@ -102,6 +102,8 @@ interface Project {
   publico_alvo: string | null;
   diferenciais: string | null;
   featured_on_homepage: boolean;
+  show_on_captacao?: boolean;
+  show_on_portfolio?: boolean;
   stage: string | null;
   stages: string[] | null;
   is_hidden: boolean;
