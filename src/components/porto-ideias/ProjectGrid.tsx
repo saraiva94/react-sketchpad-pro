@@ -390,67 +390,6 @@ export function ProjectGrid({
           />
         </SortableProjectWrapper>
       ))}
-
-      {/* CTA Card Rainbow - After projects */}
-      <Link
-        to="/submit"
-        className="block group"
-        style={{
-          opacity: isInView ? 1 : 0,
-          transform: isInView ? "translateY(0)" : "translateY(20px)",
-          transition: `all 0.6s ease-out ${displayedItems.length * 100}ms`,
-        }}
-      >
-        <div className="card-rainbow border-0 rounded-2xl overflow-hidden h-full shadow-2xl">
-          <div className="relative h-48 flex items-center justify-center">
-            <div className="text-center text-white">
-              <div className="w-20 h-20 rounded-full bg-white/30 backdrop-blur-sm flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:rotate-12 transition-all duration-500 shadow-lg">
-                <Anchor className="w-10 h-10 drop-shadow-lg" />
-              </div>
-              <div className="text-xl font-semibold drop-shadow-lg">{t.projects.ctaQuestion}</div>
-            </div>
-          </div>
-          <div className="p-6 bg-black/20 backdrop-blur-sm">
-            <h3 className="text-xl font-serif font-bold mb-3 text-white drop-shadow">{t.projects.ctaHeadline}</h3>
-            <p className="text-sm text-white/90 line-clamp-3 mb-4">{t.projects.ctaBody}</p>
-            <div className="flex items-center justify-between pt-4 border-t border-white/30">
-              <span className="text-sm text-white/80 font-medium">{t.projects.ctaFree}</span>
-              <span className="text-sm font-bold flex items-center gap-2 group-hover:translate-x-2 transition-transform text-white">
-                {t.projects.ctaAction}
-                <ArrowRight className="w-5 h-5" />
-              </span>
-            </div>
-          </div>
-        </div>
-      </Link>
-
-      {/* Empty Glass Slots - Fill to complete row */}
-      {(() => {
-        // Total cards = displayed items + 1 rainbow CTA card
-        const totalCards = displayedItems.length + 1;
-        // Calculate how many slots needed to complete the row (rows of 3 on desktop, 2 on mobile)
-        const remainder = totalCards % 3;
-        const emptySlotsNeeded = remainder === 0 ? 0 : 3 - remainder;
-
-        return Array.from({ length: emptySlotsNeeded }).map((_, slotIndex) => (
-          <div
-            key={`empty-slot-${slotIndex}`}
-            className="hidden lg:block"
-            style={{
-              opacity: isInView ? 1 : 0,
-              transform: isInView ? "translateY(0)" : "translateY(20px)",
-              transition: `all 0.6s ease-out ${(displayedItems.length + 1 + slotIndex) * 100}ms`,
-            }}
-          >
-            <div className="glass-slot-card rounded-2xl overflow-hidden h-full flex flex-col items-center justify-center min-h-[320px]">
-              <div className="w-20 h-20 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center mb-4 border border-white/20">
-                <span className="text-4xl text-white/40">+</span>
-              </div>
-              <p className="text-sm text-white/50 text-center px-6">{t.projects.slotAvailable}</p>
-            </div>
-          </div>
-        ));
-      })()}
     </>
   );
 
