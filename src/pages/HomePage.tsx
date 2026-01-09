@@ -605,18 +605,6 @@ const HomePage = () => {
     return { label: "Grande", color: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400" };
   };
 
-  const getStageInfo = (stage: string | null): { label: string; color: string } => {
-    switch (stage) {
-      case 'development':
-        return { label: t.projects.stageDevelopment, color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400" };
-      case 'production':
-        return { label: t.projects.stageProduction, color: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400" };
-      case 'distribution':
-        return { label: t.projects.stageDistribution, color: "bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-400" };
-      default:
-        return { label: t.projects.stageDevelopment, color: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400" };
-    }
-  };
 
   const getInitials = (name: string | null): string => {
     if (!name) return "PC";

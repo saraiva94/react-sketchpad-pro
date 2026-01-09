@@ -8,6 +8,7 @@ import { useDominantColor } from "@/hooks/useDominantColor";
 import { INCENTIVE_LAWS } from "@/components/admin/IncentiveLawsMultiSelect";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useAutoTranslate } from "@/hooks/useAutoTranslate";
+import { useStageColors } from "@/hooks/useStageColors";
 import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, rectSortingStrategy, arrayMove, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -46,7 +47,6 @@ interface ProjectGridProps {
   isInView: boolean;
   formatBudget: (value: number | null) => string;
   getBudgetRange: (value: number | null) => { label: string; color: string };
-  getStageInfo: (stage: string | null) => { label: string; color: string };
   getInitials: (name: string | null) => string;
   isAdmin?: boolean;
   showCtaCard?: boolean;
@@ -105,7 +105,6 @@ function ProjectCard({
   item,
   index,
   isInView,
-  getStageInfo,
   getInitials,
 }: {
   item: SortableItem;
@@ -113,10 +112,10 @@ function ProjectCard({
   isInView: boolean;
   formatBudget: (value: number | null) => string;
   getBudgetRange: (value: number | null) => { label: string; color: string };
-  getStageInfo: (stage: string | null) => { label: string; color: string };
   getInitials: (name: string | null) => string;
 }) {
   const { t, language } = useLanguage();
+  const { getStageInfo } = useStageColors();
 
   const cardImageUrl = item.data.card_image_url || item.data.image_url;
   const { backgroundColor, textColor } = useDominantColor(cardImageUrl);
@@ -254,7 +253,15 @@ function ProjectCard({
               )
             )}
             {primaryStage && (
-              <Badge variant="outline" className={`text-xs ${stageInfo.color}`}>
+              <Badge 
+                variant="outline" 
+                className="text-xs"
+                style={{
+                  backgroundColor: stageInfo.color,
+                  color: stageInfo.textColor,
+                  borderColor: stageInfo.color,
+                }}
+              >
                 {stageInfo.label}
               </Badge>
             )}
@@ -279,7 +286,6 @@ export function ProjectGrid({
   isInView,
   formatBudget,
   getBudgetRange,
-  getStageInfo,
   getInitials,
   isAdmin = false,
   showCtaCard = false,
@@ -389,7 +395,6 @@ export function ProjectGrid({
             isInView={isInView}
             formatBudget={formatBudget}
             getBudgetRange={getBudgetRange}
-            getStageInfo={getStageInfo}
             getInitials={getInitials}
           />
         </SortableProjectWrapper>
