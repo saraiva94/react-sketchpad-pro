@@ -38,7 +38,7 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
   const [adminTitlesPt, setAdminTitlesPt] = useState<Record<string, string>>({});
 
   const getSectionLabel = (section: SectionLabel) => {
-    if (section.translationKey === "portoDeIdeias") return t.nav.projects;
+    if (section.translationKey === "portoDeIdeias") return t.nav.portoDeIdeias;
     if (section.translationKey === "whoWeAre") return t.home.whoWeAre;
     return t.home.ourServices;
   };
@@ -166,13 +166,21 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
               </Link>
             )}
 
-            {/* Projetos em Captação Link with Lightbulb - Destacado com Rainbow */}
+            {/* Portfólio (todos os projetos) */}
+            <Link
+              to="/projetos"
+              className="group flex items-center gap-2 px-3 lg:px-4 py-2 text-base lg:text-lg font-semibold transition-all duration-300 rounded-xl text-muted-foreground hover:text-foreground hover:bg-accent/10"
+            >
+              <span className="whitespace-nowrap">{t.nav.projects}</span>
+            </Link>
+
+            {/* Porto de Ideias Link with Lightbulb - Destacado com Rainbow */}
             <Link
               to="/porto-de-ideias"
               className="group flex items-center gap-2 px-3 lg:px-4 py-2 text-base lg:text-lg font-semibold transition-all duration-300 rounded-xl rainbow-border-glow rainbow-text-hover"
             >
               <Lightbulb className="w-5 h-5 lg:w-6 lg:h-6 text-yellow-400 group-hover:fill-yellow-400 group-hover:drop-shadow-[0_0_16px_rgba(250,204,21,1)] group-hover:scale-125 transition-all duration-300" />
-              <span className="text-foreground whitespace-nowrap">{t.nav.projects}</span>
+              <span className="text-foreground whitespace-nowrap">{t.nav.portoDeIdeias}</span>
             </Link>
 
             {/* Section Links */}
@@ -199,7 +207,7 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
           </nav>
         )}
 
-        {/* Desktop Navigation for other pages (with Language Selector) */}
+        {/* Desktop Navigation for other pages */}
         {showNav && currentPage !== "home" && (
           <nav className="hidden md:flex items-center gap-2">
             {/* Admin button for md screens (lg+ uses centered one) */}
@@ -212,6 +220,21 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
                 <Settings className="w-5 h-5" />
               </Link>
             )}
+
+            <Link
+              to="/projetos"
+              className="px-3 py-2 text-sm font-medium rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent/10 transition-colors"
+            >
+              {t.nav.projects}
+            </Link>
+
+            <Link
+              to="/porto-de-ideias"
+              className="px-3 py-2 text-sm font-medium rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent/10 transition-colors"
+            >
+              {t.nav.portoDeIdeias}
+            </Link>
+
             <LanguageSelector />
           </nav>
         )}
@@ -273,18 +296,27 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
                        <LanguageSelector />
                      </div>
 
+                    {/* Portfólio (todos os projetos) */}
+                    <Link
+                      to="/projetos"
+                      onClick={handleNavClick}
+                      className="flex items-center gap-2 px-4 py-3 text-lg font-semibold text-muted-foreground hover:text-foreground hover:bg-accent/10 rounded-xl transition-colors"
+                    >
+                      <span>{t.nav.projects}</span>
+                    </Link>
+
+                    {/* Porto de Ideias */}
+                    <Link
+                      to="/porto-de-ideias"
+                      onClick={handleNavClick}
+                      className="group flex items-center gap-2 px-4 py-3 text-lg font-semibold transition-all duration-300 rounded-xl rainbow-border-glow rainbow-text-hover"
+                    >
+                      <Lightbulb className="w-6 h-6 text-yellow-400 group-hover:fill-yellow-400 group-hover:drop-shadow-[0_0_16px_rgba(250,204,21,1)] transition-all duration-300" />
+                      <span className="text-foreground">{t.nav.portoDeIdeias}</span>
+                    </Link>
+
                     {currentPage === "home" && (
                       <>
-                        {/* Projetos em Captação Link with Lightbulb - Rainbow Mobile */}
-                        <Link
-                          to="/porto-de-ideias"
-                          onClick={handleNavClick}
-                          className="group flex items-center gap-2 px-4 py-3 text-lg font-semibold transition-all duration-300 rounded-xl rainbow-border-glow rainbow-text-hover"
-                        >
-                          <Lightbulb className="w-6 h-6 text-yellow-400 group-hover:fill-yellow-400 group-hover:drop-shadow-[0_0_16px_rgba(250,204,21,1)] transition-all duration-300" />
-                          <span className="text-foreground">{t.nav.projects}</span>
-                        </Link>
-                        
                         {sections.map((section) => (
                           <button
                             key={section.id}
