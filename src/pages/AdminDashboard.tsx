@@ -1627,31 +1627,6 @@ const AdminDashboard = () => {
               </div>
               <div className="space-y-4">
                 <EcossistemaTextEditor />
-                <Card className="overflow-hidden">
-                  <CardContent className="p-4 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-medium text-sm">Quantidade de Slots</h4>
-                        <p className="text-xs text-muted-foreground">
-                          Projetos em destaque exibidos na homepage
-                        </p>
-                      </div>
-                      <div className="flex gap-1">
-                        {[3, 4, 5, 6].map((count) => (
-                          <Button
-                            key={count}
-                            variant={portoIdeiasSlots === count ? "default" : "outline"}
-                            onClick={() => updatePortoIdeiasSlots(count)}
-                            size="sm"
-                            className="w-9 h-9 font-bold"
-                          >
-                            {count}
-                          </Button>
-                        ))}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
                 <FeaturedProjectsManager 
                   key={`featured-${featuredRefreshKey}`}
                   projects={projects} 
