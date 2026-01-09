@@ -63,10 +63,11 @@ export const StagesMultiSelect = ({
 
   const toggleStage = (stage: string) => {
     if (confirmingDelete || editingColors) return;
+    // Single selection only - clicking the same stage deselects it, clicking another replaces
     if (value.includes(stage)) {
-      onChange(value.filter(s => s !== stage));
+      onChange([]);
     } else {
-      onChange([...value, stage]);
+      onChange([stage]);
     }
   };
 
@@ -395,7 +396,7 @@ export const StagesMultiSelect = ({
       </div>
 
       {value.length === 0 && (
-        <p className="text-xs text-muted-foreground">Clique para selecionar os estágios</p>
+        <p className="text-xs text-muted-foreground">Clique para selecionar o estágio do projeto</p>
       )}
     </div>
   );
