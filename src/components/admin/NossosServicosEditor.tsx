@@ -274,7 +274,7 @@ export const NossosServicosEditor = () => {
         </div>
 
         {/* Services */}
-        <div className="space-y-6">
+        <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="font-semibold text-lg">Serviços ({content.services.length})</h3>
             <Button onClick={addService} size="sm" variant="outline">
@@ -283,91 +283,90 @@ export const NossosServicosEditor = () => {
             </Button>
           </div>
           
-          <div className="grid gap-4">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {content.services.map((service, index) => (
-              <div key={index} className="p-4 border rounded-lg space-y-4 bg-muted/20">
+              <div key={index} className="p-4 border rounded-lg space-y-3 bg-muted/20">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white">
                       <IconComponent iconName={service.icon} />
                     </div>
-                    <span className="font-medium text-sm">Serviço {index + 1}</span>
+                    <span className="font-medium text-xs">Serviço {index + 1}</span>
                   </div>
                   <Button 
                     onClick={() => removeService(index)} 
                     size="sm" 
                     variant="ghost" 
-                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                    className="text-destructive hover:text-destructive hover:bg-destructive/10 h-7 w-7 p-0"
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>
                 </div>
                 
-                <div className="grid sm:grid-cols-2 gap-4">
-                  {/* Icon Selector */}
-                  <div className="space-y-2">
-                    <Label>Ícone</Label>
-                    <Select 
-                      value={service.icon} 
-                      onValueChange={(value) => updateService(index, "icon", value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue>
+                {/* Icon Selector */}
+                <div className="space-y-1">
+                  <Label className="text-xs">Ícone</Label>
+                  <Select 
+                    value={service.icon} 
+                    onValueChange={(value) => updateService(index, "icon", value)}
+                  >
+                    <SelectTrigger className="h-9 text-sm">
+                      <SelectValue>
+                        <div className="flex items-center gap-2">
+                          <IconComponent iconName={service.icon} />
+                          <span className="text-xs">{service.icon}</span>
+                        </div>
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent className="max-h-60">
+                      {iconOptions.map((iconName) => (
+                        <SelectItem key={iconName} value={iconName}>
                           <div className="flex items-center gap-2">
-                            <IconComponent iconName={service.icon} />
-                            <span>{service.icon}</span>
+                            <IconComponent iconName={iconName} />
+                            <span>{iconName}</span>
                           </div>
-                        </SelectValue>
-                      </SelectTrigger>
-                      <SelectContent className="max-h-60">
-                        {iconOptions.map((iconName) => (
-                          <SelectItem key={iconName} value={iconName}>
-                            <div className="flex items-center gap-2">
-                              <IconComponent iconName={iconName} />
-                              <span>{iconName}</span>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-                  {/* Color Selector */}
-                  <div className="space-y-2">
-                    <Label>Cor (hover)</Label>
-                    <Select 
-                      value={service.hoverColor} 
-                      onValueChange={(value) => updateService(index, "hoverColor", value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue>
+                {/* Color Selector */}
+                <div className="space-y-1">
+                  <Label className="text-xs">Cor (hover)</Label>
+                  <Select 
+                    value={service.hoverColor} 
+                    onValueChange={(value) => updateService(index, "hoverColor", value)}
+                  >
+                    <SelectTrigger className="h-9 text-sm">
+                      <SelectValue>
+                        <div className="flex items-center gap-2">
+                          <div className={`w-4 h-4 rounded ${colorOptions.find(c => c.value === service.hoverColor)?.preview || 'bg-muted'}`} />
+                          <span className="text-xs">{colorOptions.find(c => c.value === service.hoverColor)?.label || "Selecione"}</span>
+                        </div>
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {colorOptions.map((color) => (
+                        <SelectItem key={color.value} value={color.value}>
                           <div className="flex items-center gap-2">
-                            <div className={`w-5 h-5 rounded ${colorOptions.find(c => c.value === service.hoverColor)?.preview || 'bg-muted'}`} />
-                            <span>{colorOptions.find(c => c.value === service.hoverColor)?.label || "Selecione"}</span>
+                            <div className={`w-4 h-4 rounded ${color.preview}`} />
+                            <span>{color.label}</span>
                           </div>
-                        </SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        {colorOptions.map((color) => (
-                          <SelectItem key={color.value} value={color.value}>
-                            <div className="flex items-center gap-2">
-                              <div className={`w-5 h-5 rounded ${color.preview}`} />
-                              <span>{color.label}</span>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 {/* Text */}
-                <div className="space-y-2">
-                  <Label>Texto do Serviço</Label>
+                <div className="space-y-1">
+                  <Label className="text-xs">Texto</Label>
                   <Input
                     value={service.text}
                     onChange={(e) => updateService(index, "text", e.target.value)}
                     placeholder="Descrição do serviço"
+                    className="h-9 text-sm"
                   />
                 </div>
               </div>
