@@ -36,7 +36,7 @@ export const translations = {
     },
     projects: {
       title: 'Projetos',
-      portfolioTitle: 'Portfólio Criativo',
+      portfolioTitle: 'Portfólio',
       portfolioSubtitle: 'Projetos que estão em movimento. Aqui você encontra o que já realizamos, o que estamos desenvolvendo e o que busca parceiros pra sair do papel.',
       search: 'Buscar projetos...',
       allCategories: 'Todas as Categorias',
