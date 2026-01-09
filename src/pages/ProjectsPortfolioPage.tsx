@@ -532,6 +532,7 @@ const ProjectsPortfolioPage = () => {
               getStageInfo={getStageInfo}
               getInitials={getInitials}
               isAdmin={isAdmin}
+              showEmptySlots={true}
             />
           )}
         </div>

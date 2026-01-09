@@ -50,6 +50,7 @@ interface ProjectGridProps {
   getInitials: (name: string | null) => string;
   isAdmin?: boolean;
   showCtaCard?: boolean;
+  showEmptySlots?: boolean;
 }
 
 // Wrapper sortável para cards
@@ -282,6 +283,7 @@ export function ProjectGrid({
   getInitials,
   isAdmin = false,
   showCtaCard = false,
+  showEmptySlots = false,
 }: ProjectGridProps) {
   const { t } = useLanguage();
   const [sortableItems, setSortableItems] = useState<SortableItem[]>([]);
@@ -428,13 +430,14 @@ export function ProjectGrid({
         </Link>
       )}
 
-      {/* Empty Glass Slots - Only for captação page, fill to complete row */}
-      {showCtaCard && (() => {
-        // Total cards = displayed items + 1 rainbow CTA card
-        const totalCards = displayedItems.length + 1;
+      {/* Empty Glass Slots - For captação page (after CTA) or portfolio page */}
+      {(showCtaCard || showEmptySlots) && (() => {
+        // Total cards = displayed items + CTA card (if shown)
+        const totalCards = displayedItems.length + (showCtaCard ? 1 : 0);
         // Calculate how many slots needed to complete the row (rows of 3 on desktop)
         const remainder = totalCards % 3;
         const emptySlotsNeeded = remainder === 0 ? 0 : 3 - remainder;
+        const baseDelay = displayedItems.length + (showCtaCard ? 1 : 0);
 
         return Array.from({ length: emptySlotsNeeded }).map((_, slotIndex) => (
           <div
@@ -443,7 +446,7 @@ export function ProjectGrid({
             style={{
               opacity: isInView ? 1 : 0,
               transform: isInView ? "translateY(0)" : "translateY(20px)",
-              transition: `all 0.6s ease-out ${(displayedItems.length + 1 + slotIndex) * 100}ms`,
+              transition: `all 0.6s ease-out ${(baseDelay + slotIndex) * 100}ms`,
             }}
           >
             <div className="glass-slot-card rounded-2xl overflow-hidden h-full flex flex-col items-center justify-center min-h-[320px]">
