@@ -22,7 +22,10 @@ import { CSS } from "@dnd-kit/utilities";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Star, Trash2, Eye, GripVertical, Loader2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Star, Trash2, Eye, GripVertical, Loader2, Save } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { translationManager } from "@/lib/translationManager";
@@ -256,6 +259,11 @@ export function FeaturedProjectsManager({ projects, onProjectUpdate }: FeaturedP
   const [saving, setSaving] = useState(false);
   const [addingProjectId, setAddingProjectId] = useState<string | null>(null);
   const [addingProgress, setAddingProgress] = useState(0);
+  
+  // Section title/subtitle state
+  const [sectionTitle, setSectionTitle] = useState("Um Ecossistema de Conexões");
+  const [sectionSubtitle, setSectionSubtitle] = useState("Mais que uma vitrine, somos um porto seguro onde as ideias atracam, ganham força e partem para o mundo.");
+  const [savingSection, setSavingSection] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -275,10 +283,61 @@ export function FeaturedProjectsManager({ projects, onProjectUpdate }: FeaturedP
     })
   );
 
-  // Load featured items from settings and projects
+  // Load featured items and section settings
   useEffect(() => {
     loadFeaturedItems();
+    loadSectionSettings();
   }, [projects]);
+
+  const loadSectionSettings = async () => {
+    const { data } = await supabase
+      .from("settings")
+      .select("value")
+      .eq("key", "ecossistema_text")
+      .maybeSingle();
+
+    if (data) {
+      const settings = data.value as { title?: string; subtitle?: string };
+      if (settings.title) setSectionTitle(settings.title);
+      if (settings.subtitle) setSectionSubtitle(settings.subtitle);
+    }
+  };
+
+  const saveSectionSettings = async () => {
+    setSavingSection(true);
+
+    const settingsValue = { title: sectionTitle, subtitle: sectionSubtitle };
+
+    const { data: existing } = await supabase
+      .from("settings")
+      .select("id")
+      .eq("key", "ecossistema_text")
+      .maybeSingle();
+
+    let error;
+    if (existing) {
+      const result = await supabase
+        .from("settings")
+        .update({ value: settingsValue })
+        .eq("key", "ecossistema_text");
+      error = result.error;
+    } else {
+      const result = await supabase
+        .from("settings")
+        .insert({ key: "ecossistema_text", value: settingsValue });
+      error = result.error;
+    }
+
+    if (error) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível salvar as configurações.",
+        variant: "destructive",
+      });
+    }
+
+    setSavingSection(false);
+  };
 
   const loadFeaturedItems = async () => {
     try {
@@ -493,6 +552,36 @@ export function FeaturedProjectsManager({ projects, onProjectUpdate }: FeaturedP
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
+        {/* Section title/subtitle editor */}
+        <div className="space-y-3 p-4 bg-muted/30 rounded-lg border border-muted">
+          <div className="space-y-2">
+            <Label htmlFor="ecossistema-title" className="text-sm font-medium">Título da Seção</Label>
+            <Input
+              id="ecossistema-title"
+              value={sectionTitle}
+              onChange={(e) => setSectionTitle(e.target.value)}
+              placeholder="Um Ecossistema de Conexões"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="ecossistema-subtitle" className="text-sm font-medium">Descrição da Seção</Label>
+            <Textarea
+              id="ecossistema-subtitle"
+              value={sectionSubtitle}
+              onChange={(e) => setSectionSubtitle(e.target.value)}
+              placeholder="Descrição da seção..."
+              rows={2}
+              className="resize-none"
+            />
+          </div>
+
+          <Button onClick={saveSectionSettings} disabled={savingSection} size="sm" className="w-full">
+            <Save className="w-4 h-4 mr-2" />
+            {savingSection ? "Salvando..." : "Salvar Título e Descrição"}
+          </Button>
+        </div>
+
         {/* Featured count indicator */}
         <div className="flex items-center gap-2">
           <Eye className="w-4 h-4 text-primary" />
