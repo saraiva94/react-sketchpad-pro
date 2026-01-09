@@ -8,13 +8,19 @@ import {
   Youtube,
   Globe,
   Twitter,
-  MessageCircle
+  MessageCircle,
+  Lightbulb,
+  Rocket,
+  Send,
+  Compass,
+  X
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import portobelloLogo from "@/assets/portobello-footer-logo.png";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useAutoTranslate } from "@/hooks/useAutoTranslate";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface SocialLink {
   enabled: boolean;
@@ -57,6 +63,7 @@ const DEFAULT_FOOTER_CONTENT: FooterContent = {
 export function Footer() {
   const [socialLinks, setSocialLinks] = useState<SocialLinksConfig>(DEFAULT_SOCIAL_LINKS);
   const [footerContent, setFooterContent] = useState<FooterContent>(DEFAULT_FOOTER_CONTENT);
+  const [exploreDialogOpen, setExploreDialogOpen] = useState(false);
   const { t, language } = useLanguage();
 
   // Traduzir tagline dinâmica quando idioma não é PT
@@ -102,7 +109,8 @@ export function Footer() {
       <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-gray-700 to-transparent" />
       
       <div className="container mx-auto px-4 relative z-10">
-        <div className="grid md:grid-cols-4 gap-6 mb-6">
+        <div className="grid md:grid-cols-3 gap-8 mb-6">
+          {/* Logo & Tagline */}
           <div className="flex flex-col items-start">
             <Link to="/" className="mb-2">
               <img 
@@ -116,37 +124,47 @@ export function Footer() {
             </p>
           </div>
           
-          <div>
-            <h4 className="font-semibold text-white mb-2 text-sm">Sessões</h4>
-            <ul className="space-y-1 text-xs">
-              <li><Link to="/" className="text-gray-400 hover:text-primary transition-colors">PortoBello Filmes</Link></li>
-              <li><Link to="/porto-de-ideias" className="text-gray-400 hover:text-primary transition-colors">{t.nav.portoDeIdeias}</Link></li>
+          {/* Projetos - Centralizado */}
+          <div className="flex flex-col items-center text-center">
+            <h4 className="font-semibold text-white mb-3 text-sm">{t.nav.projects}</h4>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <Link 
+                  to="/submit" 
+                  className="group inline-flex items-center gap-2 text-gray-400 hover:text-primary transition-all duration-300"
+                >
+                  <Send className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                  <span>{t.nav.submit}</span>
+                </Link>
+              </li>
+              <li>
+                <button 
+                  onClick={() => setExploreDialogOpen(true)}
+                  className="group inline-flex items-center gap-2 text-gray-400 hover:text-primary transition-all duration-300"
+                >
+                  <Compass className="w-4 h-4 group-hover:rotate-45 transition-transform" />
+                  <span>{t.home.exploreProjects}</span>
+                </button>
+              </li>
             </ul>
           </div>
           
-          <div>
-            <h4 className="font-semibold text-white mb-2 text-sm">{t.nav.projects}</h4>
-            <ul className="space-y-1 text-xs">
-              <li><Link to="/submit" className="text-gray-400 hover:text-primary transition-colors">{t.nav.submit}</Link></li>
-              <li><Link to="/porto-de-ideias" className="text-gray-400 hover:text-primary transition-colors">{t.home.exploreProjects}</Link></li>
-            </ul>
-          </div>
-          
-          <div>
+          {/* Contato */}
+          <div className="flex flex-col items-end text-right md:items-end md:text-right">
             <h4 className="font-semibold text-white mb-2 text-sm">{t.footer.contact}</h4>
             <ul className="space-y-1 text-xs text-gray-400">
               {footerContent.emails.map((email, index) => (
-                <li key={`email-${index}`} className="flex items-center gap-2">
-                  <Mail className="w-3 h-3 text-accent" />
+                <li key={`email-${index}`} className="flex items-center gap-2 justify-end">
                   <a href={`mailto:${email}`} className="hover:text-primary transition-colors">
                     {email}
                   </a>
+                  <Mail className="w-3 h-3 text-accent" />
                 </li>
               ))}
               {footerContent.phones.map((phone, index) => (
-                <li key={`phone-${index}`} className="flex items-center gap-2">
-                  <Phone className="w-3 h-3 text-accent" />
+                <li key={`phone-${index}`} className="flex items-center gap-2 justify-end">
                   <span>{phone}</span>
+                  <Phone className="w-3 h-3 text-accent" />
                 </li>
               ))}
             </ul>
@@ -200,7 +218,7 @@ export function Footer() {
                   href={socialLinks.twitter.url} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="w-7 h-7 rounded-full bg-black flex items-center justify-center hover:opacity-80 transition-opacity"
+                  className="w-7 h-7 rounded-full bg-black flex items-center justify-center hover:opacity-80 transition-opacity border border-gray-700"
                   aria-label="X / Twitter"
                 >
                   <Twitter className="w-3 h-3 text-white" />
@@ -247,6 +265,47 @@ export function Footer() {
           <p>&copy; {new Date().getFullYear()} Porto Bello. {t.footer.rights}.</p>
         </div>
       </div>
+
+      {/* Dialog para Explorar Projetos */}
+      <Dialog open={exploreDialogOpen} onOpenChange={setExploreDialogOpen}>
+        <DialogContent className="sm:max-w-md bg-card/95 backdrop-blur-xl border-border shadow-2xl rounded-2xl p-6">
+          <DialogHeader>
+            <DialogTitle className="text-center text-xl font-serif">{t.home.exploreProjects}</DialogTitle>
+          </DialogHeader>
+          
+          <div className="grid gap-3 mt-4">
+            <Link
+              to="/porto-de-ideias"
+              onClick={() => setExploreDialogOpen(false)}
+              className="group relative flex items-center gap-4 p-5 rounded-xl border border-transparent hover:border-yellow-500/30 bg-gradient-to-r from-yellow-500/10 to-orange-500/10 hover:from-yellow-500/20 hover:to-orange-500/20 transition-all duration-300 overflow-hidden"
+            >
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-[radial-gradient(circle_at_50%_50%,hsl(45deg_100%_50%/0.1),transparent_70%)]" />
+              <div className="relative flex items-center justify-center w-14 h-14 rounded-xl bg-yellow-500/20 group-hover:bg-yellow-500/30 group-hover:scale-110 transition-all duration-300">
+                <Lightbulb className="w-7 h-7 text-yellow-400 group-hover:fill-yellow-400/30 transition-all duration-300" />
+              </div>
+              <div className="relative flex-1">
+                <h3 className="font-semibold text-foreground group-hover:text-yellow-500 transition-colors text-lg">Projetos em Captação</h3>
+                <p className="text-sm text-muted-foreground">Apoie projetos culturais</p>
+              </div>
+            </Link>
+            
+            <Link
+              to="/projetos"
+              onClick={() => setExploreDialogOpen(false)}
+              className="group relative flex items-center gap-4 p-5 rounded-xl border border-transparent hover:border-primary/30 bg-gradient-to-r from-primary/10 to-accent/10 hover:from-primary/20 hover:to-accent/20 transition-all duration-300 overflow-hidden"
+            >
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-[radial-gradient(circle_at_50%_50%,hsl(var(--primary)/0.1),transparent_70%)]" />
+              <div className="relative flex items-center justify-center w-14 h-14 rounded-xl bg-primary/20 group-hover:bg-primary/30 group-hover:scale-110 transition-all duration-300">
+                <Rocket className="w-7 h-7 text-primary group-hover:fill-primary/30 transition-all duration-300" />
+              </div>
+              <div className="relative flex-1">
+                <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors text-lg">Portfólio</h3>
+                <p className="text-sm text-muted-foreground">Nossos projetos realizados</p>
+              </div>
+            </Link>
+          </div>
+        </DialogContent>
+      </Dialog>
     </footer>
   );
 }
