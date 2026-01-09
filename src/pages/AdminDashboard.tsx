@@ -1625,19 +1625,17 @@ const AdminDashboard = () => {
                 <Star className="w-5 h-5" />
                 Seção Porto de Ideias (Projetos em Destaque)
               </div>
-              <div className="grid md:grid-cols-2 gap-4 mb-4">
+              <div className="space-y-4">
                 <EcossistemaTextEditor />
                 <Card className="overflow-hidden">
                   <CardContent className="p-4 space-y-3">
-                    <div className="flex items-center gap-2">
-                      <Lightbulb className="w-4 h-4 text-primary" />
-                      <h4 className="font-medium text-sm">Slots de Projetos</h4>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      Quantidade de projetos em destaque exibidos na homepage.
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <Label className="text-xs">Quantidade:</Label>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium text-sm">Quantidade de Slots</h4>
+                        <p className="text-xs text-muted-foreground">
+                          Projetos em destaque exibidos na homepage
+                        </p>
+                      </div>
                       <div className="flex gap-1">
                         {[3, 4, 5, 6].map((count) => (
                           <Button
@@ -1654,12 +1652,12 @@ const AdminDashboard = () => {
                     </div>
                   </CardContent>
                 </Card>
+                <FeaturedProjectsManager 
+                  key={`featured-${featuredRefreshKey}`}
+                  projects={projects} 
+                  onProjectUpdate={fetchProjects}
+                />
               </div>
-              <FeaturedProjectsManager 
-                key={`featured-${featuredRefreshKey}`}
-                projects={projects} 
-                onProjectUpdate={fetchProjects}
-              />
             </div>
 
             {/* Section 5: Nossos Serviços */}

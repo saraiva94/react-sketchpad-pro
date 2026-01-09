@@ -16,13 +16,13 @@ import {
   SortableContext,
   sortableKeyboardCoordinates,
   useSortable,
-  verticalListSortingStrategy,
+  rectSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Star, Trash2, Plus, GripVertical, Eye, EyeOff } from "lucide-react";
+import { Star, Trash2, Plus, Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { translationManager } from "@/lib/translationManager";
 import { useToast } from "@/hooks/use-toast";
@@ -75,73 +75,69 @@ function SortableItem({ item, index, onRemove, onToggleVisibility }: SortableIte
     <div
       ref={setNodeRef}
       style={style}
-      className={`flex items-center justify-between p-3 border rounded-lg transition-all group ${
+      className={`relative border rounded-lg overflow-hidden transition-all group cursor-grab active:cursor-grabbing ${
         item.visible 
-          ? "border-primary/30 bg-primary/5 hover:bg-primary/10" 
+          ? "border-primary/30 bg-card hover:border-primary/50" 
           : "border-muted bg-muted/30 opacity-60"
-      } ${isDragging ? "shadow-lg ring-2 ring-primary" : ""}`}
+      } ${isDragging ? "shadow-xl ring-2 ring-primary" : ""}`}
+      {...attributes}
+      {...listeners}
     >
-      <div className="flex items-center gap-4">
-        {/* Drag Handle */}
-        <button
-          {...attributes}
-          {...listeners}
-          className="cursor-grab active:cursor-grabbing touch-none p-1 hover:bg-muted rounded"
-          title="Arraste para reordenar"
-        >
-          <GripVertical className="w-5 h-5 text-muted-foreground" />
-        </button>
-        
-        <span className={`text-sm font-medium w-6 ${item.visible ? "text-primary" : "text-muted-foreground"}`}>
-          {item.visible ? index + 1 + "." : "-"}
-        </span>
-        
+      {/* Image */}
+      <div className="aspect-[4/3] relative">
         {item.image_url ? (
           <img 
             src={item.image_url} 
             alt={item.title}
-            className="w-12 h-12 rounded object-cover"
+            className="w-full h-full object-cover"
           />
         ) : (
-          <div className="w-12 h-12 rounded bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-            <Star className="w-6 h-6 text-primary/50" />
+          <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+            <Star className="w-10 h-10 text-primary/50" />
           </div>
         )}
         
-        <div>
-          <h4 className="font-medium">{item.title}</h4>
-          <p className="text-sm text-muted-foreground">{item.subtitle}</p>
-        </div>
-        
-        {!item.visible && (
-          <Badge variant="outline" className="text-xs">Oculto</Badge>
+        {/* Position badge */}
+        {item.visible && (
+          <div className="absolute top-2 left-2 w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">
+            {index + 1}
+          </div>
         )}
+        
+        {/* Hidden badge */}
+        {!item.visible && (
+          <div className="absolute top-2 left-2">
+            <Badge variant="secondary" className="text-xs">Oculto</Badge>
+          </div>
+        )}
+        
+        {/* Action buttons */}
+        <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <Button
+            variant="secondary"
+            size="icon"
+            onClick={(e) => { e.stopPropagation(); onToggleVisibility(item.id); }}
+            className="h-7 w-7 bg-background/80 backdrop-blur-sm hover:bg-background"
+            title={item.visible ? "Ocultar" : "Mostrar"}
+          >
+            {item.visible ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+          </Button>
+          <Button
+            variant="secondary"
+            size="icon"
+            onClick={(e) => { e.stopPropagation(); onRemove(item.id); }}
+            className="h-7 w-7 bg-background/80 backdrop-blur-sm hover:bg-destructive hover:text-destructive-foreground"
+            title="Remover"
+          >
+            <Trash2 className="w-3 h-3" />
+          </Button>
+        </div>
       </div>
       
-      <div className="flex items-center gap-2">
-        {/* Toggle Visibility */}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => onToggleVisibility(item.id)}
-          className={`opacity-60 group-hover:opacity-100 transition-opacity ${
-            item.visible ? "text-primary hover:text-primary" : "text-muted-foreground"
-          }`}
-          title={item.visible ? "Ocultar dos destaques" : "Mostrar nos destaques"}
-        >
-          {item.visible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-        </Button>
-        
-        {/* Remove */}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => onRemove(item.id)}
-          className="text-destructive hover:text-destructive hover:bg-destructive/10 opacity-60 group-hover:opacity-100 transition-opacity"
-          title="Remover da lista"
-        >
-          <Trash2 className="w-4 h-4" />
-        </Button>
+      {/* Content */}
+      <div className="p-3">
+        <h4 className="font-medium text-sm truncate">{item.title}</h4>
+        <p className="text-xs text-muted-foreground truncate">{item.subtitle}</p>
       </div>
     </div>
   );
@@ -149,25 +145,23 @@ function SortableItem({ item, index, onRemove, onToggleVisibility }: SortableIte
 
 function DragOverlayItem({ item }: { item: FeaturedItem }) {
   return (
-    <div className="flex items-center justify-between p-3 border rounded-lg bg-card shadow-xl ring-2 ring-primary border-primary">
-      <div className="flex items-center gap-4">
-        <GripVertical className="w-5 h-5 text-primary" />
-        <span className="text-sm font-medium w-6 text-primary">•</span>
+    <div className="border rounded-lg overflow-hidden bg-card shadow-xl ring-2 ring-primary border-primary w-48">
+      <div className="aspect-[4/3] relative">
         {item.image_url ? (
           <img 
             src={item.image_url} 
             alt={item.title}
-            className="w-12 h-12 rounded object-cover"
+            className="w-full h-full object-cover"
           />
         ) : (
-          <div className="w-12 h-12 rounded bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-            <Star className="w-6 h-6 text-primary/50" />
+          <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+            <Star className="w-8 h-8 text-primary/50" />
           </div>
         )}
-        <div>
-          <h4 className="font-medium">{item.title}</h4>
-          <p className="text-sm text-muted-foreground">{item.subtitle}</p>
-        </div>
+      </div>
+      <div className="p-2">
+        <h4 className="font-medium text-sm truncate">{item.title}</h4>
+        <p className="text-xs text-muted-foreground truncate">{item.subtitle}</p>
       </div>
     </div>
   );
@@ -450,8 +444,8 @@ export function FeaturedProjectsManager({ projects, onProjectUpdate }: FeaturedP
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
           >
-            <SortableContext items={items.map(i => i.id)} strategy={verticalListSortingStrategy}>
-              <div className="space-y-2">
+            <SortableContext items={items.map(i => i.id)} strategy={rectSortingStrategy}>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {items.map((item, index) => (
                   <SortableItem
                     key={item.id}
