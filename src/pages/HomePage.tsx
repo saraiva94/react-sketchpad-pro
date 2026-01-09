@@ -235,6 +235,16 @@ const HomePage = () => {
   const [featuredExampleCards, setFeaturedExampleCards] = useState<Record<string, boolean>>({});
   const [localDisplayItems, setLocalDisplayItems] = useState<DisplayItem[]>([]);
   
+  // Ecossistema (Porto de Ideias section) dynamic text
+  interface EcossistemaText {
+    title: string;
+    subtitle: string;
+  }
+  const [ecossistemaText, setEcossistemaText] = useState<EcossistemaText>({
+    title: t.home.ecosystemTitle,
+    subtitle: t.home.ecosystemSubtitle
+  });
+  
   // Quem Somos content
   interface QuemSomosCard {
     icon: string;
@@ -290,6 +300,7 @@ const HomePage = () => {
   // Auto-tradução de conteúdos dinâmicos (do backend) quando idioma != pt
   const { translated: translatedQuemSomos } = useAutoTranslate('quem_somos', quemSomosContent);
   const { translated: translatedServicos } = useAutoTranslate('nossos_servicos', servicosContent);
+  const { translated: translatedEcossistema } = useAutoTranslate('ecossistema_text', ecossistemaText);
 
   // Conteúdo final que será usado na renderização (com validação de estrutura)
   const isValidQuemSomos = (input: any): input is typeof quemSomosContent => {
@@ -330,6 +341,14 @@ const HomePage = () => {
     ? servicosContent
     : (isValidServicos(translatedServicos) ? translatedServicos : servicosContent);
 
+  // Ecossistema text validation and display
+  const isValidEcossistema = (input: any): input is EcossistemaText => {
+    return input && typeof input.title === "string" && typeof input.subtitle === "string";
+  };
+
+  const displayEcossistema = language === "pt"
+    ? ecossistemaText
+    : (isValidEcossistema(translatedEcossistema) ? translatedEcossistema : ecossistemaText);
 
 
   useEffect(() => {
@@ -339,6 +358,7 @@ const HomePage = () => {
     fetchInstitutionalVideo();
     fetchQuemSomosContent();
     fetchServicosContent();
+    fetchEcossistemaText();
 
     // Subscribe to settings changes for real-time sync
     const channel = supabase
@@ -370,6 +390,13 @@ const HomePage = () => {
           } else if (record.key === 'nossos_servicos_content') {
             // Update servicos content in real-time
             setServicosContent(record.value as unknown as ServicosContent);
+          } else if (record.key === 'ecossistema_text') {
+            // Update ecossistema text in real-time
+            const text = record.value as { title?: string; subtitle?: string };
+            setEcossistemaText({
+              title: text.title || t.home.ecosystemTitle,
+              subtitle: text.subtitle || t.home.ecosystemSubtitle
+            });
           }
         }
       )
@@ -469,6 +496,23 @@ const HomePage = () => {
       setServicosContent(data.value as unknown as ServicosContent);
     }
   };
+
+  const fetchEcossistemaText = async () => {
+    const { data } = await supabase
+      .from("settings")
+      .select("value")
+      .eq("key", "ecossistema_text")
+      .maybeSingle();
+    
+    if (data && data.value) {
+      const text = data.value as { title?: string; subtitle?: string };
+      setEcossistemaText({
+        title: text.title || t.home.ecosystemTitle,
+        subtitle: text.subtitle || t.home.ecosystemSubtitle
+      });
+    }
+  };
+
   const fetchStats = async () => {
     // Use projects_public for count (only approved projects)
     const { count: approvedCount } = await supabase
@@ -807,6 +851,7 @@ const HomePage = () => {
   const preloadItems = [
     ...createTranslationItems.forSettings('quem_somos', quemSomosContent),
     ...createTranslationItems.forSettings('nossos_servicos', servicosContent),
+    ...createTranslationItems.forSettings('ecossistema_text', ecossistemaText),
     { namespace: 'homepage_featured_cards', value: featuredCardsPayload },
   ];
   usePreloadTranslations(preloadItems, !loadingProjects);
@@ -953,11 +998,11 @@ const HomePage = () => {
           <div className={`text-center mb-16 transition-all duration-700 ${portoIdeiasInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
             <ShinyText className="inline-block" delay={300}>
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif font-semibold text-foreground mb-4">
-                {t.home.ecosystemTitle}
+                {displayEcossistema.title}
               </h2>
             </ShinyText>
             <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto mt-6">
-              {t.home.ecosystemSubtitle}
+              {displayEcossistema.subtitle}
             </p>
           </div>
 
