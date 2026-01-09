@@ -318,7 +318,7 @@ export const QuemSomosEditor = () => {
         </div>
 
         {/* Cards */}
-        <div className="space-y-6">
+        <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="font-semibold text-lg">Cards ({content.cards.length})</h3>
             <Button onClick={addCard} size="sm" variant="outline">
@@ -326,103 +326,108 @@ export const QuemSomosEditor = () => {
               Adicionar Card
             </Button>
           </div>
-          {content.cards.map((card, index) => (
-            <div key={index} className="p-4 border rounded-lg space-y-4 bg-muted/20 relative">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${card.color} flex items-center justify-center text-white`}>
-                    <IconComponent iconName={card.icon} />
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {content.cards.map((card, index) => (
+              <div key={index} className="p-4 border rounded-lg space-y-3 bg-muted/20 relative">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${card.color} flex items-center justify-center text-white`}>
+                      <IconComponent iconName={card.icon} />
+                    </div>
+                    <h4 className="font-medium text-sm">Card {index + 1}</h4>
                   </div>
-                  <h4 className="font-medium">Card {index + 1}</h4>
+                  <Button 
+                    onClick={() => removeCard(index)} 
+                    size="sm" 
+                    variant="ghost" 
+                    className="text-destructive hover:text-destructive hover:bg-destructive/10 h-7 w-7 p-0"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
                 </div>
-                <Button 
-                  onClick={() => removeCard(index)} 
-                  size="sm" 
-                  variant="ghost" 
-                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </div>
-              
-              {/* Icon Selector */}
-              <div className="space-y-2">
-                <Label>Ícone</Label>
-                <Select 
-                  value={card.icon} 
-                  onValueChange={(value) => updateCard(index, "icon", value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue>
-                      <div className="flex items-center gap-2">
-                        <IconComponent iconName={card.icon} />
-                        <span>{card.icon}</span>
-                      </div>
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent className="max-h-60">
-                    {iconOptions.map((iconName) => (
-                      <SelectItem key={iconName} value={iconName}>
+                
+                {/* Icon Selector */}
+                <div className="space-y-1">
+                  <Label className="text-xs">Ícone</Label>
+                  <Select 
+                    value={card.icon} 
+                    onValueChange={(value) => updateCard(index, "icon", value)}
+                  >
+                    <SelectTrigger className="h-9 text-sm">
+                      <SelectValue>
                         <div className="flex items-center gap-2">
-                          <IconComponent iconName={iconName} />
-                          <span>{iconName}</span>
+                          <IconComponent iconName={card.icon} />
+                          <span>{card.icon}</span>
                         </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent className="max-h-60">
+                      {iconOptions.map((iconName) => (
+                        <SelectItem key={iconName} value={iconName}>
+                          <div className="flex items-center gap-2">
+                            <IconComponent iconName={iconName} />
+                            <span>{iconName}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-              {/* Color Selector */}
-              <div className="space-y-2">
-                <Label>Cor do Ícone</Label>
-                <Select 
-                  value={card.color} 
-                  onValueChange={(value) => updateCard(index, "color", value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue>
-                      <div className="flex items-center gap-2">
-                        <div className={`w-6 h-6 rounded ${colorOptions.find(c => c.value === card.color)?.preview || 'bg-muted'}`} />
-                        <span>{colorOptions.find(c => c.value === card.color)?.label || "Selecione"}</span>
-                      </div>
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {colorOptions.map((color) => (
-                      <SelectItem key={color.value} value={color.value}>
+                {/* Color Selector */}
+                <div className="space-y-1">
+                  <Label className="text-xs">Cor</Label>
+                  <Select 
+                    value={card.color} 
+                    onValueChange={(value) => updateCard(index, "color", value)}
+                  >
+                    <SelectTrigger className="h-9 text-sm">
+                      <SelectValue>
                         <div className="flex items-center gap-2">
-                          <div className={`w-6 h-6 rounded ${color.preview}`} />
-                          <span>{color.label}</span>
+                          <div className={`w-5 h-5 rounded ${colorOptions.find(c => c.value === card.color)?.preview || 'bg-muted'}`} />
+                          <span>{colorOptions.find(c => c.value === card.color)?.label || "Selecione"}</span>
                         </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {colorOptions.map((color) => (
+                        <SelectItem key={color.value} value={color.value}>
+                          <div className="flex items-center gap-2">
+                            <div className={`w-5 h-5 rounded ${color.preview}`} />
+                            <span>{color.label}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-              {/* Title */}
-              <div className="space-y-2">
-                <Label>Título</Label>
-                <Input
-                  value={card.title}
-                  onChange={(e) => updateCard(index, "title", e.target.value)}
-                  placeholder="Título do card"
-                />
-              </div>
+                {/* Title */}
+                <div className="space-y-1">
+                  <Label className="text-xs">Título</Label>
+                  <Input
+                    value={card.title}
+                    onChange={(e) => updateCard(index, "title", e.target.value)}
+                    placeholder="Título do card"
+                    className="h-9 text-sm"
+                  />
+                </div>
 
-              {/* Description */}
-              <div className="space-y-2">
-                <Label>Descrição</Label>
-                <Textarea
-                  value={card.description}
-                  onChange={(e) => updateCard(index, "description", e.target.value)}
-                  rows={3}
-                  placeholder="Descrição do card"
-                />
+                {/* Description */}
+                <div className="space-y-1">
+                  <Label className="text-xs">Descrição</Label>
+                  <Textarea
+                    value={card.description}
+                    onChange={(e) => updateCard(index, "description", e.target.value)}
+                    rows={2}
+                    placeholder="Descrição"
+                    className="text-sm resize-none"
+                  />
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
         <Button 
