@@ -18,7 +18,7 @@ import { FeaturedProjectsManager } from "@/components/admin/FeaturedProjectsMana
 import { PortoIdeiasCardsManager } from "@/components/admin/PortoIdeiasCardsManager";
 import { PortoIdeiasHeaderEditor } from "@/components/admin/PortoIdeiasHeaderEditor";
 import { QuemSomosEditor } from "@/components/admin/QuemSomosEditor";
-import { EcossistemaTextEditor } from "@/components/admin/EcossistemaTextEditor";
+
 import { NossosServicosEditor } from "@/components/admin/NossosServicosEditor";
 import { ContactButtonsEditor } from "@/components/admin/ContactButtonsEditor";
 import ContrapartidasEditor, { Contrapartida } from "@/components/admin/ContrapartidasEditor";
@@ -1625,14 +1625,11 @@ const AdminDashboard = () => {
                 <Star className="w-5 h-5" />
                 Seção Porto de Ideias (Projetos em Destaque)
               </div>
-              <div className="space-y-4">
-                <EcossistemaTextEditor />
-                <FeaturedProjectsManager 
-                  key={`featured-${featuredRefreshKey}`}
-                  projects={projects} 
-                  onProjectUpdate={fetchProjects}
-                />
-              </div>
+              <FeaturedProjectsManager 
+                key={`featured-${featuredRefreshKey}`}
+                projects={projects} 
+                onProjectUpdate={fetchProjects}
+              />
             </div>
 
             {/* Section 5: Nossos Serviços */}
