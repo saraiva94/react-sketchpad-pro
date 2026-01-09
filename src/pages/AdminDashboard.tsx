@@ -64,8 +64,12 @@ import {
   Save,
   Lightbulb,
   Twitter,
-  Briefcase
+  Briefcase,
+  ChevronDown,
+  Rocket,
+  FolderOpen
 } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface Project {
   id: string;
@@ -1285,16 +1289,43 @@ const AdminDashboard = () => {
         showNav={false} 
         rightContent={
           <div className="flex items-center gap-4">
-            <Link to="/porto-de-ideias">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="rainbow-border-glow"
-              >
-                <Lightbulb className="w-4 h-4 mr-2" />
-                Projetos
-              </Button>
-            </Link>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="rainbow-border-glow"
+                >
+                  <FolderOpen className="w-4 h-4 mr-2" />
+                  Projetos
+                  <ChevronDown className="w-3 h-3 ml-1" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-72 p-3 bg-card border-border shadow-xl" align="end">
+                <div className="grid gap-2">
+                  <Link
+                    to="/porto-de-ideias"
+                    className="group flex items-center gap-3 p-3 rounded-lg hover:bg-yellow-500/10 transition-colors"
+                  >
+                    <Lightbulb className="w-5 h-5 text-yellow-400" />
+                    <div>
+                      <h3 className="text-sm font-medium text-foreground">Projetos em Captação</h3>
+                      <p className="text-xs text-muted-foreground">Apoie projetos culturais</p>
+                    </div>
+                  </Link>
+                  <Link
+                    to="/projetos"
+                    className="group flex items-center gap-3 p-3 rounded-lg hover:bg-primary/10 transition-colors"
+                  >
+                    <Rocket className="w-5 h-5 text-primary" />
+                    <div>
+                      <h3 className="text-sm font-medium text-foreground">Portfólio</h3>
+                      <p className="text-xs text-muted-foreground">Nossos projetos realizados</p>
+                    </div>
+                  </Link>
+                </div>
+              </PopoverContent>
+            </Popover>
             <Button 
               variant="destructive" 
               size="sm" 
