@@ -451,12 +451,6 @@ export function FeaturedProjectsManager({ projects, onProjectUpdate }: FeaturedP
       }
 
       onProjectUpdate();
-      toast({
-        title: isCurrentlyFeatured ? "Removido dos destaques" : "Adicionado aos destaques",
-        description: isCurrentlyFeatured 
-          ? "O projeto foi removido dos destaques."
-          : "O projeto foi adicionado aos destaques.",
-      });
     } catch (error) {
       setAddingProjectId(null);
       setAddingProgress(0);
@@ -476,10 +470,6 @@ export function FeaturedProjectsManager({ projects, onProjectUpdate }: FeaturedP
         .eq("id", projectId);
       
       onProjectUpdate();
-      toast({
-        title: "Projeto removido",
-        description: "O projeto foi removido dos destaques.",
-      });
     } catch (error) {
       toast({
         title: "Erro",
