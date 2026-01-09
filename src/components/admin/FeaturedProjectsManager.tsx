@@ -548,7 +548,7 @@ export function FeaturedProjectsManager({ projects, onProjectUpdate }: FeaturedP
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Star className="w-5 h-5" />
-          Projetos em Destaque na Homepage
+          {sectionTitle || "Projetos em Destaque na Homepage"}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
