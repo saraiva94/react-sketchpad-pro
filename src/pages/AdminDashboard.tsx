@@ -1397,7 +1397,7 @@ const AdminDashboard = () => {
             className="rounded-md"
           >
             <FileText className="w-4 h-4 mr-2" />
-            Projetos
+            Formulários de Projetos
             {pendingProjects.length > 0 && (
               <Badge variant="destructive" className="ml-2">{pendingProjects.length}</Badge>
             )}
