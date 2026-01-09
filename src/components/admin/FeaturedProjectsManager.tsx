@@ -25,7 +25,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Star, Trash2, Eye, GripVertical, Loader2, Save } from "lucide-react";
+import { Star, Eye, GripVertical, Loader2, Save, Lightbulb, Rocket } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { translationManager } from "@/lib/translationManager";
@@ -38,6 +38,8 @@ interface Project {
   location: string | null;
   image_url: string | null;
   featured_on_homepage: boolean;
+  show_on_captacao?: boolean;
+  show_on_portfolio?: boolean;
   status: string;
 }
 
@@ -136,7 +138,8 @@ function ProjectListItem({
   index,
   isFeatured, 
   onToggleFeatured,
-  onRemove,
+  onToggleCaptacao,
+  onTogglePortfolio,
   isAdding,
   addingProgress,
 }: { 
@@ -144,10 +147,14 @@ function ProjectListItem({
   index: number;
   isFeatured: boolean;
   onToggleFeatured: (id: string) => void;
-  onRemove: (id: string) => void;
+  onToggleCaptacao: (id: string) => void;
+  onTogglePortfolio: (id: string) => void;
   isAdding?: boolean;
   addingProgress?: number;
 }) {
+  const showOnCaptacao = project.show_on_captacao ?? false;
+  const showOnPortfolio = project.show_on_portfolio ?? false;
+
   return (
     <div
       className={`relative flex flex-col border rounded-lg transition-all overflow-hidden ${
@@ -198,8 +205,8 @@ function ProjectListItem({
           </div>
         </div>
         
-        <div className="flex items-center gap-2 flex-shrink-0">
-          {/* Toggle Featured */}
+        <div className="flex items-center gap-1 flex-shrink-0">
+          {/* Toggle Featured (Homepage) */}
           <Button
             variant="ghost"
             size="icon"
@@ -214,6 +221,40 @@ function ProjectListItem({
           >
             <Star className={`w-4 h-4 ${isFeatured ? "fill-current" : ""}`} />
           </Button>
+
+          {/* Toggle Captação */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onToggleCaptacao(project.id)}
+            disabled={isAdding}
+            className={`text-xs px-2 gap-1 ${
+              showOnCaptacao 
+                ? "text-yellow-500 hover:text-yellow-600 bg-yellow-500/10" 
+                : "text-muted-foreground hover:text-yellow-500 hover:bg-yellow-500/10"
+            }`}
+            title={showOnCaptacao ? "Remover de Captação" : "Adicionar em Captação"}
+          >
+            <Lightbulb className={`w-3.5 h-3.5 ${showOnCaptacao ? "fill-current" : ""}`} />
+            <span className="hidden sm:inline">Captação</span>
+          </Button>
+
+          {/* Toggle Portfólio */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onTogglePortfolio(project.id)}
+            disabled={isAdding}
+            className={`text-xs px-2 gap-1 ${
+              showOnPortfolio 
+                ? "text-primary hover:text-primary/80 bg-primary/10" 
+                : "text-muted-foreground hover:text-primary hover:bg-primary/10"
+            }`}
+            title={showOnPortfolio ? "Remover do Portfólio" : "Adicionar no Portfólio"}
+          >
+            <Rocket className={`w-3.5 h-3.5 ${showOnPortfolio ? "fill-current" : ""}`} />
+            <span className="hidden sm:inline">Portfólio</span>
+          </Button>
           
           {/* View */}
           <Button
@@ -223,24 +264,10 @@ function ProjectListItem({
             title="Visualizar projeto"
             asChild
           >
-            <a href={`/projeto/${project.id}`} target="_blank" rel="noopener noreferrer">
+            <a href={`/project/${project.id}`} target="_blank" rel="noopener noreferrer">
               <Eye className="w-4 h-4" />
             </a>
           </Button>
-          
-          {/* Remove from list (only if featured) */}
-          {isFeatured && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => onRemove(project.id)}
-              disabled={isAdding}
-              className="text-destructive hover:text-destructive hover:bg-destructive/10"
-              title="Remover dos destaques"
-            >
-              <Trash2 className="w-4 h-4" />
-            </Button>
-          )}
         </div>
       </div>
     </div>
@@ -521,18 +548,41 @@ export function FeaturedProjectsManager({ projects, onProjectUpdate }: FeaturedP
     }
   };
 
-  const handleRemoveFeatured = async (projectId: string) => {
+  const handleToggleCaptacao = async (projectId: string) => {
     try {
+      const project = projects.find(p => p.id === projectId);
+      const currentValue = project?.show_on_captacao ?? false;
+      
       await supabase
         .from("projects")
-        .update({ featured_on_homepage: false })
+        .update({ show_on_captacao: !currentValue })
         .eq("id", projectId);
       
       onProjectUpdate();
     } catch (error) {
       toast({
         title: "Erro",
-        description: "Não foi possível remover o projeto.",
+        description: "Não foi possível atualizar o projeto.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleTogglePortfolio = async (projectId: string) => {
+    try {
+      const project = projects.find(p => p.id === projectId);
+      const currentValue = project?.show_on_portfolio ?? false;
+      
+      await supabase
+        .from("projects")
+        .update({ show_on_portfolio: !currentValue })
+        .eq("id", projectId);
+      
+      onProjectUpdate();
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível atualizar o projeto.",
         variant: "destructive",
       });
     }
@@ -648,7 +698,8 @@ export function FeaturedProjectsManager({ projects, onProjectUpdate }: FeaturedP
                 index={index}
                 isFeatured={project.featured_on_homepage}
                 onToggleFeatured={handleToggleFeatured}
-                onRemove={handleRemoveFeatured}
+                onToggleCaptacao={handleToggleCaptacao}
+                onTogglePortfolio={handleTogglePortfolio}
                 isAdding={addingProjectId === project.id}
                 addingProgress={addingProjectId === project.id ? addingProgress : 0}
               />

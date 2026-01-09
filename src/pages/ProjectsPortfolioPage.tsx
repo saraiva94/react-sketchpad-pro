@@ -149,19 +149,15 @@ const ProjectsPortfolioPage = () => {
   };
 
   const fetchProjects = async () => {
-    // Use projects_public view to avoid exposing sensitive contact information
+    // Fetch only projects marked for portfolio page
     const { data } = await supabase
-      .from("projects_public")
-      .select("id, title, synopsis, project_type, image_url, hero_image_url, card_image_url, updated_at, location, categorias_tags, responsavel_primeiro_nome, valor_sugerido, budget, has_incentive_law, incentive_law_details, stage, stages")
+      .from("projects")
+      .select("id, title, synopsis, project_type, image_url, hero_image_url, card_image_url, updated_at, location, categorias_tags, responsavel_nome, valor_sugerido, budget, has_incentive_law, incentive_law_details, stage, stages, show_on_portfolio")
+      .eq("status", "approved")
+      .eq("show_on_portfolio", true)
       .order("created_at", { ascending: false });
     
-    // Map responsavel_primeiro_nome to responsavel_nome for compatibility
-    const mappedData = (data || []).map(p => ({
-      ...p,
-      responsavel_nome: p.responsavel_primeiro_nome
-    }));
-    
-    setProjects(mappedData as Project[]);
+    setProjects((data || []) as Project[]);
     setLoading(false);
   };
 

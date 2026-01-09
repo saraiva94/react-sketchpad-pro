@@ -231,6 +231,8 @@ export type Database = {
           responsavel_genero: string | null
           responsavel_nome: string | null
           responsavel_telefone: string | null
+          show_on_captacao: boolean | null
+          show_on_portfolio: boolean | null
           stage: string | null
           stages: string[] | null
           status: Database["public"]["Enums"]["project_status"]
@@ -273,6 +275,8 @@ export type Database = {
           responsavel_genero?: string | null
           responsavel_nome?: string | null
           responsavel_telefone?: string | null
+          show_on_captacao?: boolean | null
+          show_on_portfolio?: boolean | null
           stage?: string | null
           stages?: string[] | null
           status?: Database["public"]["Enums"]["project_status"]
@@ -315,6 +319,8 @@ export type Database = {
           responsavel_genero?: string | null
           responsavel_nome?: string | null
           responsavel_telefone?: string | null
+          show_on_captacao?: boolean | null
+          show_on_portfolio?: boolean | null
           stage?: string | null
           stages?: string[] | null
           status?: Database["public"]["Enums"]["project_status"]
