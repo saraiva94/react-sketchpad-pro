@@ -22,7 +22,8 @@ import { CSS } from "@dnd-kit/utilities";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Star, Trash2, Eye, GripVertical } from "lucide-react";
+import { Star, Trash2, Eye, GripVertical, Loader2 } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { translationManager } from "@/lib/translationManager";
 import { useToast } from "@/hooks/use-toast";
@@ -132,90 +133,112 @@ function ProjectListItem({
   index,
   isFeatured, 
   onToggleFeatured,
-  onRemove 
+  onRemove,
+  isAdding,
+  addingProgress,
 }: { 
   project: Project; 
   index: number;
   isFeatured: boolean;
   onToggleFeatured: (id: string) => void;
   onRemove: (id: string) => void;
+  isAdding?: boolean;
+  addingProgress?: number;
 }) {
   return (
     <div
-      className={`flex items-center gap-4 p-3 border rounded-lg transition-all ${
+      className={`relative flex flex-col border rounded-lg transition-all overflow-hidden ${
         isFeatured 
           ? "border-primary/30 bg-primary/5" 
           : "border-muted bg-muted/10 hover:bg-muted/20"
       }`}
     >
-      <div className="flex items-center gap-3 flex-1 min-w-0">
-        <GripVertical className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-        
-        <span className="text-sm font-medium w-6 text-muted-foreground flex-shrink-0">
-          {index + 1}.
-        </span>
-        
-        {project.image_url ? (
-          <img 
-            src={project.image_url} 
-            alt={project.title}
-            className="w-12 h-12 rounded object-cover flex-shrink-0"
-          />
-        ) : (
-          <div className="w-12 h-12 rounded bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center flex-shrink-0">
-            <Star className="w-5 h-5 text-primary/50" />
+      {/* Progress bar when adding */}
+      {isAdding && (
+        <div className="absolute inset-x-0 top-0 z-10">
+          <div className="bg-primary/10 px-3 py-2">
+            <div className="flex items-center gap-2 mb-1">
+              <Loader2 className="w-3 h-3 animate-spin text-primary" />
+              <span className="text-xs font-medium text-primary">Adicionando...</span>
+              <span className="text-xs text-muted-foreground ml-auto">{addingProgress}%</span>
+            </div>
+            <Progress value={addingProgress} className="h-1.5" />
           </div>
-        )}
-        
-        <div className="min-w-0 flex-1">
-          <h4 className="font-medium text-sm truncate">{project.title}</h4>
-          <p className="text-xs text-muted-foreground truncate">
-            {project.project_type} • {project.location || "Sem localização"}
-          </p>
         </div>
-      </div>
+      )}
       
-      <div className="flex items-center gap-2 flex-shrink-0">
-        {/* Toggle Featured */}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => onToggleFeatured(project.id)}
-          className={`${
-            isFeatured 
-              ? "text-amber-500 hover:text-amber-600" 
-              : "text-muted-foreground hover:text-amber-500"
-          }`}
-          title={isFeatured ? "Remover dos destaques" : "Adicionar aos destaques"}
-        >
-          <Star className={`w-4 h-4 ${isFeatured ? "fill-current" : ""}`} />
-        </Button>
+      <div className={`flex items-center gap-4 p-3 ${isAdding ? "pt-14" : ""}`}>
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+          <GripVertical className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+          
+          <span className="text-sm font-medium w-6 text-muted-foreground flex-shrink-0">
+            {index + 1}.
+          </span>
+          
+          {project.image_url ? (
+            <img 
+              src={project.image_url} 
+              alt={project.title}
+              className="w-12 h-12 rounded object-cover flex-shrink-0"
+            />
+          ) : (
+            <div className="w-12 h-12 rounded bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center flex-shrink-0">
+              <Star className="w-5 h-5 text-primary/50" />
+            </div>
+          )}
+          
+          <div className="min-w-0 flex-1">
+            <h4 className="font-medium text-sm truncate">{project.title}</h4>
+            <p className="text-xs text-muted-foreground truncate">
+              {project.project_type} • {project.location || "Sem localização"}
+            </p>
+          </div>
+        </div>
         
-        {/* View */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="text-muted-foreground hover:text-foreground"
-          title="Visualizar projeto"
-          asChild
-        >
-          <a href={`/projeto/${project.id}`} target="_blank" rel="noopener noreferrer">
-            <Eye className="w-4 h-4" />
-          </a>
-        </Button>
-        
-        {/* Remove from list (only if featured) */}
-        {isFeatured && (
+        <div className="flex items-center gap-2 flex-shrink-0">
+          {/* Toggle Featured */}
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => onRemove(project.id)}
-            className="text-destructive hover:text-destructive hover:bg-destructive/10"
-            title="Remover dos destaques"
+            onClick={() => onToggleFeatured(project.id)}
+            disabled={isAdding}
+            className={`${
+              isFeatured 
+                ? "text-amber-500 hover:text-amber-600" 
+                : "text-muted-foreground hover:text-amber-500"
+            }`}
+            title={isFeatured ? "Remover dos destaques" : "Adicionar aos destaques"}
           >
-            <Trash2 className="w-4 h-4" />
+            <Star className={`w-4 h-4 ${isFeatured ? "fill-current" : ""}`} />
           </Button>
-        )}
+          
+          {/* View */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-muted-foreground hover:text-foreground"
+            title="Visualizar projeto"
+            asChild
+          >
+            <a href={`/projeto/${project.id}`} target="_blank" rel="noopener noreferrer">
+              <Eye className="w-4 h-4" />
+            </a>
+          </Button>
+          
+          {/* Remove from list (only if featured) */}
+          {isFeatured && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => onRemove(project.id)}
+              disabled={isAdding}
+              className="text-destructive hover:text-destructive hover:bg-destructive/10"
+              title="Remover dos destaques"
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -231,6 +254,8 @@ export function FeaturedProjectsManager({ projects, onProjectUpdate }: FeaturedP
   const [featuredItems, setFeaturedItems] = useState<FeaturedItem[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [addingProjectId, setAddingProjectId] = useState<string | null>(null);
+  const [addingProgress, setAddingProgress] = useState(0);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -383,22 +408,46 @@ export function FeaturedProjectsManager({ projects, onProjectUpdate }: FeaturedP
     }
 
     try {
-      await supabase
-        .from("projects")
-        .update({ featured_on_homepage: !isCurrentlyFeatured })
-        .eq("id", projectId);
-
+      // If adding a new featured project, show progress bar
       if (!isCurrentlyFeatured) {
-        toast({
-          title: "Preparando traduções",
-          description: "Aquecendo traduções para este destaque.",
-        });
+        setAddingProjectId(projectId);
+        setAddingProgress(0);
+        
+        // Start progress animation
+        const progressInterval = setInterval(() => {
+          setAddingProgress(prev => {
+            if (prev >= 90) {
+              clearInterval(progressInterval);
+              return 90;
+            }
+            return prev + 15;
+          });
+        }, 200);
 
         try {
+          await supabase
+            .from("projects")
+            .update({ featured_on_homepage: true })
+            .eq("id", projectId);
+          
+          setAddingProgress(50);
+
           await warmProjectTranslations(projectId);
-        } catch (e) {
-          console.error("Translation warming failed:", e);
+          
+          setAddingProgress(100);
+          
+          // Small delay to show 100% before clearing
+          await new Promise(resolve => setTimeout(resolve, 300));
+        } finally {
+          clearInterval(progressInterval);
+          setAddingProjectId(null);
+          setAddingProgress(0);
         }
+      } else {
+        await supabase
+          .from("projects")
+          .update({ featured_on_homepage: false })
+          .eq("id", projectId);
       }
 
       onProjectUpdate();
@@ -409,6 +458,8 @@ export function FeaturedProjectsManager({ projects, onProjectUpdate }: FeaturedP
           : "O projeto foi adicionado aos destaques.",
       });
     } catch (error) {
+      setAddingProjectId(null);
+      setAddingProgress(0);
       toast({
         title: "Erro",
         description: "Não foi possível atualizar o projeto.",
@@ -519,6 +570,8 @@ export function FeaturedProjectsManager({ projects, onProjectUpdate }: FeaturedP
                 isFeatured={project.featured_on_homepage}
                 onToggleFeatured={handleToggleFeatured}
                 onRemove={handleRemoveFeatured}
+                isAdding={addingProjectId === project.id}
+                addingProgress={addingProjectId === project.id ? addingProgress : 0}
               />
             ))}
           </div>
