@@ -1963,15 +1963,6 @@ const AdminDashboard = () => {
 
             {/* Porto de Ideias Header Editor */}
             <PortoIdeiasHeaderEditor />
-
-            <Card>
-              <CardContent className="p-6">
-                <p className="text-sm text-muted-foreground">
-                  Os projetos em captação são gerenciados na aba <strong>Homepage</strong> (projetos em destaque) 
-                  e diretamente na página <strong>Porto de Ideias</strong> via drag-and-drop para ordenamento.
-                </p>
-              </CardContent>
-            </Card>
           </div>
         )}
 
