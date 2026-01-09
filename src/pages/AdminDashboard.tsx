@@ -15,7 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
 import { DualImageCropper } from "@/components/DualImageCropper";
 import { FeaturedProjectsManager } from "@/components/admin/FeaturedProjectsManager";
-import { PortoIdeiasCardsManager } from "@/components/admin/PortoIdeiasCardsManager";
+
 import { PortoIdeiasHeaderEditor } from "@/components/admin/PortoIdeiasHeaderEditor";
 import { QuemSomosEditor } from "@/components/admin/QuemSomosEditor";
 
@@ -1964,11 +1964,14 @@ const AdminDashboard = () => {
             {/* Porto de Ideias Header Editor */}
             <PortoIdeiasHeaderEditor />
 
-            {/* Cards Porto de Ideias */}
-            <PortoIdeiasCardsManager 
-              projects={projects.filter(p => p.status === "approved")}
-              onFeaturedChange={() => setFeaturedRefreshKey(prev => prev + 1)}
-            />
+            <Card>
+              <CardContent className="p-6">
+                <p className="text-sm text-muted-foreground">
+                  Os projetos em captação são gerenciados na aba <strong>Homepage</strong> (projetos em destaque) 
+                  e diretamente na página <strong>Porto de Ideias</strong> via drag-and-drop para ordenamento.
+                </p>
+              </CardContent>
+            </Card>
           </div>
         )}
 
