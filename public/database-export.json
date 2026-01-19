@@ -1,0 +1,640 @@
+{
+  "exported_at": "2026-01-19T21:53:00Z",
+  "tables": {
+    "projects": [
+      {
+        "id": "8c7595b1-ea6f-4a1e-9a2b-0563510a9404",
+        "title": "Dog Pod Tudo",
+        "project_type": "Videocast",
+        "synopsis": "Um programa de entrevistas que, a partir da relação de celebridades com seus cachorros, revela histórias pessoais, afetos e o cotidiano por trás da vida pública, com humor e leveza.",
+        "description": "Dog Pod Tudo é uma websérie de entretenimento que explora, com leveza e humor, a relação entre pessoas e seus cães no Brasil contemporâneo. A partir de entrevistas com celebridades, artistas e convidados do universo cultural, o programa investiga como os cachorros atravessam histórias pessoais, rotinas e afetos, revelando aspectos íntimos e cotidianos da vida de seus protagonistas.\n\nCom linguagem descontraída e foco no carisma dos convidados, a série transforma a convivência humano-animal em ponto de partida para conversas sobre memória, identidade, trabalho e vida urbana. Distribuído gratuitamente em plataformas digitais, Dog Pod Tudo aposta no formato de entrevista como entretenimento acessível, popular e conectado ao público.",
+        "location": "Rio de Janeiro",
+        "status": "approved",
+        "featured_on_homepage": true,
+        "show_on_captacao": true,
+        "show_on_portfolio": true,
+        "is_hidden": false,
+        "has_incentive_law": true,
+        "incentive_law_details": "lei_rouanet",
+        "stage": "distribution",
+        "stages": ["captacao", "distribution", "em_exibicao"],
+        "categorias_tags": ["videocast", "audiovisual", "webserie", "impacto_social", "familia", "Pet Friendly", "Entretenimento", "Entrevista", "Conteúdo Digital"],
+        "awards": ["Rio Web Fest 2024 - Melhor Videocast"],
+        "diferenciais": "Formato de videocast gravado em ambiente aberto e preparado para a presença livre dos cães. A interação espontânea entre convidados, apresentadoras e pets gera conversas menos formais, com foco no vínculo humano-animal, combinando entretenimento e informação sem tom educativo ou moralizante.",
+        "impacto_cultural": "Dog Pod Tudo registra a presença dos cães na vida urbana contemporânea como parte das relações afetivas e do cotidiano. Ao reunir personalidades públicas em conversas informais com seus pets, o projeto documenta modos de convivência, linguagem e hábitos que refletem transformações nas dinâmicas familiares e sociais.",
+        "impacto_social": "O projeto amplia a compreensão sobre convivência responsável e bem-estar animal de forma acessível e não didática. A participação de uma ONG de proteção animal e de uma profissional de comportamento canino qualifica o debate e contribui para a construção de uma relação mais consciente e respeitosa entre pessoas e animais.",
+        "publico_alvo": "Adultos e famílias interessadas em entrevistas, entretenimento e histórias do cotidiano, especialmente pessoas que convivem com cães ou se interessam por temas ligados a pets, comportamento e relações afetivas.",
+        "responsavel_nome": "Porto Bello Filmes",
+        "responsavel_email": "portobellofilmes@gmail.com",
+        "responsavel_telefone": "21967264730",
+        "link_video": "https://www.youtube.com/watch?v=c_d5kZGQAOc",
+        "image_url": "https://zfcyxzutsbdxntzhychl.supabase.co/storage/v1/object/public/project-media/originals/1766519475868_original.jpg",
+        "hero_image_url": "https://zfcyxzutsbdxntzhychl.supabase.co/storage/v1/object/public/project-media/thumbnails/1766519477142_hero.jpg",
+        "card_image_url": "https://zfcyxzutsbdxntzhychl.supabase.co/storage/v1/object/public/project-media/thumbnails/1766519477527_card.jpg",
+        "presentation_document_url": "https://zfcyxzutsbdxntzhychl.supabase.co/storage/v1/object/public/project-media/presentation-1765849033752.pdf",
+        "order_index": 6,
+        "created_at": "2025-12-14T20:54:03.079305+00:00",
+        "updated_at": "2026-01-09T16:26:25.829856+00:00",
+        "user_id": "00000000-0000-0000-0000-000000000000"
+      },
+      {
+        "id": "744f29f0-a009-4723-b75d-c82f69139934",
+        "title": "Maison Leblon",
+        "project_type": "Longa-metragem ficção",
+        "synopsis": "Durante a pandemia, uma porteira e mãe solo se torna uma das vozes centrais de uma greve em um edifício de luxo, enquanto uma morte misteriosa expõe o condomínio como um microcosmo de desigualdade, medo e poder.",
+        "description": "Jaqueline é porteira em um edifício de luxo no Leblon e mora na Cruzada São Sebastião, onde cria sozinha a filha pequena. Durante a pandemia, a precarização das condições de trabalho leva os funcionários do condomínio a entrarem em greve, expondo a dependência dos moradores em relação aos serviços cotidianos.\n\nEm uma assembleia para resolver a paralisação, Ricardo, um morador influente, propõe medidas que aprofundam a precarização. Raquel, advogada e moradora do prédio, se opõe e defende os trabalhadores, acirrando as tensões entre os condôminos. A reunião termina após um apagão e, pouco depois, Raquel é encontrada morta no fosso do elevador.\n\nA morte desencadeia uma investigação policial e instala um clima de paranoia no edifício. Jaqueline, que presenciou algo suspeito nas câmeras de segurança, acaba envolvida no caso enquanto tenta proteger a filha. Ambientado durante a pandemia, Maison Leblon transforma o condomínio em um microcosmo das desigualdades e relações de poder da sociedade brasileira.",
+        "location": "Rio de Janeiro",
+        "status": "approved",
+        "featured_on_homepage": true,
+        "show_on_captacao": true,
+        "show_on_portfolio": true,
+        "is_hidden": false,
+        "has_incentive_law": true,
+        "incentive_law_details": "lei_audiovisual",
+        "stage": "development",
+        "stages": ["captacao"],
+        "categorias_tags": ["cinema", "ficcao", "impacto_social", "conflito_social", "suspense_psicologico", "protagonismo_feminino", "criacao_feminina"],
+        "awards": ["2025 Menção honrosa no Grande Prêmio de Roteiro"],
+        "diferenciais": "Combinação de drama social e suspense psicológico, com protagonismo feminino não estereotipado e uso da pandemia como eixo estruturante da narrativa.",
+        "impacto_cultural": "Atualiza o debate sobre cidade, classe e trabalho no cinema brasileiro ao situar o conflito em um condomínio de luxo como espaço simbólico da vida urbana contemporânea.",
+        "impacto_social": "Estimula reflexão crítica sobre desigualdade estrutural e relações de poder naturalizadas no cotidiano, especialmente nas dinâmicas entre trabalho precarizado e espaços de privilégio.",
+        "publico_alvo": "Adultos interessados em cinema brasileiro contemporâneo, dramas urbanos e narrativas sociais com abordagem psicológica e realista.",
+        "responsavel_nome": "Porto Bello Filmes",
+        "responsavel_email": "portobellofilmes@gmail.com",
+        "responsavel_telefone": "21967264730",
+        "news": [{"date": "2025", "title": "Grande Prêmio de Roteiro - Festival Sorocaba", "url": "https://grandepremioderoteiro.com/concursos"}],
+        "image_url": "https://zfcyxzutsbdxntzhychl.supabase.co/storage/v1/object/public/project-media/originals/1768006557074_original.jpg",
+        "hero_image_url": "https://zfcyxzutsbdxntzhychl.supabase.co/storage/v1/object/public/project-media/thumbnails/1768006559522_hero.jpg",
+        "card_image_url": "https://zfcyxzutsbdxntzhychl.supabase.co/storage/v1/object/public/project-media/thumbnails/1768006560131_card.jpg",
+        "order_index": 5,
+        "created_at": "2025-12-16T03:11:43.696957+00:00",
+        "updated_at": "2026-01-10T00:56:11.66476+00:00",
+        "user_id": "00000000-0000-0000-0000-000000000000"
+      },
+      {
+        "id": "2ef58626-4926-4d0c-8a25-965464aad205",
+        "title": "Língua",
+        "project_type": "Teatro",
+        "synopsis": "Uma mãe prepara a festa de aniversário para seu filho, um taxista surdo que cresceu rodeado de ouvintes. O encontro, que reúne um pequeno grupo de amigos do rapaz, revela os afetos, mas também os dilemas e a diferença cultural entre eles. Além disso, convida-nos a perceber como lidamos com a distância entre aquilo que se sente e a tentativa de dizê-lo.",
+        "description": "Língua é um espetáculo teatral bilíngue e bicultural em português e Libras, criado para ser vivido simultaneamente em ambas as línguas, com artistas surdos e ouvintes no elenco e no processo criativo. A proposta é investigar os impasses universais da comunicação, explorando a convivência entre culturas linguísticas diferentes—sem reduzir a história apenas à condição de surdez do protagonista, mas colocando as relações humanas e os desafios de expressão e compreensão no centro da narrativa.\n\nA peça estimula reflexões sobre convivência, comunicação e práticas de acessibilidade, mostrando que a dificuldade de entender e ser entendido ultrapassa meramente a barreira de línguas físicas e entra no terreno dos afetos e da subjetividade.",
+        "location": "Rio de Janeiro",
+        "status": "approved",
+        "featured_on_homepage": true,
+        "show_on_captacao": false,
+        "show_on_portfolio": true,
+        "is_hidden": false,
+        "has_incentive_law": true,
+        "incentive_law_details": "lei_rouanet",
+        "stage": "distribution",
+        "stages": ["Circulação"],
+        "categorias_tags": ["impacto_social", "acessibilidade", "Cultura Surda"],
+        "awards": ["Prêmio Shell de Teatro (35ª edição) na categoria Dramaturgia, com o texto assinado por Pedro Emanuel e Vinicius Arneiro"],
+        "diferenciais": "Espetáculo bilíngue e bicultural em que português e Libras coexistem sem hierarquia ou tradução simultânea. Dramaturgia premiada e processo criativo integrado, que parte de uma situação cotidiana para abordar conflitos universais de afeto e comunicação.",
+        "impacto_cultural": "Língua fortalece o teatro contemporâneo brasileiro ao integrar português e Libras de forma estrutural na encenação. O espetáculo propõe novas formas de pensar linguagem, comunicação e representação, ampliando os limites estéticos da cena teatral.",
+        "impacto_social": "O projeto promove inclusão ao reunir artistas surdos e ouvintes em um processo criativo compartilhado, com a Libras como linguagem central. Estimula reflexões sobre escuta, convivência, empatia e diversidade, ampliando o acesso cultural da comunidade surda.",
+        "publico_alvo": "Público jovem e adulto, surdo e ouvinte, além de estudantes, educadores e profissionais das artes cênicas. Pessoas interessadas em acessibilidade cultural, diversidade linguística e temas ligados à comunicação e às relações humanas.",
+        "responsavel_nome": "Porto Bello Filmes",
+        "responsavel_email": "portobellofilmes@gmail.com",
+        "responsavel_telefone": "21967264730",
+        "link_video": "https://www.youtube.com/watch?v=3PxMAJiKoAg&t=2s",
+        "news": [
+          {"date": "14/06/2024", "title": "Teatro bilíngue traz inclusão para surdos e gera reflexões", "url": "https://tvbrasil.ebc.com.br/reporter-brasil-tarde/2024/06/teatro-bilingue-traz-inclusao-para-surdos-e-gera-reflexoes"},
+          {"date": "16/05/2024", "title": "Peça que une artistas surdos e ouvintes estréia em Junho no Sesc Copacabana", "url": "https://oglobo.globo.com/blogs/ancelmo-gois/post/2024/05/peca-que-une-artistas-surdos-e-ouvintes-estreia-em-junho-no-sesc-copacabana.ghtml"},
+          {"title": "Espetáculo no Sesc Copacabana leva à cena uma trama criada em português e em Libras para refletir sobre os impasses de comunicação universais.", "url": "https://www.oxigeniorevista.com/_files/ugd/6fab1a_66f375e103b34493b13667720ecb47e3.pdf"},
+          {"date": "30/05/2024", "title": "Com atores surdos e ouvintes, Filipe Codeço estreia 'Língua', espetáculo que mistura libras e português", "url": "https://ideiadelas.com.br/tag/lingua/"}
+        ],
+        "image_url": "https://zfcyxzutsbdxntzhychl.supabase.co/storage/v1/object/public/project-media/originals/1766514554352_original.jpg",
+        "hero_image_url": "https://zfcyxzutsbdxntzhychl.supabase.co/storage/v1/object/public/project-media/thumbnails/1766514554950_hero.jpg",
+        "card_image_url": "https://zfcyxzutsbdxntzhychl.supabase.co/storage/v1/object/public/project-media/thumbnails/1766514555417_card.jpg",
+        "order_index": 4,
+        "created_at": "2025-12-16T15:47:39.563608+00:00",
+        "updated_at": "2026-01-10T01:28:44.854942+00:00",
+        "user_id": "00000000-0000-0000-0000-000000000000"
+      },
+      {
+        "id": "2151501f-628c-4a9a-bf04-b22e97831c07",
+        "title": "Sombras de um Sonho",
+        "project_type": "Longa-metragem ficção",
+        "synopsis": "Obrigada a manter uma gestação incompatível com a vida enquanto aguarda uma autorização judicial que nunca chega, uma mulher atravessa um luto em suspensão. Entre o tempo do corpo e a ausência do Estado, ela precisa tomar uma decisão que transforma sua relação com a maternidade, o próprio corpo e a existência.",
+        "description": "Marina, 35 anos, descobre que sua gestação é incompatível com a vida. Apesar do diagnóstico, é obrigada a seguir grávida enquanto aguarda uma autorização judicial. O tempo passa, o corpo avança, e o futuro já foi interrompido.\n\nA espera imposta pelo sistema transforma a gravidez em um estado de violência silenciosa. O luto se instala antes da perda, atravessando o cotidiano, o casamento e a relação de Marina com o próprio corpo. Ao redor, cada pessoa reage de forma distinta: há quem tente normalizar a dor, quem consiga sustentá-la, e quem apenas observe.\n\nDiante da ausência de resposta institucional e do agravamento do sofrimento físico e psíquico, Marina precisa tomar uma decisão extrema. O fim da gestação não encerra o luto, mas inaugura um novo tempo — aquele em que a dor deixa de ser suspensa e passa a existir.\n\nSombras de um Sonho é um drama íntimo sobre luto antecipado, corpo e espera, que expõe a violência institucional enfrentada por mulheres diante da perda gestacional, quando a decisão precisa ser tomada sem amparo do Estado.",
+        "location": "Santa Catarina",
+        "status": "approved",
+        "featured_on_homepage": false,
+        "show_on_captacao": true,
+        "show_on_portfolio": true,
+        "is_hidden": false,
+        "has_incentive_law": true,
+        "incentive_law_details": "lei_audiovisual",
+        "stage": "development",
+        "stages": ["captacao"],
+        "categorias_tags": ["impacto_social", "Saúde Mental", "Narrativas Femininas", "Narrativa Feminina", "protagonismo_feminino", "saude_mental"],
+        "awards": [],
+        "diferenciais": "Narrativa não linear, abordagem sensorial e intimista, tema pouco explorado no cinema nacional, equipe majoritariamente feminina e um olhar crítico sobre a omissão institucional diante da perda gestacional.",
+        "impacto_cultural": "Aborda o luto perinatal a partir da experiência íntima de uma mulher, tensionando discursos sobre maternidade, corpo e violência institucional.",
+        "impacto_social": "Dá visibilidade à dor silenciada da perda gestacional, ampliando a discussão sobre saúde mental, cuidado e a omissão do Estado diante do sofrimento feminino.",
+        "publico_alvo": "Adultos, especialmente mulheres, profissionais da saúde, educadores e interessados em narrativas femininas, luto e saúde mental.",
+        "responsavel_email": "portobellofilmes@gmail.com",
+        "responsavel_telefone": "21967264730",
+        "image_url": "https://zfcyxzutsbdxntzhychl.supabase.co/storage/v1/object/public/project-media/originals/1766442185822_original.jpg",
+        "hero_image_url": "https://zfcyxzutsbdxntzhychl.supabase.co/storage/v1/object/public/project-media/thumbnails/1766442186438_hero.jpg",
+        "card_image_url": "https://zfcyxzutsbdxntzhychl.supabase.co/storage/v1/object/public/project-media/thumbnails/1766442186943_card.jpg",
+        "order_index": 3,
+        "created_at": "2025-12-17T00:06:47.168625+00:00",
+        "updated_at": "2026-01-10T01:27:31.503278+00:00",
+        "user_id": "00000000-0000-0000-0000-000000000000"
+      },
+      {
+        "id": "b7998681-37f5-438d-8df0-d91a0062d70b",
+        "title": "Deságua",
+        "project_type": "Curta-metragem",
+        "synopsis": "Roberta e Ilana são irmãs de uma família cearense que mora no Rio de Janeiro. Após a morte do pai, elas se reencontram, vivenciando de formas distintas o luto e os desejos sobre o futuro.",
+        "description": "Roberta e Ilana são irmãs de uma família cearense que mora no Rio de Janeiro. Anos depois de ter saído de casa, Roberta visita a irmã mais nova, Ilana, que mora numa região litorânea da Zona Oeste da cidade. O pai delas morreu recentemente e Roberta não foi ao enterro. Ilana, que cuidou do pai alcoólatra nos últimos anos, quer fazer uma viagem de mochilão sozinha pelo Brasil. Roberta tem medo do que possa acontecer com sua irmã e tenta convencer Ilana a ir morar com ela. Enquanto Roberta quer resgatar o tempo perdido, Ilana quer tomar um tempo para encontrar seu caminho. Ao longo desse dia de visita, Roberta e Ilana revivem memórias, histórias da família e conflitos que não passaram como o tempo. O luto é vivenciado de formas distintas pelas irmãs, assim como os desejos sobre o futuro.",
+        "location": "Rio de Janeiro",
+        "status": "approved",
+        "featured_on_homepage": false,
+        "show_on_captacao": false,
+        "show_on_portfolio": true,
+        "is_hidden": false,
+        "has_incentive_law": false,
+        "stage": "development",
+        "stages": ["distribution"],
+        "festivals_exhibitions": [
+          {"date": "2024", "title": "Festival Curtas de Campo Grande – Campo Grande (MS)"},
+          {"date": "2024", "title": "Cine Uivo – Paracambi (RJ)"},
+          {"date": "2025", "title": "Mostra Curta Delas – Estação NET Botafogo (RJ)"},
+          {"date": "2025", "title": "1ª Mostra Curta Santa – Santa Paciência Casa de Cultura – Campos dos Goytacazes (RJ)"},
+          {"date": "2025", "title": "Brazil New Visions Film Fest - International Film Festival – Online"},
+          {"date": "2025", "title": "Lavender Riot: An Unapologetic Queer Film Festival – Clarksville, Tennessee (EUA)"},
+          {"date": "2025", "title": "Panorama Brasilis – Bruxelas, Bélgica"},
+          {"date": "2025", "title": "Lift-Off Sessions Festival – Online"}
+        ],
+        "link_video": "https://www.youtube.com/watch?v=dQ4uxTMPObk",
+        "image_url": "https://zfcyxzutsbdxntzhychl.supabase.co/storage/v1/object/public/project-media/thumbnails/1766525891046_cover.jpg",
+        "hero_image_url": "https://zfcyxzutsbdxntzhychl.supabase.co/storage/v1/object/public/project-media/thumbnails/1766525891046_cover.jpg",
+        "card_image_url": "https://zfcyxzutsbdxntzhychl.supabase.co/storage/v1/object/public/project-media/thumbnails/1766525891046_cover.jpg",
+        "order_index": 2,
+        "created_at": "2025-12-23T21:38:15.961434+00:00",
+        "updated_at": "2026-01-10T02:06:16.960305+00:00",
+        "user_id": "00000000-0000-0000-0000-000000000000"
+      },
+      {
+        "id": "8b439ac7-9d2e-4331-b101-f163771328ac",
+        "title": "Cores no Breu",
+        "project_type": "Curta-metragem",
+        "synopsis": "Joana e Maria vivem um intenso amor sapatão de idas e vindas. Enquanto Maria quer começar uma família, Joana luta contra seus conflitos internos e cria um programa virtual com memórias das duas. O refúgio tecnológico aumenta a distância entre elas no mundo real, fazendo Joana mergulhar num abismo de realidades.",
+        "location": "Rio de Janeiro",
+        "status": "approved",
+        "featured_on_homepage": true,
+        "show_on_captacao": false,
+        "show_on_portfolio": true,
+        "is_hidden": false,
+        "has_incentive_law": false,
+        "stage": "development",
+        "stages": ["producao"],
+        "categorias_tags": ["lgbtqia", "ficcao"],
+        "link_video": "https://www.youtube.com/watch?v=1UiGZ7MKnJg",
+        "image_url": "https://zfcyxzutsbdxntzhychl.supabase.co/storage/v1/object/public/project-media/thumbnails/1767638004901_cover.jpg",
+        "hero_image_url": "https://zfcyxzutsbdxntzhychl.supabase.co/storage/v1/object/public/project-media/thumbnails/1767638004901_cover.jpg",
+        "card_image_url": "https://zfcyxzutsbdxntzhychl.supabase.co/storage/v1/object/public/project-media/thumbnails/1767638004901_cover.jpg",
+        "order_index": 1,
+        "created_at": "2026-01-05T18:33:44.685721+00:00",
+        "updated_at": "2026-01-14T15:50:30.556856+00:00",
+        "user_id": "00000000-0000-0000-0000-000000000000"
+      }
+    ],
+    "project_members": [
+      {
+        "id": "06c9d48c-e35b-4ad7-b771-5eac365d6142",
+        "project_id": "2ef58626-4926-4d0c-8a25-965464aad205",
+        "nome": "Dominique Arantes",
+        "funcao": "Assistente de Direção",
+        "detalhes": "Dominique Arantes é atriz, dramaturga e diretora teatral, formada em Direção Teatral pela UFRJ. Atuou como assistente de direção da peça Língua.",
+        "photo_url": "https://zfcyxzutsbdxntzhychl.supabase.co/storage/v1/object/public/project-media/team-member-1766508858866-3.jpg",
+        "social_links": {"instagram": "@dominique_arantes"},
+        "order_index": 2,
+        "created_at": "2025-12-23T18:47:22.424572+00:00"
+      },
+      {
+        "id": "901cbe4d-4ff3-41ec-a3e4-3d38ae43582d",
+        "project_id": "2ef58626-4926-4d0c-8a25-965464aad205",
+        "nome": "Erika Rettl",
+        "funcao": "Elenco",
+        "detalhes": "Erika é bacharel em Interpretação Teatral pela UNIRIO. Fundadora do Grupo Moitará, dirige o Ponto de Cultura Palavras Visíveis e atua há décadas na pesquisa entre teatro e linguagem.",
+        "photo_url": "https://zfcyxzutsbdxntzhychl.supabase.co/storage/v1/object/public/project-media/team-member-1766515353673-13.jpeg",
+        "social_links": {"instagram": "@erikarettl"},
+        "order_index": 13,
+        "created_at": "2025-12-23T18:47:22.424572+00:00"
+      },
+      {
+        "id": "5cda189e-9594-439e-b393-51862b19073a",
+        "project_id": "2ef58626-4926-4d0c-8a25-965464aad205",
+        "nome": "Jhonatas Narciso",
+        "funcao": "Elenco",
+        "detalhes": "Jhonatas Narciso é ator ouvinte bilíngue e tecnólogo em Tradução e Interpretação Libras–Português. Atua como intérprete audiovisual na TV Brasil e em projetos de acessibilidade cultural.",
+        "photo_url": "https://zfcyxzutsbdxntzhychl.supabase.co/storage/v1/object/public/project-media/team-member-1766515465913-14.jpg",
+        "social_links": {"instagram": "jhon_narciso"},
+        "order_index": 12,
+        "created_at": "2025-12-23T18:47:22.424572+00:00"
+      },
+      {
+        "id": "d920c6ff-6a51-403c-a164-76a6a3fc15cc",
+        "project_id": "2ef58626-4926-4d0c-8a25-965464aad205",
+        "nome": "Felipe Storino",
+        "funcao": "Direção Musical",
+        "detalhes": "Felipe Storino é compositor e diretor musical, com ampla atuação no teatro brasileiro. Assinou trilhas de espetáculos premiados como Esta Criança (Prêmio Shell), Caranguejo Overdrive e Vim assim que s",
+        "photo_url": "https://zfcyxzutsbdxntzhychl.supabase.co/storage/v1/object/public/project-media/team-member-1766513855336-7.jpg",
+        "social_links": {"instagram": "@felipestorino.music"},
+        "order_index": 11,
+        "created_at": "2025-12-23T18:47:22.424572+00:00"
+      },
+      {
+        "id": "bde54248-6776-4c44-b640-fb9b0b37d691",
+        "project_id": "2ef58626-4926-4d0c-8a25-965464aad205",
+        "nome": "Filipe Codeço",
+        "funcao": "Elenco",
+        "detalhes": "Filipe Codeço é ator e diretor, mestre em Artes Cênicas pela UNIRIO. Vencedor do Prêmio APTR de melhor ator protagonista, atua em teatro e audiovisual, com trabalhos em Impuros e Adeus, Ternura!.",
+        "photo_url": "https://zfcyxzutsbdxntzhychl.supabase.co/storage/v1/object/public/project-media/team-member-1766515557818-15.jpeg",
+        "social_links": {"instagram": "umfilipecodeco"},
+        "order_index": 10,
+        "created_at": "2025-12-23T18:47:22.424572+00:00"
+      },
+      {
+        "id": "665667a3-6b0d-4d22-88e6-a7724d57afa4",
+        "project_id": "2ef58626-4926-4d0c-8a25-965464aad205",
+        "nome": "Daniela Sanchez",
+        "funcao": "Iluminação",
+        "detalhes": "Iluminadora cênica com 25 anos de experiência, formada em Cinema. Indicada aos prêmios Shell, APTR e Botequim Cultural, atua em teatro, shows e musicais como Beetlejuice.",
+        "photo_url": "https://zfcyxzutsbdxntzhychl.supabase.co/storage/v1/object/public/project-media/team-member-1766514064766-8.jpeg",
+        "social_links": {"instagram": "@danisanchez1"},
+        "order_index": 9,
+        "created_at": "2025-12-23T18:47:22.424572+00:00"
+      },
+      {
+        "id": "aab02339-10af-4ec6-8386-88888b45f893",
+        "project_id": "2ef58626-4926-4d0c-8a25-965464aad205",
+        "nome": "Pedro Colombo",
+        "funcao": "Arte Gráfica",
+        "detalhes": "Pedro Colombo é diretor de arte e artista gráfico, fundador do Estúdio Vírgula. Assina capas de discos, cartazes e projetos gráficos para artistas e projetos culturais brasileiros.",
+        "photo_url": "https://zfcyxzutsbdxntzhychl.supabase.co/storage/v1/object/public/project-media/team-member-1766514185334-9.jpeg",
+        "social_links": {"instagram": "@pedrogcolombo"},
+        "order_index": 8,
+        "created_at": "2025-12-23T18:47:22.424572+00:00"
+      }
+    ],
+    "contrapartidas": [
+      {
+        "id": "4d8c3851-c20f-466e-a536-6e85255a369f",
+        "project_id": "8c7595b1-ea6f-4a1e-9a2b-0563510a9404",
+        "titulo": "Patinhas de Ouro",
+        "valor": "30000",
+        "indice": "por episódio",
+        "ordem": 0,
+        "ativo": false,
+        "beneficios": [
+          "Sua marca será mencionada de forma positiva e destacada no episódio do podcast, aumentando a visibilidade e o reconhecimento da sua empresa entre os ouvintes",
+          "Logotipo da sua marca exibido nos materiais de divulgação e em anúncios digitais de eventos relacionados ao episódio. Isso proporcionará uma exposição adicional",
+          "Oportunidade de oferecer descontos exclusivos, promoções especiais ou brindes personalizados aos ouvintes do episódio. Isso ajudará a impulsionar o engajamento",
+          "Relatórios detalhados que apresentam métricas e dados relevantes sobre o alcance e o engajamento da audiência do podcast. Isso permitirá que você acompanhe o im"
+        ],
+        "created_at": "2025-12-23T23:22:45.032976+00:00",
+        "updated_at": "2025-12-23T23:22:45.032976+00:00"
+      },
+      {
+        "id": "86ee7435-0a27-4599-af06-1f4e878c7096",
+        "project_id": "8c7595b1-ea6f-4a1e-9a2b-0563510a9404",
+        "titulo": "Latido de Sucesso",
+        "valor": "50000",
+        "indice": "por episódio",
+        "ordem": 1,
+        "ativo": false,
+        "beneficios": [
+          "Todos os benefícios do nível \"Patinhas de Ouro\", Isso inclui menção da marca no episódio, exibição do logotipo em materiais de divulgação e anúncios digitais de",
+          "Inclusão de materiais promocionais da marca nos kits de boas-vindas do episódio: folhetos, amostras de produtos ou brindes personalizados serão fornecidos a cel",
+          "Anúncio em vídeo de 15 segundos no início do episódio. Essa é uma maneira poderosa de alcançar a audiência de forma atrativa, aumentando o reconhecimento e a vi",
+          "Acesso direto à equipe do podcast para colaborações estratégicas. Isso permitirá discussão de ideias e feedback personalizado para ajudar a moldar a presença da"
+        ],
+        "created_at": "2025-12-23T23:22:45.032976+00:00",
+        "updated_at": "2025-12-23T23:22:45.032976+00:00"
+      },
+      {
+        "id": "2d6906be-b44f-4ef5-b9cc-4a9965f1cebf",
+        "project_id": "8c7595b1-ea6f-4a1e-9a2b-0563510a9404",
+        "titulo": "Vira-Lata Caramelo",
+        "valor": "100000",
+        "indice": "por episódio",
+        "ordem": 2,
+        "ativo": false,
+        "beneficios": [
+          "O episódio será destinado exclusivamente para a sua marca",
+          "Todos os benefícios do nível \"Latido de Sucesso\", Isso inclui menção da marca no episódio, exibição do logotipo em materiais de divulgação e anúncios digitais",
+          "Destaque como parceiro exclusivo e patrocinador do episódio em todas as comunicações. Isso inclui menções em redes sociais, publicações em blogs e outros canais",
+          "Acesso exclusivo aos bastidores com celebridades convidadas, estabelecendo conexões valiosas",
+          "Personalização dos benefícios da parceria de acordo com as suas necessidades, garantindo que sua marca obtenha o máximo de retorno sobre o investimento e atinja"
+        ],
+        "created_at": "2025-12-23T23:22:45.032976+00:00",
+        "updated_at": "2025-12-23T23:22:45.032976+00:00"
+      }
+    ],
+    "settings": [
+      {
+        "id": "d00556a6-e1c0-4aff-809c-97d7664211e1",
+        "key": "stats_visible",
+        "value": {"enabled": false},
+        "created_at": "2025-12-04T05:51:21.970759+00:00",
+        "updated_at": "2026-01-07T00:35:33.723981+00:00"
+      },
+      {
+        "id": "b2291bbc-f6e8-4799-afea-79d9dae9d2bb",
+        "key": "carousel_display_count",
+        "value": {"count": 3},
+        "created_at": "2025-12-13T00:47:24.614129+00:00",
+        "updated_at": "2026-01-08T18:01:36.673769+00:00"
+      },
+      {
+        "id": "0ebfc307-cf54-48e4-a338-45f1c265de0c",
+        "key": "porto_ideias_unified_order",
+        "value": ["real-2151501f-628c-4a9a-bf04-b22e97831c07", "real-744f29f0-a009-4723-b75d-c82f69139934", "real-8b439ac7-9d2e-4331-b101-f163771328ac", "real-b7998681-37f5-438d-8df0-d91a0062d70b", "real-8c7595b1-ea6f-4a1e-9a2b-0563510a9404", "real-2ef58626-4926-4d0c-8a25-965464aad205"],
+        "created_at": "2025-12-13T04:06:32.520501+00:00",
+        "updated_at": "2026-01-09T14:13:22.084829+00:00"
+      },
+      {
+        "id": "0521738b-eddc-4fcc-b24b-3b4ad2e7f319",
+        "key": "featured_projects_order",
+        "value": ["real-2151501f-628c-4a9a-bf04-b22e97831c07", "real-744f29f0-a009-4723-b75d-c82f69139934", "real-8c7595b1-ea6f-4a1e-9a2b-0563510a9404", "real-2ef58626-4926-4d0c-8a25-965464aad205", "real-8b439ac7-9d2e-4331-b101-f163771328ac", "real-b7998681-37f5-438d-8df0-d91a0062d70b"],
+        "created_at": "2025-12-13T04:48:07.669098+00:00",
+        "updated_at": "2026-01-07T00:38:30.416916+00:00"
+      },
+      {
+        "id": "59bb01e5-5eb8-4db2-a2b3-9dbe3c24119c",
+        "key": "featured_projects_visibility",
+        "value": {
+          "real-2151501f-628c-4a9a-bf04-b22e97831c07": true,
+          "real-2ef58626-4926-4d0c-8a25-965464aad205": true,
+          "real-744f29f0-a009-4723-b75d-c82f69139934": true,
+          "real-8b439ac7-9d2e-4331-b101-f163771328ac": true,
+          "real-8c7595b1-ea6f-4a1e-9a2b-0563510a9404": true,
+          "real-b7998681-37f5-438d-8df0-d91a0062d70b": true
+        },
+        "created_at": "2025-12-13T04:48:07.858768+00:00",
+        "updated_at": "2026-01-07T00:38:30.591516+00:00"
+      },
+      {
+        "id": "5805c85f-7c50-4059-8303-502f2703e397",
+        "key": "porto_ideias_slots",
+        "value": {"count": 6},
+        "created_at": "2025-12-13T05:18:05.786835+00:00",
+        "updated_at": "2026-01-09T15:20:45.376081+00:00"
+      },
+      {
+        "id": "adb481c5-54c6-40c7-a736-7aaa1c464328",
+        "key": "porto_ideias_card_visibility",
+        "value": {
+          "2151501f-628c-4a9a-bf04-b22e97831c07": true,
+          "2ef58626-4926-4d0c-8a25-965464aad205": true,
+          "744f29f0-a009-4723-b75d-c82f69139934": true,
+          "8b439ac7-9d2e-4331-b101-f163771328ac": true,
+          "8c7595b1-ea6f-4a1e-9a2b-0563510a9404": true,
+          "b7998681-37f5-438d-8df0-d91a0062d70b": true,
+          "exemplo-cultura-legado": false,
+          "exemplo-historias-sucesso": false,
+          "exemplo-investidores-aguardam": false,
+          "exemplo-novo-projeto": true,
+          "exemplo-recursos-disponiveis": false
+        },
+        "created_at": "2025-12-13T05:18:12.534851+00:00",
+        "updated_at": "2026-01-09T14:48:15.843576+00:00"
+      },
+      {
+        "id": "bdefeea9-1110-48d3-8af5-da7a842be363",
+        "key": "porto_ideias_featured_cards",
+        "value": {
+          "2151501f-628c-4a9a-bf04-b22e97831c07": true,
+          "8c7595b1-ea6f-4a1e-9a2b-0563510a9404": false,
+          "exemplo-cultura-legado": true,
+          "exemplo-historias-sucesso": true,
+          "exemplo-investidores-aguardam": false,
+          "exemplo-novo-projeto": false,
+          "exemplo-recursos-disponiveis": false
+        },
+        "created_at": "2025-12-13T16:05:21.343571+00:00",
+        "updated_at": "2025-12-23T22:09:17.761637+00:00"
+      },
+      {
+        "id": "e22d5bd1-7f7c-4e88-8d19-2d80175ff11a",
+        "key": "institutional_videos",
+        "value": {
+          "videos": [
+            {"title": "", "url": "https://zfcyxzutsbdxntzhychl.supabase.co/storage/v1/object/public/project-media/institutional-0-1766156838560.mp4"},
+            {"title": "", "url": "https://www.youtube.com/watch?v=1UiGZ7MKnJg&feature=youtu.be"},
+            {"title": "", "url": "https://www.youtube.com/watch?v=dQ4uxTMPObk"},
+            {"title": "", "url": ""},
+            {"title": "", "url": ""}
+          ]
+        },
+        "created_at": "2025-12-14T16:42:58.335649+00:00",
+        "updated_at": "2026-01-09T14:05:24.515059+00:00"
+      },
+      {
+        "id": "c0bc4875-c140-4d68-83ce-8145eca9023a",
+        "key": "social_links",
+        "value": {
+          "facebook": {"enabled": false, "url": ""},
+          "imdb": {"enabled": true, "url": "https://www.imdb.com/pt/user/ur189669138/?ref_=ext_shr_lnk"},
+          "instagram": {"enabled": true, "url": "https://www.instagram.com/portobellofilmes/"},
+          "linkedin": {"enabled": true, "url": "https://www.linkedin.com/company/portobellofilmes/"},
+          "website": {"enabled": false, "url": ""},
+          "whatsapp": {"enabled": true, "url": "21967264730"},
+          "youtube": {"enabled": true, "url": "https://www.youtube.com/@PortoBelloFilmes"}
+        },
+        "created_at": "2025-12-14T16:43:06.737044+00:00",
+        "updated_at": "2026-01-08T18:02:24.432041+00:00"
+      },
+      {
+        "id": "3d73d612-b8b2-4f5b-a04b-d3e93e6638e4",
+        "key": "footer_content",
+        "value": {
+          "emails": ["portobellofilmes@gmail.com"],
+          "phones": ["(21) 96726-4730"],
+          "tagline": "Cultura em movimento."
+        },
+        "created_at": "2025-12-14T16:46:41.723122+00:00",
+        "updated_at": "2025-12-14T16:46:41.723122+00:00"
+      },
+      {
+        "id": "255b3adb-961b-4d7c-8877-72e9658e5034",
+        "key": "quem_somos_content",
+        "value": {
+          "cards": [
+            {"color": "from-primary to-accent", "description": "Sua ideia com forma, plano e viabilidade. A gente entra pra tirar do papel.", "icon": "Lightbulb", "title": "Para Criadores"},
+            {"color": "from-emerald-500 to-emerald-600", "description": "Projetos viáveis, bem estruturados e com retorno institucional.", "icon": "Target", "title": "Para Investidores"},
+            {"color": "from-primary to-accent", "description": "Obras que circulam. Bem pensadas, bem produzidas e com público certo.", "icon": "Star", "title": "Para o Público"}
+          ],
+          "paragraphs": [
+            "A Porto Bello Filmes é uma produtora audiovisual que nasce da vontade de realizar. A gente acredita que o nosso movimento movimenta a vida, e é com trabalho, parceria e escuta que a gente transforma a sua ideia em projeto pronto para ganhar o mundo!",
+            "Nosso jeito de fazer nasce da troca, do repertório diverso e da vivência de quem está junto. Criamos, produzimos e finalizamos com quem soma e acredita no valor de fazer bem feito, com verdade e entrega."
+          ]
+        },
+        "created_at": "2025-12-14T18:03:34.744111+00:00",
+        "updated_at": "2026-01-09T14:07:09.481051+00:00"
+      },
+      {
+        "id": "f82b89ae-09d4-458e-ae55-65799910ca5f",
+        "key": "contact_buttons",
+        "value": {
+          "contacts": [
+            {"id": "7b1253ae-d999-4c40-97ca-c256964610ef", "link": "https://wa.me/5521967264730", "name": "Entre em contato pelo Whatsapp!"}
+          ]
+        },
+        "created_at": "2025-12-14T18:23:25.000297+00:00",
+        "updated_at": "2025-12-23T14:25:49.780365+00:00"
+      },
+      {
+        "id": "70389e1f-f730-43d9-97d7-44941399c96a",
+        "key": "nossos_servicos_content",
+        "value": {
+          "services": [
+            {"hoverColor": "group-hover:text-rose-500", "icon": "FileText", "text": "Desenvolvimento de roteiros"},
+            {"hoverColor": "group-hover:text-amber-500", "icon": "Film", "text": "Produção de filmes, séries, curtas e documentários"},
+            {"hoverColor": "group-hover:text-emerald-500", "icon": "Megaphone", "text": "Produção de peças teatrais e espetáculos"},
+            {"hoverColor": "group-hover:text-cyan-500", "icon": "Mic", "text": "Criação de videocasts e podcasts"},
+            {"hoverColor": "group-hover:text-violet-500", "icon": "Calendar", "text": "Produção de conteúdo publicitário e institucional"},
+            {"hoverColor": "group-hover:text-pink-500", "icon": "Rocket", "text": "Elaboração de projetos para leis de incentivo"},
+            {"hoverColor": "group-hover:text-orange-500", "icon": "DollarSign", "text": "Captação de recursos públicos e privados"},
+            {"hoverColor": "group-hover:text-sky-500", "icon": "Users", "text": "Produção executiva e gestão de equipe"},
+            {"hoverColor": "group-hover:text-teal-500", "icon": "HelpCircle", "text": "Consultoria criativa para projetos culturais"},
+            {"hoverColor": "group-hover:text-indigo-500", "icon": "Waves", "text": "Distribuição e estratégias de circulação"},
+            {"hoverColor": "group-hover:text-lime-500", "icon": "Lightbulb", "text": "Criação de portfólios e materiais de apresentação"},
+            {"hoverColor": "group-hover:text-rose-500", "icon": "Briefcase", "text": "Consultoria para formatação e estruturação de projetos"}
+          ],
+          "title": "Nossos Serviços"
+        },
+        "created_at": "2025-12-14T19:20:26.145628+00:00",
+        "updated_at": "2025-12-14T21:21:53.78566+00:00"
+      },
+      {
+        "id": "59f84d9c-4d3f-456e-bb66-5051bf4ae738",
+        "key": "ecossistema_text",
+        "value": {
+          "subtitle": "Conheça os projetos realizados pela Porto Bello ou em parceria com criadores e produtoras independentes.\nO portfólio reúne obras realizadas, em desenvolvimento ou em busca de patrocínio.\nProjetos com o selo \"Em Captação\" estão abertos a patrocinadores e investidores.",
+          "title": "Destaques"
+        },
+        "created_at": "2025-12-18T13:13:14.243316+00:00",
+        "updated_at": "2026-01-09T17:28:38.564612+00:00"
+      },
+      {
+        "id": "6973af6c-b457-4686-864f-45de4fb0cc18",
+        "key": "project_types",
+        "value": {
+          "types": ["Longa-metragem ficção", "Longa-metragem documentário", "Curta-metragem documentário", "Série ficção", "Série documental", "Videocast", "Podcast", "Evento Cultural", "Musical", "Teatro", "Performance", "Instalação", "Videoclipe", "Projeto educativo", "Projeto formativo", "Projeto transmídia", "Curta-metragem"]
+        },
+        "created_at": "2025-12-19T19:17:06.494117+00:00",
+        "updated_at": "2025-12-19T19:17:19.39317+00:00"
+      },
+      {
+        "id": "82da4f18-b65b-4236-83e3-3b0f7f84f999",
+        "key": "porto_ideias_header",
+        "value": {
+          "description": "Projetos prontos para sair do papel. Aqui você encontra ideias em desenvolvimento que buscam parceiros e investidores para se tornarem realidade.",
+          "title": "Projetos em Captação"
+        },
+        "created_at": "2025-12-23T22:07:04.693151+00:00",
+        "updated_at": "2026-01-09T21:46:43.359527+00:00"
+      },
+      {
+        "id": "c1539d51-4ec3-4266-a17a-3820de375be9",
+        "key": "project_categories",
+        "value": [
+          {"label": "Cinema", "value": "cinema"},
+          {"label": "Teatro", "value": "teatro"},
+          {"label": "Audiovisual", "value": "audiovisual"},
+          {"label": "Videocast", "value": "videocast"},
+          {"label": "Podcast", "value": "podcast"},
+          {"label": "Websérie", "value": "webserie"},
+          {"label": "Música", "value": "musica"},
+          {"label": "Espetáculo Infantil", "value": "espetaculo_infantil"},
+          {"label": "Projeto Educativo", "value": "projeto_educativo"},
+          {"label": "Impacto Social", "value": "impacto_social"},
+          {"label": "Meio Ambiente", "value": "meio_ambiente"},
+          {"label": "Mulheres", "value": "mulheres"},
+          {"label": "LGBTQIA+", "value": "lgbtqia"},
+          {"label": "Comunidade", "value": "comunidade"},
+          {"label": "Família", "value": "familia"},
+          {"label": "Juventude", "value": "juventude"},
+          {"label": "Projeto Multiplataforma", "value": "multiplataforma"},
+          {"label": "Cultura Negra", "value": "cultura_negra"},
+          {"label": "Acessibilidade", "value": "acessibilidade"},
+          {"label": "Sustentabilidade", "value": "sustentabilidade"},
+          {"label": "Ficção", "value": "ficcao"},
+          {"label": "Documentário", "value": "documentario"},
+          {"label": "Conflito Social", "value": "conflito_social"},
+          {"label": "Suspense psicológico", "value": "suspense_psicologico"},
+          {"label": "Protagonismo feminino", "value": "protagonismo_feminino"},
+          {"label": "Criação feminina", "value": "criacao_feminina"},
+          {"label": "Saúde mental", "value": "saude_mental"},
+          {"label": "Narrativas femininas", "value": "narrativas_femininas"},
+          {"label": "Narrativa feminina", "value": "narrativa_feminina"}
+        ],
+        "created_at": "2026-01-06T22:46:35.378022+00:00",
+        "updated_at": "2026-01-10T01:24:36.088276+00:00"
+      },
+      {
+        "id": "50266c66-d1f0-4bf0-b8df-c320a9099ce1",
+        "key": "project_stages",
+        "value": [
+          {"color": "#6366f1", "label": "Ideia inicial", "textColor": "#ffffff", "value": "ideia"},
+          {"color": "#3b82f6", "label": "Desenvolvimento", "textColor": "#ffffff", "value": "development"},
+          {"color": "#f59e0b", "label": "Captação de recursos", "textColor": "#000000", "value": "captacao"},
+          {"color": "#8b5cf6", "label": "Pré-produção", "textColor": "#ffffff", "value": "pre_producao"},
+          {"color": "#10b981", "label": "Produção", "textColor": "#ffffff", "value": "producao"},
+          {"color": "#06b6d4", "label": "Pós-produção", "textColor": "#ffffff", "value": "pos_producao"},
+          {"color": "#22c55e", "label": "Finalizado", "textColor": "#ffffff", "value": "finalizado"},
+          {"color": "#ec4899", "label": "Em exibição", "textColor": "#ffffff", "value": "em_exibicao"},
+          {"color": "#0ea5e9", "label": "Distribuição", "textColor": "#ffffff", "value": "distribution"}
+        ],
+        "created_at": "2026-01-06T22:46:54.55195+00:00",
+        "updated_at": "2026-01-09T18:05:35.32536+00:00"
+      },
+      {
+        "id": "25af7df9-c2e8-46f9-a660-c5b9ee895e49",
+        "key": "incentive_laws",
+        "value": [
+          {"label": "Lei Rouanet", "value": "lei_rouanet"},
+          {"label": "Lei do Audiovisual", "value": "lei_audiovisual"},
+          {"label": "ICMS RJ", "value": "icms_rj"},
+          {"label": "ISS RJ", "value": "iss_rj"},
+          {"label": "PROAC", "value": "proac"},
+          {"label": "Outros", "value": "outros"}
+        ],
+        "created_at": "2026-01-06T22:47:14.616435+00:00",
+        "updated_at": "2026-01-06T22:47:14.616435+00:00"
+      },
+      {
+        "id": "d783b39d-c289-4d4f-8b0f-53774c1aa6e4",
+        "key": "project_locations",
+        "value": {
+          "locations": ["São Paulo", "Rio de Janeiro", "Belo Horizonte", "Brasília", "Salvador", "Recife", "Porto Alegre", "Manaus", "Curitiba", "Fortaleza", "Santa Catarina"]
+        },
+        "created_at": "2026-01-10T01:27:24.873308+00:00",
+        "updated_at": "2026-01-10T01:27:24.873308+00:00"
+      }
+    ],
+    "access_requests": [],
+    "profiles": [
+      {
+        "id": "e77e1a74-d6c9-4351-8e58-52e6753c79ce",
+        "user_id": "959ebba9-117a-4aea-bf66-ebc637f8b5d4",
+        "email": "swami_gs@live.com",
+        "full_name": "Swamiy Saraiva",
+        "created_at": "2025-12-03T17:28:42.546838+00:00",
+        "updated_at": "2025-12-03T17:28:42.546838+00:00"
+      }
+    ],
+    "user_roles": [
+      {
+        "id": "24fcfbeb-486a-46fb-bd08-2687a9144614",
+        "user_id": "959ebba9-117a-4aea-bf66-ebc637f8b5d4",
+        "role": "admin"
+      }
+    ]
+  }
+}
