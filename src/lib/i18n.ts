@@ -6,7 +6,7 @@ export const translations = {
       about: 'Sobre',
       contact: 'Contato',
       admin: 'Admin',
-      submit: 'Submeter Projeto',
+      submit: 'Enviar Projeto',
       portoDeIdeias: 'Porto de Ideias',
     },
     home: {
