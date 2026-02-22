@@ -15,6 +15,14 @@ import { CSS } from '@dnd-kit/utilities';
 import { useDragSensors } from "@/hooks/useReorder";
 import { toast } from "sonner";
 
+interface CtaCardContent {
+  question: string;
+  headline: string;
+  body: string;
+  free: string;
+  action: string;
+}
+
 interface Project {
   id: string;
   title: string;
@@ -291,9 +299,37 @@ export function ProjectGrid({
   showCtaCard = false,
   showEmptySlots = false,
 }: ProjectGridProps) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [sortableItems, setSortableItems] = useState<SortableItem[]>([]);
+  const [ctaContent, setCtaContent] = useState<CtaCardContent>({
+    question: t.projects.ctaQuestion,
+    headline: t.projects.ctaHeadline,
+    body: t.projects.ctaBody,
+    free: t.projects.ctaFree,
+    action: t.projects.ctaAction,
+  });
   const sensors = useDragSensors();
+
+  // Fetch CTA content from database
+  useEffect(() => {
+    const fetchCtaContent = async () => {
+      try {
+        const { data } = await supabase
+          .from("settings")
+          .select("value")
+          .eq("key", "cta_card_content")
+          .maybeSingle();
+
+        if (data && data.value) {
+          setCtaContent(data.value as CtaCardContent);
+        }
+      } catch (error) {
+        console.error("Erro ao carregar conteúdo do card CTA:", error);
+      }
+    };
+
+    fetchCtaContent();
+  }, []);
 
   useEffect(() => {
     const loadOrder = async () => {
@@ -417,16 +453,16 @@ export function ProjectGrid({
                 <div className="w-20 h-20 rounded-full bg-white/30 backdrop-blur-sm flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:rotate-12 transition-all duration-500 shadow-lg">
                   <Anchor className="w-10 h-10 drop-shadow-lg" />
                 </div>
-                <div className="text-xl font-semibold drop-shadow-lg">{t.projects.ctaQuestion}</div>
+                <div className="text-xl font-semibold drop-shadow-lg">{ctaContent.question}</div>
               </div>
             </div>
             <div className="p-6 bg-black/20 backdrop-blur-sm">
-              <h3 className="text-xl font-serif font-bold mb-3 text-white drop-shadow">{t.projects.ctaHeadline}</h3>
-              <p className="text-sm text-white/90 line-clamp-3 mb-4">{t.projects.ctaBody}</p>
+              <h3 className="text-xl font-serif font-bold mb-3 text-white drop-shadow">{ctaContent.headline}</h3>
+              <p className="text-sm text-white/90 line-clamp-3 mb-4">{ctaContent.body}</p>
               <div className="flex items-center justify-between pt-4 border-t border-white/30">
-                <span className="text-sm text-white/80 font-medium">{t.projects.ctaFree}</span>
+                <span className="text-sm text-white/80 font-medium">{ctaContent.free}</span>
                 <span className="text-sm font-bold flex items-center gap-2 group-hover:translate-x-2 transition-transform text-white">
-                  {t.projects.ctaAction}
+                  {ctaContent.action}
                   <ArrowRight className="w-5 h-5" />
                 </span>
               </div>

@@ -17,12 +17,18 @@ import { DualImageCropper } from "@/components/DualImageCropper";
 import { FeaturedProjectsManager } from "@/components/admin/FeaturedProjectsManager";
 
 import { PortoIdeiasHeaderEditor } from "@/components/admin/PortoIdeiasHeaderEditor";
+import { PortfolioHeaderEditor } from "@/components/admin/PortfolioHeaderEditor";
 import { QuemSomosEditor } from "@/components/admin/QuemSomosEditor";
+import { CastDescriptionEditor } from "@/components/admin/CastDescriptionEditor";
+import { RecognitionTitlesEditor } from "@/components/admin/RecognitionTitlesEditor";
+import { CtaCardEditor } from "@/components/admin/CtaCardEditor";
 
 import { NossosServicosEditor } from "@/components/admin/NossosServicosEditor";
 import { ContactButtonsEditor } from "@/components/admin/ContactButtonsEditor";
+import { CompaniesCarouselEditor } from "@/components/admin/CompaniesCarouselEditor";
 import ContrapartidasEditor, { Contrapartida } from "@/components/admin/ContrapartidasEditor";
 import { RecognitionEditor, NewsItem } from "@/components/admin/RecognitionEditor";
+import { ProjectCarouselEditor } from "@/components/admin/ProjectCarouselEditor";
 import { StagesMultiSelect, getStageLabel } from "@/components/admin/StagesMultiSelect";
 import { CategoriesMultiSelect, getCategoryLabel } from "@/components/admin/CategoriesMultiSelect";
 import { IncentiveLawsMultiSelect, getIncentiveLawLabel, normalizeIncentiveLawValue } from "@/components/admin/IncentiveLawsMultiSelect";
@@ -67,7 +73,8 @@ import {
   Briefcase,
   ChevronDown,
   Rocket,
-  FolderOpen
+  FolderOpen,
+  Building2
 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
@@ -109,6 +116,7 @@ interface Project {
   is_hidden: boolean;
   presentation_document_url: string | null;
   additional_info: string | null;
+  carousel_images?: string[] | null;
 }
 
 interface AccessRequest {
@@ -233,9 +241,9 @@ const AdminDashboard = () => {
   const [editResponsavelTelefone, setEditResponsavelTelefone] = useState("");
   const [editResponsavelGenero, setEditResponsavelGenero] = useState("");
   const [editContrapartidas, setEditContrapartidas] = useState<Contrapartida[]>([]);
-  const [editAwards, setEditAwards] = useState<string[]>([]);
+  const [editAwards, setEditAwards] = useState<any[]>([]);
   const [editNews, setEditNews] = useState<NewsItem[]>([]);
-  const [editFestivals, setEditFestivals] = useState<{ title: string; url?: string; date?: string }[]>([]);
+  const [editFestivals, setEditFestivals] = useState<{ title: string; linkTitle?: string; url?: string; date?: string }[]>([]);
   const [editTeamMembers, setEditTeamMembers] = useState<TeamMemberData[]>([]);
   const [editAdditionalInfo, setEditAdditionalInfo] = useState("");
   
@@ -828,9 +836,21 @@ const AdminDashboard = () => {
       .maybeSingle()
       .then(({ data }) => {
         if (data) {
-          setEditAwards((data.awards as string[]) || []);
+          // Processar awards (pode vir como string JSON ou objeto)
+          const processedAwards = (data.awards || []).map((award: any) => {
+            if (typeof award === 'string') {
+              try {
+                const parsed = JSON.parse(award);
+                if (parsed && typeof parsed === 'object') return parsed;
+              } catch {}
+              return award;
+            }
+            return award;
+          });
+          
+          setEditAwards(processedAwards);
           setEditNews((data.news as unknown as NewsItem[]) || []);
-          setEditFestivals((data.festivals_exhibitions as unknown as { title: string; url?: string; date?: string }[]) || []);
+          setEditFestivals((data.festivals_exhibitions as unknown as { title: string; linkTitle?: string; url?: string; date?: string }[]) || []);
         } else {
           setEditAwards([]);
           setEditNews([]);
@@ -939,6 +959,18 @@ const AdminDashboard = () => {
       finalCardUrl = urlData.publicUrl;
     }
 
+    // Debug: Log dos reconhecimentos antes de salvar
+    console.log("📝 Salvando reconhecimentos:", {
+      awards: editAwards,
+      news: editNews,
+      festivals: editFestivals
+    });
+    console.log("📝 O que será enviado ao banco:", {
+      awards: editAwards.length > 0 ? editAwards : null,
+      news: editNews.length > 0 ? editNews : null,
+      festivals_exhibitions: editFestivals.length > 0 ? editFestivals : null,
+    });
+
     const { error } = await supabase
       .from("projects")
       .update({
@@ -967,20 +999,22 @@ const AdminDashboard = () => {
         responsavel_email: editResponsavelEmail || null,
         responsavel_telefone: editResponsavelTelefone || null,
         responsavel_genero: editResponsavelGenero || null,
-        awards: editAwards.length > 0 ? editAwards : [],
-        news: editNews.length > 0 ? editNews : [],
-        festivals_exhibitions: editFestivals.length > 0 ? editFestivals : [],
+        awards: editAwards.length > 0 ? editAwards : null,
+        news: editNews.length > 0 ? editNews : null,
+        festivals_exhibitions: editFestivals.length > 0 ? editFestivals : null,
         presentation_document_url: editPresentationDocUrl || null,
         additional_info: editAdditionalInfo || null,
       } as any)
       .eq("id", selectedProject.id);
 
     if (error) {
+      console.error("❌ ERRO ao salvar projeto:", error);
       toast({
         title: "Erro",
-        description: "Não foi possível salvar as alterações.",
+        description: error.message || "Não foi possível salvar as alterações.",
         variant: "destructive",
       });
+      return; // IMPORTANTE: Não continua se houver erro
     } else {
       // Save contrapartidas
       // First delete existing ones
@@ -1489,6 +1523,16 @@ const AdminDashboard = () => {
                   </CardContent>
                 </Card>
               </div>
+              
+              {/* Descrição Global do Elenco */}
+              <div className="mt-4">
+                <CastDescriptionEditor />
+              </div>
+
+              {/* Títulos de Reconhecimentos */}
+              <div className="mt-4">
+                <RecognitionTitlesEditor />
+              </div>
             </div>
 
             {/* Section 2: Hero - Vídeos Institucionais */}
@@ -1680,6 +1724,16 @@ const AdminDashboard = () => {
             </div>
 
             {/* Section 5: Nossos Serviços */}
+            {/* Section 5: Companies Carousel */}
+            <div>
+              <div className="text-lg font-semibold text-foreground border-b pb-2 mb-4 flex items-center gap-2">
+                <Building2 className="w-5 h-5" />
+                Seção Empresas Parceiras
+              </div>
+              <CompaniesCarouselEditor />
+            </div>
+
+            {/* Section 6: Nossos Serviços */}
             <div>
               <div className="text-lg font-semibold text-foreground border-b pb-2 mb-4 flex items-center gap-2">
                 <Briefcase className="w-5 h-5" />
@@ -1688,7 +1742,7 @@ const AdminDashboard = () => {
               <NossosServicosEditor />
             </div>
 
-            {/* Section 6: Footer */}
+            {/* Section 7: Footer */}
             <div>
               <div className="text-lg font-semibold text-foreground border-b pb-2 mb-4 flex items-center gap-2">
                 <FileText className="w-5 h-5" />
@@ -1963,6 +2017,18 @@ const AdminDashboard = () => {
 
             {/* Porto de Ideias Header Editor */}
             <PortoIdeiasHeaderEditor />
+
+            {/* CTA Card Editor */}
+            <CtaCardEditor />
+
+            <Card>
+              <CardContent className="p-6">
+                <p className="text-sm text-muted-foreground">
+                  A página de Captação exibe projetos marcados como "Captação" na lista de projetos.
+                  Use a aba <strong>Projetos</strong> para gerenciar quais projetos aparecem nesta página.
+                </p>
+              </CardContent>
+            </Card>
           </div>
         )}
 
@@ -1972,6 +2038,9 @@ const AdminDashboard = () => {
             <div className="text-lg font-semibold text-muted-foreground border-b pb-2 mb-4">
               🚀 Página Portfólio
             </div>
+
+            {/* Portfolio Header Editor */}
+            <PortfolioHeaderEditor />
 
             {/* Contact Buttons Editor */}
             <ContactButtonsEditor />
@@ -2420,10 +2489,7 @@ const AdminDashboard = () => {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => {
-                                  setSelectedProject(project);
-                                  setShowDetails(true);
-                                }}
+                                onClick={() => navigate(`/project/${project.id}`)}
                               >
                                 <Eye className="w-4 h-4 mr-1" />
                                 Ver
@@ -3035,9 +3101,25 @@ const AdminDashboard = () => {
             <div className="space-y-4 border rounded-lg p-4 bg-muted/30">
               <TeamMemberEditor 
                 members={editTeamMembers} 
-                onChange={setEditTeamMembers} 
+                onChange={setEditTeamMembers}
               />
             </div>
+
+            {/* Texto Adicional sobre o Elenco - DESABILITADO (criar coluna no banco primeiro) */}
+            {/* <div className="space-y-4 border rounded-lg p-4 bg-muted/30">
+              <Label htmlFor="castAdditionalText">Texto Adicional sobre o Elenco</Label>
+              <Textarea
+                id="castAdditionalText"
+                placeholder="Texto adicional a ser exibido após a seção de elenco..."
+                value={editCastAdditionalText}
+                onChange={(e) => setEditCastAdditionalText(e.target.value)}
+                rows={4}
+                className="resize-none"
+              />
+              <p className="text-xs text-muted-foreground">
+                Este texto será exibido na página do projeto logo após os cards de elenco.
+              </p>
+            </div> */}
 
             {/* Contrapartidas */}
             <div className="space-y-4 border rounded-lg p-4 bg-muted/30">
@@ -3058,6 +3140,19 @@ const AdminDashboard = () => {
                 onFestivalsChange={setEditFestivals}
               />
             </div>
+
+            {/* Carrossel de Imagens */}
+            {selectedProject && (
+              <div className="space-y-4">
+                <ProjectCarouselEditor
+                  projectId={selectedProject.id}
+                  carouselImages={selectedProject.carousel_images || []}
+                  onUpdate={(images) => {
+                    setSelectedProject({ ...selectedProject, carousel_images: images });
+                  }}
+                />
+              </div>
+            )}
 
             {/* Notas Admin */}
             <div className="space-y-4">

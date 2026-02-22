@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -33,6 +33,20 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
   const [activeSection, setActiveSection] = useState<string>("");
   const { isAdmin } = useAuth();
   const { t, language } = useLanguage();
+  const navRef = useRef<HTMLElement>(null);
+
+  // Mede altura do navbar e expõe como CSS variable
+  useLayoutEffect(() => {
+    const updateNavHeight = () => {
+      const h = navRef.current?.offsetHeight ?? 80; // fallback 80px
+      document.documentElement.style.setProperty("--nav-h", `${h}px`);
+    };
+    
+    updateNavHeight();
+    window.addEventListener("resize", updateNavHeight);
+    
+    return () => window.removeEventListener("resize", updateNavHeight);
+  }, []);
 
   // Optional admin-configured titles (stored in PT in the backend today).
   // We only apply them for PT to avoid overriding translated UI.
@@ -129,7 +143,10 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
   };
 
   return (
-    <header className="border-b border-border/50 bg-card/80 backdrop-blur-md fixed top-0 left-0 right-0 z-50 shadow-soft">
+    <header 
+      ref={navRef}
+      className="border-b border-border/50 bg-card/80 backdrop-blur-md fixed top-0 left-0 right-0 z-50 shadow-soft"
+    >
       <div className="container mx-auto px-2 sm:px-4 h-20 flex items-center justify-between relative">
         {/* Logo - Homepage - clipped to navbar bounds */}
         <Link to="/" className="flex items-center group -ml-6 sm:-ml-12 h-20 overflow-hidden">

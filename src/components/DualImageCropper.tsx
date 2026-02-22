@@ -477,15 +477,12 @@ export const DualImageCropper = ({
           </div>
         ) : (
           <div 
-            className="border-2 border-dashed border-primary/50 rounded-lg p-8 text-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-all"
+            className="group border-2 border-dashed border-primary/50 rounded-lg p-8 text-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-all"
             onClick={() => inputRef.current?.click()}
           >
-            <Upload className="w-12 h-12 mx-auto text-primary/60 mb-3" />
-            <p className="text-sm font-medium text-foreground mb-1">
-              Clique para adicionar imagem de capa
-            </p>
-            <p className="text-xs text-muted-foreground">
-              Você vai ajustar o recorte para Banner e Card
+            <Upload className="w-16 h-16 mx-auto text-primary/60 group-hover:text-primary group-hover:scale-110 transition-all mb-2" />
+            <p className="text-sm font-medium text-foreground">
+              Adicionar Imagem
             </p>
           </div>
         )}

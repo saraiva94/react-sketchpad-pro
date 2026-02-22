@@ -80,7 +80,7 @@ const ProjectFullView = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <>
       {/* Back to DevMenu */}
       <div className="border-b bg-card">
         <div className="container mx-auto px-4 py-3">
@@ -105,9 +105,10 @@ const ProjectFullView = () => {
 
       {/* Main Content */}
       <div className="container mx-auto px-4 -mt-32 relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Column */}
-          <div className="lg:col-span-2 space-y-8">
+        {/* Layout Flex: Conteúdo + Sidebar independente */}
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Main Column - 2/3 da largura */}
+          <div className="flex-1 lg:w-2/3 space-y-8">
             {/* Header */}
             <Card className="border-none shadow-lg">
               <CardContent className="p-8">
@@ -306,11 +307,12 @@ const ProjectFullView = () => {
             </Card>
           </div>
 
-          {/* Sidebar - Sticky */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-4 space-y-6">
-              {/* Budget Card */}
-              <Card className="border-none shadow-lg">
+          {/* Sidebar - 1/3 da largura, independente */}
+          <aside className="lg:w-1/3 lg:shrink-0">
+            {/* Sticky Wrapper - Solução Tailwind nativa */}
+            <div className="sticky top-24 space-y-6">
+                {/* Budget Card */}
+                <Card className="border-none shadow-lg">
                 <CardContent className="p-6">
                   <div className="mb-4">
                     <div className="text-3xl font-bold text-accent mb-1">{project.raised}</div>
@@ -375,10 +377,10 @@ const ProjectFullView = () => {
                 </CardContent>
               </Card>
             </div>
-          </div>
+          </aside>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

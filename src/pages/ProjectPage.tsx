@@ -22,6 +22,8 @@ import { SmartTeamGrid } from "@/components/SmartTeamGrid";
 import { SortableTeamGrid } from "@/components/SortableTeamGrid";
 import { TranslatedContrapartidaCard } from "@/components/TranslatedContrapartidaCard";
 import { WavesBackground } from "@/components/WavesBackground";
+import { SortableRecognitionColumns } from "@/components/SortableRecognitionColumns";
+import { ProjectImageCarousel } from "@/components/ProjectImageCarousel";
 import { useAuth } from "@/hooks/useAuth";
 import { 
   ArrowLeft, 
@@ -50,12 +52,14 @@ import {
 
 interface NewsItem {
   title: string;
+  linkTitle?: string;
   url?: string;
   date?: string;
 }
 
 interface FestivalItem {
   title: string;
+  linkTitle?: string;
   url?: string;
   date?: string;
 }
@@ -87,10 +91,11 @@ interface Project {
   valor_sugerido: number | null;
   presentation_document_url: string | null;
   stages: string[] | null;
-  awards: string[] | null;
+  awards: any[] | null; // Array de string OU objetos { text, linkTitle, url }
   news: NewsItem[] | null;
   festivals_exhibitions: FestivalItem[] | null;
   additional_info: string | null;
+  carousel_images: string[] | null;
 }
 
 interface ProjectMember {
@@ -139,9 +144,11 @@ const ProjectPage = () => {
   const [members, setMembers] = useState<ProjectMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [isFavorited, setIsFavorited] = useState(false);
+  const [galleryTitle, setGalleryTitle] = useState("Galeria de Imagens");
   const [contactButtons, setContactButtons] = useState<ContactButton[]>([]);
   const [showContactPopup, setShowContactPopup] = useState(false);
   const [contrapartidas, setContrapartidas] = useState<Contrapartida[]>([]);
+  const [castGlobalDescription, setCastGlobalDescription] = useState<string>("");
 
   // Auto-tradução de campos individuais do projeto (strings do banco estão em PT)
   // Traduzir campos individuais ao invés do objeto completo para melhor cache e reuso
@@ -204,12 +211,29 @@ const ProjectPage = () => {
   ];
   usePreloadTranslations(preloadItems, !loading && !!project);
 
+  // Buscar título da galeria
+  useEffect(() => {
+    const fetchGalleryTitle = async () => {
+      const { data } = await supabase
+        .from("settings")
+        .select("value")
+        .eq("key", "gallery_title")
+        .maybeSingle();
+      
+      if (data?.value && typeof data.value === 'object' && 'title' in data.value) {
+        setGalleryTitle((data.value as { title: string }).title);
+      }
+    };
+    fetchGalleryTitle();
+  }, []);
+
   useEffect(() => {
     if (id) {
       fetchProject();
       fetchMembers();
       fetchContactButtons();
       fetchContrapartidas();
+      fetchCastGlobalDescription();
     }
   }, [id]);
 
@@ -221,18 +245,77 @@ const ProjectPage = () => {
       .maybeSingle();
 
     if (!error && data) {
-      // Fetch awards, news and festivals from projects table (not in public view)
-      const { data: extraData } = await supabase
+      // Fetch awards, news, festivals and carousel_images from projects table (not in public view)
+      console.log("🔍 Buscando carousel_images para projeto:", id);
+      
+      const { data: extraData, error: extraError } = await supabase
         .from("projects")
         .select("awards, news, festivals_exhibitions")
         .eq("id", id)
         .maybeSingle();
+
+      if (extraError) {
+        console.error("❌ Erro ao buscar dados extras:", {
+          code: extraError.code,
+          message: extraError.message,
+          details: extraError.details,
+          hint: extraError.hint
+        });
+      } else {
+        console.log("✅ Dados extras carregados:", {
+          awards: extraData?.awards?.length || 0,
+          news: extraData?.news?.length || 0,
+          festivals: extraData?.festivals_exhibitions?.length || 0
+        });
+      }
+
+      // Buscar carousel_images da tabela settings (solução para erro PGRST204)
+      const settingKey = `project_carousel_${id}`;
+      const { data: carouselData } = await supabase
+        .from("settings")
+        .select("value")
+        .eq("key", settingKey)
+        .maybeSingle();
       
+      const carouselImages = (carouselData?.value as any)?.images || [];
+      console.log("✅ Carousel images carregadas da settings:", carouselImages.length);
+      
+      // Debug: Log dos reconhecimentos carregados
+      console.log("🔍 Reconhecimentos carregados do banco:", {
+        awards: extraData?.awards,
+        news: extraData?.news,
+        festivals: extraData?.festivals_exhibitions
+      });
+      
+      // Debug detalhado de cada item
+      if (extraData?.news && Array.isArray(extraData.news)) {
+        console.log("📰 Matérias na mídia (detalhado):");
+        (extraData.news as NewsItem[]).forEach((item, i) => {
+          console.log(`  ${i + 1}. Título: "${item.title}", URL: "${item.url || 'SEM URL'}", Data: "${item.date || 'SEM DATA'}"`);
+        });
+      }
+      
+      // Processar awards (pode vir como string JSON ou objeto)
+      const processedAwards = (extraData?.awards || []).map((award: any) => {
+        if (typeof award === 'string') {
+          // Tentar fazer parse se for JSON string
+          try {
+            const parsed = JSON.parse(award);
+            if (parsed && typeof parsed === 'object') return parsed;
+          } catch {
+            // Se não for JSON, retorna string simples
+          }
+          return award; // Retorna string simples
+        }
+        return award; // Já é objeto
+      });
+
       const projectData = {
         ...data,
-        awards: extraData?.awards || [],
+        awards: processedAwards,
         news: (extraData?.news as unknown as NewsItem[]) || [],
         festivals_exhibitions: (extraData?.festivals_exhibitions as unknown as FestivalItem[]) || [],
+        carousel_images: carouselImages,
       } as unknown as Project;
       
       setProject(projectData);
@@ -272,6 +355,19 @@ const ProjectPage = () => {
         name: "WhatsApp Porto Bello",
         link: "https://wa.me/5521967264730"
       }]);
+    }
+  };
+
+  const fetchCastGlobalDescription = async () => {
+    const { data } = await supabase
+      .from("settings")
+      .select("value")
+      .eq("key", "cast_global_description")
+      .maybeSingle();
+
+    if (data) {
+      const content = data.value as { description?: string };
+      setCastGlobalDescription(content.description || "");
     }
   };
 
@@ -548,7 +644,7 @@ const ProjectPage = () => {
   const embedUrl = getVideoEmbedUrl(project.link_video);
 
   return (
-    <div className="min-h-screen bg-background relative">
+    <>
       {/* Animated Waves Background */}
       <WavesBackground />
       {/* Standard Navbar */}
@@ -617,9 +713,10 @@ const ProjectPage = () => {
       </section>
 
       <div className="container mx-auto px-6 py-12">
-        <div className="grid lg:grid-cols-3 gap-12">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-12">
+        {/* Layout Flex: Conteúdo + Sidebar independente */}
+        <div className="flex flex-col lg:flex-row gap-12">
+          {/* Main Content - 2/3 da largura */}
+          <div className="flex-1 lg:w-2/3 space-y-12">
             {/* Video */}
             {embedUrl && (
               <section>
@@ -700,6 +797,13 @@ const ProjectPage = () => {
                       <span className="text-sm text-muted-foreground font-medium">{t.projectDetails.cast}</span>
                       <div className="flex-1 h-px bg-border/50" />
                     </div>
+                  )}
+
+                  {/* Descrição Global sobre o Elenco - ANTES dos cards */}
+                  {castGlobalDescription && castMembers.length > 0 && (
+                    <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap mb-6">
+                      {castGlobalDescription}
+                    </p>
                   )}
                   
                   {/* Elenco com drag-and-drop para admin */}
@@ -793,125 +897,24 @@ const ProjectPage = () => {
                 <h2 className="text-2xl font-serif font-bold text-foreground mb-6">
                   {t.projectDetails.recognitionMedia}
                 </h2>
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {displayProject?.awards && displayProject.awards.length > 0 && (
-                    <div>
-                      <h3 className="font-semibold text-foreground mb-4 flex items-center">
-                        <Award className="w-5 h-5 text-amber-500 mr-2" />
-                        {t.projectDetails.awardsTitle}
-                      </h3>
-                      <ul className="space-y-3">
-                        {displayProject.awards.map((award, index) => (
-                          <li key={index}>
-                            <div className="block p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors">
-                              <TranslatedText 
-                                namespace={`award_${id}_${index}`}
-                                value={award}
-                                as="h4"
-                                className="font-medium text-foreground"
-                                showSkeleton={false}
-                              />
-                            </div>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  {displayProject?.festivals_exhibitions && displayProject.festivals_exhibitions.length > 0 && (
-                    <div>
-                      <h3 className="font-semibold text-foreground mb-4 flex items-center">
-                        <Play className="w-5 h-5 text-violet-500 mr-2" />
-                        {t.projectDetails.festivalsExhibitions}
-                      </h3>
-                      <ul className="space-y-3">
-                        {displayProject.festivals_exhibitions.map((item, index) => (
-                          <li key={index}>
-                            {item.url ? (
-                              <a 
-                                href={item.url} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="block p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
-                              >
-                                <TranslatedText 
-                                  namespace={`festival_${id}_${index}`}
-                                  value={item.title}
-                                  as="h4"
-                                  className="font-medium text-foreground mb-1"
-                                  showSkeleton={false}
-                                />
-                                {item.date && <p className="text-sm text-muted-foreground">{item.date}</p>}
-                              </a>
-                            ) : (
-                              <div className="block p-3 bg-muted/50 rounded-lg">
-                                <TranslatedText 
-                                  namespace={`festival_${id}_${index}`}
-                                  value={item.title}
-                                  as="h4"
-                                  className="font-medium text-foreground mb-1"
-                                  showSkeleton={false}
-                                />
-                                {item.date && <p className="text-sm text-muted-foreground">{item.date}</p>}
-                              </div>
-                            )}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  {displayProject?.news && displayProject.news.length > 0 && (
-                    <div>
-                      <h3 className="font-semibold text-foreground mb-4 flex items-center">
-                        <Newspaper className="w-5 h-5 text-primary mr-2" />
-                        {t.projectDetails.inTheMedia}
-                      </h3>
-                      <ul className="space-y-3">
-                        {displayProject.news.map((item, index) => (
-                          <li key={index}>
-                            {item.url ? (
-                              <a 
-                                href={item.url} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="block p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
-                              >
-                                <TranslatedText 
-                                  namespace={`news_${id}_${index}`}
-                                  value={item.title}
-                                  as="h4"
-                                  className="font-medium text-foreground mb-1"
-                                  showSkeleton={false}
-                                />
-                                {item.date && <p className="text-sm text-muted-foreground">{item.date}</p>}
-                              </a>
-                            ) : (
-                              <div className="block p-3 bg-muted/50 rounded-lg">
-                                <TranslatedText 
-                                  namespace={`news_${id}_${index}`}
-                                  value={item.title}
-                                  as="h4"
-                                  className="font-medium text-foreground mb-1"
-                                  showSkeleton={false}
-                                />
-                                {item.date && <p className="text-sm text-muted-foreground">{item.date}</p>}
-                              </div>
-                            )}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
+                <SortableRecognitionColumns
+                  awards={displayProject?.awards || []}
+                  festivals={displayProject?.festivals_exhibitions || []}
+                  news={displayProject?.news || []}
+                  projectId={id!}
+                  isAdmin={isAdmin}
+                />
               </section>
             )}
 
           </div>
 
-          {/* Sidebar */}
-          <div className="lg:col-span-1">
+          {/* Sidebar - 1/3 da largura, independente */}
+          <aside className="lg:w-1/3 lg:shrink-0">
+            {/* Sticky Wrapper - Solução Tailwind nativa */}
             <div className="sticky top-24 space-y-6">
-              {/* Project Info */}
-              <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+                {/* Project Info */}
+                <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
                 <h3 className="font-serif font-bold text-xl text-foreground mb-4">{t.projectDetails.projectInfo}</h3>
                 <div className="space-y-4">
                   <div>
@@ -990,6 +993,14 @@ const ProjectPage = () => {
                 </div>
               )}
 
+              {/* Image Carousel Card - Apenas se houver imagens */}
+              {displayProject?.carousel_images && displayProject.carousel_images.length > 0 && (
+                <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+                  <h3 className="font-serif font-bold text-lg text-foreground mb-4">{galleryTitle}</h3>
+                  <ProjectImageCarousel images={displayProject.carousel_images} />
+                </div>
+              )}
+
               {/* Contact Button */}
               <div className="bg-card border border-border rounded-2xl p-6 shadow-sm space-y-4">
                 <h3 className="font-serif font-bold text-lg text-foreground mb-4">{t.projectDetails.contact}</h3>
@@ -999,7 +1010,7 @@ const ProjectPage = () => {
                 </Button>
               </div>
             </div>
-          </div>
+          </aside>
         </div>
       </div>
 
@@ -1029,7 +1040,7 @@ const ProjectPage = () => {
 
       {/* Footer */}
       <Footer />
-    </div>
+    </>
   );
 };
 

@@ -232,7 +232,16 @@ export const normalizeIncentiveLawValue = (raw: string): string => {
 export const getIncentiveLawLabel = (value: string): string => {
   const normalized = normalizeIncentiveLawValue(value);
   const law = DEFAULT_INCENTIVE_LAW_OPTIONS.find((l) => l.value === normalized);
-  return law?.label || value;
+  
+  // Se encontrar nas opções padrão, retorna o label
+  if (law) return law.label;
+  
+  // Se não encontrar, converte underscores em espaços e aplica Title Case
+  return value
+    .replace(/_/g, ' ')  // Substitui _ por espaço
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
 };
 
 export const INCENTIVE_LAWS = DEFAULT_INCENTIVE_LAW_OPTIONS;

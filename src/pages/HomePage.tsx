@@ -14,6 +14,7 @@ import { VideoCarousel } from "@/components/VideoCarousel";
 import { TranslatedProjectCard } from "@/components/TranslatedProjectCard";
 import { ContactModal } from "@/components/ContactModal";
 import { TranslatedServiceCard } from "@/components/TranslatedServiceCard";
+import { CompaniesCarousel } from "@/components/CompaniesCarousel";
 import { useInView } from "@/hooks/useInView";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useAutoTranslate } from "@/hooks/useAutoTranslate";
@@ -77,6 +78,20 @@ import {
   GripVertical,
   LucideIcon
 } from "lucide-react";
+
+// Companies Carousel interfaces
+interface CompanyLogo {
+  id: string;
+  image_url: string;
+  name?: string;
+}
+
+interface CompaniesContent {
+  title: string;
+  description: string;
+  displayCount: 1 | 3 | 5;
+  logos: CompanyLogo[];
+}
 
 // Icon map for dynamic Quem Somos cards and Nossos Serviços
 const iconMap: Record<string, LucideIcon> = {
@@ -297,10 +312,19 @@ const HomePage = () => {
     ]
   });
 
+  // Companies Carousel
+  const [companiesContent, setCompaniesContent] = useState<CompaniesContent>({
+    title: "Empresas Parceiras",
+    description: "Conheça as empresas e marcas que confiam no nosso trabalho",
+    displayCount: 5,
+    logos: [],
+  });
+
   // Auto-tradução de conteúdos dinâmicos (do backend) quando idioma != pt
   const { translated: translatedQuemSomos } = useAutoTranslate('quem_somos', quemSomosContent);
   const { translated: translatedServicos } = useAutoTranslate('nossos_servicos', servicosContent);
   const { translated: translatedEcossistema } = useAutoTranslate('ecossistema_text', ecossistemaText);
+  const { translated: translatedCompanies } = useAutoTranslate('companies_carousel', companiesContent);
 
   // Conteúdo final que será usado na renderização (com validação de estrutura)
   const isValidQuemSomos = (input: any): input is typeof quemSomosContent => {
@@ -333,6 +357,15 @@ const HomePage = () => {
     );
   };
 
+  const isValidCompanies = (input: any): input is CompaniesContent => {
+    return (
+      input &&
+      typeof input.title === "string" &&
+      typeof input.description === "string" &&
+      Array.isArray(input.logos)
+    );
+  };
+
   const displayQuemSomos = language === "pt"
     ? quemSomosContent
     : (isValidQuemSomos(translatedQuemSomos) ? translatedQuemSomos : quemSomosContent);
@@ -340,6 +373,10 @@ const HomePage = () => {
   const displayServicos = language === "pt"
     ? servicosContent
     : (isValidServicos(translatedServicos) ? translatedServicos : servicosContent);
+
+  const displayCompanies = language === "pt"
+    ? companiesContent
+    : (isValidCompanies(translatedCompanies) ? translatedCompanies : companiesContent);
 
   // Ecossistema text validation and display
   const isValidEcossistema = (input: any): input is EcossistemaText => {
@@ -359,6 +396,7 @@ const HomePage = () => {
     fetchQuemSomosContent();
     fetchServicosContent();
     fetchEcossistemaText();
+    fetchCompaniesContent();
 
     // Subscribe to settings changes for real-time sync
     const channel = supabase
@@ -510,6 +548,18 @@ const HomePage = () => {
         title: text.title || t.home.ecosystemTitle,
         subtitle: text.subtitle || t.home.ecosystemSubtitle
       });
+    }
+  };
+
+  const fetchCompaniesContent = async () => {
+    const { data } = await supabase
+      .from("settings")
+      .select("value")
+      .eq("key", "companies_carousel")
+      .maybeSingle();
+    
+    if (data && data.value) {
+      setCompaniesContent(data.value as unknown as CompaniesContent);
     }
   };
 
@@ -1098,6 +1148,29 @@ const HomePage = () => {
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
+        </div>
+      </section>
+
+      {/* Companies Carousel Section - SEMPRE VISÍVEL */}
+      <section className="py-20 lg:py-28 relative z-10">
+        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+        
+        <div className="mx-auto px-4 sm:px-[10%] lg:px-[20%] relative z-10">
+          <div className="text-center mb-16">
+            <ShinyText className="inline-block" delay={200}>
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif font-semibold text-foreground mb-4">
+                {displayCompanies.title}
+              </h2>
+            </ShinyText>
+            <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto mt-6">
+              {displayCompanies.description}
+            </p>
+          </div>
+
+          <CompaniesCarousel 
+            logos={displayCompanies.logos} 
+            displayCount={displayCompanies.displayCount}
+          />
         </div>
       </section>
 

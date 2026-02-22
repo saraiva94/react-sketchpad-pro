@@ -9,20 +9,20 @@
   :root {
     /* Porto Bello - Paleta elegante com preto */
     --background: 0 0% 98%;
-    --foreground: 0 0% 12%;
+    --foreground: 0 0% 0%;
 
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 12%;
+    --card-foreground: 0 0% 0%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 12%;
+    --popover-foreground: 0 0% 0%;
 
     /* Preto elegante como primário */
-    --primary: 0 0% 15%;
+    --primary: 0 0% 0%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 12%;
+    --secondary-foreground: 0 0% 0%;
 
     --muted: 0 0% 94%;
     --muted-foreground: 0 0% 45%;
@@ -41,17 +41,17 @@
     --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 0 0% 12%;
-    --sidebar-primary: 0 0% 15%;
+    --sidebar-foreground: 0 0% 0%;
+    --sidebar-primary: 0 0% 0%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 0 0% 96%;
-    --sidebar-accent-foreground: 0 0% 12%;
+    --sidebar-accent-foreground: 0 0% 0%;
     --sidebar-border: 0 0% 88%;
-    --sidebar-ring: 0 0% 15%;
+    --sidebar-ring: 0 0% 0%;
 
     /* Porto Bello - Tokens personalizados */
-    --navy: 0 0% 10%;
-    --navy-light: 0 0% 25%;
+    --navy: 0 0% 0%;
+    --navy-light: 0 0% 0%;
     --turquoise: 175 55% 45%;
     --turquoise-light: 175 40% 85%;
     --gold: 42 85% 55%;
@@ -70,13 +70,13 @@
     --shadow-gold: 42 85% 55% / 0.2;
     
     /* RGB values for glow effects */
-    --primary-rgb: 38, 38, 38;
+    --primary-rgb: 0, 0, 0;
     --accent-rgb: 52, 168, 158;
 
     /* Gradientes */
     --gradient-start: 0 0% 98%;
     --gradient-end: 0 0% 94%;
-    --gradient-ocean: linear-gradient(135deg, hsl(0 0% 15%), hsl(175 55% 45%));
+    --gradient-ocean: linear-gradient(135deg, hsl(0 0% 0%), hsl(175 55% 45%));
     --gradient-sunset: linear-gradient(135deg, hsl(42 85% 55%), hsl(25 80% 55%));
 
     /* Fontes Porto Bello */
@@ -86,22 +86,23 @@
   }
 
   .dark {
-    --background: 0 0% 6%;
-    --foreground: 0 0% 95%;
+    /* Preto puro como base do dark mode */
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
 
-    --card: 0 0% 10%;
-    --card-foreground: 0 0% 95%;
+    --card: 0 0% 0%;
+    --card-foreground: 0 0% 100%;
 
-    --popover: 0 0% 10%;
-    --popover-foreground: 0 0% 95%;
+    --popover: 0 0% 0%;
+    --popover-foreground: 0 0% 100%;
 
-    --primary: 0 0% 85%;
-    --primary-foreground: 0 0% 6%;
+    --primary: 0 0% 100%;
+    --primary-foreground: 0 0% 0%;
 
-    --secondary: 0 0% 14%;
-    --secondary-foreground: 0 0% 95%;
+    --secondary: 0 0% 5%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 0 0% 14%;
+    --muted: 0 0% 5%;
     --muted-foreground: 0 0% 65%;
 
     --accent: 175 50% 50%;
@@ -110,43 +111,44 @@
     --destructive: 0 65% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 18%;
-    --input: 0 0% 18%;
-    --ring: 0 0% 85%;
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
+    --ring: 0 0% 100%;
 
-    --sidebar-background: 0 0% 6%;
-    --sidebar-foreground: 0 0% 95%;
-    --sidebar-primary: 0 0% 85%;
-    --sidebar-primary-foreground: 0 0% 6%;
-    --sidebar-accent: 0 0% 14%;
-    --sidebar-accent-foreground: 0 0% 95%;
-    --sidebar-border: 0 0% 18%;
-    --sidebar-ring: 0 0% 85%;
+    --sidebar-background: 0 0% 0%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 0 0% 100%;
+    --sidebar-primary-foreground: 0 0% 0%;
+    --sidebar-accent: 0 0% 5%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 0 0% 15%;
+    --sidebar-ring: 0 0% 100%;
 
-    --navy: 0 0% 75%;
-    --navy-light: 0 0% 85%;
+    --navy: 0 0% 0%;
+    --navy-light: 0 0% 5%;
     --turquoise: 175 50% 55%;
     --turquoise-light: 175 35% 25%;
     --gold: 42 85% 55%;
     --gold-light: 42 60% 35%;
-    --sand: 35 15% 18%;
-    --ocean-mist: 0 0% 8%;
+    --sand: 35 15% 5%;
+    --ocean-mist: 0 0% 0%;
     
-    /* Tons de cinza para profundidade - dark mode */
-    --gray-subtle: 0 0% 12%;
-    --gray-depth: 0 0% 18%;
-    --gray-shadow: 0 0% 25%;
+    /* Tons de cinza para profundidade - dark mode com preto puro */
+    --gray-subtle: 0 0% 5%;
+    --gray-depth: 0 0% 10%;
+    --gray-shadow: 0 0% 15%;
     
     --shadow-soft: 0 0% 0% / 0.35;
     --shadow-elegant: 0 0% 0% / 0.5;
     --shadow-gold: 42 85% 55% / 0.15;
     
-    /* RGB values for glow effects - dark mode */
-    --primary-rgb: 217, 217, 217;
+    /* RGB values for glow effects - dark mode com preto puro */
+    --primary-rgb: 0, 0, 0;
     --accent-rgb: 64, 191, 179;
 
-    --gradient-start: 0 0% 8%;
-    --gradient-end: 0 0% 12%;
+    --gradient-start: 0 0% 0%;
+    --gradient-end: 0 0% 5%;
+    --gradient-ocean: linear-gradient(135deg, hsl(0 0% 0%), hsl(175 55% 45%));
   }
 }
 
@@ -508,6 +510,18 @@
     }
   }
 
+  /* Fade in scale animation for carousel items */
+  @keyframes fadeInScale {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
   /* Staggered animation delays */
   .delay-100 { animation-delay: 100ms; }
   .delay-200 { animation-delay: 200ms; }
@@ -684,6 +698,45 @@
       0 12px 40px -10px hsl(0 0% 0% / 0.4);
   }
 
+  /* Sticky Scroll Sidebar Animations */
+  @keyframes slide-in-from-top {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-in {
+    animation-duration: 300ms;
+    animation-fill-mode: both;
+  }
+
+  .fade-in {
+    animation-name: fade-in;
+  }
+
+  .slide-in-from-top-2 {
+    animation-name: slide-in-from-top;
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  /* Smooth sticky behavior */
+  .sticky-smooth {
+    @apply transition-all duration-300 ease-in-out;
+  }
+
 }
 
 /* Prevent layout shift when Radix Select opens - using more specific selectors */
@@ -697,4 +750,25 @@ html body[data-scroll-locked] {
   padding-right: 0px !important;
   padding-left: 0px !important;
   overflow: visible !important;
+}
+
+/* Sticky Sidebar - Fallback robusto com CSS customizado */
+@layer utilities {
+  /* Hide scrollbar for carousel components */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  @media (min-width: 1024px) {
+    .sticky-sidebar {
+      position: sticky;
+      top: calc(var(--nav-h, 80px) + 1.5rem);
+      max-height: calc(100vh - var(--nav-h, 80px) - 1.5rem - 2rem);
+      overflow-y: auto;
+    }
+  }
 }

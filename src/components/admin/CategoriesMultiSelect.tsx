@@ -233,7 +233,14 @@ export const CategoriesMultiSelect = ({
 
 export const getCategoryLabel = (value: string): string => {
   const cat = DEFAULT_CATEGORY_OPTIONS.find(c => c.value === value);
-  return cat?.label || value;
+  if (cat?.label) return cat.label;
+  
+  // Capitalize first letter of each word and replace underscores with spaces
+  return value
+    .replace(/_/g, ' ')
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
 };
 
 export const CATEGORIES = DEFAULT_CATEGORY_OPTIONS;

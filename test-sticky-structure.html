@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Teste Estrutura Sticky</title>
+  <script>
+    // AUDITORIA 2: Encontrar "assassinos de sticky"
+    function findStickyKillers() {
+      const sidebar = document.querySelector('[data-sticky="sidebar"]');
+      if (!sidebar) {
+        console.error('❌ Sidebar não encontrado!');
+        return;
+      }
+
+      console.log('🔍 AUDITANDO ANCESTRAIS DO SIDEBAR...\n');
+      
+      let current = sidebar;
+      let level = 0;
+      const killers = [];
+
+      while (current && current !== document.body) {
+        const styles = getComputedStyle(current);
+        const tag = current.tagName.toLowerCase();
+        const classes = current.className || '(sem classe)';
+        const id = current.id ? `#${current.id}` : '';
+
+        // Detecta propriedades que matam sticky
+        const issues = [];
+        
+        if (styles.overflow !== 'visible') issues.push(`overflow: ${styles.overflow}`);
+        if (styles.overflowX !== 'visible') issues.push(`overflow-x: ${styles.overflowX}`);
+        if (styles.overflowY !== 'visible') issues.push(`overflow-y: ${styles.overflowY}`);
+        if (styles.display === 'flex' && styles.flexDirection === 'column' && styles.height !== 'auto') {
+          issues.push(`flex column com height: ${styles.height}`);
+        }
+        if (styles.transform !== 'none') issues.push(`transform: ${styles.transform}`);
+        if (styles.perspective !== 'none') issues.push(`perspective: ${styles.perspective}`);
+        if (styles.willChange === 'transform') issues.push('will-change: transform');
+        if (styles.filter !== 'none') issues.push(`filter: ${styles.filter}`);
+        if (styles.contain && styles.contain !== 'none') issues.push(`contain: ${styles.contain}`);
+
+        if (issues.length > 0) {
+          killers.push({
+            level,
+            tag,
+            id,
+            classes,
+            issues,
+            element: current
+          });
+        }
+
+        console.log(`
+${level === 0 ? '🎯' : '  '.repeat(level) + '↑'} <${tag}${id}> ${classes}
+   position: ${styles.position}
+   ${issues.length > 0 ? '⚠️ PROBLEMAS: ' + issues.join(', ') : '✅ OK'}
+        `.trim());
+
+        current = current.parentElement;
+        level++;
+      }
+
+      console.log('\n\n📊 RESUMO DOS ASSASSINOS:');
+      if (killers.length === 0) {
+        console.log('✅ Nenhum assassino detectado! Sticky deveria funcionar.');
+      } else {
+        console.log(`❌ ${killers.length} assassino(s) encontrado(s):\n`);
+        killers.forEach((killer, i) => {
+          console.log(`${i + 1}. <${killer.tag}${killer.id}>`);
+          console.log(`   Classes: ${killer.classes}`);
+          console.log(`   Problemas: ${killer.issues.join(', ')}`);
+          console.log('');
+        });
+
+        console.log('\n🔧 SOLUÇÃO:');
+        console.log('Remova ou ajuste os estilos problemáticos dos elementos acima.');
+      }
+
+      return killers;
+    }
+
+    // Executar quando a página carregar
+    window.addEventListener('load', () => {
+      setTimeout(findStickyKillers, 1000);
+    });
+  </script>
+</head>
+<body>
+  <h1>Cole este script no console do seu navegador na página do projeto:</h1>
+  <pre id="script-output" style="background: #f5f5f5; padding: 20px; border-radius: 8px; overflow-x: auto;">
+// 🔍 AUDITORIA 2: Encontrar "assassinos de sticky"
+function findStickyKillers() {
+  const sidebar = document.querySelector('[data-sticky="sidebar"]');
+  if (!sidebar) {
+    console.error('❌ Sidebar não encontrado!');
+    return;
+  }
+
+  console.log('🔍 AUDITANDO ANCESTRAIS DO SIDEBAR...\\n');
+  
+  let current = sidebar;
+  let level = 0;
+  const killers = [];
+
+  while (current && current !== document.body) {
+    const styles = getComputedStyle(current);
+    const tag = current.tagName.toLowerCase();
+    const classes = current.className || '(sem classe)';
+    const id = current.id ? `#${current.id}` : '';
+
+    // Detecta propriedades que matam sticky
+    const issues = [];
+    
+    if (styles.overflow !== 'visible') issues.push(`overflow: ${styles.overflow}`);
+    if (styles.overflowX !== 'visible') issues.push(`overflow-x: ${styles.overflowX}`);
+    if (styles.overflowY !== 'visible') issues.push(`overflow-y: ${styles.overflowY}`);
+    if (styles.display === 'flex' && styles.flexDirection === 'column' && styles.height !== 'auto') {
+      issues.push(`flex column com height: ${styles.height}`);
+    }
+    if (styles.transform !== 'none') issues.push(`transform: ${styles.transform}`);
+    if (styles.perspective !== 'none') issues.push(`perspective: ${styles.perspective}`);
+    if (styles.willChange === 'transform') issues.push('will-change: transform');
+    if (styles.filter !== 'none') issues.push(`filter: ${styles.filter}`);
+    if (styles.contain && styles.contain !== 'none') issues.push(`contain: ${styles.contain}`);
+
+    if (issues.length > 0) {
+      killers.push({
+        level,
+        tag,
+        id,
+        classes,
+        issues,
+        element: current
+      });
+    }
+
+    console.log(`
+${level === 0 ? '🎯' : '  '.repeat(level) + '↑'} <${tag}${id}> ${classes}
+   position: ${styles.position}
+   ${issues.length > 0 ? '⚠️ PROBLEMAS: ' + issues.join(', ') : '✅ OK'}
+    `.trim());
+
+    current = current.parentElement;
+    level++;
+  }
+
+  console.log('\\n\\n📊 RESUMO DOS ASSASSINOS:');
+  if (killers.length === 0) {
+    console.log('✅ Nenhum assassino detectado! Sticky deveria funcionar.');
+  } else {
+    console.log(`❌ ${killers.length} assassino(s) encontrado(s):\\n`);
+    killers.forEach((killer, i) => {
+      console.log(`${i + 1}. <${killer.tag}${killer.id}>`);
+      console.log(`   Classes: ${killer.classes}`);
+      console.log(`   Problemas: ${killer.issues.join(', ')}`);
+      console.log('');
+    });
+
+    console.log('\\n🔧 SOLUÇÃO:');
+    console.log('Remova ou ajuste os estilos problemáticos dos elementos acima.');
+  }
+
+  return killers;
+}
+
+// Executar
+findStickyKillers();
+  </pre>
+
+  <h2>Instruções:</h2>
+  <ol>
+    <li>Abra a página do projeto no navegador (ex: http://localhost:5173/project/[id])</li>
+    <li>Pressione F12 para abrir DevTools</li>
+    <li>Vá na aba "Console"</li>
+    <li>Copie e cole o script acima</li>
+    <li>Pressione Enter</li>
+    <li>Envie o resultado completo para mim</li>
+  </ol>
+</body>
+</html>

@@ -309,7 +309,7 @@ const ExampleProjectPage = () => {
   const embedUrl = getVideoEmbedUrl(project.link_video);
 
   return (
-    <div className="min-h-screen bg-background">
+    <>
       {/* Custom Navbar for Project Page */}
       <header className="fixed top-0 left-0 right-0 border-b border-border/50 bg-card/80 backdrop-blur-md z-50 shadow-soft">
         <div className="container mx-auto px-4 h-20 flex items-center justify-between">
@@ -388,9 +388,10 @@ const ExampleProjectPage = () => {
       </section>
 
       <div className="container mx-auto px-6 py-12">
-        <div className="grid lg:grid-cols-3 gap-12">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-12">
+        {/* Layout Flex: Conteúdo + Sidebar independente */}
+        <div className="flex flex-col lg:flex-row gap-12">
+          {/* Main Content - 2/3 da largura */}
+          <div className="flex-1 lg:w-2/3 space-y-12">
             {/* Video */}
             {embedUrl && (
               <section>
@@ -593,11 +594,12 @@ const ExampleProjectPage = () => {
             )}
           </div>
 
-          {/* Sidebar */}
-          <div className="lg:col-span-1">
+          {/* Sidebar - 1/3 da largura, independente */}
+          <aside className="lg:w-1/3 lg:shrink-0">
+            {/* Sticky Wrapper - Solução Tailwind nativa */}
             <div className="sticky top-24 space-y-6">
-              {/* Project Info */}
-              <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+                {/* Project Info */}
+                <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
                 <h3 className="font-serif font-bold text-xl text-foreground mb-4">Informações do Projeto</h3>
                 <div className="space-y-4">
                   <div>
@@ -693,7 +695,7 @@ const ExampleProjectPage = () => {
                 </Link>
               </div>
             </div>
-          </div>
+          </aside>
         </div>
       </div>
 
@@ -765,7 +767,7 @@ const ExampleProjectPage = () => {
           </div>
         </div>
       </footer>
-    </div>
+    </>
   );
 };
 

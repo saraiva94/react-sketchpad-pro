@@ -23,6 +23,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import imdbLogo from "@/assets/imdb-logo.png";
+import { DynamicFunctionSelect } from "./DynamicFunctionSelect";
 import {
   Tooltip,
   TooltipContent,
@@ -138,7 +139,10 @@ interface TeamMemberEditorProps {
   onChange: (members: TeamMemberData[]) => void;
 }
 
-export const TeamMemberEditor = ({ members, onChange }: TeamMemberEditorProps) => {
+export const TeamMemberEditor = ({ 
+  members, 
+  onChange 
+}: TeamMemberEditorProps) => {
   const { toast } = useToast();
   const [uploadingPhotoIndex, setUploadingPhotoIndex] = useState<number | null>(null);
   const [uploadingCvIndex, setUploadingCvIndex] = useState<number | null>(null);
@@ -295,32 +299,34 @@ export const TeamMemberEditor = ({ members, onChange }: TeamMemberEditorProps) =
           <div className="space-y-4">
             {/* Photo Section */}
             <div className="flex items-start gap-4">
-              <div className="flex flex-col items-center gap-2">
-                <div className="w-20 h-20 rounded-full border-2 border-dashed border-muted-foreground/30 overflow-hidden bg-muted/50 flex items-center justify-center">
+              <div className="flex flex-col items-center">
+                <input
+                  type="file"
+                  accept="image/*"
+                  id={`photo-input-${index}`}
+                  className="hidden"
+                  disabled={uploadingPhotoIndex === index}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handlePhotoUpload(index, file);
+                  }}
+                />
+                <label 
+                  htmlFor={`photo-input-${index}`}
+                  className="w-20 h-20 rounded-full border-2 border-dashed border-muted-foreground/30 overflow-hidden bg-muted/50 flex items-center justify-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-all group/photo"
+                  title="Clique para fazer upload da foto"
+                >
                   {member.photo_url ? (
                     <img 
                       src={member.photo_url} 
                       alt={member.nome || "Foto"}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover group-hover/photo:opacity-70 transition-opacity"
                     />
+                  ) : uploadingPhotoIndex === index ? (
+                    <div className="text-xs text-center text-muted-foreground">Enviando...</div>
                   ) : (
-                    <Camera className="w-8 h-8 text-muted-foreground/50" />
+                    <Camera className="w-8 h-8 text-muted-foreground/50 group-hover/photo:text-primary transition-colors" />
                   )}
-                </div>
-                <label className="cursor-pointer">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    disabled={uploadingPhotoIndex === index}
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) handlePhotoUpload(index, file);
-                    }}
-                  />
-                  <span className="text-xs text-primary hover:underline">
-                    {uploadingPhotoIndex === index ? "Enviando..." : "Foto"}
-                  </span>
                 </label>
               </div>
 
@@ -335,11 +341,11 @@ export const TeamMemberEditor = ({ members, onChange }: TeamMemberEditorProps) =
                   />
                 </div>
                 <div>
-                  <Label>Função *</Label>
-                  <Input
+                  <DynamicFunctionSelect
                     value={member.funcao}
-                    onChange={(e) => updateMember(index, "funcao", e.target.value)}
-                    placeholder="Ex: Diretor, Roteirista..."
+                    onChange={(value) => updateMember(index, "funcao", value)}
+                    allowManage={true}
+                    label="Função *"
                   />
                 </div>
                 <div>

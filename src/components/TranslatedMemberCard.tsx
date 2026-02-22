@@ -56,34 +56,26 @@ export function TranslatedMemberCard({ member, getInitials }: TranslatedMemberCa
 
   return (
     <div className="group relative overflow-visible card-solid p-6 bg-card rounded-xl border border-border rainbow-card-glow">
-      <div className="flex items-start gap-4">
-        {/* Foto */}
-        {member.photo_url ? (
-          <img 
-            src={member.photo_url} 
-            alt={member.nome}
-            className="w-16 h-16 rounded-full object-cover flex-shrink-0 border-2 border-primary/20"
-          />
-        ) : (
-          <div className="w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center flex-shrink-0">
-            <span className="text-primary-foreground text-base font-semibold">
-              {getInitials(member.nome)}
-            </span>
-          </div>
-        )}
-        <div className="min-w-0 flex-1">
-          <h4 className="font-semibold text-foreground text-lg leading-tight tracking-normal antialiased">{member.nome}</h4>
-          {displayFuncao && (
-            <p className="text-sm text-primary/80 font-medium mt-0.5 antialiased">{displayFuncao}</p>
+      <div className="flex items-center gap-4">
+        {/* Coluna da Foto + Redes Sociais */}
+        <div className="flex flex-col items-center gap-3 flex-shrink-0">
+          {/* Foto */}
+          {member.photo_url ? (
+            <img 
+              src={member.photo_url} 
+              alt={member.nome}
+              className="w-16 h-16 rounded-full object-cover border-2 border-primary/20"
+            />
+          ) : (
+            <div className="w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center">
+              <span className="text-primary-foreground text-base font-semibold">
+                {getInitials(member.nome)}
+              </span>
+            </div>
           )}
           
-          {/* Detalhes */}
-          {displayDetalhes && (
-            <p className="text-sm text-muted-foreground mt-2 leading-relaxed antialiased">{displayDetalhes}</p>
-          )}
-          
-          {/* Social Links e CV */}
-          <div className="flex items-center gap-2.5 mt-3">
+          {/* Social Links e CV em Grid 2x2 */}
+          <div className="grid grid-cols-2 gap-2">
             {member.social_links?.instagram && (
               <a href={member.social_links.instagram.startsWith('http') ? member.social_links.instagram : `https://instagram.com/${member.social_links.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="social-link-circle social-link-instagram w-8 h-8 rounded-full bg-pink-500/10 flex items-center justify-center hover:bg-pink-500/30">
                 <Instagram className="w-4 h-4 text-pink-500" />
@@ -136,6 +128,19 @@ export function TranslatedMemberCard({ member, getInitials }: TranslatedMemberCa
               </a>
             )}
           </div>
+        </div>
+        
+        {/* Coluna de Informações */}
+        <div className="min-w-0 flex-1">
+          <h4 className="font-semibold text-foreground text-lg leading-tight tracking-normal antialiased">{member.nome}</h4>
+          {displayFuncao && (
+            <p className="text-sm text-primary/80 font-medium mt-0.5 antialiased">{displayFuncao}</p>
+          )}
+          
+          {/* Detalhes */}
+          {displayDetalhes && (
+            <p className="text-sm text-muted-foreground mt-2 leading-relaxed antialiased">{displayDetalhes}</p>
+          )}
         </div>
       </div>
     </div>

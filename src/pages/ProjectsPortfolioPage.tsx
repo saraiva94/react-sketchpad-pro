@@ -88,9 +88,9 @@ const ProjectsPortfolioPage = () => {
   const [displaySlots, setDisplaySlots] = useState(6);
   const [filtersOpen, setFiltersOpen] = useState(false);
   
-  // Header content - hardcoded for this page (can be made dynamic later)
-  const headerTitlePt = t.projects.portfolioTitle || "Projetos em Andamento";
-  const headerDescriptionPt = t.projects.portfolioSubtitle || "Acompanhe nosso portfólio de projetos culturais";
+  // Header content from settings (PT source)
+  const [headerTitlePt, setHeaderTitlePt] = useState<string>(t.projects.portfolioTitle || "Projetos em Andamento");
+  const [headerDescriptionPt, setHeaderDescriptionPt] = useState<string>(t.projects.portfolioSubtitle || "Acompanhe nosso portfólio de projetos culturais");
   
   // Auto-translate header content
   const { translated: translatedTitle } = useAutoTranslate('portfolio_header_title', headerTitlePt);
@@ -124,7 +124,22 @@ const ProjectsPortfolioPage = () => {
     fetchProjects();
     fetchDisplaySlots();
     fetchDynamicFilters();
+    fetchHeaderContent();
   }, []);
+
+  const fetchHeaderContent = async () => {
+    const { data } = await supabase
+      .from("settings")
+      .select("value")
+      .eq("key", "portfolio_header")
+      .maybeSingle();
+    
+    if (data) {
+      const content = data.value as { title?: string; description?: string };
+      if (content.title) setHeaderTitlePt(content.title);
+      if (content.description) setHeaderDescriptionPt(content.description);
+    }
+  };
 
   const fetchDynamicFilters = async () => {
     // Fetch project types
