@@ -1,12 +1,19 @@
 import { useEffect, useRef } from "react";
+import { useAnimationsEnabled } from "@/hooks/useAnimationsEnabled";
 
 export function WavesBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>();
+  const animationsEnabled = useAnimationsEnabled();
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+    if (!animationsEnabled) {
+      const ctx = canvas.getContext("2d");
+      if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+      return;
+    }
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
@@ -93,7 +100,7 @@ export function WavesBackground() {
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, []);
+  }, [animationsEnabled]);
 
   return (
     <canvas

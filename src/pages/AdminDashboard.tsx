@@ -36,6 +36,7 @@ import { TeamMemberEditor, TeamMemberData } from "@/components/admin/TeamMemberE
 import { DynamicProjectTypeSelect } from "@/components/admin/DynamicProjectTypeSelect";
 import { DynamicLocationSelect } from "@/components/admin/DynamicLocationSelect";
 import { Switch } from "@/components/ui/switch";
+import { setAnimationsCacheValue } from "@/hooks/useAnimationsEnabled";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   CheckCircle, 
@@ -157,6 +158,7 @@ const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState("all");
   const [activeSection, setActiveSection] = useState<"projects" | "requests" | "contacts" | "homepage" | "captacao" | "portfolio">("homepage");
   const [statsVisible, setStatsVisible] = useState(true);
+  const [backgroundAnimationsEnabled, setBackgroundAnimationsEnabled] = useState(true);
   const [loadingSettings, setLoadingSettings] = useState(true);
   const [featuredRefreshKey, setFeaturedRefreshKey] = useState(0);
   
@@ -299,6 +301,19 @@ const AdminDashboard = () => {
       setStatsVisible((statsData.value as { enabled: boolean }).enabled);
     }
 
+    // Fetch background animations setting
+    const { data: animData } = await supabase
+      .from("settings")
+      .select("value")
+      .eq("key", "background_animations_enabled")
+      .maybeSingle();
+
+    if (animData) {
+      const val = (animData.value as { enabled: boolean }).enabled !== false;
+      setBackgroundAnimationsEnabled(val);
+      setAnimationsCacheValue(val);
+    }
+
     // Fetch institutional videos
     const { data: videoData } = await supabase
       .from("settings")
@@ -431,6 +446,47 @@ const AdminDashboard = () => {
         description: newValue 
           ? "O painel de números está visível na homepage." 
           : "O painel de números foi ocultado da homepage.",
+      });
+    }
+  };
+
+  const toggleBackgroundAnimations = async () => {
+    const newValue = !backgroundAnimationsEnabled;
+
+    const { data: existing } = await supabase
+      .from("settings")
+      .select("id")
+      .eq("key", "background_animations_enabled")
+      .maybeSingle();
+
+    let error;
+    if (existing) {
+      const result = await supabase
+        .from("settings")
+        .update({ value: { enabled: newValue } })
+        .eq("key", "background_animations_enabled");
+      error = result.error;
+    } else {
+      const result = await supabase
+        .from("settings")
+        .insert({ key: "background_animations_enabled", value: { enabled: newValue } });
+      error = result.error;
+    }
+
+    if (error) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível atualizar a configuração.",
+        variant: "destructive",
+      });
+    } else {
+      setBackgroundAnimationsEnabled(newValue);
+      setAnimationsCacheValue(newValue);
+      toast({
+        title: newValue ? "Animações ativadas" : "Animações desativadas",
+        description: newValue
+          ? "O fundo animado está visível nas páginas do portfólio."
+          : "O fundo ficará preto nas páginas do portfólio.",
       });
     }
   };
@@ -1478,7 +1534,7 @@ const AdminDashboard = () => {
                 <Settings2 className="w-5 h-5" />
                 Configurações Gerais
               </div>
-              <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid md:grid-cols-3 gap-4">
                 <Card>
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
@@ -1494,6 +1550,26 @@ const AdminDashboard = () => {
                         />
                         <Badge variant={statsVisible ? "default" : "secondary"}>
                           {statsVisible ? "Visível" : "Oculto"}
+                        </Badge>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">Animações de Background</h4>
+                        <p className="text-sm text-muted-foreground">Luzes animadas nas páginas do portfólio</p>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Switch
+                          checked={backgroundAnimationsEnabled}
+                          onCheckedChange={toggleBackgroundAnimations}
+                          disabled={loadingSettings}
+                        />
+                        <Badge variant={backgroundAnimationsEnabled ? "default" : "secondary"}>
+                          {backgroundAnimationsEnabled ? "Ativo" : "Desativo"}
                         </Badge>
                       </div>
                     </div>

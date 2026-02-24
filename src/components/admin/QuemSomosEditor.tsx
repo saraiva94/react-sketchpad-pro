@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { 
@@ -112,6 +113,7 @@ interface QuemSomosCard {
   title: string;
   description: string;
   color: string;
+  visible?: boolean;
 }
 
 interface QuemSomosContent {
@@ -130,19 +132,22 @@ const defaultContent: QuemSomosContent = {
       icon: "Lightbulb", 
       title: "Para Criadores", 
       description: "Histórias potentes merecem estrutura sólida. Atuamos no desenvolvimento, organização e produção para tirar ideias do papel e transformá-las em obras realizadas.",
-      color: "from-primary to-accent"
+      color: "from-primary to-accent",
+      visible: true
     },
     { 
       icon: "Target", 
       title: "Para Investidores", 
       description: "Projetos prontos para investimento, com identidade, força de execução e potencial de retorno institucional.",
-      color: "from-emerald-500 to-emerald-600"
+      color: "from-emerald-500 to-emerald-600",
+      visible: true
     },
     { 
       icon: "Heart", 
       title: "Para a Sociedade", 
       description: "Criamos experiências que atravessam. Conectamos narrativas a quem importa: as pessoas.",
-      color: "from-violet-500 to-violet-600"
+      color: "from-violet-500 to-violet-600",
+      visible: true
     }
   ]
 };
@@ -222,9 +227,14 @@ export const QuemSomosEditor = () => {
     setContent({ ...content, paragraphs: newParagraphs });
   };
 
-  const updateCard = (index: number, field: keyof QuemSomosCard, value: string) => {
+  const updateCard = (index: number, field: keyof QuemSomosCard, value: string | boolean) => {
     const newCards = [...content.cards];
-    newCards[index] = { ...newCards[index], [field]: value };
+    // Converter string para boolean se o campo for 'visible'
+    if (field === 'visible') {
+      newCards[index] = { ...newCards[index], [field]: value === true || value === "true" };
+    } else {
+      newCards[index] = { ...newCards[index], [field]: value };
+    }
     setContent({ ...content, cards: newCards });
   };
 
@@ -233,7 +243,8 @@ export const QuemSomosEditor = () => {
       icon: "Star",
       title: "Novo Card",
       description: "Descrição do novo card",
-      color: "from-primary to-accent"
+      color: "from-primary to-accent",
+      visible: true
     };
     setContent({ ...content, cards: [...content.cards, newCard] });
   };
@@ -329,7 +340,7 @@ export const QuemSomosEditor = () => {
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {content.cards.map((card, index) => (
-              <div key={index} className="p-4 border rounded-lg space-y-3 bg-muted/20 relative">
+              <div key={index} className={`p-4 border rounded-lg space-y-3 relative ${card.visible !== false ? 'bg-muted/20' : 'bg-muted/40 opacity-60'}`}>
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
                     <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${card.color} flex items-center justify-center text-white`}>
@@ -345,6 +356,17 @@ export const QuemSomosEditor = () => {
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>
+                </div>
+
+                {/* Visibilidade Toggle */}
+                <div className="flex items-center justify-between p-2 bg-background/50 rounded border">
+                  <Label className="text-xs font-medium">
+                    {card.visible !== false ? "✅ Visível na Homepage" : "❌ Oculto"}
+                  </Label>
+                  <Switch
+                    checked={card.visible !== false}
+                    onCheckedChange={(checked) => updateCard(index, "visible", checked)}
+                  />
                 </div>
                 
                 {/* Icon Selector */}

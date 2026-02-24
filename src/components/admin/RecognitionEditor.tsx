@@ -1,14 +1,18 @@
 import { useState } from "react";
-import { Plus, X, Award, Newspaper, Film, Check, AlertCircle } from "lucide-react";
+import { Plus, X, Award, Newspaper, Film, Check, AlertCircle, ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ImageCropper } from "@/components/ImageCropper";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export interface NewsItem {
   title: string;
   linkTitle?: string;
   url?: string;
   date?: string;
+  image_url?: string;
 }
 
 export interface FestivalItem {
@@ -16,6 +20,7 @@ export interface FestivalItem {
   linkTitle?: string;
   url?: string;
   date?: string;
+  image_url?: string;
 }
 
 interface RecognitionEditorProps {
@@ -35,13 +40,18 @@ export function RecognitionEditor({
   onNewsChange,
   onFestivalsChange
 }: RecognitionEditorProps) {
-  const [newAward, setNewAward] = useState<{ text: string; linkTitle: string; url: string }>({ text: "", linkTitle: "", url: "" });
-  const [newNewsItem, setNewNewsItem] = useState<NewsItem>({ title: "", linkTitle: "", url: "", date: "" });
-  const [newFestivalItem, setNewFestivalItem] = useState<FestivalItem>({ title: "", linkTitle: "", url: "", date: "" });
+  const [newAward, setNewAward] = useState<{ text: string; linkTitle: string; url: string; image_url?: string }>({ text: "", linkTitle: "", url: "", image_url: undefined });
+  const [newNewsItem, setNewNewsItem] = useState<NewsItem>({ title: "", linkTitle: "", url: "", date: "", image_url: undefined });
+  const [newFestivalItem, setNewFestivalItem] = useState<FestivalItem>({ title: "", linkTitle: "", url: "", date: "", image_url: undefined });
   const [urlValidation, setUrlValidation] = useState<{ news: boolean; festival: boolean; award: boolean }>({ 
     news: true, 
     festival: true, 
     award: true 
+  });
+  const [uploading, setUploading] = useState<{ award: boolean; news: boolean; festival: boolean }>({
+    award: false,
+    news: false,
+    festival: false
   });
 
   // Função para formatar data automaticamente (dd/mm/aaaa)
@@ -85,17 +95,53 @@ export function RecognitionEditor({
     }
   };
 
+  // Upload de imagem para reconhecimentos
+  const handleImageCropped = async (type: 'award' | 'news' | 'festival', blob: Blob, previewUrl: string) => {
+    setUploading({ ...uploading, [type]: true });
+    
+    try {
+      const fileName = `recognition-${type}-${Date.now()}.png`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from("project-media")
+        .upload(fileName, blob);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("project-media")
+        .getPublicUrl(fileName);
+
+      // Atualizar o estado correspondente
+      if (type === 'award') {
+        setNewAward({ ...newAward, image_url: publicUrl });
+      } else if (type === 'news') {
+        setNewNewsItem({ ...newNewsItem, image_url: publicUrl });
+      } else {
+        setNewFestivalItem({ ...newFestivalItem, image_url: publicUrl });
+      }
+
+      toast.success("Imagem adicionada!");
+    } catch (error) {
+      console.error("Erro no upload:", error);
+      toast.error("Erro ao fazer upload da imagem");
+    } finally {
+      setUploading({ ...uploading, [type]: false });
+    }
+  };
+
   const addAward = () => {
     if (!newAward.text.trim()) return;
     
     const awardToAdd: any = {
       text: newAward.text.trim(),
       linkTitle: newAward.linkTitle.trim() || undefined,
-      url: newAward.url ? formatUrl(newAward.url.trim()) : undefined
+      url: newAward.url ? formatUrl(newAward.url.trim()) : undefined,
+      image_url: newAward.image_url || undefined
     };
     
     onAwardsChange([...awards, awardToAdd]);
-    setNewAward({ text: "", linkTitle: "", url: "" });
+    setNewAward({ text: "", linkTitle: "", url: "", image_url: undefined });
   };
 
   const removeAward = (index: number) => {
@@ -108,9 +154,10 @@ export function RecognitionEditor({
       title: newNewsItem.title.trim(),
       linkTitle: newNewsItem.linkTitle?.trim() || undefined,
       url: newNewsItem.url ? formatUrl(newNewsItem.url.trim()) : undefined,
-      date: newNewsItem.date?.trim() || undefined
+      date: newNewsItem.date?.trim() || undefined,
+      image_url: newNewsItem.image_url || undefined
     }]);
-    setNewNewsItem({ title: "", linkTitle: "", url: "", date: "" });
+    setNewNewsItem({ title: "", linkTitle: "", url: "", date: "", image_url: undefined });
   };
 
   const removeNewsItem = (index: number) => {
@@ -123,9 +170,10 @@ export function RecognitionEditor({
       title: newFestivalItem.title.trim(),
       linkTitle: newFestivalItem.linkTitle?.trim() || undefined,
       url: newFestivalItem.url ? formatUrl(newFestivalItem.url.trim()) : undefined,
-      date: newFestivalItem.date?.trim() || undefined
+      date: newFestivalItem.date?.trim() || undefined,
+      image_url: newFestivalItem.image_url || undefined
     }]);
-    setNewFestivalItem({ title: "", linkTitle: "", url: "", date: "" });
+    setNewFestivalItem({ title: "", linkTitle: "", url: "", date: "", image_url: undefined });
   };
 
   const removeFestivalItem = (index: number) => {
@@ -226,14 +274,42 @@ export function RecognitionEditor({
               )}
             </div>
           </div>
+          
+          {/* Imagem opcional */}
+          <div className="space-y-2">
+            <Label className="text-xs text-muted-foreground flex items-center gap-1">
+              <ImageIcon className="w-3 h-3" />
+              Imagem (opcional - quadrada ou retangular)
+            </Label>
+            {newAward.image_url ? (
+              <div className="flex items-center gap-2">
+                <img src={newAward.image_url} alt="Preview" className="w-16 h-16 object-cover rounded border" />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setNewAward({ ...newAward, image_url: undefined })}
+                >
+                  <X className="w-4 h-4 text-destructive" />
+                </Button>
+              </div>
+            ) : (
+              <ImageCropper
+                onImageCropped={(blob, previewUrl) => handleImageCropped('award', blob, previewUrl)}
+                mode="both"
+                allowReadjust={false}
+              />
+            )}
+          </div>
+          
           <Button 
             type="button" 
             variant="secondary" 
             size="sm"
             onClick={addAward}
-            disabled={!newAward.text.trim()}
+            disabled={!newAward.text.trim() || uploading.award}
           >
-            Salvar
+            {uploading.award ? "Fazendo upload..." : "Salvar"}
           </Button>
         </div>
       </div>
@@ -323,14 +399,42 @@ export function RecognitionEditor({
               maxLength={10}
             />
           </div>
+          
+          {/* Imagem opcional */}
+          <div className="space-y-2">
+            <Label className="text-xs text-muted-foreground flex items-center gap-1">
+              <ImageIcon className="w-3 h-3" />
+              Imagem (opcional - quadrada ou retangular)
+            </Label>
+            {newFestivalItem.image_url ? (
+              <div className="flex items-center gap-2">
+                <img src={newFestivalItem.image_url} alt="Preview" className="w-16 h-16 object-cover rounded border" />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setNewFestivalItem({ ...newFestivalItem, image_url: undefined })}
+                >
+                  <X className="w-4 h-4 text-destructive" />
+                </Button>
+              </div>
+            ) : (
+              <ImageCropper
+                onImageCropped={(blob, previewUrl) => handleImageCropped('festival', blob, previewUrl)}
+                mode="both"
+                allowReadjust={false}
+              />
+            )}
+          </div>
+          
           <Button 
             type="button" 
             variant="secondary" 
             size="sm"
             onClick={addFestivalItem}
-            disabled={!newFestivalItem.title.trim()}
+            disabled={!newFestivalItem.title.trim() || uploading.festival}
           >
-            Salvar
+            {uploading.festival ? "Fazendo upload..." : "Salvar"}
           </Button>
         </div>
       </div>
@@ -420,14 +524,42 @@ export function RecognitionEditor({
               maxLength={10}
             />
           </div>
+          
+          {/* Imagem opcional */}
+          <div className="space-y-2">
+            <Label className="text-xs text-muted-foreground flex items-center gap-1">
+              <ImageIcon className="w-3 h-3" />
+              Imagem (opcional - quadrada ou retangular)
+            </Label>
+            {newNewsItem.image_url ? (
+              <div className="flex items-center gap-2">
+                <img src={newNewsItem.image_url} alt="Preview" className="w-16 h-16 object-cover rounded border" />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setNewNewsItem({ ...newNewsItem, image_url: undefined })}
+                >
+                  <X className="w-4 h-4 text-destructive" />
+                </Button>
+              </div>
+            ) : (
+              <ImageCropper
+                onImageCropped={(blob, previewUrl) => handleImageCropped('news', blob, previewUrl)}
+                mode="both"
+                allowReadjust={false}
+              />
+            )}
+          </div>
+          
           <Button 
             type="button" 
             variant="secondary" 
             size="sm"
             onClick={addNewsItem}
-            disabled={!newNewsItem.title.trim()}
+            disabled={!newNewsItem.title.trim() || uploading.news}
           >
-            Salvar
+            {uploading.news ? "Fazendo upload..." : "Salvar"}
           </Button>
         </div>
       </div>

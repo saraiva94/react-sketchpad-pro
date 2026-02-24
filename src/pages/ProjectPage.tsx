@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -23,7 +23,7 @@ import { SortableTeamGrid } from "@/components/SortableTeamGrid";
 import { TranslatedContrapartidaCard } from "@/components/TranslatedContrapartidaCard";
 import { WavesBackground } from "@/components/WavesBackground";
 import { SortableRecognitionColumns } from "@/components/SortableRecognitionColumns";
-import { ProjectImageCarousel } from "@/components/ProjectImageCarousel";
+import { ProjectImageCarousel, CarouselImageItem } from "@/components/ProjectImageCarousel";
 import { useAuth } from "@/hooks/useAuth";
 import { 
   ArrowLeft, 
@@ -95,7 +95,7 @@ interface Project {
   news: NewsItem[] | null;
   festivals_exhibitions: FestivalItem[] | null;
   additional_info: string | null;
-  carousel_images: string[] | null;
+  carousel_images: Array<string | CarouselImageItem> | null;
 }
 
 interface ProjectMember {
@@ -137,6 +137,7 @@ interface Contrapartida {
 
 const ProjectPage = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { toast } = useToast();
   const { t, language } = useLanguage();
   const { isAdmin } = useAuth();
@@ -277,7 +278,15 @@ const ProjectPage = () => {
         .eq("key", settingKey)
         .maybeSingle();
       
-      const carouselImages = (carouselData?.value as any)?.images || [];
+      const rawCarousel = (carouselData?.value as any)?.images || [];
+      // Normalize: each entry may be a string (legacy) or { url, fit } object
+      const carouselImages: Array<string | CarouselImageItem> = rawCarousel.map(
+        (item: unknown) => {
+          if (typeof item === "string") return item;
+          if (item && typeof (item as CarouselImageItem).url === "string") return item as CarouselImageItem;
+          return String(item);
+        }
+      );
       console.log("✅ Carousel images carregadas da settings:", carouselImages.length);
       
       // Debug: Log dos reconhecimentos carregados
@@ -649,10 +658,13 @@ const ProjectPage = () => {
       <WavesBackground />
       {/* Standard Navbar */}
       <Navbar showNav={false} rightContent={
-        <Link to="/porto-de-ideias" className="flex items-center text-muted-foreground hover:text-primary transition-colors">
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center text-muted-foreground hover:text-primary transition-colors"
+        >
           <ArrowLeft className="w-4 h-4 mr-2" />
           {t.common.back}
-        </Link>
+        </button>
       } />
       <div className="h-20" />
 

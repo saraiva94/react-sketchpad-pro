@@ -1000,24 +1000,26 @@ const HomePage = () => {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            {displayQuemSomos.cards.map((card, index) => {
-              const IconComponent = iconMap[card.icon] || Lightbulb;
-              return (
-                <Card 
-                  key={card.title}
-                  className={`text-center p-8 card-solid bg-card border-border card-hover group transition-all duration-700 ${quemSomosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
-                  style={{ transitionDelay: quemSomosInView ? `${(index + 2) * 150}ms` : '0ms' }}
-                >
-                  <div className={`w-20 h-20 bg-gradient-to-br ${card.color} rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-elegant group-hover:scale-110 transition-transform duration-300`}>
-                    <IconComponent className="w-10 h-10 text-white" />
-                  </div>
-                  <CardTitle className="text-xl font-serif mb-3">{card.title}</CardTitle>
-                  <CardDescription className="text-base leading-relaxed">
-                    {card.description}
-                  </CardDescription>
-                </Card>
-              );
-            })}
+            {displayQuemSomos.cards
+              .filter(card => card.visible !== false)
+              .map((card, index) => {
+                const IconComponent = iconMap[card.icon] || Lightbulb;
+                return (
+                  <Card 
+                    key={card.title}
+                    className={`text-center p-8 card-solid bg-card border-border card-hover group transition-all duration-700 ${quemSomosInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+                    style={{ transitionDelay: quemSomosInView ? `${(index + 2) * 150}ms` : '0ms' }}
+                  >
+                    <div className={`w-20 h-20 bg-gradient-to-br ${card.color} rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-elegant group-hover:scale-110 transition-transform duration-300`}>
+                      <IconComponent className="w-10 h-10 text-white" />
+                    </div>
+                    <CardTitle className="text-xl font-serif mb-3">{card.title}</CardTitle>
+                    <CardDescription className="text-base leading-relaxed">
+                      {card.description}
+                    </CardDescription>
+                  </Card>
+                );
+              })}
           </div>
 
           {/* Botão Fale Conosco */}
@@ -1151,29 +1153,6 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Companies Carousel Section - SEMPRE VISÍVEL */}
-      <section className="py-20 lg:py-28 relative z-10">
-        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent" />
-        
-        <div className="mx-auto px-4 sm:px-[10%] lg:px-[20%] relative z-10">
-          <div className="text-center mb-16">
-            <ShinyText className="inline-block" delay={200}>
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif font-semibold text-foreground mb-4">
-                {displayCompanies.title}
-              </h2>
-            </ShinyText>
-            <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto mt-6">
-              {displayCompanies.description}
-            </p>
-          </div>
-
-          <CompaniesCarousel 
-            logos={displayCompanies.logos} 
-            displayCount={displayCompanies.displayCount}
-          />
-        </div>
-      </section>
-
       {/* Nossos Serviços Section */}
       <section ref={servicosRef} id="servicos" className="py-20 lg:py-28 relative z-10">
         <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent" />
@@ -1205,6 +1184,29 @@ const HomePage = () => {
                 );
               })}
             </div>
+        </div>
+      </section>
+
+      {/* Companies Carousel Section - SEMPRE VISÍVEL - ÚLTIMA SEÇÃO */}
+      <section className="py-20 lg:py-28 relative z-10">
+        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+        
+        <div className="mx-auto px-4 sm:px-[10%] lg:px-[20%] relative z-10">
+          <div className="text-center mb-16">
+            <ShinyText className="inline-block" delay={200}>
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif font-semibold text-foreground mb-4">
+                {displayCompanies.title}
+              </h2>
+            </ShinyText>
+            <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto mt-6">
+              {displayCompanies.description}
+            </p>
+          </div>
+
+          <CompaniesCarousel 
+            logos={displayCompanies.logos} 
+            displayCount={displayCompanies.displayCount}
+          />
         </div>
       </section>
 

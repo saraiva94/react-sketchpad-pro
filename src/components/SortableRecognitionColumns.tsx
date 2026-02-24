@@ -26,6 +26,7 @@ interface NewsItem {
   linkTitle?: string;
   url?: string;
   date?: string;
+  image_url?: string;
 }
 
 interface FestivalItem {
@@ -33,12 +34,14 @@ interface FestivalItem {
   linkTitle?: string;
   url?: string;
   date?: string;
+  image_url?: string;
 }
 
 interface AwardItem {
   text: string;
   linkTitle?: string;
   url?: string;
+  image_url?: string;
 }
 
 interface RecognitionTitle {
@@ -114,18 +117,21 @@ function SortableColumn({
             let linkTitle = "";
             let linkUrl = "";
             let date = "";
+            let imageUrl = "";
 
             if (column.type === "awards") {
               const award = item as AwardItem;
               title = typeof award === 'string' ? award : award.text || "";
               linkTitle = typeof award === 'object' ? award.linkTitle || "" : "";
               linkUrl = typeof award === 'object' ? award.url || "" : "";
+              imageUrl = typeof award === 'object' ? award.image_url || "" : "";
             } else {
               const mediaItem = item as NewsItem | FestivalItem;
               title = mediaItem.title || "";
               linkTitle = mediaItem.linkTitle || "";
               linkUrl = mediaItem.url || "";
               date = mediaItem.date || "";
+              imageUrl = mediaItem.image_url || "";
             }
 
             if (!title) return null;
@@ -133,31 +139,45 @@ function SortableColumn({
             return (
               <li key={index}>
                 <div className="block p-3 bg-muted/50 rounded-lg">
-                  {column.type === "awards" ? (
-                    <h4 className="font-medium text-foreground mb-2">{title}</h4>
-                  ) : (
-                    <>
-                      <TranslatedText 
-                        namespace={`${column.type}_${projectId}_${index}`}
-                        value={title}
-                        as="h4"
-                        className="font-medium text-foreground mb-1"
-                        showSkeleton={false}
+                  <div className="flex items-start gap-3">
+                    {/* Imagem opcional */}
+                    {imageUrl && (
+                      <img 
+                        src={imageUrl} 
+                        alt={title}
+                        className="w-16 h-16 object-cover rounded border border-border flex-shrink-0"
                       />
-                      {date && <p className="text-sm text-muted-foreground mb-2">{date}</p>}
-                    </>
-                  )}
-                  {linkTitle && linkUrl && (
-                    <a
-                      href={linkUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-primary hover:text-primary/80 hover:underline inline-flex items-center gap-1"
-                    >
-                      {linkTitle}
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
-                  )}
+                    )}
+                    
+                    {/* Conteúdo */}
+                    <div className="flex-1 min-w-0">
+                      {column.type === "awards" ? (
+                        <h4 className="font-medium text-foreground mb-2">{title}</h4>
+                      ) : (
+                        <>
+                          <TranslatedText 
+                            namespace={`${column.type}_${projectId}_${index}`}
+                            value={title}
+                            as="h4"
+                            className="font-medium text-foreground mb-1"
+                            showSkeleton={false}
+                          />
+                          {date && <p className="text-sm text-muted-foreground mb-2">{date}</p>}
+                        </>
+                      )}
+                      {linkTitle && linkUrl && (
+                        <a
+                          href={linkUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-primary hover:text-primary/80 hover:underline inline-flex items-center gap-1"
+                        >
+                          {linkTitle}
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </li>
             );
