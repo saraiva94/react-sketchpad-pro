@@ -1,108 +1,42 @@
-# Porto Bello
+# Porto Bello Filmes — Plataforma Digital
 
-**Plataforma de conexão entre projetos culturais e investidores**
+## Sobre o Projeto
 
-Desenvolvido por: **[Seu Nome]**  
-Tecnologias: React, TypeScript, Vite, Tailwind CSS, Supabase
+Uma plataforma digital completa desenvolvida para a Porto Bello Filmes, produtora audiovisual brasileira. A plataforma funciona como portfólio público, hub de submissão de projetos, vitrine para investidores e ferramenta de gestão interna — tudo em um sistema unificado com painel administrativo personalizado e métricas em tempo real.
 
----
+## O Que Foi Entregue
 
-## 📋 Instruções de Uso Geral
+- Portfólio público de projetos com páginas individuais e URLs amigáveis para SEO
+- Construtor de homepage com drag-and-drop e gerenciamento de projetos em destaque
+- Painel administrativo completo para gestão de conteúdo, mídia e ciclo de vida dos projetos
+- Formulário público de submissão de projetos com campos configuráveis pelo admin
+- Dashboard de métricas de engajamento por projeto (visualizações, cliques em contato, downloads de PDF)
+- Edição inline de reconhecimentos, cobertura de mídia e participações em festivais
+- Cards de serviços com pop-up detalhado e integração com contato
+- Suporte multilíngue com tradução automática (PT/EN/ES)
+- Design responsivo otimizado para desktop e mobile
+- Carrossel de vídeos com autoplay na seção hero da homepage
+- Gerenciamento de equipe com ordenação por drag-and-drop
+- Editor de contrapartidas/níveis de patrocínio para páginas voltadas a investidores
+- Editor de carrossel de imagens com recorte e reordenação por projeto
+- Modal de contato com links sociais dinâmicos e integração com WhatsApp
+- Sistema de configuração de formulários — ativar/desativar seções e campos pelo admin
+- Slugs de URL amigáveis para páginas de projetos
+- Tema claro/escuro com fundos animados
 
-### Navegação Pública
+## Stack Tecnológica
 
-1. **Página Inicial** (`/`) - Exibe projetos culturais em destaque, estatísticas da plataforma e informações sobre a missão
-2. **Portfólio de Projetos** (`/projetos`) - Lista todos os projetos aprovados com filtros por categoria
-3. **Submeter Projeto** (`/submit`) - Formulário público para envio de novos projetos culturais
-4. **Visualização de Projeto** (`/project/:id`) - Detalhes completos de um projeto específico
+- **React** — Arquitetura de UI baseada em componentes
+- **TypeScript** — Desenvolvimento com tipagem segura em todo o código
+- **Vite** — Build rápido e servidor de desenvolvimento
+- **Supabase** — Banco de dados, autenticação, armazenamento e assinaturas em tempo real
+- **Tailwind CSS** — Estilização utilitária com tokens de design personalizados
+- **shadcn/ui** — Biblioteca de componentes de UI acessíveis e composáveis
 
-### Como Submeter um Projeto
+## Online
 
-1. Acesse `/submit`
-2. Preencha os dados do responsável (nome, email, telefone)
-3. Adicione informações do projeto (título, categoria, descrição)
-4. Faça upload de mídia (vídeo, documentos)
-5. Adicione membros da equipe
-6. Informe dados de financiamento e impacto
-7. Clique em "Enviar Projeto"
+- Website: [portobellofilmes.com.br](https://portobellofilmes.com.br)
 
----
+## Desenvolvido por
 
-## 🔐 Instruções de Uso do Administrador
-
-### Acesso ao Painel
-
-- **URL**: `/auth`
-- **Usuário**: `Admin2025`
-- **Senha**: `administradorpi2025`
-
-### Funcionalidades do Admin (`/admin`)
-
-| Função | Descrição |
-|--------|-----------|
-| **Aprovar/Rejeitar** | Moderar projetos pendentes |
-| **Destacar na Home** | Marcar projetos para exibição na página inicial |
-| **Editar Projeto** | Alterar imagem, orçamento, localização e notas |
-| **Excluir Projeto** | Remover projetos permanentemente |
-| **Baixar CSV** | Exportar contatos dos responsáveis em planilha |
-| **Limpar Cadastros** | Limpar dados de contato após backup |
-| **Mostrar/Ocultar Stats** | Controlar visibilidade das estatísticas na home |
-
-### Adicionar Projeto Manualmente
-
-- Acesse `/admin/add-project` para cadastrar projetos diretamente como aprovados
-
----
-
-## 🔍 Auditoria do Sistema
-
-### Estrutura de Dados
-
-| Tabela | Função |
-|--------|--------|
-| `projects` | Projetos com status (pending/approved/rejected) |
-| `project_members` | Membros da equipe de cada projeto |
-| `profiles` | Perfis de usuários |
-| `user_roles` | Controle de permissões (admin/user) |
-| `settings` | Configurações da aplicação |
-
-### Políticas de Segurança (RLS)
-
-- ✅ Leitura pública de projetos aprovados
-- ✅ Inserção pública para submissões
-- ✅ Atualização/exclusão restrita a admins
-- ✅ Configurações editáveis apenas por admins
-
-### Funcionalidades Testadas
-
-- [x] Submissão de projetos (público)
-- [x] Aprovação/rejeição de projetos
-- [x] Destaque na homepage
-- [x] Edição e exclusão de projetos
-- [x] Upload de arquivos (vídeo/documentos)
-- [x] Export CSV de contatos
-- [x] Limpeza de cadastros
-- [x] Toggle de estatísticas
-- [x] Tema claro/escuro
-- [x] Menu responsivo mobile
-
----
-
-## 🚀 Desenvolvimento Local
-
-```bash
-# Clonar repositório
-git clone <URL_DO_REPOSITORIO>
-
-# Instalar dependências
-npm install
-
-# Iniciar servidor de desenvolvimento
-npm run dev
-```
-
----
-
-## 📄 Licença
-
-Projeto desenvolvido para fins de gestão de projetos culturais.
+Swamiy Saraiva
