@@ -47,7 +47,8 @@ import {
   Facebook,
   Youtube,
   FileText,
-  Twitter
+  Twitter,
+  TrendingUp
 } from "lucide-react";
 
 interface NewsItem {
@@ -81,7 +82,7 @@ interface Project {
   created_at: string;
   updated_at: string | null;
   categorias_tags: string[] | null;
-  responsavel_primeiro_nome: string | null;
+  responsavel_nome: string | null;
   link_video: string | null;
   link_pagamento: string | null;
   impacto_cultural: string | null;
@@ -136,8 +137,9 @@ interface Contrapartida {
 }
 
 const ProjectPage = () => {
-  const { id } = useParams();
+  const { id, slug } = useParams();
   const navigate = useNavigate();
+  const projectIdentifier = id || slug;
   const { toast } = useToast();
   const { t, language } = useLanguage();
   const { isAdmin } = useAuth();
@@ -150,19 +152,20 @@ const ProjectPage = () => {
   const [showContactPopup, setShowContactPopup] = useState(false);
   const [contrapartidas, setContrapartidas] = useState<Contrapartida[]>([]);
   const [castGlobalDescription, setCastGlobalDescription] = useState<string>("");
+  const [projectMetrics, setProjectMetrics] = useState<{ enabled: boolean; publico_alcancado?: string; exibicoes_info?: string } | null>(null);
 
   // Auto-tradução de campos individuais do projeto (strings do banco estão em PT)
   // Traduzir campos individuais ao invés do objeto completo para melhor cache e reuso
   const { translated: translatedTitle } = useAutoTranslate(
-    `project_full_${id ?? "unknown"}_title`,
+    `project_full_${projectIdentifier ?? "unknown"}_title`,
     project?.title
   );
   const { translated: translatedSynopsis } = useAutoTranslate(
-    `project_full_${id ?? "unknown"}_synopsis`,
+    `project_full_${projectIdentifier ?? "unknown"}_synopsis`,
     project?.synopsis
   );
   const { translated: translatedDescription } = useAutoTranslate(
-    `project_full_${id ?? "unknown"}_description`,
+    `project_full_${projectIdentifier ?? "unknown"}_description`,
     project?.description
   );
   const { translated: translatedProjectType } = useAutoTranslate(
@@ -170,23 +173,23 @@ const ProjectPage = () => {
     project?.project_type
   );
   const { translated: translatedImpactoCultural } = useAutoTranslate(
-    `project_full_${id ?? "unknown"}_impacto_cultural`,
+    `project_full_${projectIdentifier ?? "unknown"}_impacto_cultural`,
     project?.impacto_cultural
   );
   const { translated: translatedImpactoSocial } = useAutoTranslate(
-    `project_full_${id ?? "unknown"}_impacto_social`,
+    `project_full_${projectIdentifier ?? "unknown"}_impacto_social`,
     project?.impacto_social
   );
   const { translated: translatedPublicoAlvo } = useAutoTranslate(
-    `project_full_${id ?? "unknown"}_publico_alvo`,
+    `project_full_${projectIdentifier ?? "unknown"}_publico_alvo`,
     project?.publico_alvo
   );
   const { translated: translatedDiferenciais } = useAutoTranslate(
-    `project_full_${id ?? "unknown"}_diferenciais`,
+    `project_full_${projectIdentifier ?? "unknown"}_diferenciais`,
     project?.diferenciais
   );
   const { translated: translatedAdditionalInfo } = useAutoTranslate(
-    `project_full_${id ?? "unknown"}_additional_info`,
+    `project_full_${projectIdentifier ?? "unknown"}_additional_info`,
     project?.additional_info
   );
 
@@ -229,49 +232,70 @@ const ProjectPage = () => {
   }, []);
 
   useEffect(() => {
-    if (id) {
+    if (projectIdentifier) {
       fetchProject();
-      fetchMembers();
       fetchContactButtons();
-      fetchContrapartidas();
       fetchCastGlobalDescription();
     }
-  }, [id]);
+  }, [projectIdentifier]);
+
+  // Fetch data that depends on the resolved project UUID
+  useEffect(() => {
+    if (project?.id) {
+      fetchMembers(project.id);
+      fetchContrapartidas(project.id);
+      // Fetch project metrics from settings
+      supabase
+        .from("settings")
+        .select("value")
+        .eq("key", `project_metrics_${project.id}`)
+        .maybeSingle()
+        .then(({ data }) => {
+          if (data?.value) {
+            setProjectMetrics(data.value as { enabled: boolean; publico_alcancado?: string; exibicoes_info?: string });
+          }
+        });
+      // Track page view
+      trackView();
+    }
+  }, [project?.id]);
 
   const fetchProject = async () => {
-    const { data, error } = await supabase
-      .from("projects_public")
-      .select("*")
-      .eq("id", id)
-      .maybeSingle();
+    let data: any = null;
+    let error: any = null;
 
-    if (!error && data) {
-      // Fetch awards, news, festivals and carousel_images from projects table (not in public view)
-      console.log("🔍 Buscando carousel_images para projeto:", id);
-      
-      const { data: extraData, error: extraError } = await supabase
-        .from("projects")
-        .select("awards, news, festivals_exhibitions")
-        .eq("id", id)
-        .maybeSingle();
+    if (slug) {
+      // Look up project id from settings table via slug
+      const { data: slugSettings } = await supabase
+        .from("settings")
+        .select("key, value")
+        .like("key", "project_slug_%");
 
-      if (extraError) {
-        console.error("❌ Erro ao buscar dados extras:", {
-          code: extraError.code,
-          message: extraError.message,
-          details: extraError.details,
-          hint: extraError.hint
-        });
-      } else {
-        console.log("✅ Dados extras carregados:", {
-          awards: extraData?.awards?.length || 0,
-          news: extraData?.news?.length || 0,
-          festivals: extraData?.festivals_exhibitions?.length || 0
-        });
+      const match = (slugSettings || []).find((row: any) => (row.value as any)?.slug === slug);
+      if (match) {
+        const projectId = match.key.replace("project_slug_", "");
+        const result = await supabase.from("projects").select("*").eq("id", projectId).maybeSingle();
+        data = result.data;
+        error = result.error;
       }
 
-      // Buscar carousel_images da tabela settings (solução para erro PGRST204)
-      const settingKey = `project_carousel_${id}`;
+      // Fallback: try as direct id
+      if (!data) {
+        const fallback = await supabase.from("projects").select("*").eq("id", slug).maybeSingle();
+        data = fallback.data;
+        error = fallback.error;
+      }
+    } else {
+      const result = await supabase.from("projects").select("*").eq("id", id).maybeSingle();
+      data = result.data;
+      error = result.error;
+    }
+
+    if (!error && data) {
+      const projectId = data.id;
+
+      // Buscar carousel_images da tabela settings
+      const settingKey = `project_carousel_${projectId}`;
       const { data: carouselData } = await supabase
         .from("settings")
         .select("value")
@@ -289,41 +313,25 @@ const ProjectPage = () => {
       );
       console.log("✅ Carousel images carregadas da settings:", carouselImages.length);
       
-      // Debug: Log dos reconhecimentos carregados
-      console.log("🔍 Reconhecimentos carregados do banco:", {
-        awards: extraData?.awards,
-        news: extraData?.news,
-        festivals: extraData?.festivals_exhibitions
-      });
-      
-      // Debug detalhado de cada item
-      if (extraData?.news && Array.isArray(extraData.news)) {
-        console.log("📰 Matérias na mídia (detalhado):");
-        (extraData.news as NewsItem[]).forEach((item, i) => {
-          console.log(`  ${i + 1}. Título: "${item.title}", URL: "${item.url || 'SEM URL'}", Data: "${item.date || 'SEM DATA'}"`);
-        });
-      }
-      
       // Processar awards (pode vir como string JSON ou objeto)
-      const processedAwards = (extraData?.awards || []).map((award: any) => {
+      const processedAwards = (data?.awards || []).map((award: any) => {
         if (typeof award === 'string') {
-          // Tentar fazer parse se for JSON string
           try {
             const parsed = JSON.parse(award);
             if (parsed && typeof parsed === 'object') return parsed;
           } catch {
             // Se não for JSON, retorna string simples
           }
-          return award; // Retorna string simples
+          return award;
         }
-        return award; // Já é objeto
+        return award;
       });
 
       const projectData = {
         ...data,
         awards: processedAwards,
-        news: (extraData?.news as unknown as NewsItem[]) || [],
-        festivals_exhibitions: (extraData?.festivals_exhibitions as unknown as FestivalItem[]) || [],
+        news: (data?.news as unknown as NewsItem[]) || [],
+        festivals_exhibitions: (data?.festivals_exhibitions as unknown as FestivalItem[]) || [],
         carousel_images: carouselImages,
       } as unknown as Project;
       
@@ -332,11 +340,11 @@ const ProjectPage = () => {
     setLoading(false);
   };
 
-  const fetchMembers = async () => {
+  const fetchMembers = async (projectId: string) => {
     const { data } = await supabase
       .from("project_members")
       .select("id, nome, funcao, email, telefone, photo_url, curriculum_url, social_links, detalhes, order_index")
-      .eq("project_id", id)
+      .eq("project_id", projectId)
       .order("order_index", { ascending: true, nullsFirst: false });
     
     if (data) {
@@ -380,11 +388,11 @@ const ProjectPage = () => {
     }
   };
 
-  const fetchContrapartidas = async () => {
+  const fetchContrapartidas = async (projectId: string) => {
     const { data } = await supabase
       .from("contrapartidas")
       .select("*")
-      .eq("project_id", id)
+      .eq("project_id", projectId)
       .eq("ativo", true)
       .order("ordem", { ascending: true });
 
@@ -393,7 +401,52 @@ const ProjectPage = () => {
     }
   };
 
+  // Fire-and-forget view tracking via settings table
+  const trackView = () => {
+    if (!project?.id) return;
+    const key = `project_views_${project.id}`;
+    supabase
+      .from("settings")
+      .select("value")
+      .eq("key", key)
+      .maybeSingle()
+      .then(({ data }) => {
+        const current = (data?.value as any) || { views: 0 };
+        const updated = { views: (current.views || 0) + 1 };
+        if (data) {
+          supabase.from("settings").update({ value: updated as any }).eq("key", key).then(() => {});
+        } else {
+          supabase.from("settings").insert([{ key, value: updated as any }]).then(() => {});
+        }
+      });
+  };
+
+  // Fire-and-forget click tracking via settings table
+  const trackClick = (field: "contact_clicks" | "pdf_clicks") => {
+    if (!project?.id) return;
+    const key = `project_clicks_${project.id}`;
+    supabase
+      .from("settings")
+      .select("value")
+      .eq("key", key)
+      .maybeSingle()
+      .then(({ data }) => {
+        const current = (data?.value as any) || { contact_clicks: 0, pdf_clicks: 0 };
+        const updated = { ...current, [field]: (current[field] || 0) + 1 };
+        if (data) {
+          supabase.from("settings").update({ value: updated as any }).eq("key", key).then(({ error, status }) => {
+            console.log("trackClick result:", { key, field, error: JSON.stringify(error), status });
+          });
+        } else {
+          supabase.from("settings").insert([{ key, value: updated as any }]).then(({ error, status }) => {
+            console.log("trackClick result:", { key, field, error: JSON.stringify(error), status });
+          });
+        }
+      });
+  };
+
   const handleContactClick = () => {
+    trackClick("contact_clicks");
     if (contactButtons.length === 1) {
       window.open(contactButtons[0].link, "_blank");
     } else if (contactButtons.length > 1) {
@@ -703,10 +756,11 @@ const ProjectPage = () => {
                 )}
               </div>
               {project.presentation_document_url ? (
-                <a 
-                  href={project.presentation_document_url} 
-                  target="_blank" 
+                <a
+                  href={project.presentation_document_url}
+                  target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() => trackClick("pdf_clicks")}
                 >
                   <Button variant="secondary" className="rounded-full">
                     <Download className="w-4 h-4 mr-2" />
@@ -714,7 +768,7 @@ const ProjectPage = () => {
                   </Button>
                 </a>
               ) : (
-                <Button variant="secondary" className="rounded-full" onClick={handleDownloadPDF}>
+                <Button variant="secondary" className="rounded-full" onClick={() => { trackClick("pdf_clicks"); handleDownloadPDF(); }}>
                   <Download className="w-4 h-4 mr-2" />
                   {t.projectDetails.generatePdf}
                 </Button>
@@ -1001,6 +1055,41 @@ const ProjectPage = () => {
                         variant="secondary"
                       />
                     ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Public Metrics Section */}
+              {projectMetrics?.enabled && (
+                projectMetrics.publico_alcancado || projectMetrics.exibicoes_info || (project as any)?.view_count
+              ) && (
+                <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+                  <h3 className="font-serif font-bold text-lg text-foreground mb-4 flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5 text-accent" />
+                    Métricas do Projeto
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    {projectMetrics.publico_alcancado && (
+                      <div className="border border-border rounded-xl p-4 text-center">
+                        <span className="text-2xl mb-1 block">👥</span>
+                        <p className="text-xs text-muted-foreground uppercase tracking-wide">Público Alcançado</p>
+                        <p className="text-lg font-bold mt-1">{projectMetrics.publico_alcancado}</p>
+                      </div>
+                    )}
+                    {projectMetrics.exibicoes_info && (
+                      <div className="border border-border rounded-xl p-4 text-center">
+                        <span className="text-2xl mb-1 block">🎬</span>
+                        <p className="text-xs text-muted-foreground uppercase tracking-wide">Exibições</p>
+                        <p className="text-lg font-bold mt-1">{projectMetrics.exibicoes_info}</p>
+                      </div>
+                    )}
+                    {(project as any)?.view_count > 0 && (
+                      <div className="border border-border rounded-xl p-4 text-center">
+                        <span className="text-2xl mb-1 block">👁</span>
+                        <p className="text-xs text-muted-foreground uppercase tracking-wide">Visualizações</p>
+                        <p className="text-lg font-bold mt-1">{((project as any).view_count || 0).toLocaleString("pt-BR")}</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}

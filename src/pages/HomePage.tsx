@@ -1,6 +1,9 @@
 import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
+import { useProjectSlugs } from "@/hooks/useProjectSlugs";
 import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
@@ -150,7 +153,7 @@ interface Project {
   image_url: string | null;
   location: string | null;
   categorias_tags: string[] | null;
-  responsavel_primeiro_nome: string | null;  // Only first name from public view
+  responsavel_nome: string | null;
   link_pagamento: string | null;
   valor_sugerido: number | null;
   has_incentive_law: boolean;
@@ -230,6 +233,7 @@ function SortableFeaturedCard({
 const HomePage = () => {
   const { t, language } = useLanguage();
   const { isAdmin } = useAuth();
+  const { getProjectUrl } = useProjectSlugs();
   const sensors = useDragSensors();
   const [featuredProjects, setFeaturedProjects] = useState<Project[]>([]);
   const [loadingProjects, setLoadingProjects] = useState(true);
@@ -266,6 +270,7 @@ const HomePage = () => {
     title: string;
     description: string;
     color: string;
+    visible?: boolean;
   }
   interface QuemSomosContent {
     paragraphs: string[];
@@ -289,6 +294,7 @@ const HomePage = () => {
     icon: string;
     text: string;
     hoverColor: string;
+    detailedDescription?: string;
   }
   interface ServicosContent {
     title: string;
@@ -311,6 +317,9 @@ const HomePage = () => {
       { icon: "Briefcase", text: "Consultoria para formatação e estruturação de projetos", hoverColor: "group-hover:text-rose-500" },
     ]
   });
+
+  // Service detail modal
+  const [selectedService, setSelectedService] = useState<(ServiceItem & { resolvedIcon: LucideIcon }) | null>(null);
 
   // Companies Carousel
   const [companiesContent, setCompaniesContent] = useState<CompaniesContent>({
@@ -564,10 +573,11 @@ const HomePage = () => {
   };
 
   const fetchStats = async () => {
-    // Use projects_public for count (only approved projects)
+    // Count only approved projects
     const { count: approvedCount } = await supabase
-      .from("projects_public")
-      .select("*", { count: "exact", head: true });
+      .from("projects")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "approved");
 
     // For stats, we count based on approved projects only (public view)
     setStats({
@@ -579,10 +589,12 @@ const HomePage = () => {
   };
 
   const fetchFeaturedProjects = async () => {
-    // Use projects_public view to avoid exposing sensitive contact information
+    // Fetch featured approved projects
     const { data: projectsData } = await supabase
-      .from("projects_public")
-      .select("id, title, synopsis, project_type, image_url, location, categorias_tags, responsavel_primeiro_nome, link_pagamento, valor_sugerido, has_incentive_law, incentive_law_details, stage, impacto_cultural, impacto_social, featured_on_homepage")
+      .from("projects")
+      // TODO: add 'slug' back to select after Supabase schema cache refreshes
+      .select("id, title, synopsis, project_type, image_url, location, categorias_tags, responsavel_nome, link_pagamento, valor_sugerido, has_incentive_law, incentive_law_details, stage, impacto_cultural, impacto_social, featured_on_homepage")
+      .eq("status", "approved")
       .eq("featured_on_homepage", true)
       .order("created_at", { ascending: true })
       .limit(6);
@@ -671,7 +683,7 @@ const HomePage = () => {
       project_type: "Audiovisual",
       image_url: "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=800&h=600&fit=crop",
       location: "Rio de Janeiro",
-      responsavel_primeiro_nome: "Maria",
+      responsavel_nome: "Maria",
       valor_sugerido: 250000,
       has_incentive_law: true,
       incentive_law_details: "Lei Rouanet",
@@ -686,7 +698,7 @@ const HomePage = () => {
       project_type: "Produção Cultural",
       image_url: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=800&h=600&fit=crop",
       location: "São Paulo",
-      responsavel_primeiro_nome: "Carlos",
+      responsavel_nome: "Carlos",
       valor_sugerido: 450000,
       has_incentive_law: true,
       incentive_law_details: "Lei Rouanet",
@@ -701,7 +713,7 @@ const HomePage = () => {
       project_type: "Teatro",
       image_url: "https://images.unsplash.com/photo-1507924538820-ede94a04019d?w=800&h=600&fit=crop",
       location: "São Paulo",
-      responsavel_primeiro_nome: "João",
+      responsavel_nome: "João",
       valor_sugerido: 180000,
       has_incentive_law: true,
       incentive_law_details: "PROAC",
@@ -716,7 +728,7 @@ const HomePage = () => {
       project_type: "Música",
       image_url: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=800&h=600&fit=crop",
       location: "Belo Horizonte",
-      responsavel_primeiro_nome: "Ana",
+      responsavel_nome: "Ana",
       valor_sugerido: 320000,
       has_incentive_law: true,
       incentive_law_details: "Lei do Audiovisual",
@@ -1074,7 +1086,7 @@ const HomePage = () => {
                   {(Array.isArray(localDisplayItems) ? localDisplayItems : []).map((item, index) => {
                     const project = item.data;
                     const isExample = item.type === 'example';
-                    const linkUrl = isExample ? (project as any).link : `/project/${project.id}`;
+                    const linkUrl = isExample ? (project as any).link : getProjectUrl(project.id);
                     const isLeftCard = index % 2 === 0;
 
                     const translatedEntry = featuredCardsMap.get(project.id);
@@ -1110,7 +1122,7 @@ const HomePage = () => {
               {(Array.isArray(displayItems) ? displayItems : []).map((item, index) => {
                 const project = item.data;
                 const isExample = item.type === 'example';
-                const linkUrl = isExample ? (project as any).link : `/project/${project.id}`;
+                const linkUrl = isExample ? (project as any).link : getProjectUrl(project.id);
                 const isLeftCard = index % 2 === 0;
 
                 const translatedEntry = featuredCardsMap.get(project.id);
@@ -1143,7 +1155,7 @@ const HomePage = () => {
           {/* Botão "Conheça todos os projetos" */}
           <div className={`flex justify-center mt-12 transition-all duration-700 ${portoIdeiasInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`} style={{ transitionDelay: '400ms' }}>
             <Link
-              to="/porto-de-ideias"
+              to="/projetos"
               className="group inline-flex items-center gap-2 px-8 py-4 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-1"
             >
               {t.home.viewAllProjects}
@@ -1180,12 +1192,48 @@ const HomePage = () => {
                     index={index}
                     inView={servicosInView}
                     skipTranslation={skipTranslation}
+                    detailedDescription={service.detailedDescription}
+                    onClick={service.detailedDescription ? () => setSelectedService({ ...service, resolvedIcon: ServiceIcon }) : undefined}
                   />
                 );
               })}
             </div>
         </div>
       </section>
+
+      {/* Service Detail Modal */}
+      <Dialog open={!!selectedService} onOpenChange={(open) => !open && setSelectedService(null)}>
+        <DialogContent className="max-w-lg border-border bg-card">
+          {selectedService && (() => {
+            const Icon = selectedService.resolvedIcon;
+            return (
+              <>
+                <DialogHeader>
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center shrink-0">
+                      <Icon className="w-6 h-6 text-black" />
+                    </div>
+                    <DialogTitle className="text-xl font-serif">{selectedService.text}</DialogTitle>
+                  </div>
+                </DialogHeader>
+                <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
+                  {selectedService.detailedDescription}
+                </p>
+                <div className="pt-2">
+                  <ContactModal
+                    trigger={
+                      <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold">
+                        <MessageCircle className="w-4 h-4 mr-2" />
+                        Fale Conosco
+                      </Button>
+                    }
+                  />
+                </div>
+              </>
+            );
+          })()}
+        </DialogContent>
+      </Dialog>
 
       {/* Companies Carousel Section - SEMPRE VISÍVEL - ÚLTIMA SEÇÃO */}
       <section className="py-20 lg:py-28 relative z-10">

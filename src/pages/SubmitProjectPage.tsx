@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Send, CheckCircle2, ArrowLeft, Plus, X, Upload, Image } from "lucide-react";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -93,6 +93,26 @@ const SubmitProjectPage = () => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
+
+  // Form config from admin settings
+  interface FormFieldConfig { [fieldName: string]: boolean }
+  interface FormSectionConfig { visible: boolean; fields: FormFieldConfig }
+  interface FormConfig { [sectionName: string]: FormSectionConfig }
+  const [formConfig, setFormConfig] = useState<FormConfig | null>(null);
+
+  useEffect(() => {
+    supabase
+      .from("settings")
+      .select("value")
+      .eq("key", "submit_form_config")
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data?.value) setFormConfig(data.value as FormConfig);
+      });
+  }, []);
+
+  const isSectionVisible = (section: string) => !formConfig || formConfig[section]?.visible !== false;
+  const isFieldActive = (section: string, field: string) => !formConfig || formConfig[section]?.fields?.[field] !== false;
 
   const handleImageCropped = (blob: Blob, previewUrl: string) => {
     setThumbnailBlob(blob);
@@ -348,7 +368,7 @@ const SubmitProjectPage = () => {
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-8">
                 {/* Imagem de Capa - PRIMEIRO */}
-                <div className="space-y-4">
+                {isSectionVisible("Imagem de Capa") && <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-foreground border-b pb-2 flex items-center gap-2">
                     <Image className="w-5 h-5" />
                     {t.submit.coverImage}
@@ -362,10 +382,10 @@ const SubmitProjectPage = () => {
                     onClear={handleClearImage}
                     mode="both"
                   />
-                </div>
+                </div>}
 
                 {/* Responsável */}
-                <div className="space-y-4">
+                {isSectionVisible("Responsável") && <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-foreground border-b pb-2">
                     {t.submit.responsibleInfo}
                   </h3>
@@ -415,7 +435,7 @@ const SubmitProjectPage = () => {
                     )}
                   </div>
 
-                  <div>
+                  {isFieldActive("Responsável", "genero") && <div>
                     <Label htmlFor="responsavelGenero">Gênero</Label>
                     <select
                       id="responsavelGenero"
@@ -429,11 +449,11 @@ const SubmitProjectPage = () => {
                       <option value="outro">Outro</option>
                       <option value="prefiro_nao_informar">Prefiro não informar</option>
                     </select>
-                  </div>
-                </div>
+                  </div>}
+                </div>}
 
                 {/* Projeto Básico */}
-                <div className="space-y-4">
+                {isSectionVisible("Informações do Projeto") && <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-foreground border-b pb-2">
                     Informações do Projeto
                   </h3>
@@ -452,32 +472,42 @@ const SubmitProjectPage = () => {
                     )}
                   </div>
 
-                  <DynamicProjectTypeSelect
-                    value={projectType}
-                    onChange={setProjectType}
-                    allowManage={false}
-                  />
+                  {isFieldActive("Informações do Projeto", "tipo") && <div>
+                    <DynamicProjectTypeSelect
+                      value={projectType}
+                      onChange={setProjectType}
+                      allowManage={false}
+                    />
+                  </div>}
 
-                  <CategoriesMultiSelect
-                    value={categoriasTags}
-                    onChange={setCategoriasTags}
-                  />
+                  {isFieldActive("Informações do Projeto", "categorias") && <div>
+                    <CategoriesMultiSelect
+                      value={categoriasTags}
+                      onChange={setCategoriasTags}
+                    />
+                  </div>}
 
-                  <StagesMultiSelect
-                    value={stages}
-                    onChange={setStages}
-                  />
+                  {isFieldActive("Informações do Projeto", "etapas") && <div>
+                    <StagesMultiSelect
+                      value={stages}
+                      onChange={setStages}
+                    />
+                  </div>}
 
-                  <IncentiveLawsMultiSelect
-                    value={incentiveLaws}
-                    onChange={setIncentiveLaws}
-                  />
+                  {isFieldActive("Informações do Projeto", "leis_incentivo") && <div>
+                    <IncentiveLawsMultiSelect
+                      value={incentiveLaws}
+                      onChange={setIncentiveLaws}
+                    />
+                  </div>}
 
-                  <DynamicLocationSelect
-                    value={location}
-                    onChange={setLocation}
-                    allowManage={false}
-                  />
+                  {isFieldActive("Informações do Projeto", "localizacao") && <div>
+                    <DynamicLocationSelect
+                      value={location}
+                      onChange={setLocation}
+                      allowManage={false}
+                    />
+                  </div>}
 
                   <div>
                     <Label htmlFor="descricao">Descrição Completa *</Label>
@@ -493,10 +523,10 @@ const SubmitProjectPage = () => {
                       <p className="text-sm text-destructive mt-1">{errors.descricao}</p>
                     )}
                   </div>
-                </div>
+                </div>}
 
                 {/* Mídia */}
-                <div className="space-y-4">
+                {isSectionVisible("Mídia") && <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-foreground border-b pb-2">
                     Mídia
                   </h3>
@@ -574,10 +604,10 @@ const SubmitProjectPage = () => {
                       </a>
                     )}
                   </div>
-                </div>
+                </div>}
 
                 {/* Integrantes */}
-                <div className="space-y-4">
+                {isSectionVisible("Ficha Técnica") && <div className="space-y-4">
                   <div className="flex items-center justify-between border-b pb-2">
                     <h3 className="text-lg font-semibold text-foreground">
                       Ficha Técnica / Integrantes
@@ -644,16 +674,16 @@ const SubmitProjectPage = () => {
                       Nenhum integrante adicionado. Clique em "Adicionar" para incluir membros da equipe.
                     </p>
                   )}
-                </div>
+                </div>}
 
                 {/* Financiamento */}
-                <div className="space-y-4">
+                {isSectionVisible("Financiamento") && <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-foreground border-b pb-2">
                     Financiamento
                   </h3>
                   
                   <div className="grid md:grid-cols-2 gap-4">
-                    <div>
+                    {isFieldActive("Financiamento", "valor_sugerido") && <div>
                       <Label htmlFor="valorSugerido">Valor Sugerido de Apoio (R$)</Label>
                       <Input
                         id="valorSugerido"
@@ -662,9 +692,9 @@ const SubmitProjectPage = () => {
                         onChange={(e) => setValorSugerido(e.target.value)}
                         placeholder="100.00"
                       />
-                    </div>
+                    </div>}
 
-                    <div>
+                    {isFieldActive("Financiamento", "link_pagamento") && <div>
                       <Label htmlFor="linkPagamento">Link de Pagamento/Doação</Label>
                       <Input
                         id="linkPagamento"
@@ -673,12 +703,12 @@ const SubmitProjectPage = () => {
                         onChange={(e) => setLinkPagamento(e.target.value)}
                         placeholder="https://..."
                       />
-                    </div>
+                    </div>}
                   </div>
-                </div>
+                </div>}
 
                 {/* Contrapartidas */}
-                <div className="space-y-4">
+                {isSectionVisible("Contrapartidas") && <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-foreground border-b pb-2">
                     Contrapartidas para Investidores
                   </h3>
@@ -686,9 +716,10 @@ const SubmitProjectPage = () => {
                     contrapartidas={contrapartidas} 
                     onChange={setContrapartidas} 
                   />
-                </div>
+                </div>}
 
                 {/* Reconhecimentos e Mídia */}
+                {isSectionVisible("Reconhecimentos e Mídia") && <div>
                 <RecognitionEditor
                   awards={awards}
                   news={news}
@@ -697,15 +728,16 @@ const SubmitProjectPage = () => {
                   onNewsChange={setNews}
                   onFestivalsChange={setFestivals}
                 />
+                </div>}
 
                 {/* Impacto */}
-                <div className="space-y-4">
+                {isSectionVisible("Impacto do Projeto") && <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-foreground border-b pb-2">
                     Impacto do Projeto
                   </h3>
                   
                   <div className="grid md:grid-cols-2 gap-4">
-                    <div>
+                    {isFieldActive("Impacto do Projeto", "impacto_cultural") && <div>
                       <Label htmlFor="impactoCultural">Impacto Cultural</Label>
                       <Textarea
                         id="impactoCultural"
@@ -714,9 +746,9 @@ const SubmitProjectPage = () => {
                         placeholder="Descreva o impacto cultural esperado..."
                         rows={3}
                       />
-                    </div>
+                    </div>}
 
-                    <div>
+                    {isFieldActive("Impacto do Projeto", "impacto_social") && <div>
                       <Label htmlFor="impactoSocial">Impacto Social</Label>
                       <Textarea
                         id="impactoSocial"
@@ -725,10 +757,10 @@ const SubmitProjectPage = () => {
                         placeholder="Descreva o impacto social esperado..."
                         rows={3}
                       />
-                    </div>
+                    </div>}
                   </div>
 
-                  <div>
+                  {isFieldActive("Impacto do Projeto", "publico_alvo") && <div>
                     <Label htmlFor="publicoAlvo">Público-Alvo</Label>
                     <Textarea
                       id="publicoAlvo"
@@ -737,9 +769,9 @@ const SubmitProjectPage = () => {
                       placeholder="Descreva o público-alvo do projeto..."
                       rows={2}
                     />
-                  </div>
+                  </div>}
 
-                  <div>
+                  {isFieldActive("Impacto do Projeto", "diferenciais") && <div>
                     <Label htmlFor="diferenciais">Diferenciais do Projeto</Label>
                     <Textarea
                       id="diferenciais"
@@ -748,8 +780,8 @@ const SubmitProjectPage = () => {
                       placeholder="O que torna seu projeto único?"
                       rows={3}
                     />
-                  </div>
-                </div>
+                  </div>}
+                </div>}
 
                 {/* Submit */}
                 <div className="flex justify-end pt-4">

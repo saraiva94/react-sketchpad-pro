@@ -113,7 +113,7 @@ export function CtaCardEditor() {
           Editor do Card "Quer Enviar Seu Projeto"
         </CardTitle>
         <CardDescription>
-          Configure o conteúdo do card colorido que aparece na página de projetos em captação
+          Configure o conteúdo do card colorido que aparece na página de projetos em distribuição
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">

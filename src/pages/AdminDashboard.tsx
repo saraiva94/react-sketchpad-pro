@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
+import { useProjectSlugs } from "@/hooks/useProjectSlugs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -75,7 +76,9 @@ import {
   ChevronDown,
   Rocket,
   FolderOpen,
-  Building2
+  Building2,
+  Lock,
+  ClipboardList
 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
@@ -118,7 +121,20 @@ interface Project {
   presentation_document_url: string | null;
   additional_info: string | null;
   carousel_images?: string[] | null;
+  slug?: string | null;
 }
+
+// Generate URL slug from title: lowercase, remove accents, replace spaces with hyphens
+const generateSlug = (title: string): string => {
+  return title
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+};
 
 interface AccessRequest {
   id: string;
@@ -142,10 +158,335 @@ interface ProjectMember {
   social_links: Record<string, string> | null;
 }
 
+// --- Form Config Types & Defaults ---
+interface FormFieldConfig { [fieldName: string]: boolean }
+interface FormSectionConfig { visible: boolean; fields: FormFieldConfig }
+interface FormConfig { [sectionName: string]: FormSectionConfig }
+
+const REQUIRED_FIELDS = new Set(["nome", "telefone", "email", "titulo", "descricao", "sinopse"]);
+
+const SUBMIT_FORM_DEFAULT: FormConfig = {
+  "Imagem de Capa": { visible: true, fields: { capa: true } },
+  "Responsável": { visible: true, fields: { nome: true, telefone: true, email: true, genero: true } },
+  "Informações do Projeto": { visible: true, fields: { titulo: true, tipo: true, categorias: true, etapas: true, leis_incentivo: true, localizacao: true, descricao: true } },
+  "Mídia": { visible: true, fields: { link_video: true, upload_video: true, documento_pdf: true } },
+  "Ficha Técnica": { visible: true, fields: { integrantes: true } },
+  "Financiamento": { visible: true, fields: { valor_sugerido: true, link_pagamento: true } },
+  "Contrapartidas": { visible: true, fields: { contrapartidas: true } },
+  "Reconhecimentos e Mídia": { visible: true, fields: { premios: true, midias: true, exibicoes: true } },
+  "Impacto do Projeto": { visible: true, fields: { impacto_cultural: true, impacto_social: true, publico_alvo: true, diferenciais: true } },
+};
+
+const ADMIN_ADD_FORM_DEFAULT: FormConfig = {
+  "Informações do Responsável": { visible: true, fields: { nome: true, genero: true, email: true, telefone: true } },
+  "Informações do Projeto": { visible: true, fields: { titulo: true, tipo: true, localizacao: true, categorias: true, etapas: true, sinopse: true, descricao: true, info_adicional: true } },
+  "Lei de Incentivo": { visible: true, fields: { leis_incentivo: true } },
+  "Mídia": { visible: true, fields: { link_video: true, documento_pdf: true } },
+  "Integrantes": { visible: true, fields: { integrantes: true } },
+  "Financiamento": { visible: true, fields: { orcamento: true, valor_sugerido: true, link_pagamento: true } },
+  "Impacto do Projeto": { visible: true, fields: { impacto_cultural: true, impacto_social: true, publico_alvo: true, diferenciais: true } },
+  "Contrapartidas": { visible: true, fields: { contrapartidas: true } },
+  "Reconhecimentos e Mídia": { visible: true, fields: { premios: true, midias: true, exibicoes: true } },
+  "Notas Internas": { visible: true, fields: { notas_admin: true } },
+};
+
+const ADMIN_EDIT_FORM_DEFAULT: FormConfig = {
+  "Informações Básicas": { visible: true, fields: { titulo: true, slug: true, tipo: true, etapas: true, categorias: true, localizacao: true, sinopse: true, descricao: true, info_adicional: true } },
+  "Métricas Públicas": { visible: true, fields: { toggle_metricas: true, publico_alcancado: true, exibicoes_info: true } },
+  "Mídia e Imagens": { visible: true, fields: { imagens: true, link_video: true, documento_pdf: true } },
+  "Informações Financeiras": { visible: true, fields: { orcamento: true, valor_sugerido: true, link_pagamento: true, leis_incentivo: true } },
+  "Impacto e Diferenciação": { visible: true, fields: { impacto_cultural: true, impacto_social: true, publico_alvo: true, diferenciais: true } },
+  "Dados do Responsável": { visible: true, fields: { nome: true, genero: true, email: true, telefone: true } },
+  "Ficha Técnica": { visible: true, fields: { integrantes: true } },
+  "Contrapartidas": { visible: true, fields: { contrapartidas: true } },
+  "Reconhecimentos e Mídia": { visible: true, fields: { premios: true, midias: true, exibicoes: true } },
+  "Carrossel de Imagens": { visible: true, fields: { carrossel: true } },
+  "Notas Internas": { visible: true, fields: { notas_admin: true } },
+};
+
+// Merge saved config with defaults (preserves new fields added later)
+const mergeConfig = (defaults: FormConfig, saved: FormConfig | null): FormConfig => {
+  if (!saved) return JSON.parse(JSON.stringify(defaults));
+  const result: FormConfig = {};
+  for (const section of Object.keys(defaults)) {
+    const def = defaults[section];
+    const sav = saved[section];
+    result[section] = {
+      visible: sav?.visible ?? def.visible,
+      fields: { ...def.fields, ...sav?.fields },
+    };
+  }
+  return result;
+};
+
+// --- FormCard: one collapsible card for a single form ---
+const FormCard = ({ title, settingsKey, defaults }: { title: string; settingsKey: string; defaults: FormConfig }) => {
+  const [expanded, setExpanded] = useState(false);
+  const [config, setConfig] = useState<FormConfig>(JSON.parse(JSON.stringify(defaults)));
+  const [saving, setSaving] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    supabase
+      .from("settings")
+      .select("value")
+      .eq("key", settingsKey)
+      .maybeSingle()
+      .then(({ data }) => {
+        setConfig(mergeConfig(defaults, data?.value as FormConfig | null));
+        setLoaded(true);
+      });
+  }, []);
+
+  const toggleSection = (section: string) => {
+    setConfig(prev => ({
+      ...prev,
+      [section]: { ...prev[section], visible: !prev[section].visible },
+    }));
+  };
+
+  const toggleField = (section: string, field: string) => {
+    if (REQUIRED_FIELDS.has(field)) return;
+    setConfig(prev => ({
+      ...prev,
+      [section]: {
+        ...prev[section],
+        fields: { ...prev[section].fields, [field]: !prev[section].fields[field] },
+      },
+    }));
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    const { data: existing } = await supabase.from("settings").select("id").eq("key", settingsKey).maybeSingle();
+    if (existing) {
+      await supabase.from("settings").update({ value: config as any }).eq("key", settingsKey);
+    } else {
+      await supabase.from("settings").insert([{ key: settingsKey, value: config as any }]);
+    }
+    setSaving(false);
+  };
+
+  const fieldLabel = (f: string) => f.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+
+  return (
+    <div className="border border-border rounded-xl bg-card overflow-hidden">
+      <button
+        type="button"
+        className="w-full flex items-center justify-between px-5 py-4 hover:bg-muted/30 transition-colors"
+        onClick={() => setExpanded(!expanded)}
+      >
+        <span className="font-semibold text-sm">{title}</span>
+        <ChevronDown className={`w-4 h-4 transition-transform ${expanded ? "rotate-180" : ""}`} />
+      </button>
+      {expanded && loaded && (
+        <div className="px-5 pb-5 space-y-4 border-t border-border pt-4">
+          {Object.keys(config).map(section => {
+            const sec = config[section];
+            return (
+              <div key={section} className={sec.visible ? "" : "opacity-40"}>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium">{section}</span>
+                  <Switch checked={sec.visible} onCheckedChange={() => toggleSection(section)} />
+                </div>
+                {sec.visible && (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pl-2">
+                    {Object.keys(sec.fields).map(field => {
+                      const isRequired = REQUIRED_FIELDS.has(field);
+                      const active = sec.fields[field];
+                      return (
+                        <div
+                          key={field}
+                          className={`flex items-center gap-2 text-xs px-2 py-1.5 rounded-lg border ${active ? "border-border" : "border-border/50 opacity-50"}`}
+                        >
+                          {isRequired ? (
+                            <Lock className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                          ) : (
+                            <Switch
+                              checked={active}
+                              onCheckedChange={() => toggleField(section, field)}
+                              className="scale-75 origin-left"
+                            />
+                          )}
+                          <span className="truncate">{fieldLabel(field)}</span>
+                          {isRequired && <span className="text-[10px] text-muted-foreground">(obrigatório)</span>}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+          <Button onClick={handleSave} disabled={saving} size="sm" className="w-full mt-2">
+            <Save className="w-4 h-4 mr-2" />
+            {saving ? "Salvando..." : "Salvar Configuração"}
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// --- FormsSection: top-level admin section ---
+const FormsSection = () => (
+  <div className="space-y-6">
+    <div>
+      <h2 className="text-2xl font-semibold">Configuração de Formulários</h2>
+      <p className="text-sm text-muted-foreground mt-1">
+        Controle quais seções e campos são exibidos em cada formulário do sistema.
+      </p>
+    </div>
+    <FormCard title="Formulário Público (/submit)" settingsKey="submit_form_config" defaults={SUBMIT_FORM_DEFAULT} />
+    <FormCard title="Formulário Admin — Adicionar Projeto" settingsKey="admin_add_form_config" defaults={ADMIN_ADD_FORM_DEFAULT} />
+    <FormCard title="Formulário Admin — Editar Projeto" settingsKey="admin_edit_form_config" defaults={ADMIN_EDIT_FORM_DEFAULT} />
+  </div>
+);
+
+// Métricas: view count, contact clicks, PDF downloads per project
+const MetricsSection = () => {
+  const [metrics, setMetrics] = useState<{ id: string; title: string; project_type: string; views: number; contacts: number; pdfs: number }[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchMetrics = async () => {
+      // TODO: add 'view_count' back to select after Supabase schema cache refreshes
+      const { data: projects, error } = await supabase
+        .from("projects")
+        .select("id, title, project_type")
+        .eq("is_hidden", false)
+        .order("title");
+
+      if (!projects) { setLoading(false); return; }
+
+      // Fetch all project_views and project_clicks settings in one query
+      const allKeys = projects.flatMap(p => [`project_views_${p.id}`, `project_clicks_${p.id}`]);
+      const { data: settingsData } = await supabase
+        .from("settings")
+        .select("key, value")
+        .in("key", allKeys);
+
+      const viewsMap: Record<string, number> = {};
+      const clicksMap: Record<string, { contact_clicks: number; pdf_clicks: number }> = {};
+      (settingsData || []).forEach((row: any) => {
+        if (row.key.startsWith("project_views_")) {
+          const pid = row.key.replace("project_views_", "");
+          viewsMap[pid] = (row.value as any)?.views || 0;
+        } else if (row.key.startsWith("project_clicks_")) {
+          const pid = row.key.replace("project_clicks_", "");
+          clicksMap[pid] = row.value as any;
+        }
+      });
+
+      const result = projects.map((p: any) => ({
+        id: p.id,
+        title: p.title,
+        project_type: p.project_type || "",
+        views: viewsMap[p.id] || 0,
+        contacts: clicksMap[p.id]?.contact_clicks || 0,
+        pdfs: clicksMap[p.id]?.pdf_clicks || 0,
+      }));
+
+      // Sort by total activity descending
+      result.sort((a, b) => {
+        const totalA = a.views + a.contacts + a.pdfs;
+        const totalB = b.views + b.contacts + b.pdfs;
+        if (totalA !== totalB) return totalB - totalA;
+        return a.title.localeCompare(b.title, "pt-BR");
+      });
+      setMetrics(result);
+      setLoading(false);
+    };
+
+    fetchMetrics();
+  }, []);
+
+  const totalViews = metrics.reduce((sum, m) => sum + m.views, 0);
+  const totalContacts = metrics.reduce((sum, m) => sum + m.contacts, 0);
+  const totalPdfs = metrics.reduce((sum, m) => sum + m.pdfs, 0);
+  const rankMedal = (i: number) => i === 0 ? "\u{1F947}" : i === 1 ? "\u{1F948}" : i === 2 ? "\u{1F949}" : `${i + 1}`;
+  const accentBorder = (i: number) => i === 0 ? "border-l-4 border-l-yellow-500" : i === 1 ? "border-l-4 border-l-gray-400" : i === 2 ? "border-l-4 border-l-amber-700" : "";
+  const statColor = (v: number) => v === 0 ? "text-muted-foreground/40" : "text-foreground";
+
+  if (loading) return <p className="text-muted-foreground p-4">Carregando métricas...</p>;
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-semibold">Métricas dos Projetos</h2>
+        <p className="text-sm text-muted-foreground mt-1">
+          Visualizações, contatos e downloads por projeto.
+        </p>
+      </div>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+        <div className="border border-border rounded-xl p-4 bg-card">
+          <p className="text-xs text-muted-foreground uppercase tracking-wide">Projetos Ativos</p>
+          <p className="text-3xl font-bold mt-1 tabular-nums">{metrics.length}</p>
+        </div>
+        <div className="border border-border rounded-xl p-4 bg-card">
+          <p className="text-xs text-muted-foreground uppercase tracking-wide">👁 Visualizações</p>
+          <p className="text-3xl font-bold mt-1 tabular-nums">{totalViews.toLocaleString("pt-BR")}</p>
+        </div>
+        <div className="border border-border rounded-xl p-4 bg-card">
+          <p className="text-xs text-muted-foreground uppercase tracking-wide">💬 Contatos</p>
+          <p className="text-3xl font-bold mt-1 tabular-nums">{totalContacts.toLocaleString("pt-BR")}</p>
+        </div>
+        <div className="border border-border rounded-xl p-4 bg-card">
+          <p className="text-xs text-muted-foreground uppercase tracking-wide">📄 PDF Downloads</p>
+          <p className="text-3xl font-bold mt-1 tabular-nums">{totalPdfs.toLocaleString("pt-BR")}</p>
+        </div>
+      </div>
+
+      {/* Ranked List */}
+      {metrics.length === 0 ? (
+        <div className="border border-dashed border-border rounded-xl p-12 text-center">
+          <Eye className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
+          <p className="text-lg font-medium text-muted-foreground">Nenhum projeto encontrado</p>
+          <p className="text-sm text-muted-foreground/70 mt-1">Não foi possível carregar a lista de projetos.</p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {metrics.map((item, index) => (
+            <div
+              key={item.id}
+              className={`flex items-center gap-4 px-4 py-4 border border-border rounded-xl bg-card hover:bg-muted/30 transition-colors ${accentBorder(index)}`}
+            >
+              <span className="w-8 text-center text-lg flex-shrink-0">{rankMedal(index)}</span>
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-sm truncate">{item.title}</p>
+                {item.project_type && (
+                  <span className="inline-block mt-1 text-[11px] px-2 py-0.5 rounded-md bg-muted text-muted-foreground">{item.project_type}</span>
+                )}
+              </div>
+              <div className="flex items-center gap-4 flex-shrink-0">
+                <div className="flex flex-col items-center min-w-[50px]">
+                  <span className={`text-lg font-bold tabular-nums ${statColor(item.views)}`}>{item.views.toLocaleString("pt-BR")}</span>
+                  <span className="text-[10px] text-muted-foreground">👁 views</span>
+                </div>
+                <div className="flex flex-col items-center min-w-[50px]">
+                  <span className={`text-lg font-bold tabular-nums ${statColor(item.contacts)}`}>{item.contacts.toLocaleString("pt-BR")}</span>
+                  <span className="text-[10px] text-muted-foreground">💬 contatos</span>
+                </div>
+                <div className="flex flex-col items-center min-w-[50px]">
+                  <span className={`text-lg font-bold tabular-nums ${statColor(item.pdfs)}`}>{item.pdfs.toLocaleString("pt-BR")}</span>
+                  <span className="text-[10px] text-muted-foreground">📄 PDFs</span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { getProjectUrl } = useProjectSlugs();
 
   const [projects, setProjects] = useState<Project[]>([]);
   const [projectMembers, setProjectMembers] = useState<ProjectMember[]>([]);
@@ -156,7 +497,7 @@ const AdminDashboard = () => {
   const [showDetails, setShowDetails] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
-  const [activeSection, setActiveSection] = useState<"projects" | "requests" | "contacts" | "homepage" | "captacao" | "portfolio">("homepage");
+  const [activeSection, setActiveSection] = useState<"projects" | "requests" | "contacts" | "homepage" | "captacao" | "portfolio" | "forms" | "metrics">("homepage");
   const [statsVisible, setStatsVisible] = useState(true);
   const [backgroundAnimationsEnabled, setBackgroundAnimationsEnabled] = useState(true);
   const [loadingSettings, setLoadingSettings] = useState(true);
@@ -223,6 +564,7 @@ const AdminDashboard = () => {
   
   // Extended edit fields
   const [editTitle, setEditTitle] = useState("");
+  const [editSlug, setEditSlug] = useState("");
   const [editSynopsis, setEditSynopsis] = useState("");
   const [editDescription, setEditDescription] = useState("");
   const [editProjectType, setEditProjectType] = useState("");
@@ -248,7 +590,10 @@ const AdminDashboard = () => {
   const [editFestivals, setEditFestivals] = useState<{ title: string; linkTitle?: string; url?: string; date?: string }[]>([]);
   const [editTeamMembers, setEditTeamMembers] = useState<TeamMemberData[]>([]);
   const [editAdditionalInfo, setEditAdditionalInfo] = useState("");
-  
+  const [editPublicoAlcancado, setEditPublicoAlcancado] = useState("");
+  const [editExibicoesInfo, setEditExibicoesInfo] = useState("");
+  const [editShowMetricsSection, setEditShowMetricsSection] = useState(false);
+
   // Image cropper states for edit (dual images)
   const [editHeroBlob, setEditHeroBlob] = useState<Blob | null>(null);
   const [editCardBlob, setEditCardBlob] = useState<Blob | null>(null);
@@ -840,6 +1185,18 @@ const AdminDashboard = () => {
     setEditLocation(project.location || "");
     setEditAdminNotes(project.admin_notes || "");
     setEditTitle(project.title || "");
+    // Fetch slug from settings table
+    setEditSlug(generateSlug(project.title || ""));
+    supabase
+      .from("settings")
+      .select("value")
+      .eq("key", `project_slug_${project.id}`)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data?.value && (data.value as any).slug) {
+          setEditSlug((data.value as any).slug);
+        }
+      });
     setEditSynopsis(project.synopsis || "");
     setEditDescription(project.description || "");
     setEditProjectType(project.project_type || "");
@@ -869,7 +1226,26 @@ const AdminDashboard = () => {
     setEditResponsavelTelefone(project.responsavel_telefone || "");
     setEditResponsavelGenero(project.responsavel_genero || "");
     setEditAdditionalInfo(project.additional_info || "");
-    
+
+    // Fetch project metrics from settings
+    supabase
+      .from("settings")
+      .select("value")
+      .eq("key", `project_metrics_${project.id}`)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data?.value) {
+          const m = data.value as { enabled?: boolean; publico_alcancado?: string; exibicoes_info?: string };
+          setEditShowMetricsSection(m.enabled || false);
+          setEditPublicoAlcancado(m.publico_alcancado || "");
+          setEditExibicoesInfo(m.exibicoes_info || "");
+        } else {
+          setEditShowMetricsSection(false);
+          setEditPublicoAlcancado("");
+          setEditExibicoesInfo("");
+        }
+      });
+
     // Fetch contrapartidas for this project
     supabase
       .from("contrapartidas")
@@ -1031,6 +1407,7 @@ const AdminDashboard = () => {
       .from("projects")
       .update({
         title: editTitle || null,
+        // slug saved separately via settings table
         synopsis: editSynopsis || null,
         description: editDescription || null,
         project_type: editProjectType || null,
@@ -1072,6 +1449,39 @@ const AdminDashboard = () => {
       });
       return; // IMPORTANTE: Não continua se houver erro
     } else {
+      // Save slug to settings table (bypasses PostgREST schema cache for projects.slug column)
+      const slugKey = `project_slug_${selectedProject.id}`;
+      const slugValue = { slug: editSlug || null };
+      const { data: existingSlug } = await supabase
+        .from("settings")
+        .select("id")
+        .eq("key", slugKey)
+        .maybeSingle();
+      if (existingSlug) {
+        await supabase.from("settings").update({ value: slugValue as any }).eq("key", slugKey);
+      } else if (editSlug) {
+        await supabase.from("settings").insert([{ key: slugKey, value: slugValue as any }]);
+      }
+
+      // Save project metrics to settings table
+      const metricsKey = `project_metrics_${selectedProject.id}`;
+      const metricsValue = {
+        enabled: editShowMetricsSection,
+        publico_alcancado: editPublicoAlcancado || null,
+        exibicoes_info: editExibicoesInfo || null,
+      };
+      const { data: existingMetrics } = await supabase
+        .from("settings")
+        .select("id")
+        .eq("key", metricsKey)
+        .maybeSingle();
+
+      if (existingMetrics) {
+        await supabase.from("settings").update({ value: metricsValue as any }).eq("key", metricsKey);
+      } else {
+        await supabase.from("settings").insert([{ key: metricsKey, value: metricsValue as any }]);
+      }
+
       // Save contrapartidas
       // First delete existing ones
       await supabase
@@ -1401,8 +1811,8 @@ const AdminDashboard = () => {
                   >
                     <Lightbulb className="w-5 h-5 text-yellow-400" />
                     <div>
-                      <h3 className="text-sm font-medium text-foreground">Projetos em Captação</h3>
-                      <p className="text-xs text-muted-foreground">Apoie projetos culturais</p>
+                      <h3 className="text-sm font-medium text-foreground">Projetos em Distribuição</h3>
+                      <p className="text-xs text-muted-foreground">Projetos em circulação</p>
                     </div>
                   </Link>
                   <Link
@@ -1459,7 +1869,7 @@ const AdminDashboard = () => {
             className="rounded-md"
           >
             <Lightbulb className="w-4 h-4 mr-2" />
-            Projetos em Captação
+            Projetos em Distribuição
           </Button>
           <Button 
             type="button"
@@ -1475,7 +1885,21 @@ const AdminDashboard = () => {
             <Rocket className="w-4 h-4 mr-2" />
             Portfólio
           </Button>
-          <Button 
+          <Button
+            type="button"
+            variant={activeSection === "forms" ? "default" : "ghost"}
+            size="sm"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setActiveSection("forms");
+            }}
+            className="rounded-md"
+          >
+            <ClipboardList className="w-4 h-4 mr-2" />
+            Formulários
+          </Button>
+          <Button
             type="button"
             variant={activeSection === "projects" ? "default" : "ghost"}
             size="sm"
@@ -1522,6 +1946,20 @@ const AdminDashboard = () => {
           >
             <Users className="w-4 h-4 mr-2" />
             Cadastros
+          </Button>
+          <Button
+            type="button"
+            variant={activeSection === "metrics" ? "default" : "ghost"}
+            size="sm"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setActiveSection("metrics");
+            }}
+            className="rounded-md"
+          >
+            <BarChart3 className="w-4 h-4 mr-2" />
+            Métricas
           </Button>
         </div>
 
@@ -2088,7 +2526,7 @@ const AdminDashboard = () => {
         {activeSection === "captacao" && (
           <div className="space-y-6">
             <div className="text-lg font-semibold text-muted-foreground border-b pb-2 mb-4">
-              💡 Página Projetos em Captação (Porto de Ideias)
+              💡 Página Projetos em Distribuição (Porto de Ideias)
             </div>
 
             {/* Porto de Ideias Header Editor */}
@@ -2100,7 +2538,7 @@ const AdminDashboard = () => {
             <Card>
               <CardContent className="p-6">
                 <p className="text-sm text-muted-foreground">
-                  A página de Captação exibe projetos marcados como "Captação" na lista de projetos.
+                  A página de Distribuição exibe projetos marcados como "Distribuição" na lista de projetos.
                   Use a aba <strong>Projetos</strong> para gerenciar quais projetos aparecem nesta página.
                 </p>
               </CardContent>
@@ -2565,7 +3003,7 @@ const AdminDashboard = () => {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => navigate(`/project/${project.id}`)}
+                                onClick={() => navigate(getProjectUrl(project.id))}
                               >
                                 <Eye className="w-4 h-4 mr-1" />
                                 Ver
@@ -2660,6 +3098,14 @@ const AdminDashboard = () => {
               </TabsContent>
             </Tabs>
           </>
+        )}
+        {/* Formulários Section */}
+        {activeSection === "forms" && (
+          <FormsSection />
+        )}
+        {/* Métricas Section */}
+        {activeSection === "metrics" && (
+          <MetricsSection />
         )}
       </main>
 
@@ -2852,7 +3298,7 @@ const AdminDashboard = () => {
 
       {/* Edit Dialog - Complete Form */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-scroll overflow-x-hidden scrollbar-thin-modern">
           <DialogHeader>
             <DialogTitle>Editar Projeto</DialogTitle>
             <DialogDescription>
@@ -2874,6 +3320,19 @@ const AdminDashboard = () => {
                     value={editTitle}
                     onChange={(e) => setEditTitle(e.target.value)}
                   />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="edit-slug">Slug da URL</Label>
+                  <Input
+                    id="edit-slug"
+                    placeholder="maison-leblon"
+                    value={editSlug}
+                    onChange={(e) => setEditSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-"))}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    portobellofilmes.com.br/projeto/<strong>{editSlug || "..."}</strong>
+                  </p>
                 </div>
 
                 <DynamicProjectTypeSelect
@@ -2950,6 +3409,47 @@ const AdminDashboard = () => {
                 />
                 <p className="text-xs text-muted-foreground">{editAdditionalInfo.length}/100 caracteres</p>
               </div>
+            </div>
+
+            {/* Métricas Públicas */}
+            <div className="space-y-4 border rounded-lg p-4 bg-muted/30">
+              <h4 className="font-semibold text-sm border-b pb-2">Métricas Públicas</h4>
+
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  id="edit-show-metrics"
+                  checked={editShowMetricsSection}
+                  onChange={(e) => setEditShowMetricsSection(e.target.checked)}
+                  className="w-4 h-4 rounded border-border"
+                />
+                <Label htmlFor="edit-show-metrics" className="cursor-pointer">
+                  Exibir seção de métricas na página do projeto
+                </Label>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Público Alcançado</Label>
+                  <Input
+                    placeholder="Ex: 5.000 espectadores"
+                    value={editPublicoAlcancado}
+                    onChange={(e) => setEditPublicoAlcancado(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Exibições</Label>
+                  <Input
+                    placeholder="Ex: 23 festivais"
+                    value={editExibicoesInfo}
+                    onChange={(e) => setEditExibicoesInfo(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <p className="text-xs text-muted-foreground">
+                Visualizações são contabilizadas automaticamente a cada visita à página do projeto.
+              </p>
             </div>
 
             {/* Mídia */}
@@ -3206,7 +3706,7 @@ const AdminDashboard = () => {
             </div>
 
             {/* Reconhecimentos e Mídia */}
-            <div className="space-y-4 border rounded-lg p-4 bg-muted/30">
+            <div className="space-y-4 border rounded-lg p-4 bg-muted/30 overflow-x-hidden">
               <RecognitionEditor
                 awards={editAwards}
                 news={editNews}

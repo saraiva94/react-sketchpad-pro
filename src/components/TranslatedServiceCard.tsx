@@ -13,6 +13,8 @@ interface TranslatedServiceCardProps {
   inView: boolean;
   /** quando true, não tenta traduzir (texto já vem traduzido do pai) */
   skipTranslation?: boolean;
+  detailedDescription?: string;
+  onClick?: () => void;
 }
 
 export function TranslatedServiceCard({
@@ -23,6 +25,8 @@ export function TranslatedServiceCard({
   index,
   inView,
   skipTranslation,
+  detailedDescription,
+  onClick,
 }: TranslatedServiceCardProps) {
   const { language } = useLanguage();
 
@@ -36,12 +40,13 @@ export function TranslatedServiceCard({
   const showSkeleton = !skipTranslation && language !== "pt" && isTranslating && !translatedText;
 
   return (
-    <Card 
-      className={`group relative overflow-visible card-solid bg-card border-border rainbow-card-glow ${inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
-      style={{ 
+    <Card
+      className={`group relative overflow-visible card-solid bg-card border-border rainbow-card-glow ${inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'} ${onClick ? 'cursor-pointer' : ''}`}
+      style={{
         transition: 'opacity 300ms ease-out, transform 300ms ease-out',
         transitionDelay: inView ? `${(index + 1) * 50}ms` : '0ms',
       }}
+      onClick={onClick}
     >
       <div className="relative p-6 flex flex-col items-center text-center gap-4">
         <div className="relative">

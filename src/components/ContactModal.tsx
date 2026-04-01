@@ -51,7 +51,11 @@ const DEFAULT_SOCIAL_LINKS: SocialLinksConfig = {
   whatsapp: { enabled: false, url: "" },
 };
 
-export const ContactModal = () => {
+interface ContactModalProps {
+  trigger?: React.ReactNode;
+}
+
+export const ContactModal = ({ trigger }: ContactModalProps = {}) => {
   const [socialLinks, setSocialLinks] = useState<SocialLinksConfig>(DEFAULT_SOCIAL_LINKS);
   const [emails, setEmails] = useState<string[]>([]);
 
@@ -169,12 +173,14 @@ export const ContactModal = () => {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <button 
-          className="group inline-flex items-center gap-2 px-8 py-4 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-1"
-        >
-          <MessageCircle className="w-5 h-5" />
-          Fale Conosco
-        </button>
+        {trigger || (
+          <button
+            className="group inline-flex items-center gap-2 px-8 py-4 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-1"
+          >
+            <MessageCircle className="w-5 h-5" />
+            Fale Conosco
+          </button>
+        )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>

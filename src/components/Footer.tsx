@@ -284,8 +284,8 @@ export function Footer() {
                 <Lightbulb className="w-7 h-7 text-yellow-400 group-hover:fill-yellow-400/30 transition-all duration-300" />
               </div>
               <div className="relative flex-1">
-                <h3 className="font-semibold text-foreground group-hover:text-yellow-500 transition-colors text-lg">Projetos em Captação</h3>
-                <p className="text-sm text-muted-foreground">Apoie projetos culturais</p>
+                <h3 className="font-semibold text-foreground group-hover:text-yellow-500 transition-colors text-lg">Projetos em Distribuição</h3>
+                <p className="text-sm text-muted-foreground">Projetos em circulação</p>
               </div>
             </Link>
             

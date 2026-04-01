@@ -763,6 +763,22 @@ html body[data-scroll-locked] {
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+
+  .scrollbar-thin-modern {
+    scrollbar-gutter: stable;
+    scrollbar-width: thin; /* Firefox */
+    scrollbar-color: hsl(var(--border)) transparent; /* Firefox */
+  }
+  .scrollbar-thin-modern::-webkit-scrollbar {
+    width: 5px;
+  }
+  .scrollbar-thin-modern::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-thin-modern::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--border));
+    border-radius: 999px;
+  }
   @media (min-width: 1024px) {
     .sticky-sidebar {
       position: sticky;

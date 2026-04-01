@@ -99,7 +99,7 @@ export type Database = {
             foreignKeyName: "contrapartidas_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
-            referencedRelation: "projects_public"
+            referencedRelation: "projects"
             referencedColumns: ["id"]
           },
         ]
@@ -192,7 +192,7 @@ export type Database = {
             foreignKeyName: "project_members_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
-            referencedRelation: "projects_public"
+            referencedRelation: "projects"
             referencedColumns: ["id"]
           },
         ]
@@ -233,6 +233,7 @@ export type Database = {
           responsavel_telefone: string | null
           show_on_captacao: boolean | null
           show_on_portfolio: boolean | null
+          slug: string | null
           stage: string | null
           stages: string[] | null
           status: Database["public"]["Enums"]["project_status"]
@@ -277,6 +278,7 @@ export type Database = {
           responsavel_telefone?: string | null
           show_on_captacao?: boolean | null
           show_on_portfolio?: boolean | null
+          slug?: string | null
           stage?: string | null
           stages?: string[] | null
           status?: Database["public"]["Enums"]["project_status"]
@@ -321,6 +323,7 @@ export type Database = {
           responsavel_telefone?: string | null
           show_on_captacao?: boolean | null
           show_on_portfolio?: boolean | null
+          slug?: string | null
           stage?: string | null
           stages?: string[] | null
           status?: Database["public"]["Enums"]["project_status"]
@@ -418,105 +421,7 @@ export type Database = {
       }
     }
     Views: {
-      projects_public: {
-        Row: {
-          additional_info: string | null
-          budget: string | null
-          card_image_url: string | null
-          categorias_tags: string[] | null
-          created_at: string | null
-          description: string | null
-          diferenciais: string | null
-          featured_on_homepage: boolean | null
-          has_incentive_law: boolean | null
-          hero_image_url: string | null
-          id: string | null
-          image_url: string | null
-          impacto_cultural: string | null
-          impacto_social: string | null
-          incentive_law_details: string | null
-          is_hidden: boolean | null
-          link_pagamento: string | null
-          link_video: string | null
-          location: string | null
-          media_url: string | null
-          presentation_document_url: string | null
-          project_type: string | null
-          publico_alvo: string | null
-          responsavel_primeiro_nome: string | null
-          stage: string | null
-          stages: string[] | null
-          synopsis: string | null
-          title: string | null
-          updated_at: string | null
-          valor_sugerido: number | null
-        }
-        Insert: {
-          additional_info?: string | null
-          budget?: string | null
-          card_image_url?: string | null
-          categorias_tags?: string[] | null
-          created_at?: string | null
-          description?: string | null
-          diferenciais?: string | null
-          featured_on_homepage?: boolean | null
-          has_incentive_law?: boolean | null
-          hero_image_url?: string | null
-          id?: string | null
-          image_url?: string | null
-          impacto_cultural?: string | null
-          impacto_social?: string | null
-          incentive_law_details?: string | null
-          is_hidden?: boolean | null
-          link_pagamento?: string | null
-          link_video?: string | null
-          location?: string | null
-          media_url?: string | null
-          presentation_document_url?: string | null
-          project_type?: string | null
-          publico_alvo?: string | null
-          responsavel_primeiro_nome?: never
-          stage?: string | null
-          stages?: string[] | null
-          synopsis?: string | null
-          title?: string | null
-          updated_at?: string | null
-          valor_sugerido?: number | null
-        }
-        Update: {
-          additional_info?: string | null
-          budget?: string | null
-          card_image_url?: string | null
-          categorias_tags?: string[] | null
-          created_at?: string | null
-          description?: string | null
-          diferenciais?: string | null
-          featured_on_homepage?: boolean | null
-          has_incentive_law?: boolean | null
-          hero_image_url?: string | null
-          id?: string | null
-          image_url?: string | null
-          impacto_cultural?: string | null
-          impacto_social?: string | null
-          incentive_law_details?: string | null
-          is_hidden?: boolean | null
-          link_pagamento?: string | null
-          link_video?: string | null
-          location?: string | null
-          media_url?: string | null
-          presentation_document_url?: string | null
-          project_type?: string | null
-          publico_alvo?: string | null
-          responsavel_primeiro_nome?: never
-          stage?: string | null
-          stages?: string[] | null
-          synopsis?: string | null
-          title?: string | null
-          updated_at?: string | null
-          valor_sugerido?: number | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       has_role: {

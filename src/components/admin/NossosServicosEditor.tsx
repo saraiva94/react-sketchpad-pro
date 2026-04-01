@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -128,6 +129,7 @@ interface ServiceItem {
   icon: string;
   text: string;
   hoverColor: string;
+  detailedDescription?: string;
 }
 
 interface ServicosContent {
@@ -367,6 +369,18 @@ export const NossosServicosEditor = () => {
                     onChange={(e) => updateService(index, "text", e.target.value)}
                     placeholder="Descrição do serviço"
                     className="h-9 text-sm"
+                  />
+                </div>
+
+                {/* Detailed Description */}
+                <div className="space-y-1">
+                  <Label className="text-xs">Descrição detalhada (opcional)</Label>
+                  <Textarea
+                    value={service.detailedDescription || ""}
+                    onChange={(e) => updateService(index, "detailedDescription", e.target.value)}
+                    placeholder="Texto que aparecerá no pop-up ao clicar no card"
+                    className="text-sm min-h-[60px] resize-y"
+                    rows={3}
                   />
                 </div>
               </div>

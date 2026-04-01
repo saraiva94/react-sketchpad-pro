@@ -51,6 +51,7 @@ const App = () => (
               <Route path="/projetos" element={<ProjectsPortfolioPage />} />
               <Route path="/porto-de-ideias" element={<PortoDeIdeiasPage />} />
               <Route path="/project/:id" element={<ProjectPage />} />
+              <Route path="/projeto/:slug" element={<ProjectPage />} />
               <Route path="/exemplo/:exampleId" element={<ExampleProjectPage />} />
               <Route path="/dev" element={<DevMenu />} />
               <Route path="*" element={<NotFound />} />

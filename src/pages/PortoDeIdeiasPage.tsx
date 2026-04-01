@@ -191,6 +191,7 @@ const PortoDeIdeiasPage = () => {
     // Fetch only projects marked for captação page
     const { data } = await supabase
       .from("projects")
+      // TODO: add 'slug' back to select after Supabase schema cache refreshes
       .select("id, title, synopsis, project_type, image_url, hero_image_url, card_image_url, updated_at, location, categorias_tags, responsavel_nome, valor_sugerido, budget, has_incentive_law, incentive_law_details, stage, stages, show_on_captacao")
       .eq("status", "approved")
       .eq("show_on_captacao", true)
@@ -239,8 +240,9 @@ const PortoDeIdeiasPage = () => {
     
     // Extract unique locations from projects for autocomplete
     const { data: projectsData } = await supabase
-      .from("projects_public")
+      .from("projects")
       .select("location")
+      .eq("status", "approved")
       .not("location", "is", null);
     
     if (projectsData) {

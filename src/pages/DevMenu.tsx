@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useProjectSlugs } from "@/hooks/useProjectSlugs";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,6 +32,7 @@ interface TestProject {
 
 const DevMenu = () => {
   const navigate = useNavigate();
+  const { getProjectUrl } = useProjectSlugs();
   const [projects, setProjects] = useState<TestProject[]>([]);
   const [loading, setLoading] = useState(false);
   const [newProject, setNewProject] = useState({
@@ -269,7 +271,7 @@ const DevMenu = () => {
                       </>
                     )}
                     {project.status === "approved" && (
-                      <Button size="sm" variant="outline" onClick={() => navigate(`/project/${project.id}`)}>
+                      <Button size="sm" variant="outline" onClick={() => navigate(getProjectUrl(project.id))}>
                         <Eye className="w-4 h-4 mr-1" /> Ver Página
                       </Button>
                     )}

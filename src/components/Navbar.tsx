@@ -52,8 +52,8 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
   const [adminTitlesPt, setAdminTitlesPt] = useState<Record<string, string>>({});
 
   const getSectionLabel = (section: SectionLabel) => {
-    if (section.translationKey === "portoDeIdeias") return t.nav.portoDeIdeias;
     if (section.translationKey === "whoWeAre") return t.home.whoWeAre;
+    if (section.translationKey === "portoDeIdeias") return t.nav.portoDeIdeias;
     return t.home.ourServices;
   };
 
@@ -159,23 +159,6 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
         {/* Desktop Navigation - Section Links */}
         {showNav && currentPage === "home" && (
           <nav className="hidden md:flex items-center gap-1">
-            {/* Links diretos (sem dropdown) */}
-            <Link
-              to="/porto-de-ideias"
-              className="group flex items-center gap-2 px-3 lg:px-4 py-2 text-xs lg:text-sm font-medium transition-all duration-300 rounded-xl text-muted-foreground hover:text-yellow-400 hover:bg-yellow-500/10"
-            >
-              <Lightbulb className="w-4 h-4" />
-              <span className="whitespace-nowrap">Projetos em Captação</span>
-            </Link>
-
-            <Link
-              to="/projetos"
-              className="group flex items-center gap-2 px-3 lg:px-4 py-2 text-xs lg:text-sm font-medium transition-all duration-300 rounded-xl text-muted-foreground hover:text-primary hover:bg-primary/10"
-            >
-              <Rocket className="w-4 h-4" />
-              <span className="whitespace-nowrap">Portfólio</span>
-            </Link>
-
             {/* Section Links */}
             {sections.map((section) => (
               <button
@@ -194,6 +177,23 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
                 )}
               </button>
             ))}
+
+            {/* Links diretos */}
+            <Link
+              to="/projetos"
+              className="group flex items-center gap-2 px-3 lg:px-4 py-2 text-xs lg:text-sm font-medium transition-all duration-300 rounded-xl text-muted-foreground hover:text-primary hover:bg-primary/10"
+            >
+              <Rocket className="w-4 h-4" />
+              <span className="whitespace-nowrap">Portfólio</span>
+            </Link>
+
+            <Link
+              to="/porto-de-ideias"
+              className="group flex items-center gap-2 px-3 lg:px-4 py-2 text-xs lg:text-sm font-medium transition-all duration-300 rounded-xl text-muted-foreground hover:text-yellow-400 hover:bg-yellow-500/10"
+            >
+              <Lightbulb className="w-4 h-4" />
+              <span className="whitespace-nowrap">Projetos em Distribuição</span>
+            </Link>
 
             {/* Admin Button */}
             {isAdmin && (
@@ -234,19 +234,6 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
               </Link>
             )}
 
-            {/* Links diretos - Projetos em Captação */}
-            <Link
-              to="/porto-de-ideias"
-              className={`group flex items-center gap-2 px-3 py-2 text-xs lg:text-sm font-medium transition-all duration-300 rounded-xl whitespace-nowrap ${
-                currentPage === "porto-de-ideias"
-                  ? "text-yellow-400 bg-yellow-500/20 border border-yellow-500/30"
-                  : "text-muted-foreground hover:text-yellow-400 hover:bg-yellow-500/10"
-              }`}
-            >
-              <Lightbulb className="w-4 h-4" />
-              <span>Projetos em Captação</span>
-            </Link>
-
             {/* Links diretos - Portfólio */}
             <Link
               to="/projetos"
@@ -258,6 +245,19 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
             >
               <Rocket className="w-4 h-4" />
               <span>Portfólio</span>
+            </Link>
+
+            {/* Links diretos - Projetos em Distribuição */}
+            <Link
+              to="/porto-de-ideias"
+              className={`group flex items-center gap-2 px-3 py-2 text-xs lg:text-sm font-medium transition-all duration-300 rounded-xl whitespace-nowrap ${
+                currentPage === "porto-de-ideias"
+                  ? "text-yellow-400 bg-yellow-500/20 border border-yellow-500/30"
+                  : "text-muted-foreground hover:text-yellow-400 hover:bg-yellow-500/10"
+              }`}
+            >
+              <Lightbulb className="w-4 h-4" />
+              <span>Projetos em Distribuição</span>
             </Link>
 
             <LanguageSelector />
@@ -333,31 +333,23 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
                        <LanguageSelector />
                      </div>
 
-                    {/* Projetos em Captação */}
-                    <Link
-                      to="/porto-de-ideias"
-                      onClick={handleNavClick}
-                      className={`group relative flex items-center gap-4 px-4 py-4 rounded-xl border transition-all duration-300 overflow-hidden ${
-                        currentPage === "porto-de-ideias"
-                          ? "border-yellow-500/50 bg-yellow-500/15"
-                          : "border-transparent bg-gradient-to-r from-yellow-500/10 to-orange-500/10 hover:from-yellow-500/20 hover:to-orange-500/20"
-                      }`}
-                    >
-                      <div className={`flex items-center justify-center w-12 h-12 rounded-xl transition-all duration-300 ${
-                        currentPage === "porto-de-ideias" ? "bg-yellow-500/30" : "bg-yellow-500/20"
-                      }`}>
-                        <Lightbulb className={`w-6 h-6 text-yellow-400 transition-all duration-300 ${
-                          currentPage === "porto-de-ideias" ? "fill-yellow-400/50" : ""
-                        }`} />
-                      </div>
-                      <div className="flex-1">
-                        <span className="block font-semibold text-foreground">Projetos em Captação</span>
-                        <span className="text-xs text-muted-foreground">Apoie projetos culturais</span>
-                      </div>
-                      {currentPage === "porto-de-ideias" && (
-                        <div className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse" />
-                      )}
-                    </Link>
+                    {currentPage === "home" && (
+                      <>
+                        {sections.map((section) => (
+                          <button
+                            key={section.id}
+                            onClick={() => scrollToSection(section.id)}
+                            className={`text-left px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                              activeSection === section.id
+                                ? "text-foreground bg-accent/15"
+                                : "text-muted-foreground hover:text-foreground hover:bg-accent/10"
+                            }`}
+                          >
+                            {section.label}
+                          </button>
+                        ))}
+                      </>
+                    )}
 
                     {/* Portfólio */}
                     <Link
@@ -385,23 +377,31 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
                       )}
                     </Link>
 
-                    {currentPage === "home" && (
-                      <>
-                        {sections.map((section) => (
-                          <button
-                            key={section.id}
-                            onClick={() => scrollToSection(section.id)}
-                            className={`text-left px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
-                              activeSection === section.id
-                                ? "text-foreground bg-accent/15"
-                                : "text-muted-foreground hover:text-foreground hover:bg-accent/10"
-                            }`}
-                          >
-                            {section.label}
-                          </button>
-                        ))}
-                      </>
-                    )}
+                    {/* Projetos em Distribuição */}
+                    <Link
+                      to="/porto-de-ideias"
+                      onClick={handleNavClick}
+                      className={`group relative flex items-center gap-4 px-4 py-4 rounded-xl border transition-all duration-300 overflow-hidden ${
+                        currentPage === "porto-de-ideias"
+                          ? "border-yellow-500/50 bg-yellow-500/15"
+                          : "border-transparent bg-gradient-to-r from-yellow-500/10 to-orange-500/10 hover:from-yellow-500/20 hover:to-orange-500/20"
+                      }`}
+                    >
+                      <div className={`flex items-center justify-center w-12 h-12 rounded-xl transition-all duration-300 ${
+                        currentPage === "porto-de-ideias" ? "bg-yellow-500/30" : "bg-yellow-500/20"
+                      }`}>
+                        <Lightbulb className={`w-6 h-6 text-yellow-400 transition-all duration-300 ${
+                          currentPage === "porto-de-ideias" ? "fill-yellow-400/50" : ""
+                        }`} />
+                      </div>
+                      <div className="flex-1">
+                        <span className="block font-semibold text-foreground">Projetos em Distribuição</span>
+                        <span className="text-xs text-muted-foreground">Projetos em circulação</span>
+                      </div>
+                      {currentPage === "porto-de-ideias" && (
+                        <div className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse" />
+                      )}
+                    </Link>
 
                     {/* Admin Button - Only visible for admins */}
                     {isAdmin && (

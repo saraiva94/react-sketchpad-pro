@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useProjectSlugs } from "@/hooks/useProjectSlugs";
 import {
   DndContext,
   closestCenter,
@@ -233,10 +234,10 @@ function ProjectListItem({
                 ? "text-yellow-500 hover:text-yellow-600 bg-yellow-500/10" 
                 : "text-muted-foreground hover:text-yellow-500 hover:bg-yellow-500/10"
             }`}
-            title={showOnCaptacao ? "Remover de Captação" : "Adicionar em Captação"}
+            title={showOnCaptacao ? "Remover de Distribuição" : "Adicionar em Distribuição"}
           >
             <Lightbulb className={`w-3.5 h-3.5 ${showOnCaptacao ? "fill-current" : ""}`} />
-            <span className="hidden sm:inline">Captação</span>
+            <span className="hidden sm:inline">Distribuição</span>
           </Button>
 
           {/* Toggle Portfólio */}
@@ -264,7 +265,7 @@ function ProjectListItem({
             title="Visualizar projeto"
             asChild
           >
-            <a href={`/project/${project.id}`} target="_blank" rel="noopener noreferrer">
+            <a href={getProjectUrl(project.id)} target="_blank" rel="noopener noreferrer">
               <Eye className="w-4 h-4" />
             </a>
           </Button>
@@ -281,6 +282,7 @@ interface FeaturedProjectsManagerProps {
 
 export function FeaturedProjectsManager({ projects, onProjectUpdate }: FeaturedProjectsManagerProps) {
   const { toast } = useToast();
+  const { getProjectUrl } = useProjectSlugs();
   const [featuredItems, setFeaturedItems] = useState<FeaturedItem[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);

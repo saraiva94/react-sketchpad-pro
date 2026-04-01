@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useProjectSlugs } from "@/hooks/useProjectSlugs";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
@@ -38,6 +39,7 @@ interface Project {
   valor_sugerido: number | null;
   budget: string | null;
   has_incentive_law: boolean;
+  slug?: string | null;
   incentive_law_details: string | null;
   stage: string | null;
   stages: string[] | null;
@@ -169,7 +171,7 @@ function ProjectCard({
 
   return (
     <Link
-      to={`/project/${project.id}`}
+      to={getProjectUrl(project.id)}
       className="block group"
       style={{
         opacity: isInView ? 1 : 0,
@@ -300,6 +302,7 @@ export function ProjectGrid({
   showEmptySlots = false,
 }: ProjectGridProps) {
   const { t, language } = useLanguage();
+  const { getProjectUrl } = useProjectSlugs();
   const [sortableItems, setSortableItems] = useState<SortableItem[]>([]);
   const [ctaContent, setCtaContent] = useState<CtaCardContent>({
     question: t.projects.ctaQuestion,

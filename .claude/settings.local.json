@@ -1,7 +1,15 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npx tsc --noEmit --skipLibCheck)"
+      "Bash(npx tsc --noEmit --skipLibCheck)",
+      "Bash(npx tsc:*)",
+      "Bash(grep -rn \"\\\\.id\\\\`\" src --include=\"*.tsx\")",
+      "Bash(grep -rn \"\\\\`/project\" src --include=\"*.tsx\")",
+      "Bash(xargs grep:*)",
+      "Bash(for key:*)",
+      "Bash(do echo:*)",
+      "Bash(grep -r \"\"\"$key\"\"\" src/ --include=\"*.ts\" --include=\"*.tsx\" -l)",
+      "Bash(done)"
     ]
   }
 }

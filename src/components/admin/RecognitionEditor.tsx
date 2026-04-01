@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, X, Award, Newspaper, Film, Check, AlertCircle, ImageIcon } from "lucide-react";
+import { Plus, X, Award, Newspaper, Film, Check, AlertCircle, ImageIcon, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -53,6 +53,9 @@ export function RecognitionEditor({
     news: false,
     festival: false
   });
+  const [editingAwardIndex, setEditingAwardIndex] = useState<number | null>(null);
+  const [editingNewsIndex, setEditingNewsIndex] = useState<number | null>(null);
+  const [editingFestivalIndex, setEditingFestivalIndex] = useState<number | null>(null);
 
   // Função para formatar data automaticamente (dd/mm/aaaa)
   const formatDate = (value: string): string => {
@@ -130,58 +133,126 @@ export function RecognitionEditor({
     }
   };
 
+  // --- Award functions ---
+  const startEditAward = (index: number) => {
+    const award = awards[index];
+    if (typeof award === 'string') {
+      setNewAward({ text: award, linkTitle: "", url: "", image_url: undefined });
+    } else {
+      setNewAward({ text: award.text || "", linkTitle: award.linkTitle || "", url: award.url || "", image_url: award.image_url || undefined });
+    }
+    setEditingAwardIndex(index);
+  };
+
+  const cancelEditAward = () => {
+    setNewAward({ text: "", linkTitle: "", url: "", image_url: undefined });
+    setEditingAwardIndex(null);
+  };
+
   const addAward = () => {
     if (!newAward.text.trim()) return;
-    
+
     const awardToAdd: any = {
       text: newAward.text.trim(),
       linkTitle: newAward.linkTitle.trim() || undefined,
       url: newAward.url ? formatUrl(newAward.url.trim()) : undefined,
       image_url: newAward.image_url || undefined
     };
-    
-    onAwardsChange([...awards, awardToAdd]);
+
+    if (editingAwardIndex !== null) {
+      const updated = [...awards];
+      updated[editingAwardIndex] = awardToAdd;
+      onAwardsChange(updated);
+      setEditingAwardIndex(null);
+    } else {
+      onAwardsChange([...awards, awardToAdd]);
+    }
     setNewAward({ text: "", linkTitle: "", url: "", image_url: undefined });
   };
 
   const removeAward = (index: number) => {
+    if (editingAwardIndex === index) cancelEditAward();
     onAwardsChange(awards.filter((_, i) => i !== index));
+  };
+
+  // --- News functions ---
+  const startEditNews = (index: number) => {
+    const item = news[index];
+    setNewNewsItem({ title: item.title || "", linkTitle: item.linkTitle || "", url: item.url || "", date: item.date || "", image_url: item.image_url || undefined });
+    setEditingNewsIndex(index);
+  };
+
+  const cancelEditNews = () => {
+    setNewNewsItem({ title: "", linkTitle: "", url: "", date: "", image_url: undefined });
+    setEditingNewsIndex(null);
   };
 
   const addNewsItem = () => {
     if (!newNewsItem.title.trim()) return;
-    onNewsChange([...news, { 
+    const item = {
       title: newNewsItem.title.trim(),
       linkTitle: newNewsItem.linkTitle?.trim() || undefined,
       url: newNewsItem.url ? formatUrl(newNewsItem.url.trim()) : undefined,
       date: newNewsItem.date?.trim() || undefined,
       image_url: newNewsItem.image_url || undefined
-    }]);
+    };
+
+    if (editingNewsIndex !== null) {
+      const updated = [...news];
+      updated[editingNewsIndex] = item;
+      onNewsChange(updated);
+      setEditingNewsIndex(null);
+    } else {
+      onNewsChange([...news, item]);
+    }
     setNewNewsItem({ title: "", linkTitle: "", url: "", date: "", image_url: undefined });
   };
 
   const removeNewsItem = (index: number) => {
+    if (editingNewsIndex === index) cancelEditNews();
     onNewsChange(news.filter((_, i) => i !== index));
+  };
+
+  // --- Festival functions ---
+  const startEditFestival = (index: number) => {
+    const item = festivals[index];
+    setNewFestivalItem({ title: item.title || "", linkTitle: item.linkTitle || "", url: item.url || "", date: item.date || "", image_url: item.image_url || undefined });
+    setEditingFestivalIndex(index);
+  };
+
+  const cancelEditFestival = () => {
+    setNewFestivalItem({ title: "", linkTitle: "", url: "", date: "", image_url: undefined });
+    setEditingFestivalIndex(null);
   };
 
   const addFestivalItem = () => {
     if (!newFestivalItem.title.trim()) return;
-    onFestivalsChange([...festivals, { 
+    const item = {
       title: newFestivalItem.title.trim(),
       linkTitle: newFestivalItem.linkTitle?.trim() || undefined,
       url: newFestivalItem.url ? formatUrl(newFestivalItem.url.trim()) : undefined,
       date: newFestivalItem.date?.trim() || undefined,
       image_url: newFestivalItem.image_url || undefined
-    }]);
+    };
+
+    if (editingFestivalIndex !== null) {
+      const updated = [...festivals];
+      updated[editingFestivalIndex] = item;
+      onFestivalsChange(updated);
+      setEditingFestivalIndex(null);
+    } else {
+      onFestivalsChange([...festivals, item]);
+    }
     setNewFestivalItem({ title: "", linkTitle: "", url: "", date: "", image_url: undefined });
   };
 
   const removeFestivalItem = (index: number) => {
+    if (editingFestivalIndex === index) cancelEditFestival();
     onFestivalsChange(festivals.filter((_, i) => i !== index));
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 overflow-x-hidden w-full min-w-0">
       <h3 className="text-lg font-semibold text-foreground border-b pb-2">
         Reconhecimentos e Mídia
       </h3>
@@ -218,33 +289,44 @@ export function RecognitionEditor({
               }
               
               return (
-                <li key={index} className="flex items-center justify-between p-2 bg-muted/50 rounded-lg group">
+                <li key={index} className={`flex items-center justify-between p-2 rounded-lg group ${editingAwardIndex === index ? 'bg-primary/10 ring-1 ring-primary/30' : 'bg-muted/50'}`}>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">{awardText}</p>
                     {linkTitle && <p className="text-xs text-primary/80 truncate mt-1">Link: {linkTitle}</p>}
                     {linkUrl && <p className="text-xs text-muted-foreground truncate">{linkUrl}</p>}
                   </div>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => removeAward(index)}
-                  >
-                    <X className="w-4 h-4 text-destructive" />
-                  </Button>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => startEditAward(index)}
+                      title="Editar"
+                    >
+                      <Pencil className="w-4 h-4 text-muted-foreground hover:text-foreground" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeAward(index)}
+                    >
+                      <X className="w-4 h-4 text-destructive" />
+                    </Button>
+                  </div>
                 </li>
               );
             })}
           </ul>
         )}
         
-        <div className="space-y-2 p-3 border border-dashed rounded-lg">
+        <div className="space-y-2 p-3 border border-dashed rounded-lg overflow-hidden">
           <Input
             placeholder="Texto do prêmio/reconhecimento *"
             value={newAward.text}
             onChange={(e) => setNewAward({ ...newAward, text: e.target.value })}
           />
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <Input
               placeholder="Título do link (opcional)"
               value={newAward.linkTitle}
@@ -302,15 +384,22 @@ export function RecognitionEditor({
             )}
           </div>
           
-          <Button 
-            type="button" 
-            variant="secondary" 
-            size="sm"
-            onClick={addAward}
-            disabled={!newAward.text.trim() || uploading.award}
-          >
-            {uploading.award ? "Fazendo upload..." : "Salvar"}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={addAward}
+              disabled={!newAward.text.trim() || uploading.award}
+            >
+              {uploading.award ? "Fazendo upload..." : editingAwardIndex !== null ? "Atualizar" : "Salvar"}
+            </Button>
+            {editingAwardIndex !== null && (
+              <Button type="button" variant="ghost" size="sm" onClick={cancelEditAward}>
+                Cancelar
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -324,14 +413,14 @@ export function RecognitionEditor({
         {festivals.length > 0 && (
           <ul className="space-y-2">
             {festivals.map((item, index) => (
-              <li key={index} className="flex items-center justify-between p-2 bg-muted/50 rounded-lg group">
+              <li key={index} className={`flex items-center justify-between p-2 rounded-lg group ${editingFestivalIndex === index ? 'bg-primary/10 ring-1 ring-primary/30' : 'bg-muted/50'}`}>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <p className="text-sm font-medium truncate">{item.title}</p>
                     {item.url && (
-                      <a 
-                        href={item.url} 
-                        target="_blank" 
+                      <a
+                        href={item.url}
+                        target="_blank"
                         rel="noopener noreferrer"
                         className="flex-shrink-0 text-primary hover:text-primary/80"
                         onClick={(e) => e.stopPropagation()}
@@ -344,26 +433,37 @@ export function RecognitionEditor({
                   {item.linkTitle && <p className="text-xs text-primary/80 truncate mt-1">Link: {item.linkTitle}</p>}
                   {item.url && <p className="text-xs text-muted-foreground truncate">{item.url}</p>}
                 </div>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => removeFestivalItem(index)}
-                >
-                  <X className="w-4 h-4 text-destructive" />
-                </Button>
+                <div className="flex items-center gap-1">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => startEditFestival(index)}
+                    title="Editar"
+                  >
+                    <Pencil className="w-4 h-4 text-muted-foreground hover:text-foreground" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeFestivalItem(index)}
+                  >
+                    <X className="w-4 h-4 text-destructive" />
+                  </Button>
+                </div>
               </li>
             ))}
           </ul>
         )}
         
-        <div className="space-y-2 p-3 border border-dashed rounded-lg">
+        <div className="space-y-2 p-3 border border-dashed rounded-lg overflow-hidden">
           <Input
             placeholder="Nome do Festival/Exibição *"
             value={newFestivalItem.title}
             onChange={(e) => setNewFestivalItem({ ...newFestivalItem, title: e.target.value })}
           />
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             <Input
               placeholder="Título do link (opcional)"
               value={newFestivalItem.linkTitle || ""}
@@ -427,15 +527,22 @@ export function RecognitionEditor({
             )}
           </div>
           
-          <Button 
-            type="button" 
-            variant="secondary" 
-            size="sm"
-            onClick={addFestivalItem}
-            disabled={!newFestivalItem.title.trim() || uploading.festival}
-          >
-            {uploading.festival ? "Fazendo upload..." : "Salvar"}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={addFestivalItem}
+              disabled={!newFestivalItem.title.trim() || uploading.festival}
+            >
+              {uploading.festival ? "Fazendo upload..." : editingFestivalIndex !== null ? "Atualizar" : "Salvar"}
+            </Button>
+            {editingFestivalIndex !== null && (
+              <Button type="button" variant="ghost" size="sm" onClick={cancelEditFestival}>
+                Cancelar
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -449,14 +556,14 @@ export function RecognitionEditor({
         {news.length > 0 && (
           <ul className="space-y-2">
             {news.map((item, index) => (
-              <li key={index} className="flex items-center justify-between p-2 bg-muted/50 rounded-lg group">
+              <li key={index} className={`flex items-center justify-between p-2 rounded-lg group ${editingNewsIndex === index ? 'bg-primary/10 ring-1 ring-primary/30' : 'bg-muted/50'}`}>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <p className="text-sm font-medium truncate">{item.title}</p>
                     {item.url && (
-                      <a 
-                        href={item.url} 
-                        target="_blank" 
+                      <a
+                        href={item.url}
+                        target="_blank"
                         rel="noopener noreferrer"
                         className="flex-shrink-0 text-primary hover:text-primary/80"
                         onClick={(e) => e.stopPropagation()}
@@ -469,26 +576,37 @@ export function RecognitionEditor({
                   {item.linkTitle && <p className="text-xs text-primary/80 truncate mt-1">Link: {item.linkTitle}</p>}
                   {item.url && <p className="text-xs text-muted-foreground truncate">{item.url}</p>}
                 </div>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => removeNewsItem(index)}
-                >
-                  <X className="w-4 h-4 text-destructive" />
-                </Button>
+                <div className="flex items-center gap-1">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => startEditNews(index)}
+                    title="Editar"
+                  >
+                    <Pencil className="w-4 h-4 text-muted-foreground hover:text-foreground" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeNewsItem(index)}
+                  >
+                    <X className="w-4 h-4 text-destructive" />
+                  </Button>
+                </div>
               </li>
             ))}
           </ul>
         )}
         
-        <div className="space-y-2 p-3 border border-dashed rounded-lg">
+        <div className="space-y-2 p-3 border border-dashed rounded-lg overflow-hidden">
           <Input
             placeholder="Título da matéria *"
             value={newNewsItem.title}
             onChange={(e) => setNewNewsItem({ ...newNewsItem, title: e.target.value })}
           />
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             <Input
               placeholder="Título do link (opcional)"
               value={newNewsItem.linkTitle || ""}
@@ -552,15 +670,22 @@ export function RecognitionEditor({
             )}
           </div>
           
-          <Button 
-            type="button" 
-            variant="secondary" 
-            size="sm"
-            onClick={addNewsItem}
-            disabled={!newNewsItem.title.trim() || uploading.news}
-          >
-            {uploading.news ? "Fazendo upload..." : "Salvar"}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={addNewsItem}
+              disabled={!newNewsItem.title.trim() || uploading.news}
+            >
+              {uploading.news ? "Fazendo upload..." : editingNewsIndex !== null ? "Atualizar" : "Salvar"}
+            </Button>
+            {editingNewsIndex !== null && (
+              <Button type="button" variant="ghost" size="sm" onClick={cancelEditNews}>
+                Cancelar
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     </div>
