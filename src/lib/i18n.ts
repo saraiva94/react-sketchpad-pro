@@ -7,7 +7,7 @@ export const translations = {
       contact: 'Contato',
       admin: 'Admin',
       submit: 'Enviar Projeto',
-      portoDeIdeias: 'Porto de Ideias',
+      portoDeIdeias: 'Projetos Recentes',
     },
     home: {
       title: 'Bem-vindo',
@@ -267,7 +267,7 @@ export const translations = {
       contact: 'Contact',
       admin: 'Admin',
       submit: 'Submit Project',
-      portoDeIdeias: 'Porto de Ideias',
+      portoDeIdeias: 'Projetos Recentes',
     },
     home: {
       title: 'Welcome',
@@ -525,7 +525,7 @@ export const translations = {
       contact: 'Contacto',
       admin: 'Admin',
       submit: 'Enviar Proyecto',
-      portoDeIdeias: 'Porto de Ideias',
+      portoDeIdeias: 'Projetos Recentes',
     },
     home: {
       title: 'Bienvenido',

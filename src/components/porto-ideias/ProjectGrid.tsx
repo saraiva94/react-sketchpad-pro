@@ -125,6 +125,7 @@ function ProjectCard({
   getInitials: (name: string | null) => string;
 }) {
   const { t, language } = useLanguage();
+  const { getProjectUrl } = useProjectSlugs();
   const { getStageInfo } = useStageColors();
 
   const cardImageUrl = item.data.card_image_url || item.data.image_url;
@@ -302,7 +303,6 @@ export function ProjectGrid({
   showEmptySlots = false,
 }: ProjectGridProps) {
   const { t, language } = useLanguage();
-  const { getProjectUrl } = useProjectSlugs();
   const [sortableItems, setSortableItems] = useState<SortableItem[]>([]);
   const [ctaContent, setCtaContent] = useState<CtaCardContent>({
     question: t.projects.ctaQuestion,

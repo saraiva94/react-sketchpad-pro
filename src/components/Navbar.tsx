@@ -69,7 +69,7 @@ export function Navbar({ showNav = true, currentPage, rightContent }: NavbarProp
 
       if (ecossistemaData?.value) {
         const settings = ecossistemaData.value as { title?: string };
-        if (settings.title) titles["porto-de-ideias"] = settings.title;
+        if (settings.title) titles["porto-de-ideias"] = settings.title.replace(/\b\w/g, c => c.toUpperCase());
       }
 
       const { data: servicosData } = await supabase

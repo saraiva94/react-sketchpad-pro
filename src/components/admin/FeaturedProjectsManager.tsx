@@ -153,6 +153,7 @@ function ProjectListItem({
   isAdding?: boolean;
   addingProgress?: number;
 }) {
+  const { getProjectUrl } = useProjectSlugs();
   const showOnCaptacao = project.show_on_captacao ?? false;
   const showOnPortfolio = project.show_on_portfolio ?? false;
 
@@ -282,7 +283,6 @@ interface FeaturedProjectsManagerProps {
 
 export function FeaturedProjectsManager({ projects, onProjectUpdate }: FeaturedProjectsManagerProps) {
   const { toast } = useToast();
-  const { getProjectUrl } = useProjectSlugs();
   const [featuredItems, setFeaturedItems] = useState<FeaturedItem[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
