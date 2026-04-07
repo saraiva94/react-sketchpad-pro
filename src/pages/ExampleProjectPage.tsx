@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
+import { EmailLink } from "@/components/EmailLink";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -741,8 +742,8 @@ const ExampleProjectPage = () => {
             <div>
               <h3 className="font-bold text-sm mb-2 text-white">Suporte</h3>
               <ul className="space-y-1 text-gray-400 text-xs">
-                <li><a href="mailto:portobellofilmes@gmail.com" className="hover:text-white transition-colors">FAQ</a></li>
-                <li><a href="mailto:portobellofilmes@gmail.com" className="hover:text-white transition-colors">Ajuda</a></li>
+                <li><EmailLink email="portobellofilmes@gmail.com" className="hover:text-white transition-colors">FAQ</EmailLink></li>
+                <li><EmailLink email="portobellofilmes@gmail.com" className="hover:text-white transition-colors">Ajuda</EmailLink></li>
                 <li><Link to="/" className="hover:text-white transition-colors">Termos</Link></li>
               </ul>
             </div>

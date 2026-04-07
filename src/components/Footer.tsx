@@ -21,6 +21,7 @@ import portobelloLogo from "@/assets/portobello-footer-logo.png";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useAutoTranslate } from "@/hooks/useAutoTranslate";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { EmailLink } from "@/components/EmailLink";
 
 interface SocialLink {
   enabled: boolean;
@@ -155,9 +156,9 @@ export function Footer() {
             <ul className="space-y-1 text-xs text-gray-400">
               {footerContent.emails.map((email, index) => (
                 <li key={`email-${index}`} className="flex items-center gap-2 justify-end">
-                  <a href={`mailto:${email}`} className="hover:text-primary transition-colors">
+                  <EmailLink email={email} className="hover:text-primary transition-colors">
                     {email}
-                  </a>
+                  </EmailLink>
                   <Mail className="w-3 h-3 text-accent" />
                 </li>
               ))}

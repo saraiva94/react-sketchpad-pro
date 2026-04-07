@@ -19,6 +19,7 @@ import {
   MessageCircle,
 } from "lucide-react";
 import imdbIcon from "@/assets/imdb-icon.png";
+import { EmailLink } from "@/components/EmailLink";
 
 interface SocialLink {
   enabled: boolean;
@@ -157,16 +158,16 @@ export const ContactModal = ({ trigger }: ContactModalProps = {}) => {
   // Email(s) - only first email as circular icon
   if (emails.length > 0) {
     allItems.push(
-      <a
+      <EmailLink
         key="email"
-        href={`mailto:${emails[0]}`}
+        email={emails[0]}
         className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-muted transition-colors group"
       >
         <div className="w-12 h-12 bg-[#EA4335] rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
           <Mail className="w-6 h-6 text-white" />
         </div>
         <span className="text-xs text-muted-foreground">E-mail</span>
-      </a>
+      </EmailLink>
     );
   }
 
