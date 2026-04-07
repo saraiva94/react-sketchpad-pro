@@ -127,7 +127,6 @@ export const ImageCropper = ({
 
   const getCroppedImg = async (): Promise<{ blob: Blob; url: string } | null> => {
     if (!completedCrop || !imgRef.current) {
-      console.error('[ImageCropper] Missing completedCrop or imgRef', { completedCrop, imgRef: imgRef.current });
       return null;
     }
 
@@ -138,7 +137,6 @@ export const ImageCropper = ({
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     if (!ctx) {
-      console.error('[ImageCropper] Could not get canvas context');
       return null;
     }
 
@@ -175,7 +173,6 @@ export const ImageCropper = ({
             const url = URL.createObjectURL(blob);
             resolve({ blob, url });
           } else {
-            console.error('[ImageCropper] Canvas toBlob returned null');
             resolve(null);
           }
         },
@@ -189,13 +186,10 @@ export const ImageCropper = ({
     if (isProcessing) return;
 
     setIsProcessing(true);
-    console.log('[ImageCropper] Starting crop confirmation...', { completedCrop });
-
     try {
       const result = await getCroppedImg();
 
       if (result) {
-        console.log('[ImageCropper] Crop successful, calling onImageCropped');
         onImageCropped(result.blob, result.url);
 
         toast({
@@ -211,15 +205,13 @@ export const ImageCropper = ({
           inputRef.current.value = '';
         }
       } else {
-        console.error('[ImageCropper] getCroppedImg returned null');
         toast({
           variant: 'destructive',
           title: 'Não foi possível confirmar',
           description: 'Tente reajustar novamente ou trocar a imagem.',
         });
       }
-    } catch (error) {
-      console.error('[ImageCropper] Error during crop:', error);
+    } catch {
       toast({
         variant: 'destructive',
         title: 'Erro ao confirmar imagem',
@@ -272,7 +264,6 @@ export const ImageCropper = ({
         };
 
         reader.onerror = () => {
-          console.error('[ImageCropper] Failed to convert image to base64');
           toast({
             variant: 'destructive',
             title: 'Não foi possível carregar para reajuste',
@@ -291,8 +282,7 @@ export const ImageCropper = ({
         setActiveTab(mode === 'card' ? 'card' : 'hero');
         setIsProcessing(false);
       }
-    } catch (error) {
-      console.error('[ImageCropper] Error loading image for readjust:', error);
+    } catch {
       toast({
         variant: 'destructive',
         title: 'Não foi possível reajustar',
@@ -307,7 +297,6 @@ export const ImageCropper = ({
   };
 
   const handleCropComplete = (c: PixelCrop) => {
-    console.log('[ImageCropper] Crop completed:', c);
     setCompletedCrop(c);
   };
 

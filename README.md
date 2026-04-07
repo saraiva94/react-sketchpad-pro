@@ -1,42 +1,99 @@
-# Porto Bello Filmes — Plataforma Digital
+# Plataforma Digital — Produtora Audiovisual
 
-## Sobre o Projeto
+Sistema web completo para gestao de portfolio, captacao de recursos e administracao de projetos audiovisuais.
 
-Uma plataforma digital completa desenvolvida para a Porto Bello Filmes, produtora audiovisual brasileira. A plataforma funciona como portfólio público, hub de submissão de projetos, vitrine para investidores e ferramenta de gestão interna — tudo em um sistema unificado com painel administrativo personalizado e métricas em tempo real.
+## Sobre
 
-## O Que Foi Entregue
+Plataforma construida para centralizar a presenca digital de uma produtora audiovisual brasileira. O sistema unifica portfolio publico, hub de submissao de projetos, vitrine para investidores e painel administrativo em uma unica aplicacao. O problema resolvido e a fragmentacao entre ferramentas: planilhas para gestao de projetos, sites estaticos para portfolio e comunicacao manual com patrocinadores.
 
-- Portfólio público de projetos com páginas individuais e URLs amigáveis para SEO
-- Construtor de homepage com drag-and-drop e gerenciamento de projetos em destaque
-- Painel administrativo completo para gestão de conteúdo, mídia e ciclo de vida dos projetos
-- Formulário público de submissão de projetos com campos configuráveis pelo admin
-- Dashboard de métricas de engajamento por projeto (visualizações, cliques em contato, downloads de PDF)
-- Edição inline de reconhecimentos, cobertura de mídia e participações em festivais
-- Cards de serviços com pop-up detalhado e integração com contato
-- Suporte multilíngue com tradução automática (PT/EN/ES)
-- Design responsivo otimizado para desktop e mobile
-- Carrossel de vídeos com autoplay na seção hero da homepage
-- Gerenciamento de equipe com ordenação por drag-and-drop
-- Editor de contrapartidas/níveis de patrocínio para páginas voltadas a investidores
-- Editor de carrossel de imagens com recorte e reordenação por projeto
-- Modal de contato com links sociais dinâmicos e integração com WhatsApp
-- Sistema de configuração de formulários — ativar/desativar seções e campos pelo admin
-- Slugs de URL amigáveis para páginas de projetos
-- Tema claro/escuro com fundos animados
+O publico-alvo se divide em tres perfis: visitantes que exploram o portfolio e filtram projetos por tipo, localizacao ou estagio; proponentes que submetem projetos via formulario publico configuravel; e administradores que gerenciam todo o conteudo, aprovam submissoes, editam reconhecimentos e acompanham metricas de engajamento por projeto.
 
-## Stack Tecnológica
+## Stack
 
-- **React** — Arquitetura de UI baseada em componentes
-- **TypeScript** — Desenvolvimento com tipagem segura em todo o código
-- **Vite** — Build rápido e servidor de desenvolvimento
-- **Supabase** — Banco de dados, autenticação, armazenamento e assinaturas em tempo real
-- **Tailwind CSS** — Estilização utilitária com tokens de design personalizados
-- **shadcn/ui** — Biblioteca de componentes de UI acessíveis e composáveis
+| Camada | Tecnologia | Proposito |
+|--------|-----------|-----------|
+| Framework | React 18 + TypeScript | Componentes tipados com JSX |
+| Build | Vite 5 (SWC) | Dev server com HMR e build otimizado |
+| Estilo | Tailwind CSS 3 + shadcn/ui | Utility-first com componentes Radix acessiveis |
+| Estado servidor | TanStack React Query 5 | Cache, invalidacao e refetch automatico |
+| Estado global | React Context | Providers de idioma, tema e autenticacao |
+| Backend | Supabase (PostgreSQL) | Banco, storage, realtime subscriptions e edge functions |
+| Formularios | React Hook Form + Zod | Validacao declarativa com schema |
+| Drag-and-drop | dnd-kit | Reordenacao de projetos, equipe e carrossel |
+| i18n | Sistema proprio com cache em 3 camadas | Traducao automatica PT/EN/ES via edge function |
+| PDF | jsPDF | Exportacao client-side sem dependencia externa |
+| Graficos | Recharts | Dashboard de metricas e engajamento |
+| Carrossel | Embla Carousel | Carrosseis de imagens e parceiros |
+| Icones | Lucide React | Biblioteca de icones SVG consistente |
+| Tema | next-themes | Alternancia claro/escuro persistente |
 
-## Online
+## Funcionalidades
 
-- Website: [portobellofilmes.com.br](https://portobellofilmes.com.br)
+**Publico**
+- Portfolio de projetos com filtros por tipo, localizacao, estagio, lei de incentivo e orcamento
+- Paginas individuais de projeto com slug amigavel para SEO
+- Secao de captacao de recursos com grid configuravel (2-5 projetos)
+- Formulario publico de submissao com campos e secoes ativaveis pelo admin
+- Suporte trilíngue (PT/EN/ES) com traducao automatica e fallback para idioma original
+- Carrossel de videos com autoplay na hero da homepage
+- Cards de servicos com modal detalhado e integracao com contato
+- Carrossel de empresas parceiras com auto-advance por hover
+- Exportacao de projeto em PDF
+- Tema claro/escuro com animacoes de fundo opcionais
 
-## Desenvolvido por
+**Administracao**
+- Painel centralizado com abas para projetos, equipe, conteudo e configuracoes
+- Aprovacao e rejeicao de projetos submetidos com notas administrativas
+- Drag-and-drop para reordenar projetos em destaque, membros da equipe e carrossel
+- Editor de reconhecimentos (premios, cobertura de midia, festivais) inline
+- Editor de contrapartidas/niveis de patrocinio por projeto
+- Editor de carrossel de imagens com crop dual (banner 21:4 e card 16:9)
+- Configuracao dinamica de tipos de projeto, localizacoes, estagios e categorias
+- Metricas de engajamento por projeto (visualizacoes, cliques em contato, downloads)
+- Edicao de conteudo da homepage (quem somos, servicos, rodape, botoes de contato)
+- Configuracao de formulario de submissao (secoes e campos por tipo de projeto)
+- Sincronizacao em tempo real de configuracoes via Supabase Realtime
 
-Swamiy Saraiva
+## Arquitetura
+
+O estado do servidor e gerenciado pelo TanStack React Query, que centraliza cache, invalidacao e sincronizacao. Configuracoes administrativas sao armazenadas em uma tabela `settings` no Supabase e propagadas em tempo real para todos os clientes via `postgres_changes` subscriptions, eliminando a necessidade de reload. O sistema de internacionalizacao usa um `TranslationManager` com cache em 3 camadas (memoria, localStorage e banco de dados), fila com rate limiting e deduplicacao de requests para evitar chamadas duplicadas a edge function de traducao. Drag-and-drop e implementado com dnd-kit usando delay de ativacao de 100ms e tolerancia de 5px para prevenir drags acidentais em cliques. A autenticacao combina validacao por chave/senha com estado persistido em localStorage e sincronizado entre abas via `StorageEvent`. Componentes pesados como animacoes de fundo sao carregados com `React.lazy` + `requestIdleCallback` para nao impactar metricas de carregamento.
+
+## Como rodar localmente
+
+**Pre-requisitos:** Node.js 18+ e npm.
+
+```bash
+# Clonar e instalar dependencias
+git clone <url-do-repositorio>
+cd <nome-do-diretorio>
+npm install
+
+# Configurar variaveis de ambiente
+cp .env.example .env
+# Preencher as variaveis no arquivo .env (ver secao abaixo)
+
+# Iniciar servidor de desenvolvimento
+npm run dev
+# Acesse http://localhost:8080
+```
+
+**Outros comandos:**
+
+```bash
+npm run build       # Build de producao
+npm run build:dev   # Build em modo desenvolvimento
+npm run preview     # Preview do build
+npm run lint        # Linting com ESLint
+```
+
+## Variaveis de ambiente
+
+| Variavel | Descricao |
+|----------|-----------|
+| `VITE_SUPABASE_PROJECT_ID` | ID do projeto no Supabase |
+| `VITE_SUPABASE_URL` | URL da instancia Supabase |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Chave publica (anon key) do Supabase |
+| `VITE_ADMIN_KEY` | Chave de acesso ao painel administrativo |
+| `VITE_ADMIN_PASSWORD` | Senha do painel administrativo |
+
+A edge function de traducao (`supabase/functions/translate`) requer as variaveis `TRANSLATION_API_KEY` e `TRANSLATION_API_URL` configuradas no ambiente do Supabase.

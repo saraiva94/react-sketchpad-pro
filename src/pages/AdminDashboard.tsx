@@ -350,7 +350,6 @@ const MetricsSection = () => {
 
   useEffect(() => {
     const fetchMetrics = async () => {
-      // TODO: add 'view_count' back to select after Supabase schema cache refreshes
       const { data: projects, error } = await supabase
         .from("projects")
         .select("id, title, project_type")
@@ -962,10 +961,8 @@ const AdminDashboard = () => {
       .select("*")
       .order("created_at", { ascending: false });
 
-    console.log("fetchProjects - data:", data, "error:", error);
-
     if (error) {
-      console.error("Erro ao buscar projetos:", error);
+      // Error fetching projects
     }
     
     if (data) {
@@ -979,10 +976,8 @@ const AdminDashboard = () => {
       .from("project_members")
       .select("*");
 
-    console.log("fetchProjectMembers - data:", data, "error:", error);
-
     if (error) {
-      console.error("Erro ao buscar membros:", error);
+      // Error fetching members
     }
     
     if (data) {
@@ -1391,18 +1386,6 @@ const AdminDashboard = () => {
       finalCardUrl = urlData.publicUrl;
     }
 
-    // Debug: Log dos reconhecimentos antes de salvar
-    console.log("📝 Salvando reconhecimentos:", {
-      awards: editAwards,
-      news: editNews,
-      festivals: editFestivals
-    });
-    console.log("📝 O que será enviado ao banco:", {
-      awards: editAwards.length > 0 ? editAwards : null,
-      news: editNews.length > 0 ? editNews : null,
-      festivals_exhibitions: editFestivals.length > 0 ? editFestivals : null,
-    });
-
     const { error } = await supabase
       .from("projects")
       .update({
@@ -1441,7 +1424,6 @@ const AdminDashboard = () => {
       .eq("id", selectedProject.id);
 
     if (error) {
-      console.error("❌ ERRO ao salvar projeto:", error);
       toast({
         title: "Erro",
         description: error.message || "Não foi possível salvar as alterações.",

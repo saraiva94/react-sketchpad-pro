@@ -256,7 +256,6 @@ export function ProjectCarouselEditor({ projectId, carouselImages, onUpdate }: P
       if (data?.value && (data.value as any).images) {
         const raw = (data.value as any).images as unknown[];
         const loaded = raw.map(normalizeItem);
-        console.log("📥 Imagens carregadas da tabela settings:", loaded);
         setImages(loaded);
       } else if (carouselImages && carouselImages.length > 0) {
         // Fallback para prop (dados antigos em string[])
@@ -306,8 +305,7 @@ export function ProjectCarouselEditor({ projectId, carouselImages, onUpdate }: P
       }
 
       toast.success("Título atualizado!");
-    } catch (error) {
-      console.error("Erro ao salvar título:", error);
+    } catch {
       toast.error("Erro ao salvar título");
     } finally {
       setLoadingTitle(false);
@@ -369,8 +367,7 @@ export function ProjectCarouselEditor({ projectId, carouselImages, onUpdate }: P
       await persistImages(updatedImages);
       toast.success("Imagem adicionada e salva!");
     } catch (error: any) {
-      console.error("❌ Erro no upload:", error);
-      toast.error(`Erro ao salvar: ${error?.message || "Veja o console (F12)"}`);
+      toast.error(`Erro ao salvar: ${error?.message || "Erro desconhecido"}`);
     } finally {
       setUploading(false);
     }
@@ -437,8 +434,7 @@ export function ProjectCarouselEditor({ projectId, carouselImages, onUpdate }: P
       await persistImages(updatedImages);
       toast.success("Imagem atualizada!");
     } catch (error: any) {
-      console.error("❌ Erro ao substituir imagem:", error);
-      toast.error(`Erro ao salvar: ${error?.message || "Veja o console (F12)"}`);
+      toast.error(`Erro ao salvar: ${error?.message || "Erro desconhecido"}`);
     } finally {
       setUploading(false);
     }
@@ -461,8 +457,7 @@ export function ProjectCarouselEditor({ projectId, carouselImages, onUpdate }: P
     try {
       await persistImages(updatedImages);
       toast.success("Imagem adicionada e salva!");
-    } catch (error) {
-      console.error("Erro ao salvar:", error);
+    } catch {
       toast.error("Erro ao salvar imagem");
     }
   };
@@ -473,8 +468,7 @@ export function ProjectCarouselEditor({ projectId, carouselImages, onUpdate }: P
     try {
       await persistImages(updatedImages);
       toast.success("Imagem removida e salva!");
-    } catch (error) {
-      console.error("Erro ao salvar:", error);
+    } catch {
       toast.error("Erro ao salvar");
     }
   };
@@ -487,8 +481,7 @@ export function ProjectCarouselEditor({ projectId, carouselImages, onUpdate }: P
     try {
       await persistImages(updatedImages);
       toast.success("Dimensionamento atualizado!");
-    } catch (error) {
-      console.error("Erro ao salvar fit:", error);
+    } catch {
       toast.error("Erro ao salvar dimensionamento");
     }
   };
@@ -508,8 +501,7 @@ export function ProjectCarouselEditor({ projectId, carouselImages, onUpdate }: P
     try {
       await persistImages(reorderedImages);
       toast.success("Ordem atualizada e salva!");
-    } catch (error) {
-      console.error("Erro ao salvar ordem:", error);
+    } catch {
       toast.error("Erro ao salvar ordem");
     }
   };

@@ -161,7 +161,6 @@ export const DualImageCropper = ({
 
   const captureViewport = async (): Promise<{ blob: Blob; url: string } | null> => {
     if (!imgRef.current) {
-      console.error('[DualImageCropper] Missing image ref');
       return null;
     }
 
@@ -257,8 +256,8 @@ export const DualImageCropper = ({
             try {
               const response = await fetch(storedOriginalSrc);
               originalBlob = await response.blob();
-            } catch (e) {
-              console.warn('[DualImageCropper] Could not convert original to blob:', e);
+            } catch {
+              // Could not convert original to blob
             }
           }
           
@@ -289,8 +288,7 @@ export const DualImageCropper = ({
           description: 'Tente ajustar novamente.',
         });
       }
-    } catch (error) {
-      console.error('[DualImageCropper] Error:', error);
+    } catch {
       toast({
         variant: 'destructive',
         title: 'Erro ao processar imagem',
@@ -386,8 +384,7 @@ export const DualImageCropper = ({
         setCroppedImages({ hero: null, card: null });
         setIsProcessing(false);
       }
-    } catch (error) {
-      console.error('[DualImageCropper] Error loading:', error);
+    } catch {
       toast({
         variant: 'destructive',
         title: 'Não foi possível reajustar',

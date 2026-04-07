@@ -102,8 +102,7 @@ const CreateProjectPage = () => {
       documents: documents ? Array.from(documents).map(f => f.name) : [],
     };
 
-    console.log("Dados do Projeto para Salvar:", projectData);
-    alert("Projeto salvo! Confira o console para ver os dados.");
+    alert("Projeto salvo!");
   };
 
   const PreviewModal = () => (

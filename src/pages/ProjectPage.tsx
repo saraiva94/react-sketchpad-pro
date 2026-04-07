@@ -311,8 +311,6 @@ const ProjectPage = () => {
           return String(item);
         }
       );
-      console.log("✅ Carousel images carregadas da settings:", carouselImages.length);
-      
       // Processar awards (pode vir como string JSON ou objeto)
       const processedAwards = (data?.awards || []).map((award: any) => {
         if (typeof award === 'string') {
@@ -434,13 +432,9 @@ const ProjectPage = () => {
         const current = (data?.value as any) || { contact_clicks: 0, pdf_clicks: 0 };
         const updated = { ...current, [field]: (current[field] || 0) + 1 };
         if (data) {
-          supabase.from("settings").update({ value: updated as any }).eq("key", key).then(({ error, status }) => {
-            console.log("trackClick result:", { key, field, error: JSON.stringify(error), status });
-          });
+          supabase.from("settings").update({ value: updated as any }).eq("key", key);
         } else {
-          supabase.from("settings").insert([{ key, value: updated as any }]).then(({ error, status }) => {
-            console.log("trackClick result:", { key, field, error: JSON.stringify(error), status });
-          });
+          supabase.from("settings").insert([{ key, value: updated as any }]);
         }
       });
   };

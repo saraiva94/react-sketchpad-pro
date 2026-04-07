@@ -10,9 +10,8 @@ import { Navbar } from "@/components/Navbar";
 import { ArrowLeft, Eye, EyeOff, ShieldCheck } from "lucide-react";
 import { useLanguage } from "@/hooks/useLanguage";
 
-// Credenciais do admin
-const ADMIN_KEY = "Admin2025";
-const ADMIN_PASSWORD = "administradorpi2025";
+const ADMIN_KEY = import.meta.env.VITE_ADMIN_KEY || "";
+const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || "";
 
 const schema = z.object({
   key: z.string().min(1, "Informe a chave de acesso"),

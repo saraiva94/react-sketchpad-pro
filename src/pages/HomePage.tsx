@@ -592,7 +592,6 @@ const HomePage = () => {
     // Fetch featured approved projects
     const { data: projectsData } = await supabase
       .from("projects")
-      // TODO: add 'slug' back to select after Supabase schema cache refreshes
       .select("id, title, synopsis, project_type, image_url, location, categorias_tags, responsavel_nome, link_pagamento, valor_sugerido, has_incentive_law, incentive_law_details, stage, impacto_cultural, impacto_social, featured_on_homepage")
       .eq("status", "approved")
       .eq("featured_on_homepage", true)

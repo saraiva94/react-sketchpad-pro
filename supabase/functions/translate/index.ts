@@ -1,4 +1,4 @@
-// Lovable Cloud function: translate arbitrary JSON (strings inside) from PT -> target language.
+// Edge function: translate arbitrary JSON (strings inside) from PT -> target language.
 // - Input: { targetLanguage: 'en' | 'es', value: any }
 // - Output: { value: any }
 
@@ -32,8 +32,8 @@ const stripUrls = (value: any): any => {
 };
 
 async function translateWithGateway(value: any, targetLanguage: Exclude<Language, "pt">) {
-  const apiKey = Deno.env.get("LOVABLE_API_KEY");
-  if (!apiKey) throw new Error("Missing LOVABLE_API_KEY");
+  const apiKey = Deno.env.get("TRANSLATION_API_KEY");
+  if (!apiKey) throw new Error("Missing TRANSLATION_API_KEY");
 
   const payload = JSON.stringify(stripUrls(value));
 
@@ -50,7 +50,8 @@ async function translateWithGateway(value: any, targetLanguage: Exclude<Language
     json: payload,
   };
 
-  const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+  const gatewayUrl = Deno.env.get("TRANSLATION_API_URL") || "https://openrouter.ai/api/v1/chat/completions";
+  const res = await fetch(gatewayUrl, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

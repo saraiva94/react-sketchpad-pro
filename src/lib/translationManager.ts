@@ -154,7 +154,6 @@ export class TranslationManager {
 
     // 1. Memória (mais rápido)
     if (this.memoryCache.has(cacheKey)) {
-      console.log("[i18n] Cache hit (memória):", namespace);
       const cached = this.memoryCache.get(cacheKey);
       const normalized = this.normalizeTranslated(value, cached);
 
@@ -175,13 +174,12 @@ export class TranslationManager {
         // Se cache estiver poluído (== original), invalidar e tratar como miss
         if (!this.isSameValue(value, normalized)) {
           this.memoryCache.set(cacheKey, normalized);
-          console.log("[i18n] Cache hit (localStorage):", namespace);
           return normalized;
         }
         localStorage.removeItem(cacheKey);
       }
-    } catch (err) {
-      console.warn("[i18n] localStorage read error:", err);
+    } catch {
+      // localStorage read error
     }
 
 
@@ -223,21 +221,19 @@ export class TranslationManager {
 
             try {
               localStorage.setItem(cacheKey, JSON.stringify(normalized));
-            } catch (err) {
-              console.warn("[i18n] localStorage write error:", err);
+            } catch {
+              // localStorage write error
             }
 
-            console.log("[i18n] Cache hit (banco):", namespace);
             return normalized;
           }
         }
       }
-    } catch (err) {
-      console.error("[i18n] Supabase lookup error:", err);
+    } catch {
+      // Supabase lookup error
     }
 
     // 4. Adicionar à fila de tradução
-    console.log("[i18n] Cache miss, adicionando à fila:", namespace);
     return this.queueTranslation(namespace, value, targetLang, hash, cacheKey) as Promise<T>;
   }
 
@@ -250,7 +246,6 @@ export class TranslationManager {
   ): Promise<unknown> {
     // Deduplicação: se já está pendente, retorna a mesma promise
     if (this.pendingRequests.has(cacheKey)) {
-      console.log("[i18n] Requisição já pendente:", namespace);
       return this.pendingRequests.get(cacheKey)!;
     }
 
@@ -291,21 +286,17 @@ export class TranslationManager {
 
       // Processar em lotes
       const batch = this.requestQueue.splice(0, this.config.batchSize);
-      console.log(`[i18n] Processando lote de ${batch.length} traduções`);
 
       try {
         await Promise.all(batch.map((req) => this.translateWithRetry(req)));
-      } catch (err) {
-        console.error("[i18n] Batch error:", err);
+      } catch {
+        // Batch processing error
       }
 
       this.processingQueue = false;
 
       // Delay entre lotes para evitar rate limit
       if (this.requestQueue.length > 0) {
-        console.log(
-          `[i18n] Aguardando ${this.config.batchDelay}ms antes do próximo lote...`
-        );
         await this.sleep(this.config.batchDelay);
       }
     }
@@ -319,10 +310,6 @@ export class TranslationManager {
     const hash = this.generateHash(value);
 
     try {
-      console.log(
-        `[i18n] Traduzindo: ${namespace} (tentativa ${retryCount + 1})`
-      );
-
       const { data, error } = await supabase.functions.invoke("translate", {
         body: {
           value,
@@ -352,8 +339,8 @@ export class TranslationManager {
 
       try {
         localStorage.setItem(cacheKey, JSON.stringify(translated));
-      } catch (err) {
-        console.warn("[i18n] localStorage write error:", err);
+      } catch {
+        // localStorage write error
       }
 
       // Salvar no banco
@@ -375,7 +362,6 @@ export class TranslationManager {
         }
       );
 
-      console.log("[i18n] Tradução completa:", namespace);
       resolve(translated);
     } catch (error: unknown) {
       const err = error as { status?: number; message?: string };
@@ -390,10 +376,6 @@ export class TranslationManager {
 
       if (isRateLimit && retryCount < this.config.maxRetries) {
         const delay = this.config.retryDelay * Math.pow(2, retryCount);
-        console.warn(
-          `[i18n] Rate limited! Retry em ${delay}ms (tentativa ${retryCount + 2}/${this.config.maxRetries + 1})`
-        );
-
         await this.sleep(delay);
         return this.translateWithRetry(request, retryCount + 1);
       }
@@ -401,13 +383,11 @@ export class TranslationManager {
       // Se foi rate-limit e esgotou tentativas: NÃO rejeitar (evita unhandled rejection)
       // Mantém o conteúdo original e deixa o usuário seguir navegando.
       if (isRateLimit) {
-        console.warn("[i18n] Rate limit esgotado (fallback p/ original):", namespace);
         resolve(value);
         return;
       }
 
       // Outros erros: fallback para original
-      console.error("[i18n] Falha após retries:", error);
       resolve(value);
     }
   }
@@ -428,7 +408,6 @@ export class TranslationManager {
     }
 
     keysToRemove.forEach((key) => localStorage.removeItem(key));
-    console.log("[i18n] Cache limpo!");
   }
 
   /**
@@ -453,7 +432,6 @@ export class TranslationManager {
     }
 
     keysToRemove.forEach((key) => localStorage.removeItem(key));
-    console.log(`[i18n] Cache limpo para idioma: ${lang}`);
   }
 }
 
